@@ -1,0 +1,19 @@
+name: Build
+
+on: [push]
+
+jobs:
+  build_ubuntu:
+    name: build_ubuntu
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install
+        run: ./scripts/install.sh
+      - name: Install distribution dependent
+        run: ./scripts/install_ubuntu2204.sh
+      - name: Build Wasm
+        run: ./imgui_glfw/build_wasm.sh
+      - name: Build Executable
+        run: ./imgui_glfw/build_cpp.sh
