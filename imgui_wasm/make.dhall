@@ -40,8 +40,8 @@ let cxxflagsRelease = [
 let ldflags = [
 	, "-s NO_FILESYSTEM"
     , "-s STANDALONE_WASM"
-	, "-s USE_FREETYPE=1"
-	, "-s USE_GLFW=1"
+	, "-s USE_FREETYPE=0"
+	, "-s USE_GLFW=0"
 ] : List Text
 
 in make.makefileToText make.makefile::{
