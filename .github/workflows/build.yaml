@@ -2,7 +2,13 @@ name: Build
 
 on: 
   - push
-  - workflow_dispatch
+  - workflow_dispatch:
+    inputs:
+      debug_enabled:
+        type: boolean
+        description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'
+        required: false
+        default: false
 
 jobs:
   build_ubuntu:
@@ -20,6 +26,10 @@ jobs:
         run: ./scripts/install.sh
       - name: Install distribution dependent
         run: ./scripts/install_ubuntu2204.sh
+      # Enable tmate debugging of manually-triggered workflows if the input option was provided
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
       - name: Generate fffi dispatching code
         run: ./common/generate.sh
       - name: Build ImGui Glfw Executable
