@@ -9,9 +9,10 @@ function installEmsdk() {
 }
 
 cd "../../contrib/emsdk/"
-#installEmsdk
+installEmsdk
 source ./emsdk_env.sh
 cd "$here"
 
+./make.dhall
 make clean
 make -j

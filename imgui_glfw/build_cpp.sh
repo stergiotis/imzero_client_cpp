@@ -2,5 +2,6 @@
 set -ev
 here=$(dirname "$(readlink -f "$BASH_SOURCE")")
 cd "$here"
-./make.dhall || true
+./make.dhall
+make clean
 make -j
