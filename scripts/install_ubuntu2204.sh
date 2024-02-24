@@ -14,6 +14,9 @@ fi
 if ! [ -x "$(command -v gcc)" ]; then
 	sudo apt install -y gcc
 fi
+if ! [ -x "$(command -v xsltproc)" ]; then
+	sudo apt install -y xsltproc
+fi
 # freetype
 sudo apt install -y libfreetype-dev
 
