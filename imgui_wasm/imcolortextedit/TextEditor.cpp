@@ -1,1 +1,1 @@
-../contrib/imgui_ImGuiColorTextEdit/TextEditor.cpp
+../../common/contrib/imgui_ImGuiColorTextEdit/TextEditor.cpp

@@ -5,8 +5,6 @@
 #include "render.h"
 
 #include "imgui/emscripten_mainloop_stub.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
 
 int main(int, char**)
 {

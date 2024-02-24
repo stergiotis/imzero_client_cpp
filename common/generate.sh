@@ -2,7 +2,5 @@
 set -ev
 here=$(dirname "$(readlink -f "$BASH_SOURCE")")
 cd "$here"
-../common/generate_links.sh
-./generate_links.sh
-make clean
-./build_cpp.sh
+source "env.sh"
+"../../boxer/public/imzero/generate.sh"

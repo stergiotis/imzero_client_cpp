@@ -9,11 +9,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache-dependency-path: 'go.sum'
       - name: Install
         run: ./scripts/install.sh
       - name: Install distribution dependent
         run: ./scripts/install_ubuntu2204.sh
+      - name: Generate fffi dispatching code
+        run: ./common/generate.sh
       - name: Build Wasm
-        run: ./imgui_glfw/build_wasm.sh
-      - name: Build Executable
-        run: ./imgui_glfw/build_cpp.sh
+        run: ./imgui_wasm/build.sh
+      - name: Build ImGui Glfw Executable
+        run: ./imgui_glfw/build.sh

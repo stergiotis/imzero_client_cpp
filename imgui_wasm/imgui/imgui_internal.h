@@ -1,1 +1,1 @@
-../contrib/imgui/imgui_internal.h
+../../common/contrib/imgui/imgui_internal.h
