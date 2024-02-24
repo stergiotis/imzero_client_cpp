@@ -9,9 +9,9 @@ function installEmsdk() {
 }
 
 cd "../../contrib/emsdk/"
-installEmsdk
+#installEmsdk
 source ./emsdk_env.sh
 cd "$here"
 
-make -f Makefile_wasm.out clean
-make -j -f Makefile_wasm.out
+make clean
+make -j

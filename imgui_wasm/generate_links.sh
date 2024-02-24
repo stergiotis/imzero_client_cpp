@@ -47,13 +47,7 @@ link ./contrib/imgui_ImCoolBar/ImCoolbar.h ./src/widgets/imgui_coolbar/ImCoolbar
 link ./contrib/imgui_flame-graph/imgui_widget_flamegraph.cpp ./src/widgets/imgui_flamegraph/imgui_widget_flamegraph.cpp 
 link ./contrib/imgui_flame-graph/imgui_widget_flamegraph.h ./src/widgets/imgui_flamegraph/imgui_widget_flamegraph.h 
 link ./contrib/imgui_club/imgui_memory_editor/imgui_memory_editor.h ./src/widgets/imgui_club/imgui_memory_editor.h 
-link ./contrib/imgui/misc/freetype/imgui_freetype.h ./imgui/misc/freetype/imgui_freetype.h 
-link ./contrib/imgui/misc/freetype/imgui_freetype.cpp ./imgui/misc/freetype/imgui_freetype.cpp 
-link ./contrib/imgui/backends/imgui_impl_glfw.cpp ./imgui/imgui_impl_glfw.cpp 
-link ./contrib/imgui/backends/imgui_impl_glfw.h ./imgui/imgui_impl_glfw.h 
-link ./contrib/imgui/backends/imgui_impl_opengl3.cpp ./imgui/imgui_impl_opengl3.cpp 
-link ./contrib/imgui/backends/imgui_impl_opengl3.h ./imgui/imgui_impl_opengl3.h 
-link ./contrib/imgui/backends/imgui_impl_opengl3_loader.h ./imgui/imgui_impl_opengl3_loader.h 
+link ./contrib/imgui/examples/libs/emscripten/emscripten_mainloop_stub.h ./imgui/emscripten_mainloop_stub.h 
 link ./contrib/imgui/imgui.cpp ./imgui/imgui.cpp 
 link ./contrib/imgui/imgui.h ./imgui/imgui.h 
 link ./contrib/imgui/imgui_demo.cpp ./imgui/imgui_demo.cpp 

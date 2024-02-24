@@ -5,40 +5,22 @@
 #include "render.h"
 
 
-#ifdef __EMSCRIPTEN__
-  #include "imgui/emscripten_mainloop_stub.h"
-  #include "imgui_impl_glfw.h"
-  #include "imgui_impl_opengl3.h"
-#else
-  #include "imgui_impl_glfw.h"
-  #include "imgui_impl_opengl3.h"
-  #define GL_SILENCE_DEPRECATION
-  #if defined(IMGUI_IMPL_OPENGL_ES2)
-  #include <GLES2/gl2.h>
-  #endif
-  #include <GLFW/glfw3.h> // Will drag system OpenGL headers
-  static void glfw_error_callback(int error, const char* description)
-  {
-      fprintf(stderr, "GLFW Error %d: %s\n", error, description);
-  }
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+#define GL_SILENCE_DEPRECATION
+#if defined(IMGUI_IMPL_OPENGL_ES2)
+#include <GLES2/gl2.h>
 #endif
+#include <GLFW/glfw3.h> // Will drag system OpenGL headers
+static void glfw_error_callback(int error, const char* description)
+{
+   fprintf(stderr, "GLFW Error %d: %s\n", error, description);
+}
 
 
 // Main code
 int main(int, char**)
 {
-#ifdef __EMSCRIPTEN__
-    // For an Emscripten build we are disabling file-system access, so let's not attempt to do a fopen() of the imgui.ini file.
-    // You may manually call LoadIniSettingsFromMemory() to load settings from your own storage.
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.IniFilename = nullptr;
-    EMSCRIPTEN_MAINLOOP_BEGIN {
-    }
-    EMSCRIPTEN_MAINLOOP_END;
-    ImGui::DestroyContext();
-#else
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit())
         return 1;
@@ -180,7 +162,6 @@ render_cleanup();
 
     glfwDestroyWindow(window);
     glfwTerminate();
-#endif
     return 0;
 
 }
