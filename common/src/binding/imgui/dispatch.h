@@ -9,8 +9,8 @@ case 0x00000000:
     {
     
          bool v = state > 0;
-         checked = state;
          if(state == 0) {
+              checked = state;
               ImGui::PushItemFlag(ImGuiItemFlags_MixedValue, true);
               clicked = ImGui::Checkbox(label, &v);
               ImGui::PopItemFlag();
