@@ -14,6 +14,7 @@ let cxxflagsRelease = [
 	, "-O3"
 ]
 let ldflags = [] : List Text
+let stdlibFlags = ["-stdlib=libc++"] : List Text
 
 in make.makefileToText make.makefile::{
 	, cxx = common.cxx
@@ -21,7 +22,7 @@ in make.makefileToText make.makefile::{
 	, cxxflags = [, "-std=" ++ common.cppstd
 	              , "\${CXXFLAGS}"
 				  , "-Wno-unused-command-line-argument" -- triggered by -MF flags
-				 ] # cxxflagsDebug
-	, ldflags = ldflags
+				 ] # cxxflagsDebug # stdlibFlags
+	, ldflags = ldflags # stdlibFlags
 	, sourceTreeParts = common.sourceTreeParts
 }
