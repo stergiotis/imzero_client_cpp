@@ -11,9 +11,6 @@ fi
 if ! [ -x "$(command -v clang)" ]; then
 	sudo apt install -y clang
 fi
-if ! [ -x "$(command -v gcc)" ]; then
-	sudo apt install -y gcc
-fi
 if ! [ -x "$(command -v xsltproc)" ]; then
 	sudo apt install -y xsltproc
 fi
@@ -25,3 +22,6 @@ sudo apt install -y libglfw3-dev
 
 # opengl
 sudo apt install -y libgl-dev
+
+#libc++
+sudo apt install -y libc++-dev libc++abi-dev
