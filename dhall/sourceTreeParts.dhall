@@ -273,6 +273,7 @@ let skia =
 	, sources = [
 		, "${dir}/app.cpp"
 		, "${dir}/ImGuiLayer.cpp"
+		, "${dir}/renderFbOnSkia.cpp"
 	]
 	, additionalIncludeDirs = [
 		, "${contribDir}/modules/sksg/include"
@@ -330,7 +331,7 @@ let skia =
         , "SK_ENABLE_SVG"
         , "SK_BUILD_FOR_UNIX"
 	], global = [
-		, "IMGUI_USE_BGRA_PACKED_COLOR"
+		--, "IMGUI_USE_BGRA_PACKED_COLOR"
 	] : List Text}
 	, cxxflags = {
 		, global = [
