@@ -249,6 +249,30 @@ let binding = let dir = "./src/binding" in sourceTreePart::{
 		] : List Text
 	}
 }
+let tracy = let dir = "../../contrib/tracy/public" in sourceTreePart::{
+	, dir = dir
+	, defines = { 
+		, local = [] : List Text
+		, global = [ 
+			, "TRACY_ENABLE"
+			, "TRACY_ON_DEMAND"
+		]
+	}
+	, sources = [
+		, "${dir}/TracyClient.cpp"
+	] : List Text
+	, additionalDependants = [
+	] : List Text
+	, cxxflags = {
+		, global = [
+		] : List Text
+		, local = [] : List Text
+	}
+	, ldflags = {
+		, global = [
+		] : List Text
+	}
+}
 let skia = 
     let dir = "./skia"
     let contribDir = "./contrib/skia"
@@ -273,7 +297,7 @@ let skia =
 	, sources = [
 		, "${dir}/app.cpp"
 		, "${dir}/ImGuiLayer.cpp"
-		, "${dir}/renderFbOnSkia.cpp"
+		, "${dir}/vectorCmdSkiaRenderer.cpp"
 	]
 	, additionalIncludeDirs = [
 		, "${contribDir}/modules/sksg/include"
@@ -410,6 +434,7 @@ let skia =
         , "${objDir}/tools/timer/tool_utils.Timer.o"
         , "${objDir}/tools/tool_utils.SvgPathExtractor.o"
         , "${objDir}/tools/tool_utils.CrashHandler.o"
+        , "${objDir}/tools/tool_utils.CrashHandler.o"
         , "${contribDir}/out/Static/libsvg.a"
         , "${contribDir}/out/Static/libskia.a"
         , "${contribDir}/out/Static/libskshaper.a"
@@ -442,4 +467,5 @@ in
 	, imguiTextedit
 	, binding
 	, skia
+	, tracy
 }

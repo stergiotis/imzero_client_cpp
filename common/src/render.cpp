@@ -61,12 +61,18 @@
 #include "marshalling/helper.h"
 
 const uint32_t FuncProcIdFlush = 0xffffffff;
+#ifdef TRACY_ENABLE
+#include "tracy/Tracy.hpp"
+#define FFFI_FUNCTION_INVOCATION(funcName) ZoneScopedN(funcName);
+#define FFFI_FUNCTION_FLUSH() ZoneScopedN("fffi flush");
+#else
 #if 1
 #define FFFI_FUNCTION_INVOCATION(funcName)
 #define FFFI_FUNCTION_FLUSH()
 #else
 #define FFFI_FUNCTION_INVOCATION(funcName) fprintf(stderr, "invoking %s\n", funcName);
 #define FFFI_FUNCTION_FLUSH() fprintf(stderr,"flushing\n");
+#endif
 #endif
 
 uint32_t lap = 0;
