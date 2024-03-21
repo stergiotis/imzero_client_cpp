@@ -337,6 +337,9 @@ if (window->SkipItems) { return; } // GetCoolBarItemScale() will return 0.0f if 
 if(l > 0) {
    auto font_ptr = (ImFont*)fontPtr;
    if(font_ptr == nullptr) {
+      if(ImGui::GetIO().Fonts == nullptr) {
+	      return;
+      }
       font_ptr = ImGui::GetIO().Fonts->Fonts[0];
       if(font_ptr == nullptr) {
           return;
