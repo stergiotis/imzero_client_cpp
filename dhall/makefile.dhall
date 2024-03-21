@@ -34,7 +34,7 @@ let makefileToText = \(m : makefile.Type) ->
 		in
 		prelude.Text.concatMapSep "\n" Text (\(s : Text) -> 
 			(prelude.Text.replace ".cpp" ".o" s)
-			 ++ ": ${s}"
+			 ++ ": ${s} "
 			 ++ (prelude.Text.concatSep " " p.additionalDependants)
 			 ++ "\n" 
 			 ++ "\t$(CXX) $(CXXFLAGS2) ${prelude.Text.concatSep " " (cf #
