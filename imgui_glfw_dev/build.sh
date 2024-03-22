@@ -1,4 +1,7 @@
 #!/bin/bash
+set -ev
 here=$(dirname "$(readlink -f "$BASH_SOURCE")")
 cd "$here"
-source "generate_links_.sh"
+../common/generate_links.sh
+./generate_links.sh
+./build_cpp.sh
