@@ -249,13 +249,13 @@ let binding = let dir = "./src/binding" in sourceTreePart::{
 		] : List Text
 	}
 }
-let tracy = let dir = "../../contrib/tracy/public" in sourceTreePart::{
+let tracyEnabled = let dir = "../../contrib/tracy/public" in sourceTreePart::{
 	, dir = dir
 	, defines = { 
 		, local = [] : List Text
 		, global = [ 
 			, "TRACY_ENABLE"
-			, "TRACY_ON_DEMAND"
+			-- , "TRACY_ON_DEMAND"
 		]
 	}
 	, sources = [
@@ -271,6 +271,12 @@ let tracy = let dir = "../../contrib/tracy/public" in sourceTreePart::{
 	, ldflags = {
 		, global = [
 		] : List Text
+	}
+}
+let tracyDisabled = tracyEnabled // {
+	, defines = { 
+		, local = [] : List Text
+		, global = [] : List Text
 	}
 }
 let skia = 
@@ -467,5 +473,6 @@ in
 	, imguiTextedit
 	, binding
 	, skia
-	, tracy
+	, tracyEnabled
+	, tracyDisabled
 }
