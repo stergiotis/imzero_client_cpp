@@ -28,6 +28,7 @@ let vsCodeProperties = let T = {
 	in schema
 let sourceTreePart = let T = {
 	, dir : Text
+	, name : Text
 	, sources : List Text
 	, additionalDependants : List Text
 	, additionalIncludeDirs : List Text
