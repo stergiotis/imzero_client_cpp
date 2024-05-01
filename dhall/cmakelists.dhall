@@ -55,7 +55,7 @@ let cmakelistsToText = \(m : cmakelists.Type) ->
 	++ "set(COMPILE_DEFINITIONS ${prelude.Text.concatSep "\n" gDefines})\n"
 	++ "include_directories(${composePathList gIncludeDirs})\n"
 	++ "set(COMPILE_OPTIONS ${prelude.Text.concatSep "\n" gCompileOptions})\n"
-	++ "set(LINK_OPTIONS ${prelude.Text.concatSep "\n" gLinkOptions})\n"
+	++ "link_libraries(${prelude.Text.concatSep "\n" gLinkOptions})\n"
 	++ "\n"
 	++ targets
 	++ "add_executable(${m.exe} ${targetNames})\n"
