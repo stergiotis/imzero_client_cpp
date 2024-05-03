@@ -1,8 +1,18 @@
 #include "receive.h"
 FILE *fdIn;
+size_t totalReceivedBytes;
 
+size_t fread_receiveStat(void *__restrict __ptr, size_t __size, size_t __n, FILE *__restrict __stream) noexcept {
+    auto t = fread(__ptr,__size,__n,__stream);
+    totalReceivedBytes += t;
+    return t;
+}
+void resetReceiveStat() {
+    totalReceivedBytes = 0;
+}
 void receiveInit() {
     fdIn = stdin;
+    resetReceiveStat();
 }
 const char *receiveString() {
     auto l = receiveValue<uint32_t>();
@@ -10,7 +20,7 @@ const char *receiveString() {
     auto r = static_cast<uint8_t *>(arenaCalloc(l+sizeof(l)+1,1));
     // store length adjacent to slice
     memcpy(r,&l,sizeof(l));
-    fread(r+sizeof(l),1,l,fdIn);
+    fread_receiveStat(r+sizeof(l),1,l,fdIn);
 //    r[sizeof(l)+l] = '\0';
     return (const char *)(r+sizeof(l));
 }
@@ -21,8 +31,8 @@ const char *const *receiveStrings() {
     // store length adjacent to slice
     memcpy(r,&l,sizeof(l));
     for(uint32_t i=0;i<l;i++) {
-	auto t = receiveString();
-	memcpy(r+sizeof(l)+i*sizeof(const char*),&t,sizeof(const char*));
+        auto t = receiveString();
+        memcpy(r+sizeof(l)+i*sizeof(const char*),&t,sizeof(const char*));
     }
     return (const char *const *)(r+sizeof(l));
 }

@@ -1,8 +1,9 @@
 #pragma once
-#include <stdint.h>
-#include <stdlib.h>
+#include <cstdint>
+#include <cstdlib>
 
 void arenaInit();
+size_t arenaSize();
 void arenaReset(bool shrinkToFit);
 void arenaFree();
 void *arenaMalloc(size_t sz);

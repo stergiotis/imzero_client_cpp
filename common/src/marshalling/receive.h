@@ -5,26 +5,29 @@
 #include <type_traits>
 #include "../arena/simple/simple.h"
 extern FILE *fdIn;
+extern size_t totalReceivedBytes;
 
 void receiveInit();
+inline size_t fread_receiveStat(void *__restrict __ptr, size_t __size, size_t __n, FILE *__restrict __stream) noexcept;
+void resetReceiveStat();
 
 template <typename T>
 static T receiveValue() {
     T r;
-    fread(&r,sizeof(r),1,fdIn);
+    fread_receiveStat(&r,sizeof(r),1,fdIn);
     return r;
 }
 template <typename T>
 static T receiveValueSignMagnitude() {
     typename std::make_unsigned<T>::type mask = static_cast<typename std::make_unsigned<T>::type>(1) << (sizeof(T)*8-1);
     typename std::make_unsigned<T>::type u;
-    fread(&u,sizeof(u),1,fdIn);
+    fread_receiveStat(&u,sizeof(u),1,fdIn);
     return (u & mask) ? -(T)(u & ~mask) : u;
 }
 template <typename T,int n>
 static T *receiveArray() {
     auto r = (T *)arenaCalloc(n,sizeof(T));
-    fread(r,sizeof(T),n,fdIn);
+    fread_receiveStat(r,sizeof(T),n,fdIn);
     return r;
 }
 template <typename T>
@@ -38,7 +41,7 @@ static T *receiveSlice() {
     uint8_t *r = (uint8_t *)arenaCalloc(l+sizeof(l),sizeof(T));
     // store length adjacent to slice
     memcpy(r,&l,sizeof(l));
-    fread(r+sizeof(l),sizeof(T),l,fdIn);
+    fread_receiveStat(r+sizeof(l),sizeof(T),l,fdIn);
     return (T*)(r+sizeof(l));
 }
 const char *receiveString();

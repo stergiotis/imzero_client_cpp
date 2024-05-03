@@ -151,6 +151,10 @@ let marshalling = let dir = "./src/marshalling" in sourceTreePart::{
 let arena = let dir = "./src/arena/simple" in sourceTreePart::{
 	, name = "arena"
 	, dir = dir
+	, includeDirs = {
+		, local = [] : List Text
+		, global = ["${dir}"] : List Text
+	}
 	, sources = [
 		, "${dir}/simple.cpp"
 	]
@@ -373,6 +377,7 @@ let skia =
 	, includeDirs = {
 		, local = [
 			, imgui.dir
+			, imguiImplot.dir
 			, render.dir]
 		, global = [
 			, "${contribDir}"

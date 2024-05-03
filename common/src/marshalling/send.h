@@ -8,28 +8,33 @@
 #include <type_traits>
 #include <string>
 extern FILE *fdOut;
+extern size_t totalSentBytes;
 
 void sendInit();
+void resetSendStat();
+
+inline size_t fwrite_sendStat(const void *__restrict __ptr, size_t __size,
+                      size_t __n, FILE *__restrict __s) noexcept;
 
 template <typename T>
 void sendValue(T v) {
-    fwrite(&v,sizeof(v),1,fdOut);
+    fwrite_sendStat(&v,sizeof(v),1,fdOut);
 }
 template <typename T>
 void sendValueSignMagnitude(T v) {
     auto mask = static_cast<typename std::make_unsigned<T>::type>(1) << (sizeof(T)*8-1);
     auto u = static_cast<typename std::make_unsigned<T>::type>((v < 0) ? ((mask) | static_cast<typename std::make_unsigned<T>::type>(-v)) : v);
-    fwrite(&u,sizeof(u),1,fdOut);
+    fwrite_sendStat(&u,sizeof(u),1,fdOut);
 }
 template <typename T,int n>
 void sendArray(const T *v) {
-    fwrite(v,sizeof(T),n,fdOut);
+    fwrite_sendStat(v,sizeof(T),n,fdOut);
 }
 template <typename T>
 void sendSlice(const T *v, size_t len) {
     sendValue<uint32_t>((uint32_t)len);
     if(len > 0){
-        fwrite(v,sizeof(T),len,fdOut);
+        fwrite_sendStat(v,sizeof(T),len,fdOut);
     }
 }
 template <typename T>
