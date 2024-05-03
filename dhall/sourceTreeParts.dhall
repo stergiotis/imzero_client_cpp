@@ -363,9 +363,10 @@ let skia =
 	, name = "skia"
 	, dir = dir
 	, sources = [
-		, "${dir}/paragraph.cpp"
 		, "${dir}/modified/app.cpp"
 		, "${dir}/modified/ImGuiLayer.cpp"
+		, "${dir}/paragraph.cpp"
+		, "${dir}/setupUI.cpp"
 		, "${dir}/vectorCmdSkiaRenderer.cpp"
 		, "${dir}/skiaTracyTracer.cpp"
 	]
