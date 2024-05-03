@@ -7,7 +7,7 @@ void receiveInit() {
 const char *receiveString() {
     auto l = receiveValue<uint32_t>();
     // use calloc if we receiveParam short, can be lowered to malloc as soon we handle fread errors
-    uint8_t *r = (uint8_t *)arenaCalloc(l+sizeof(l)+1,1);
+    auto r = static_cast<uint8_t *>(arenaCalloc(l+sizeof(l)+1,1));
     // store length adjacent to slice
     memcpy(r,&l,sizeof(l));
     fread(r+sizeof(l),1,l,fdIn);
@@ -17,7 +17,7 @@ const char *receiveString() {
 const char *const *receiveStrings() {
     auto l = receiveValue<uint32_t>();
     // use calloc if we receiveParam short, can be lowered to malloc as soon we handle fread errors
-    uint8_t *r = (uint8_t *)arenaCalloc(l+sizeof(l),sizeof(const char*));
+    auto r = static_cast<uint8_t *>(arenaCalloc(l+sizeof(l),sizeof(const char*)));
     // store length adjacent to slice
     memcpy(r,&l,sizeof(l));
     for(uint32_t i=0;i<l;i++) {

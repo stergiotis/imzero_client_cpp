@@ -1,6 +1,6 @@
 let lib = ./lib.dhall
 let sourceTreePart = lib.sourceTreePart
-let tracyEnabled = let dir = "../../contrib/tracy/public" in sourceTreePart::{
+let tracyEnabled = let dir = "./contrib/tracy/public" in sourceTreePart::{
 	, name = "tracyEnabled"
 	, dir = dir
 	, defines = { 
@@ -15,6 +15,10 @@ let tracyEnabled = let dir = "../../contrib/tracy/public" in sourceTreePart::{
 	] : List Text
 	, additionalDependants = [
 	] : List Text
+	, includeDirs = {
+		, global = ["${dir}"] : List Text
+		, local = [] : List Text
+	}
 	, cxxflags = {
 		, global = [
 		] : List Text
@@ -42,10 +46,10 @@ let imgui = let dir = "./imgui" in sourceTreePart::{
 		, "${dir}/imgui_tables.cpp"
 		, "${dir}/imgui_widgets.cpp"
 	]
-	, additionalIncludeDirs = [
-		, "${dir}/../skia"
-		, tracyEnabled.dir
-	] : List Text
+	, includeDirs = {
+		, local = [] : List Text
+		, global = ["${dir}"] : List Text
+	}
 	, cxxflags = {
 		, global = [
 		] : List Text
@@ -100,9 +104,35 @@ let imguiFreetype = let dir = "./imgui/misc/freetype" in sourceTreePart::{
 		] : List Text
 	}
 }
+let imguiImplot = let dir = "./src/widgets/imgui_implot" in sourceTreePart::{
+	, name = "imguiImplot"
+	, dir = dir
+	, includeDirs = {
+		, local = [] : List Text
+		, global = [] : List Text
+	}
+	, sources = [
+		, "${dir}/implot.cpp"
+		, "${dir}/implot_demo.cpp"
+		, "${dir}/implot_items.cpp"
+	]
+	, cxxflags = {
+		, global = [
+		] : List Text
+		, local = [] : List Text
+	}
+	, ldflags = {
+		, global = [
+		] : List Text
+	}
+}
 let marshalling = let dir = "./src/marshalling" in sourceTreePart::{
 	, name = "marshalling"
 	, dir = dir
+	, includeDirs = {
+		, local = [imguiImplot.dir] : List Text
+		, global = [] : List Text
+	}
 	, sources = [
 		, "${dir}/receive.cpp"
 		, "${dir}/send.cpp"
@@ -137,7 +167,10 @@ let arena = let dir = "./src/arena/simple" in sourceTreePart::{
 let widgets = let dir = "./src/widgets" in sourceTreePart::{
 	, name = "widgets"
 	, dir = dir
-	, additionalIncludeDirs = [imgui.dir]
+	, includeDirs = {
+		, local = [] : List Text
+		, global = [] : List Text
+	}  
 	, sources = [
 		, "${dir}/common.cpp"
 		, "${dir}/piemenu.cpp"
@@ -159,7 +192,10 @@ let widgets = let dir = "./src/widgets" in sourceTreePart::{
 }
 let imguiToggle = let dir = "./src/widgets/imgui_toggle" in sourceTreePart::{
 	, name = "imguiToggle"
-	, additionalIncludeDirs = [imgui.dir]
+	, includeDirs = {
+		, local = [] : List Text
+		, global = [] : List Text
+	}
 	, dir = dir
 	, sources = [
 		, "${dir}/imgui_toggle.cpp"
@@ -180,29 +216,13 @@ let imguiToggle = let dir = "./src/widgets/imgui_toggle" in sourceTreePart::{
 		] : List Text
 	}
 }
-let imguiImplot = let dir = "./src/widgets/imgui_implot" in sourceTreePart::{
-	, name = "imguiImplot"
-	, dir = dir
-	, additionalIncludeDirs = [imgui.dir]
-	, sources = [
-		, "${dir}/implot.cpp"
-		, "${dir}/implot_demo.cpp"
-		, "${dir}/implot_items.cpp"
-	]
-	, cxxflags = {
-		, global = [
-		] : List Text
-		, local = [] : List Text
-	}
-	, ldflags = {
-		, global = [
-		] : List Text
-	}
-}
 let imguiKnobs = let dir = "./src/widgets/imgui_knobs" in sourceTreePart::{
 	, name = "imguiKnobs"
 	, dir = dir
-	, additionalIncludeDirs = [imgui.dir]
+	, includeDirs = {
+		, local = [] : List Text
+		, global = [] : List Text
+	}
 	, sources = [
 		, "${dir}/imgui-knobs.cpp"
 	]
@@ -219,7 +239,10 @@ let imguiKnobs = let dir = "./src/widgets/imgui_knobs" in sourceTreePart::{
 let imguiCoolbar = let dir = "./src/widgets/imgui_coolbar" in sourceTreePart::{
 	, name = "imguiCoolbar"
 	, dir = dir
-	, additionalIncludeDirs = [imgui.dir]
+	, includeDirs = {
+		, local = [] : List Text
+		, global = [] : List Text
+	}
 	, sources = [
 		, "${dir}/ImCoolbar.cpp"
 	]
@@ -236,7 +259,10 @@ let imguiCoolbar = let dir = "./src/widgets/imgui_coolbar" in sourceTreePart::{
 let imguiFlamegraph = let dir = "./src/widgets/imgui_flamegraph" in sourceTreePart::{
 	, name = "imguiFlamegraph"
 	, dir = dir
-	, additionalIncludeDirs = [imgui.dir]
+	, includeDirs = {
+		, local = ["${dir}"] : List Text
+		, global = [] : List Text
+	}
 	, sources = [
 		, "${dir}/imgui_widget_flamegraph.cpp"
 	]
@@ -253,7 +279,10 @@ let imguiFlamegraph = let dir = "./src/widgets/imgui_flamegraph" in sourceTreePa
 let imguiTextedit = let dir = "./imcolortextedit" in sourceTreePart::{
 	, name = "imguiTextedit"
 	, dir = dir
-	, additionalIncludeDirs = [imgui.dir]
+	, includeDirs = {
+		, local = [] : List Text
+		, global = [] : List Text
+	}
 	, sources = [
 		, "${dir}/TextEditor.cpp"
 	]
@@ -272,10 +301,13 @@ let imguiTextedit = let dir = "./imcolortextedit" in sourceTreePart::{
 let render = let dir = "./src" in sourceTreePart::{
 	, name = "render"
 	, dir = dir
-	, additionalIncludeDirs = [
-		, imguiImplot.dir
-		, imguiTextedit.dir
-	]
+	, includeDirs = {
+		, local = [
+			, imguiImplot.dir
+			, imguiTextedit.dir
+		] : List Text
+		, global = [] : List Text
+	}
 	, sources = [
 		, "${dir}/render.cpp"
 	]
@@ -332,27 +364,31 @@ let skia =
 	, dir = dir
 	, sources = [
 		, "${dir}/paragraph.cpp"
-		, "${dir}/app.cpp"
-		, "${dir}/ImGuiLayer.cpp"
+		, "${dir}/modified/app.cpp"
+		, "${dir}/modified/ImGuiLayer.cpp"
 		, "${dir}/vectorCmdSkiaRenderer.cpp"
 		, "${dir}/skiaTracyTracer.cpp"
 	]
-	, additionalIncludeDirs = [
-		, "${contribDir}/modules/sksg/include"
-		, "${contribDir}/modules/bentleyottmann/include"
-		, "${contribDir}/modules/skottie/include"
-		, "${contribDir}/modules/skparagraph/include"
-		, "${contribDir}/modules/skplaintexteditor/include"
-		, "${contribDir}/modules/skresources/include"
-		, "${contribDir}/modules/skshaper/include"
-		, "${contribDir}/modules/skunicode/include"
-		, "${contribDir}/modules/svg/include"
-		--, "${contribDir}/experimental/sktext/include"
-		, "${contribDir}/include"
-		, "${contribDir}/include/core"
-		, "${contribDir}"
-		, render.dir
-	]
+	, includeDirs = {
+		, local = [
+			, imgui.dir
+			, render.dir]
+		, global = [
+			, "${contribDir}"
+			, "${contribDir}/modules/sksg/include"
+			, "${contribDir}/modules/bentleyottmann/include"
+			, "${contribDir}/modules/skottie/include"
+			, "${contribDir}/modules/skparagraph/include"
+			, "${contribDir}/modules/skplaintexteditor/include"
+			, "${contribDir}/modules/skresources/include"
+			, "${contribDir}/modules/skshaper/include"
+			, "${contribDir}/modules/skunicode/include"
+			, "${contribDir}/modules/svg/include"
+			--, "${contribDir}/experimental/sktext/include"
+			, "${contribDir}/include"
+			, "${contribDir}/include/core"
+		] : List Text
+	}
 	, defines = {, local = [
         , "SK_TRIVIAL_ABI=\\[\\[clang::trivial_abi\\]\\]"
         , "SK_GAMMA_APPLY_TO_A8"
@@ -485,15 +521,27 @@ let skia =
         , "${contribDir}/out/Static/libwindow.a"
 	] # static3rdPartyLibraries
 }
+let flatbuffers = let dir = "./contrib/flatbuffers" in
+ sourceTreePart::{
+	, dir = dir
+	, name = "flatbuffers"
+	, includeDirs = {
+		, local = [] : List Text
+		, global = ["${dir}"] : List Text
+	}
+	, sources = [] : List Text
+}
 let imguiWithSkia = imgui // {
 	, name = "imguiWithSkia"
-	, additionalIncludeDirs = imgui.additionalIncludeDirs # skia.additionalIncludeDirs # [
-		, "${imgui.dir}/../../../contrib/flatbuffers/include"
-		]
+	, includeDirs = {
+		, local = imgui.includeDirs.local # skia.includeDirs.local
+		, global = imgui.includeDirs.global
+	}
 	, sources = imgui.sources # [ "${imgui.dir}/flatbufferHelpers.cpp" ]
 	}
 in
 {
+	, flatbuffers
 	, imgui
 	, imguiWithSkia
 	, imguiBackendGlfw

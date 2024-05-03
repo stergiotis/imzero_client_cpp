@@ -31,7 +31,10 @@ let sourceTreePart = let T = {
 	, name : Text
 	, sources : List Text
 	, additionalDependants : List Text
-	, additionalIncludeDirs : List Text
+	, includeDirs : {
+		, local : List Text
+		, global : List Text
+	}
 	, defines : {
 		, local : List Text
 		, global : List Text
@@ -50,7 +53,7 @@ let sourceTreePart = let T = {
 		, cxxflags = {local = [] : List Text, global = [] : List Text}
 		, ldflags = {global = [] : List Text}
 		, nonSourceObjs = [] : List Text
-		, additionalIncludeDirs = [] : List Text
+		, includeDirs = { local = [] : List Text, global = [] : List Text}
 		, defines = {, local = [] : List Text, global = [] : List Text}
 	}}
 	in schema

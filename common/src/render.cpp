@@ -1,16 +1,16 @@
 #include "render.h"
 #include <cstddef>
-#include <stdarg.h>
+#include <cstdarg>
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <stdio.h>
+#include <cstdio>
 #include <unistd.h>
 #include <fcntl.h>
 
-#include <stdint.h>
-#include <inttypes.h>
-#include <stdlib.h>
+#include <cstdint>
+#include <cinttypes>
+#include <cstdlib>
 #include <cstring>
 #include <algorithm>
 
@@ -76,12 +76,12 @@ const uint32_t FuncProcIdFlush = 0xffffffff;
 #endif
 
 uint32_t lap = 0;
-static void interpretCommands(void) {
+static void interpretCommands() {
     lap++;
     arenaReset((lap & 0xff) == 0);
     bool flushed = false;
     while(!flushed) {
-        const uint32_t funcId = receiveValue<uint32_t>();
+        const auto funcId = receiveValue<uint32_t>();
         switch(funcId) { // this should be reordered by pgo
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -107,13 +107,13 @@ static void interpretCommands(void) {
     }
 }
 
-static void setup_imgui(void) {
+static void setup_imgui() {
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags &= ~ImGuiConfigFlags_ViewportsEnable;
 }
 
 #include "style.h"
-void render_init(void) {
+void render_init() {
     //StyeColorsApp();
     setup_imgui();
 
@@ -128,13 +128,13 @@ void render_init(void) {
 }
 
 
-void render_render(void) {
+void render_render() {
     ImGui::DockSpaceOverViewport();    
 
     interpretCommands();
     //EmitDrawList(stdout);
 }
 
-void render_cleanup(void) {
+void render_cleanup() {
 	ImPlot::DestroyContext();
 }

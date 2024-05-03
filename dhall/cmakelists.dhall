@@ -20,7 +20,7 @@ let definesToCxxflags = \(defines : List Text) -> (prelude.List.map Text Text (\
 let includesToCxxflags = \(dirs : List Text) -> (prelude.List.map Text Text (\(d : Text) -> "-I${d}") dirs)
 let cmakelistsToText = \(m : cmakelists.Type) -> 
 	let gDefines = prelude.List.concatMap lib.sourceTreePart.Type Text (\(p : lib.sourceTreePart.Type) -> p.defines.global) m.sourceTreeParts
-	let gIncludeDirs = prelude.List.concatMap lib.sourceTreePart.Type Text (\(p : lib.sourceTreePart.Type) -> p.additionalIncludeDirs) m.sourceTreeParts
+	let gIncludeDirs = prelude.List.concatMap lib.sourceTreePart.Type Text (\(p : lib.sourceTreePart.Type) -> p.includeDirs.global) m.sourceTreeParts
 	let gCompileOptions = m.cxxflags # prelude.List.concatMap lib.sourceTreePart.Type Text (\(p : lib.sourceTreePart.Type) -> p.cxxflags.global) m.sourceTreeParts
 	let gLinkOptions = m.ldflags # prelude.List.concatMap lib.sourceTreePart.Type Text (\(p : lib.sourceTreePart.Type) -> p.ldflags.global) m.sourceTreeParts
 
@@ -33,7 +33,7 @@ let cmakelistsToText = \(m : cmakelists.Type) ->
 		++ (if (prelude.List.null Text p.sources) then "" else "add_library(${p.name} OBJECT ${composePathList p.sources})\n")
 		++ (if (prelude.List.null Text p.cxxflags.local) then "" else "target_compile_options(${p.name} PUBLIC ${prelude.Text.concatSep "\n" p.cxxflags.local})\n")
 		++ (if (prelude.List.null Text p.defines.local) then "" else "target_compile_definitions(${p.name} PUBLIC ${prelude.Text.concatSep "\n" p.defines.local})\n")
-		++ (if (prelude.List.null Text p.additionalIncludeDirs) then "" else "target_include_directories(${p.name} PUBLIC ${composePathList ([p.dir] # p.additionalIncludeDirs)})\n")
+		++ (if (prelude.List.null Text p.includeDirs.local) then "" else "target_include_directories(${p.name} PUBLIC ${composePathList ([p.dir] # p.includeDirs.local)})\n")
 		++ (if (prelude.List.null Text p.nonSourceObjs) then "" else
 		 ("add_library(${p.name}_imported OBJECT IMPORTED)\n"
 		 ++ "set_property(TARGET ${p.name}_imported PROPERTY IMPORTED_OBJECTS ${composePathList p.nonSourceObjs})\n"
