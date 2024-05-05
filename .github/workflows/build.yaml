@@ -36,3 +36,5 @@ jobs:
         run: ./imgui_glfw/build.sh
       - name: Build Wasm
         run: ./imgui_wasm/build.sh
+      - name: Build Skia Backend
+        run: ./skia/build.sh
