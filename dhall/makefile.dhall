@@ -19,7 +19,7 @@ let makefileToText = \(m : makefile.Type) ->
 	let cxxflags = m.cxxflags
 	            # (prelude.List.concatMap lib.sourceTreePart.Type Text 
 				     (\(p : lib.sourceTreePart.Type) -> p.cxxflags.global 
-					    # (includesToCxxflags ([p.dir] # p.additionalIncludeDirs))
+					    # (includesToCxxflags ([p.dir] # p.includeDirs.global))
 					    # (definesToCxxflags p.defines.global)
 						) m.sourceTreeParts)
 	let ldflags = m.ldflags # (prelude.List.concatMap lib.sourceTreePart.Type Text (\(p : lib.sourceTreePart.Type) -> p.ldflags.global) m.sourceTreeParts)
@@ -30,7 +30,7 @@ let makefileToText = \(m : makefile.Type) ->
 	let srcDepFiles = prelude.List.map Text Text srcToDepFile sources
 	let nonSourceObjs = prelude.List.concatMap lib.sourceTreePart.Type Text (\(p : lib.sourceTreePart.Type) -> p.nonSourceObjs) m.sourceTreeParts
 	let composeBuildRule = \(p : lib.sourceTreePart.Type) ->
-		let cf = p.cxxflags.local # (definesToCxxflags p.defines.local)
+		let cf = p.cxxflags.local # (definesToCxxflags p.defines.local) # (includesToCxxflags p.includeDirs.local)
 		in
 		prelude.Text.concatMapSep "\n" Text (\(s : Text) -> 
 			(prelude.Text.replace ".cpp" ".o" s)
