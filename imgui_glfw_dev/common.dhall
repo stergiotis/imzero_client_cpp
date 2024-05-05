@@ -1,6 +1,7 @@
 let lib = ../dhall/lib.dhall
 let sourceTreePartsRepo = ../dhall/sourceTreeParts.dhall
 let mainPart = let dir = "." in lib.sourceTreePart::{
+        , name = "main"
 	, dir = dir
 	, sources = [ "${dir}/main.cpp" ]
 }
