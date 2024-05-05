@@ -13,7 +13,7 @@ extern size_t totalSentBytes;
 void sendInit();
 void resetSendStat();
 
-inline size_t fwrite_sendStat(const void *__restrict __ptr, size_t __size,
+size_t fwrite_sendStat(const void *__restrict __ptr, size_t __size,
                       size_t __n, FILE *__restrict __s) noexcept;
 
 template <typename T>

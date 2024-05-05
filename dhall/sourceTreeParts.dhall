@@ -543,7 +543,13 @@ let imguiWithSkia = imgui // {
 		, local = imgui.includeDirs.local # skia.includeDirs.local
 		, global = imgui.includeDirs.global
 	}
-	, sources = imgui.sources # [ "${imgui.dir}/flatbufferHelpers.cpp" ]
+	, sources = [
+		, "${imgui.dir}/imgui.cpp"
+		, "${imgui.dir}/imgui_demo.cpp"
+		, "${imgui.dir}/imgui_draw_fb.cpp"
+		, "${imgui.dir}/imgui_tables.cpp"
+		, "${imgui.dir}/imgui_widgets.cpp"
+		, "${imgui.dir}/flatbufferHelpers.cpp" ]
 	}
 in
 {

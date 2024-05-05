@@ -25,3 +25,6 @@ sudo apt install -y libgl-dev
 
 #libc++
 sudo apt install -y libc++-dev libc++abi-dev
+
+#skia deps
+sudo apt install -y clang libjpeg-dev libicu-dev libwebp-dev libfontconfig-dev

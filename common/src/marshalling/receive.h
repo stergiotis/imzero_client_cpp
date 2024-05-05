@@ -8,7 +8,7 @@ extern FILE *fdIn;
 extern size_t totalReceivedBytes;
 
 void receiveInit();
-inline size_t fread_receiveStat(void *__restrict __ptr, size_t __size, size_t __n, FILE *__restrict __stream) noexcept;
+size_t fread_receiveStat(void *__restrict __ptr, size_t __size, size_t __n, FILE *__restrict __stream) noexcept;
 void resetReceiveStat();
 
 template <typename T>
