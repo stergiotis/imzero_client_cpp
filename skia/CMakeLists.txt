@@ -22,16 +22,8 @@ include_directories("${CMAKE_CURRENT_LIST_DIR}/./imgui"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/flatbuffers")
 set(COMPILE_OPTIONS -std=c++20
--g
--gdwarf-4
--Wall
--Wformat
--Wextra
--O1
--fsanitize=address
--fno-omit-frame-pointer
--DIMZERO_DEBUG_BUILD)
-link_libraries(-fsanitize=address
+-O3)
+link_libraries(-DNDEBUG
 -ldl
 -lpthread
 -lfreetype

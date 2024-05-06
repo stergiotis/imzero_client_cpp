@@ -48,4 +48,5 @@ getContribRepo "https://github.com/stergiotis/imgui_imspinner.git" "imgui_imspin
 getContribRepo "https://github.com/stergiotis/imgui_knobs.git" "imgui_knobs" "main" "4f207526f9ef036a0aff7edfaad92cfbe12d987a"
 getContribRepo "https://github.com/stergiotis/imgui_toggle.git" "imgui_toggle" "main" "d8d22c0f41bc4923e224bdf5a2fae8ea6a4aab1a"
 getContribRepo "https://github.com/dhall-lang/dhall-lang" "dhall-lang" "master" "v22.0.0"
+getContribRepo "https://github.com/google/flatbuffers.git" "flatbuffers" "master" "129ef422e8a4e89d87a7216a865602673a6d0bf3"
 getMyRepo "https://github.com/stergiotis/boxer.git" "boxer" "main" ""

@@ -37,7 +37,7 @@ let ldflagsDebug = ["-fsanitize=address"] : List Text
 let ldflagsRelease = ["-DNDEBUG"] : List Text
 --let stdlibFlags = ["-stdlib=libc++"] : List Text
 let stdlibFlags = [] : List Text
-let debug = True
+let debug = False
 in {
     , sourceTreeParts
     , cxx
