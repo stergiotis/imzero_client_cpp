@@ -26,6 +26,8 @@ jobs:
         run: ./scripts/install.sh
       - name: Install distribution dependent
         run: ./scripts/install_ubuntu2204.sh
+      - name: Install git repos
+        run: ./scripts/install_3rd_party_git_repos.sh
       # Enable tmate debugging of manually-triggered workflows if the input option was provided
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
@@ -36,5 +38,7 @@ jobs:
         run: ./imgui_glfw/build.sh
       - name: Build Wasm
         run: ./imgui_wasm/build.sh
+      - name: Build Skia
+        run: ./skia/build_skia.sh
       - name: Build Skia Backend
         run: ./skia/build.sh
