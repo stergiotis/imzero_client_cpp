@@ -2,7 +2,7 @@
 here=$(dirname "$(readlink -f "$BASH_SOURCE")")
 set -ev
 cd ../../contrib
-git clone git@github.com:google/skia.git || true
+git clone https://github.com/google/skia || true
 cd skia
 #sudo apt install clang libjpeg-dev libicu-dev libwebp-dev libfontconfig-dev
 git checkout "chrome/m123"
