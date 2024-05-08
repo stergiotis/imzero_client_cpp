@@ -3234,12 +3234,9 @@ struct ImFont
     IMGUI_API const ImFontGlyph*FindGlyphNoFallback(ImWchar c) const;
 #ifdef SKIA_DRAW_BACKEND
     float                       GetCharAdvance(ImWchar c) const     {
-#ifdef IMGUI_USE_WCHAR32
+        auto tmp = static_cast<uint32_t>(c);
         constexpr auto encoding = SkTextEncoding::kUTF32;
-#else
-        constexpr auto encoding = SkTextEncoding::kUTF16;
-#endif
-        return SkScalarToFloat(ImGui::skiaFont.makeWithSize(SkScalar(FontSize)).measureText(&c,sizeof(ImWchar),encoding, nullptr));
+        return SkScalarToFloat(ImGui::skiaFont.makeWithSize(SkScalar(FontSize)).measureText(&tmp,sizeof(ImWchar),encoding, nullptr));
     }
 #else
     float                       GetCharAdvance(ImWchar c) const     { return ((int)c < IndexAdvanceX.Size) ? IndexAdvanceX[(int)c] : FallbackAdvanceX; }
