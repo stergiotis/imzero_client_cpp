@@ -638,12 +638,11 @@ void VectorCmdSkiaRenderer::drawCmdTriangleFilledFB(const VectorCmdFB::CmdTriang
 
 void VectorCmdSkiaRenderer::drawCmdRenderTextFB(const VectorCmdFB::CmdRenderText &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;
-    auto const cpu_fine_clip = cmd.cpu_fine_clip();
-    if(cpu_fine_clip) {
-        canvas.save();
-        auto const &cr = cmd.clip_rect();
-        canvas.clipRect(SkRect::MakeLTRB(cr->x(), cr->y(), cr->z(),cr->w()));
-    }
+
+    canvas.save();
+    auto const &cr = cmd.clip_rect();
+    canvas.clipRect(SkRect::MakeLTRB(cr->x(), cr->y(), cr->z(),cr->w()));
+
     paint.setColor(convertColor(cmd.col()));
     auto size = cmd.size();
     auto font = fFont.makeWithSize(SkScalar(size));
@@ -671,9 +670,7 @@ void VectorCmdSkiaRenderer::drawCmdRenderTextFB(const VectorCmdFB::CmdRenderText
                                paint);
     }
 
-    if(cpu_fine_clip) { ZoneScoped;
-        canvas.restore();
-    }
+    canvas.restore();
 }
 template <typename T>
 void drawCmdCircle_(const T &cmd,SkCanvas &canvas,SkPaint &paint) { ZoneScoped;
