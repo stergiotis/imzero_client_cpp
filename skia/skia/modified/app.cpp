@@ -15,6 +15,8 @@
 
 #include "vectorCmdSkiaRenderer.h"
 #include "imgui.h"
+#include "marshalling/receive.h"
+#include "marshalling/send.h"
 
 using namespace sk_app;
 using skwindow::DisplayParams;
@@ -76,13 +78,44 @@ static const char *findFlagValueDefault(int argc, char **argv,const char *flag,c
     }
     return defaultValue;
 }
+static void showUsage(const char *name, FILE *file) {
+   fprintf(stderr, "%s -ttfFilePath <file.ttf> -fontDyFudge <float> -fffiInFile <fffiIn> -fffiOutFile <fffiOut> -disableVsync -disableFffi\n", name);
+}
 
 Application* Application::Create(int argc, char** argv, void* platformData) {
     #ifdef TRACY_ENABLE
     ImGui::SetAllocatorFunctions(imZeroMemAlloc,imZeroMemFree,nullptr);
     #endif
 
-    auto ttfFilePath = findFlagValueDefault(argc,argv,"-ttfFilePath","./SauceCodeProNerdFontPropo-Regular.ttf");
+    const auto ttfFilePath = findFlagValueDefault(argc,argv,"-ttfFilePath","./SauceCodeProNerdFontPropo-Regular.ttf");
+    const auto fffiInFile = findFlagValueDefault(argc, argv, "-fffiInFile", nullptr);
+    const auto fffiOutFile = findFlagValueDefault(argc, argv, "-fffiOutFile", nullptr);
+    const auto fontDyFudge = findFlagValueDefault(argc, argv, "-fontDyFudge", nullptr);
+
+    if(hasFlag(argc,argv,"-help")) {
+        showUsage(argv[0],stderr);
+        exit(0);
+    }
+
+    const auto standalone = hasFlag(argc, argv, "-disableFffi");
+    if(!standalone) {
+        if(fffiInFile != nullptr) {
+            fdIn = fopen(fffiInFile, "r");
+            if(fdIn == nullptr) {
+                fprintf(stderr, "unable to open fffInFile %s: %s", fffiInFile, strerror(errno));
+                exit(1);
+            }
+            setvbuf(fdIn, nullptr,_IONBF,0);
+        }
+        if(fffiOutFile != nullptr) {
+            fdOut = fopen(fffiOutFile, "w");
+            if(fdOut == nullptr) {
+                fprintf(stderr, "unable to open fffOutFile %s: %s", fffiOutFile, strerror(errno));
+                exit(1);
+            }
+            setvbuf(fdOut, nullptr,_IONBF,0);
+        }
+    }
 
     auto ttfData = SkData::MakeFromFileName(ttfFilePath);
     auto fontMgr = SkFontMgr_New_Custom_Data(SkSpan<sk_sp<SkData>>(&ttfData,1));
@@ -99,7 +132,6 @@ Application* Application::Create(int argc, char** argv, void* platformData) {
     return new ImZeroSkiaClient(argc, argv, platformData);
 }
 
-
 ImZeroSkiaClient::ImZeroSkiaClient(int argc, char** argv, void* platformData)
 #if defined(SK_GL)
         : fBackendType(Window::kNativeGL_BackendType)
@@ -109,6 +141,8 @@ ImZeroSkiaClient::ImZeroSkiaClient(int argc, char** argv, void* platformData)
         : fBackendType(Window::kRaster_BackendType)
 #endif
         {
+    const auto standalone = hasFlag(argc, argv, "-disableFffi");
+
     SkGraphics::Init();
 
     fWindow = Window::CreateNativeWindow(platformData);
@@ -121,11 +155,12 @@ ImZeroSkiaClient::ImZeroSkiaClient(int argc, char** argv, void* platformData)
         fWindow->setRequestedDisplayParams(params);
     }
 
-    fImGuiLayer.setScaleFactor(fWindow->scaleFactor());
+    fImGuiLayer = std::make_unique<ImGuiLayer>(standalone);
+    fImGuiLayer->setScaleFactor(fWindow->scaleFactor());
 
     // register callbacks
     fWindow->pushLayer(this);
-    fWindow->pushLayer(&fImGuiLayer);
+    fWindow->pushLayer(fImGuiLayer.get());
 
     fWindow->attach(fBackendType);
 }

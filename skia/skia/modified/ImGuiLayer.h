@@ -39,7 +39,7 @@ enum class ModifierKey;
 
 class ImGuiLayer : public sk_app::Window::Layer {
 public:
-    ImGuiLayer();
+    ImGuiLayer(bool standalone);
     ~ImGuiLayer() override;
 
     void setScaleFactor(float scaleFactor);
@@ -61,11 +61,12 @@ private:
     skia_private::TArray<SkiaWidgetFunc> fSkiaWidgetFuncs;
 
     VectorCmdSkiaRenderer fVectorCmdSkiaRenderer;
-    size_t fTotalVectorCmdSerializedSize;
+    size_t fTotalVectorCmdSerializedSize{};
     size_t fSkpBytesWritten;
     size_t fSvgBytesWritten;
     size_t fPngBytesWritten;
     ImZeroSkiaSetupUI fImZeroSkiaSetupUi;
+    bool fStandalone;
 
     void drawImDrawData(SkCanvas &canvas);
     void drawImGuiVectorCmdsFB(SkCanvas &canvas);

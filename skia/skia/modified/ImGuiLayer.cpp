@@ -65,7 +65,7 @@ static void build_ImFontAtlas(ImFontAtlas& atlas, SkPaint& fontPaint) {
     atlas.TexID = &fontPaint;
 }
 
-ImGuiLayer::ImGuiLayer() : fWindow(nullptr), fSvgBytesWritten(0), fSkpBytesWritten(0), fPngBytesWritten(0) {
+ImGuiLayer::ImGuiLayer(bool standalone) : fWindow(nullptr), fSvgBytesWritten(0), fSkpBytesWritten(0), fPngBytesWritten(0), fStandalone(standalone), fTotalVectorCmdSerializedSize(0) {
     // ImGui initialization:
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
@@ -93,7 +93,9 @@ ImGuiLayer::ImGuiLayer() : fWindow(nullptr), fSvgBytesWritten(0), fSkpBytesWritt
     io.KeyMap[ImGuiKey_Y]          = (int)skui::Key::kY;
     io.KeyMap[ImGuiKey_Z]          = (int)skui::Key::kZ;
 
-    render_init();
+    if(!fStandalone) {
+        render_init();
+    }
 
     // TODO remove this when switching to skia only backend
     build_ImFontAtlas(*io.Fonts, fFontPaint);
@@ -105,7 +107,9 @@ ImGuiLayer::ImGuiLayer() : fWindow(nullptr), fSvgBytesWritten(0), fSkpBytesWritt
 }
 
 ImGuiLayer::~ImGuiLayer() {
-    render_cleanup();
+    if(!fStandalone) {
+        render_cleanup();
+    }
     ImGui::DestroyContext();
     //if(eventTracer != nullptr) {
     //    delete eventTracer;
@@ -290,13 +294,10 @@ void ImGuiLayer::onPaint(SkSurface* surface) { ZoneScoped;
     auto renderMode = fVectorCmdSkiaRenderer.getRenderMode();
     resetReceiveStat();
     resetSendStat();
-    { ZoneScopedN("render fffi commands");
+    if(!fStandalone) { ZoneScopedN("render fffi commands");
         render_render();
     }
 
-    bool saveSkp = false;
-    bool saveSvg = false;
-    bool savePng = false;
     SaveFormatE saveFormat = SaveFormatE_None;
     if(ImGui::Begin("ImZeroSkia Settings")) { ZoneScoped;
         fImZeroSkiaSetupUi.render(saveFormat, fVectorCmdSkiaRenderer, fSkiaBackendActive,

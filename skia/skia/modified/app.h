@@ -35,7 +35,7 @@ private:
     sk_app::Window* fWindow;
     sk_app::Window::BackendType fBackendType;
 
-    ImGuiLayer fImGuiLayer;
+    std::unique_ptr<ImGuiLayer> fImGuiLayer;
 };
 
 #endif
