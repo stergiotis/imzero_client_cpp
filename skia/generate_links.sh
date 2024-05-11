@@ -4,11 +4,6 @@ cd "$here"
 source "../common/lib.sh"
 
 link ../common/src src
-link ../common/contrib/imgui/backends/imgui_impl_glfw.cpp ./imgui/imgui_impl_glfw.cpp 
-link ../common/contrib/imgui/backends/imgui_impl_glfw.h ./imgui/imgui_impl_glfw.h 
-link ../common/contrib/imgui/backends/imgui_impl_opengl3.cpp ./imgui/imgui_impl_opengl3.cpp 
-link ../common/contrib/imgui/backends/imgui_impl_opengl3.h ./imgui/imgui_impl_opengl3.h 
-link ../common/contrib/imgui/backends/imgui_impl_opengl3_loader.h ./imgui/imgui_impl_opengl3_loader.h 
 link ../common/contrib/imgui/imgui.cpp ./imgui/imgui.cpp 
 link ../common/contrib/imgui/imgui_demo.cpp ./imgui/imgui_demo.cpp 
 link ../common/contrib/imgui/imgui_internal.h ./imgui/imgui_internal.h 
