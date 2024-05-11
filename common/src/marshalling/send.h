@@ -1,10 +1,10 @@
 #pragma once
-#include <stdint.h>
+#include <cstdint>
 #include "casts.h"
 #include <imgui.h>
 #include <implot.h>
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 #include <type_traits>
 #include <string>
 extern FILE *fdOut;

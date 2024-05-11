@@ -1,7 +1,7 @@
 #pragma once
-#include <stdio.h>
-#include <stdint.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdint>
+#include <cstring>
 #include <type_traits>
 #include "../arena/simple/simple.h"
 extern FILE *fdIn;
