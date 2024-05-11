@@ -294,7 +294,9 @@ void ImGuiLayer::onPaint(SkSurface* surface) { ZoneScoped;
     auto renderMode = fVectorCmdSkiaRenderer.getRenderMode();
     resetReceiveStat();
     resetSendStat();
-    if(!fStandalone) { ZoneScopedN("render fffi commands");
+    if(fStandalone) { ZoneScoped("demo window");
+        ImGui::ShowDemoWindow();
+    } else { ZoneScopedN("render fffi commands");
         render_render();
     }
 

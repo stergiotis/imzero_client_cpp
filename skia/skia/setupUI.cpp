@@ -171,7 +171,7 @@ void ImZeroSkiaSetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &v
                 if(actualSize == fabs(fontMetricsSize)) {
                     ImGui::TextUnformatted("|ascent|+|descent| == |size|   => easy");
                 } else {
-                    ImGui::Text("%f = |ascent|+|descent| != |size| = %f   => hard", a, fontMetricsSize);
+                    ImGui::Text("%f = |ascent|+|descent| != |size| = %f   => hard", fabs(metrics.fAscent)+fabs(metrics.fDescent), fontMetricsSize);
                 }
             }
 
