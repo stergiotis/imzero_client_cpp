@@ -63,3 +63,7 @@ void Paragraph::setForegroundPaint(SkPaint &paint) {
 void Paragraph::paint(SkCanvas &canvas, SkScalar x, SkScalar y) {
     fPara->paint(&canvas,x,y);
 }
+
+void Paragraph::setFontSize(SkScalar size) {
+    fTlTextStyle.setFontSize(size);
+}

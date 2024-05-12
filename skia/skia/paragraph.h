@@ -20,6 +20,7 @@ class Paragraph {
         void getCacheStatistics(int &count);
         void setCacheEnable(bool enable);
         void resetCache();
+        void setFontSize(SkScalar size);
 
         sk_sp<SkTypeface> getDefaultTypeface();
 

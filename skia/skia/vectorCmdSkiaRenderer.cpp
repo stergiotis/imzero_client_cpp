@@ -648,6 +648,7 @@ void VectorCmdSkiaRenderer::drawCmdRenderTextFB(const VectorCmdFB::CmdRenderText
     auto font = fFont.makeWithSize(SkScalar(size));
     const auto text = cmd.text();
     if(cmd.is_paragraph()){ ZoneScoped;
+        fParagraph->setFontSize(SkScalar(size));
         fParagraph->setForegroundPaint(paint);
         fParagraph->build(text->data(), text->size());
         const auto ww = cmd.wrap_width();
