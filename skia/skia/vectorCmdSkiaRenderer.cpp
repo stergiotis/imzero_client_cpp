@@ -425,7 +425,7 @@ void VectorCmdSkiaRenderer::drawCmdLineFB(const VectorCmdFB::CmdLine &cmd,SkCanv
 }
 
 void VectorCmdSkiaRenderer::drawRectRounded(const SkRect &rect, float r,SkCanvas &canvas,SkPaint &paint) { ZoneScoped
-#ifdef RENDER_MODE_SKETCH_ENABLED
+#if defined (RENDER_MODE_SKETCH_ENABLED) || defined (RENDER_MODE_SVG_ENABLED)
     if(fRenderMode & (RenderModeE_Sketch | RenderModeE_SVG)) {
         SkPath pa;
         if(r > 0.0f) {
@@ -444,7 +444,7 @@ void VectorCmdSkiaRenderer::drawRectRounded(const SkRect &rect, float r,SkCanvas
     }
 }
 void VectorCmdSkiaRenderer::drawRRect(const SkRRect &rect, SkCanvas &canvas,SkPaint &paint) { ZoneScoped
-#ifdef RENDER_MODE_SKETCH_ENABLED
+#if defined (RENDER_MODE_SKETCH_ENABLED) || defined (RENDER_MODE_SVG_ENABLED)
     if(fRenderMode & (RenderModeE_Sketch | RenderModeE_SVG)) {
         SkPath pa;
         pa.addRRect(rect);
@@ -557,22 +557,47 @@ void VectorCmdSkiaRenderer::registerFont(const VectorCmdFB::CmdRegisterFont &cmd
 void VectorCmdSkiaRenderer::drawCmdVertexDraw(const VectorCmdFB::CmdVertexDraw &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped
     if(fVertexPaint == nullptr) {
         return;
-    }    
-
+    }
     auto cr = cmd.clip_rect();
     auto elementCount = cmd.element_count();
     auto indexOffset = cmd.index_offset();
     auto vtxOffset = cmd.vtx_offset();
+    auto const crRect = SkRect::MakeLTRB(cr->x(), cr->y(), cr->z(), cr->w());
+
+#ifdef RENDER_MODE_SVG_ENABLED
+    SkCanvas *rasterCanvas;
+    sk_sp<SkSurface> rasterSurface;
+    const auto dx = SkScalar(cr->x());
+    const auto dy = SkScalar(cr->y());
+    if(fRenderMode & RenderModeE_SVG) {
+        const auto s = SkSize::Make(SkScalar(cr->z())-dx,SkScalar(cr->w())-dy);
+        const auto c = SkColorInfo(kRGBA_8888_SkColorType, kPremul_SkAlphaType, SkColorSpace::MakeSRGB());
+        rasterSurface = SkSurfaces::Raster(SkImageInfo::Make(s.toCeil(), c));
+        rasterCanvas = rasterSurface->getCanvas();
+    }
+#endif
+
+    auto vertices = SkVertices::MakeCopy(SkVertices::kTriangles_VertexMode,
+                                         static_cast<int>(vtxXYs.size()-vtxOffset),
+                                         vtxXYs.begin()+vtxOffset,
+                                         vtxTexUVs.begin()+vtxOffset,
+                                         vtxColors.begin()+vtxOffset,
+                                         static_cast<int>(elementCount),
+                                         vtxIndices.begin() + indexOffset);
+
+
+#ifdef RENDER_MODE_SVG_ENABLED
+    if(fRenderMode & RenderModeE_SVG) {
+        rasterCanvas->setMatrix(SkMatrix::Translate(-dx,-dy));
+        rasterCanvas->drawVertices(vertices, SkBlendMode::kModulate, *fVertexPaint);
+        sk_sp<SkImage> img(rasterSurface->makeImageSnapshot());
+        canvas.drawImage(img,dx,dy);
+        return;
+    }
+#endif
 
     SkAutoCanvasRestore acr(&canvas, true);
-    canvas.clipRect(SkRect::MakeLTRB(cr->x(), cr->y(), cr->z(), cr->w()));
-    auto vertices = SkVertices::MakeCopy(SkVertices::kTriangles_VertexMode,
-                                            static_cast<int>(vtxXYs.size()-vtxOffset),
-                                            vtxXYs.begin()+vtxOffset,
-                                            vtxTexUVs.begin()+vtxOffset,
-                                            vtxColors.begin()+vtxOffset,
-                                            static_cast<int>(elementCount),
-                                            vtxIndices.begin() + indexOffset);
+    canvas.clipRect(crRect);
     canvas.drawVertices(vertices, SkBlendMode::kModulate, *fVertexPaint);
 }
 template <typename T>
@@ -678,7 +703,7 @@ void VectorCmdSkiaRenderer::drawCmdCircleFB(const VectorCmdFB::CmdCircle &cmd, S
     SkPaint paint;
     prepareOutlinePaint(paint,dlFlags);
     paint.setStrokeWidth(SkScalar(cmd.thickness()));
-#ifdef RENDER_MODE_SKETCH_ENABLED
+#if defined (RENDER_MODE_SKETCH_ENABLED) || defined (RENDER_MODE_SVG_ENABLED)
     if(fRenderMode & (RenderModeE_Sketch | RenderModeE_SVG)) {
         drawCmdCircleAsPath_(cmd,canvas,paint);
         return;
@@ -689,7 +714,7 @@ void VectorCmdSkiaRenderer::drawCmdCircleFB(const VectorCmdFB::CmdCircle &cmd, S
 void VectorCmdSkiaRenderer::drawCmdCircleFilledFB(const VectorCmdFB::CmdCircleFilled &cmd, SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped
     SkPaint paint;
     prepareFillPaint(paint,dlFlags);
-#ifdef RENDER_MODE_SKETCH_ENABLED
+#if defined (RENDER_MODE_SKETCH_ENABLED) || defined (RENDER_MODE_SVG_ENABLED)
     if(fRenderMode & (RenderModeE_Sketch | RenderModeE_SVG)) {
         drawCmdCircleAsPath_(cmd,canvas,paint);
         return;
