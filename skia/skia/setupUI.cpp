@@ -76,6 +76,10 @@ void ImZeroSkiaSetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &v
     }
     saveFormat = SaveFormatE_None;
     if(ImGui::CollapsingHeader("(Vector) Screenshots")) {
+        ImGui::Text("serialized flatbuffer verctor cmd size: %d Bytes", static_cast<int>(totalVectorCmdSerializedSz));
+        ImGui::Text("fffi cmd size: %d Bytes",static_cast<int>(totalFffiSz));
+        ImGui::Separator();
+
         if(ImGui::Button("Save Snapshot to /tmp/skiaBackend.skp")) {
             saveFormat = SaveFormatE_SKP;
         }

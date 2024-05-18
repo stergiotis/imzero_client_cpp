@@ -289,60 +289,71 @@ void ImGuiLayer::onPaint(SkSurface* surface) { ZoneScoped
     ImGui::End();
     ImGui::Render();
 
-    if((saveFormat & SaveFormatE_SKP) != SaveFormatE_None) { ZoneScoped
-        const auto path = "/tmp/skiaBackend.skp";
+    if(saveFormat != SaveFormatE_None) {
+        switch(saveFormat) {
+            case SaveFormatE_SKP: { ZoneScoped
+                const auto path = "/tmp/skiaBackend.skp";
 
-        SkPictureRecorder skiaRecorder;
-        auto skiaCanvas = skiaRecorder.beginRecording(SkIntToScalar(fWindow->width()), SkIntToScalar(fWindow->height()));
+                SkPictureRecorder skiaRecorder;
+                auto skiaCanvas = skiaRecorder.beginRecording(SkIntToScalar(fWindow->width()),
+                                                              SkIntToScalar(fWindow->height()));
 
-        skiaCanvas->clear(SK_ColorDKGRAY);
-        skiaCanvas->save();
-        drawImGuiVectorCmdsFB(*skiaCanvas);
-        skiaCanvas->restore();
+                skiaCanvas->clear(SK_ColorDKGRAY);
+                skiaCanvas->save();
+                drawImGuiVectorCmdsFB(*skiaCanvas);
+                skiaCanvas->restore();
 
-        sk_sp<SkPicture> picture = skiaRecorder.finishRecordingAsPicture();
-        SkFILEWStream skpStream(path);
-        picture->serialize(&skpStream);
-        fSkpBytesWritten = skpStream.bytesWritten();
-    } else if((saveFormat & SaveFormatE_SVG) != SaveFormatE_None) {
-        ZoneScoped
-        const auto path = "/tmp/skiaBackend.svg";
-        SkFILEWStream svgStream(path);
-        SkRect bounds = SkRect::MakeIWH(fWindow->width(), fWindow->height());
-        std::unique_ptr<SkCanvas> skiaCanvas = SkSVGCanvas::Make(bounds, &svgStream);
-        fVectorCmdSkiaRenderer.changeRenderMode(renderMode | RenderModeE_SVG);
-        drawImGuiVectorCmdsFB(*skiaCanvas);
-        fVectorCmdSkiaRenderer.changeRenderMode(renderMode);
-        fSvgBytesWritten = svgStream.bytesWritten();
-    } else if((saveFormat & SaveFormatE_PNG) != SaveFormatE_None) {
-        ZoneScoped
-        const auto path = "/tmp/skiaBackend.png";
-        const auto s = SkISize::Make(fWindow->width(), fWindow->height());
-        const auto c = SkColorInfo(kRGBA_8888_SkColorType, kPremul_SkAlphaType, SkColorSpace::MakeSRGB());
-        sk_sp<SkSurface> rasterSurface = SkSurfaces::Raster(SkImageInfo::Make(s, c));
-        SkCanvas *rasterCanvas = rasterSurface->getCanvas();
-        drawImGuiVectorCmdsFB(*rasterCanvas);
-        sk_sp<SkImage> img(rasterSurface->makeImageSnapshot());
-        SkFILEWStream pngStream(path);
-        SkPixmap pixmap;
-        img->peekPixels(&pixmap);
-        if (SkPngEncoder::Encode(static_cast<SkWStream *>(&pngStream), pixmap, SkPngEncoder::Options{})) {
-            fPngBytesWritten = pngStream.bytesWritten();
-        } else {
-            fPngBytesWritten = 0;
-        }
-    } else if((saveFormat & SaveFormatE_VECTORCMD) != SaveFormatE_None) {
-        const auto path = "/tmp/skiaBackend.flatbuffers";
-        SkFILEWStream stream(path);
+                sk_sp<SkPicture> picture = skiaRecorder.finishRecordingAsPicture();
+                SkFILEWStream skpStream(path);
+                picture->serialize(&skpStream);
+                fSkpBytesWritten = skpStream.bytesWritten();
+                fprintf(stderr, "skp=%d\n", (int) fSkpBytesWritten);
+                break;
+            }
+            case SaveFormatE_SVG: { ZoneScoped
+                const auto path = "/tmp/skiaBackend.svg";
+                SkFILEWStream svgStream(path);
+                SkRect bounds = SkRect::MakeIWH(fWindow->width(), fWindow->height());
+                std::unique_ptr<SkCanvas> skiaCanvas = SkSVGCanvas::Make(bounds, &svgStream);
+                fVectorCmdSkiaRenderer.changeRenderMode(renderMode | RenderModeE_SVG);
+                drawImGuiVectorCmdsFB(*skiaCanvas);
+                fVectorCmdSkiaRenderer.changeRenderMode(renderMode);
+                fSvgBytesWritten = svgStream.bytesWritten();
+                break;
+            }
+            case SaveFormatE_PNG: { ZoneScoped
+                const auto path = "/tmp/skiaBackend.png";
+                const auto s = SkISize::Make(fWindow->width(), fWindow->height());
+                const auto c = SkColorInfo(kRGBA_8888_SkColorType, kPremul_SkAlphaType, SkColorSpace::MakeSRGB());
+                sk_sp<SkSurface> rasterSurface = SkSurfaces::Raster(SkImageInfo::Make(s, c));
+                SkCanvas *rasterCanvas = rasterSurface->getCanvas();
+                drawImGuiVectorCmdsFB(*rasterCanvas);
+                sk_sp<SkImage> img(rasterSurface->makeImageSnapshot());
+                SkFILEWStream pngStream(path);
+                SkPixmap pixmap;
+                fPngBytesWritten = 0;
+                if(img->peekPixels(&pixmap)) {
+                    if (SkPngEncoder::Encode(static_cast<SkWStream *>(&pngStream), pixmap, SkPngEncoder::Options{})) {
+                        fPngBytesWritten = pngStream.bytesWritten();
+                    }
+                }
+                break;
+            }
+            case SaveFormatE_VECTORCMD: { ZoneScoped
+                const auto path = "/tmp/skiaBackend.flatbuffers";
+                SkFILEWStream stream(path);
 
-        const ImDrawData* drawData = ImGui::GetDrawData();
-        fTotalVectorCmdSerializedSize = 0;
-        for (int i = 0; i < drawData->CmdListsCount; ++i) {
-            ImDrawList* drawList = drawData->CmdLists[i];
-            const uint8_t *buf;
-            size_t sz;
-            drawList->serializeFB(buf,sz);
-            stream.write(buf,sz);
+                const ImDrawData* drawData = ImGui::GetDrawData();
+                fTotalVectorCmdSerializedSize = 0;
+                for (int i = 0; i < drawData->CmdListsCount; ++i) {
+                    ImDrawList* drawList = drawData->CmdLists[i];
+                    const uint8_t *buf;
+                    size_t sz;
+                    drawList->serializeFB(buf,sz);
+                    stream.write(buf,sz);
+                }
+                break;
+            }
         }
     } else if(fSkiaBackendActive) { ZoneScoped
         auto skiaCanvas = surface->getCanvas();

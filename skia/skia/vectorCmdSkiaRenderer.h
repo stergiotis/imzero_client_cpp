@@ -28,8 +28,7 @@
 #include "paragraph.h"
 #include <memory>
 
-#define RENDER_MODE_SKETCH_ENABLED
-#define RENDER_MODE_BACKDROP_FILTER_ENABLED
+#include "vectorCmdSkiRendererConfig.h"
 
 #include <cstdint>
 
