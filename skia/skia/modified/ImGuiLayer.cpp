@@ -321,8 +321,10 @@ void ImGuiLayer::onPaint(SkSurface* surface) { ZoneScoped
                             constexpr auto path1 = "/tmp/skiaBackend.svg";
                             constexpr int flags1 = SkSVGCanvas::kNoPrettyXML_Flag;
                             SkFILEWStream svgStream(path1);
-                            auto skiaCanvas = SkSVGCanvas::Make(bounds, &svgStream, flags1);
-                            drawImGuiVectorCmdsFB(*skiaCanvas);
+                            { // svg canvas may buffer commands, extra scope to ensure flush by RAII
+                                auto skiaCanvas = SkSVGCanvas::Make(bounds, &svgStream, flags1);
+                                drawImGuiVectorCmdsFB(*skiaCanvas);
+                            }
                             fSvgBytesWritten = svgStream.bytesWritten();
                         }
                         break;
@@ -331,8 +333,10 @@ void ImGuiLayer::onPaint(SkSurface* surface) { ZoneScoped
                             constexpr auto path = "/tmp/skiaBackend.nofont.svg";
                             constexpr int flags = SkSVGCanvas::kConvertTextToPaths_Flag | SkSVGCanvas::kNoPrettyXML_Flag;
                             SkFILEWStream svgStream(path);
-                            auto skiaCanvas = SkSVGCanvas::Make(bounds, &svgStream, flags);
-                            drawImGuiVectorCmdsFB(*skiaCanvas);
+                            { // svg canvas may buffer commands, extra scope to ensure flush by RAII
+                                auto skiaCanvas = SkSVGCanvas::Make(bounds, &svgStream, flags);
+                                drawImGuiVectorCmdsFB(*skiaCanvas);
+                            }
                             fSvgBytesWritten = svgStream.bytesWritten();
                         }
                         break;
