@@ -722,7 +722,7 @@ void ImDrawList::PushClipRect(const ImVec2& cr_min, const ImVec2& cr_max, bool i
     _OnChangedClipRect();
 
 SKIA_DRAW_BACKEND_BEGIN
-    auto rect = VectorCmdFB::SingleVec4(cr_min.x,cr_min.y,cr_max.x,cr_max.y);
+    auto rect = VectorCmdFB::SingleVec4(cr.x,cr.y,cr.z,cr.w); // NOTE: use of intersected rectangle is mandatory
     auto arg = VectorCmdFB::CreateCmdPushClipRect(*fbBuilder,&rect,intersect_with_current_clip_rect);
     addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdPushClipRect,arg.Union());
 SKIA_DRAW_BACKEND_END

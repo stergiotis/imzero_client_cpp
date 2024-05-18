@@ -284,6 +284,7 @@ void ImGuiLayer::drawImGuiVectorCmdsFB(SkCanvas &canvas) {
         size_t sz;
         drawList->serializeFB(buf,sz);
         fTotalVectorCmdSerializedSize += sz;
+        fVectorCmdSkiaRenderer.prepareForDrawing();
         fVectorCmdSkiaRenderer.drawSerializedVectorCmdsFB(buf, canvas);
     }
 }
@@ -345,15 +346,11 @@ void ImGuiLayer::onPaint(SkSurface* surface) { ZoneScoped;
         SkCanvas *rasterCanvas = rasterSurface->getCanvas();
         drawImGuiVectorCmdsFB(*rasterCanvas);
         sk_sp<SkImage> img(rasterSurface->makeImageSnapshot());
-        if (img) {
-            SkFILEWStream pngStream(path);
-            SkPixmap pixmap;
-            img->peekPixels(&pixmap);
-            if (SkPngEncoder::Encode(static_cast<SkWStream *>(&pngStream), pixmap, SkPngEncoder::Options{})) {
-                fPngBytesWritten = pngStream.bytesWritten();
-            } else {
-                fPngBytesWritten = 0;
-            }
+        SkFILEWStream pngStream(path);
+        SkPixmap pixmap;
+        img->peekPixels(&pixmap);
+        if (SkPngEncoder::Encode(static_cast<SkWStream *>(&pngStream), pixmap, SkPngEncoder::Options{})) {
+            fPngBytesWritten = pngStream.bytesWritten();
         } else {
             fPngBytesWritten = 0;
         }

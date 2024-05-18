@@ -12,6 +12,7 @@
 #include "include/core/SkSurface.h"
 #include "include/core/SkSwizzle.h"
 #include "include/core/SkVertices.h"
+#include "src/core/SkClipStack.h"
 #include "include/private/base/SkTDArray.h"
 #include "src/base/SkTime.h"
 #include "tools/skui/InputState.h"
@@ -45,6 +46,8 @@ class VectorCmdSkiaRenderer {
         VectorCmdSkiaRenderer();
         ~VectorCmdSkiaRenderer();
 
+        void prepareForDrawing();
+
         void drawSerializedVectorCmdsFB(const uint8_t *buf, SkCanvas &canvas);
         void drawVectorCmdsFBDrawList(const VectorCmdFB::DrawList *drawListFb, SkCanvas &canvas, bool inner);
         void drawVectorCmdFB(const VectorCmdFB::SingleVectorCmdDto *cmdUnion, SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags);
@@ -75,13 +78,20 @@ class VectorCmdSkiaRenderer {
         void drawCmdVertexDraw(const VectorCmdFB::CmdVertexDraw &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags);
         void registerFont(const VectorCmdFB::CmdRegisterFont &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags);
 
-        RenderModeE getRenderMode();
+        RenderModeE getRenderMode() const;
         void changeRenderMode(RenderModeE r);
         void setVertexDrawPaint(SkPaint *vertexPaintP);
         void setParagraphHandler(std::shared_ptr<Paragraph> paragraph);
 
     private:
-        SkPaint *vertexPaint;
+        // stack of pre-intersected clipping rectangles
+#ifdef SKIA_DRAW_BACKEND_DEBUG_CLIPPING
+        SkTDArray<std::pair<SkRect,bool>> fClipStack;
+#else
+        SkTDArray<SkRect> fClipStack;
+#endif
+
+        SkPaint *fVertexPaint;
         SkTDArray<SkPoint> vtxXYs;
         SkTDArray<SkPoint> vtxTexUVs;
         SkTDArray<SkColor> vtxColors;
@@ -91,10 +101,10 @@ class VectorCmdSkiaRenderer {
         std::shared_ptr<Paragraph> fParagraph;
         SkFont fFont;
 
-        RenderModeE renderMode;
+        RenderModeE fRenderMode;
 
-        void prepareFillPaint(SkPaint &paint,VectorCmdFB::DrawListFlags dlFlags);
-        void prepareOutlinePaint(SkPaint &paint,VectorCmdFB::DrawListFlags dlFlags);
+        void prepareFillPaint(SkPaint &paint,VectorCmdFB::DrawListFlags dlFlags) const;
+        void prepareOutlinePaint(SkPaint &paint,VectorCmdFB::DrawListFlags dlFlags) const;
 
 #ifdef RENDER_MODE_BACKDROP_FILTER_ENABLED
         sk_sp<SkImageFilter> backdropFilter;

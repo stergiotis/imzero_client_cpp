@@ -392,34 +392,40 @@ enum DrawListFlags : uint8_t {
   DrawListFlags_AntiAliasedLines = 1,
   DrawListFlags_AntiAliasedFill = 2,
   DrawListFlags_AntiAliasedText = 4,
+  DrawListFlags_AntiAliasedClipping = 8,
   DrawListFlags_MIN = DrawListFlags_None,
-  DrawListFlags_MAX = DrawListFlags_AntiAliasedText
+  DrawListFlags_MAX = DrawListFlags_AntiAliasedClipping
 };
 
-inline const DrawListFlags (&EnumValuesDrawListFlags())[4] {
+inline const DrawListFlags (&EnumValuesDrawListFlags())[5] {
   static const DrawListFlags values[] = {
     DrawListFlags_None,
     DrawListFlags_AntiAliasedLines,
     DrawListFlags_AntiAliasedFill,
-    DrawListFlags_AntiAliasedText
+    DrawListFlags_AntiAliasedText,
+    DrawListFlags_AntiAliasedClipping
   };
   return values;
 }
 
 inline const char * const *EnumNamesDrawListFlags() {
-  static const char * const names[6] = {
+  static const char * const names[10] = {
     "None",
     "AntiAliasedLines",
     "AntiAliasedFill",
     "",
     "AntiAliasedText",
+    "",
+    "",
+    "",
+    "AntiAliasedClipping",
     nullptr
   };
   return names;
 }
 
 inline const char *EnumNameDrawListFlags(DrawListFlags e) {
-  if (::flatbuffers::IsOutRange(e, DrawListFlags_None, DrawListFlags_AntiAliasedText)) return "";
+  if (::flatbuffers::IsOutRange(e, DrawListFlags_None, DrawListFlags_AntiAliasedClipping)) return "";
   const size_t index = static_cast<size_t>(e);
   return EnumNamesDrawListFlags()[index];
 }
@@ -2696,18 +2702,18 @@ struct CmdPushClipRect FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
   typedef CmdPushClipRectBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
     VT_RECT = 4,
-    VT_INTERSECT_WITH_CURRENT_CLIP_RECT = 6
+    VT_INTERSECTED_WITH_CURRENT_CLIP_RECT = 6
   };
   const VectorCmdFB::SingleVec4 *rect() const {
     return GetStruct<const VectorCmdFB::SingleVec4 *>(VT_RECT);
   }
-  bool intersect_with_current_clip_rect() const {
-    return GetField<uint8_t>(VT_INTERSECT_WITH_CURRENT_CLIP_RECT, 0) != 0;
+  bool intersected_with_current_clip_rect() const {
+    return GetField<uint8_t>(VT_INTERSECTED_WITH_CURRENT_CLIP_RECT, 0) != 0;
   }
   bool Verify(::flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<VectorCmdFB::SingleVec4>(verifier, VT_RECT, 4) &&
-           VerifyField<uint8_t>(verifier, VT_INTERSECT_WITH_CURRENT_CLIP_RECT, 1) &&
+           VerifyField<uint8_t>(verifier, VT_INTERSECTED_WITH_CURRENT_CLIP_RECT, 1) &&
            verifier.EndTable();
   }
 };
@@ -2719,8 +2725,8 @@ struct CmdPushClipRectBuilder {
   void add_rect(const VectorCmdFB::SingleVec4 *rect) {
     fbb_.AddStruct(CmdPushClipRect::VT_RECT, rect);
   }
-  void add_intersect_with_current_clip_rect(bool intersect_with_current_clip_rect) {
-    fbb_.AddElement<uint8_t>(CmdPushClipRect::VT_INTERSECT_WITH_CURRENT_CLIP_RECT, static_cast<uint8_t>(intersect_with_current_clip_rect), 0);
+  void add_intersected_with_current_clip_rect(bool intersected_with_current_clip_rect) {
+    fbb_.AddElement<uint8_t>(CmdPushClipRect::VT_INTERSECTED_WITH_CURRENT_CLIP_RECT, static_cast<uint8_t>(intersected_with_current_clip_rect), 0);
   }
   explicit CmdPushClipRectBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
@@ -2736,10 +2742,10 @@ struct CmdPushClipRectBuilder {
 inline ::flatbuffers::Offset<CmdPushClipRect> CreateCmdPushClipRect(
     ::flatbuffers::FlatBufferBuilder &_fbb,
     const VectorCmdFB::SingleVec4 *rect = nullptr,
-    bool intersect_with_current_clip_rect = false) {
+    bool intersected_with_current_clip_rect = false) {
   CmdPushClipRectBuilder builder_(_fbb);
   builder_.add_rect(rect);
-  builder_.add_intersect_with_current_clip_rect(intersect_with_current_clip_rect);
+  builder_.add_intersected_with_current_clip_rect(intersected_with_current_clip_rect);
   return builder_.Finish();
 }
 

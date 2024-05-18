@@ -82,11 +82,20 @@ void ImZeroSkiaSetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &v
         if(ImGui::IsItemHovered()) {
             ImGui::SetTooltip("%s","Open SKP files with `viewer --skps PATH_TO_SKP --slide SKP_FILE");
         }
+        if(skpBytes > 0) {
+            ImGui::Text("skp file size: %d Bytes", static_cast<int>(skpBytes));
+        }
         if(ImGui::Button("Save Snapshot to /tmp/skiaBackend.svg")) {
             saveFormat = SaveFormatE_SVG;
         }
+        if(svgBytes > 0) {
+            ImGui::Text("svg file size: %d Bytes", static_cast<int>(svgBytes));
+        }
         if(ImGui::Button("Save Snapshot to /tmp/skiaBackend.png")) {
             saveFormat = SaveFormatE_PNG;
+        }
+        if(pngBytes > 0) {
+            ImGui::Text("png file size: %d Bytes", static_cast<int>(pngBytes));
         }
         if(ImGui::Button("Save Snapshot to /tmp/skiaBackend.flatbuffers")) {
             saveFormat = SaveFormatE_VECTORCMD;

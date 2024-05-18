@@ -193,7 +193,7 @@ table CmdImageRounded {
 }
 table CmdPushClipRect {
     rect: SingleVec4;
-    intersect_with_current_clip_rect : bool;
+    intersected_with_current_clip_rect : bool;
 }
 table CmdPopClipRect {
 }
@@ -277,7 +277,8 @@ enum DrawListFlags:uint8 {
     None = 0,
     AntiAliasedLines = 1,
     AntiAliasedFill = 2,
-    AntiAliasedText = 4
+    AntiAliasedText = 4,
+    AntiAliasedClipping = 8
 }
 table VertexData {
     pos_xy: [float];

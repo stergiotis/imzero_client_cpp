@@ -1,15 +1,7 @@
 #include "vectorCmdSkiaRenderer.h"
 
-#include "include/core/SkMatrix.h"
-#include "include/core/SkPaint.h"
 #include "include/core/SkPoint.h"
 #include "include/core/SkRRect.h"
-#include "include/core/SkScalar.h"
-#include "include/core/SkTypes.h"
-#include "include/core/SkSwizzle.h"
-#include "include/private/base/SkTArray.h"
-#include "include/private/base/SkTPin.h"
-#include "include/private/base/SkTemplates.h"
 #include "tools/sk_app/Window.h"
 
 #include "include/core/SkPathEffect.h"
@@ -17,13 +9,8 @@
 #include "include/effects/SkGradientShader.h"
 #include "include/effects/SkImageFilters.h"
 
-#include "include/core/SkFontMgr.h"
-#include "include/ports/SkFontMgr_fontconfig.h"
-#include "include/ports/SkFontMgr_empty.h"
 #include "include/ports/SkFontMgr_data.h"
 #include "include/core/SkSpan.h"
-#include "include/core/SkFontMetrics.h"
-#include "include/core/SkFont.h"
 
 #include "imgui.h"
 #ifdef RENDER_MODE_SKETCH_ENABLED
@@ -67,29 +54,29 @@ static void loadCmdRectRoundedCorners_(SkRRect &out,const T &cmd) {
     out.setRectRadii(rect,corners);
 }
 
-void VectorCmdSkiaRenderer::prepareOutlinePaint(SkPaint &paint, VectorCmdFB::DrawListFlags dlFlags) {
+void VectorCmdSkiaRenderer::prepareOutlinePaint(SkPaint &paint, VectorCmdFB::DrawListFlags dlFlags) const {
     paint.setAntiAlias(dlFlags & VectorCmdFB::DrawListFlags_AntiAliasedLines);
     paint.setStyle(SkPaint::kStroke_Style);
 #ifdef RENDER_MODE_SKETCH_ENABLED
-    if(renderMode & RenderModeE_Sketch) {
+    if(fRenderMode & RenderModeE_Sketch) {
         paint.setPathEffect(SkDiscretePathEffect::Make(10.0f, 1.0f));
     }
 #endif
 }
-void VectorCmdSkiaRenderer::prepareFillPaint(SkPaint &paint, VectorCmdFB::DrawListFlags dlFlags) {
+void VectorCmdSkiaRenderer::prepareFillPaint(SkPaint &paint, VectorCmdFB::DrawListFlags dlFlags) const {
     paint.setAntiAlias(dlFlags & VectorCmdFB::DrawListFlags_AntiAliasedFill);
     paint.setStyle(SkPaint::kFill_Style);
 #ifdef RENDER_MODE_SKETCH_ENABLED
-    if(renderMode & RenderModeE_Sketch) {
+    if(fRenderMode & RenderModeE_Sketch) {
         paint.setPathEffect(SkDiscretePathEffect::Make(10.0f, 1.0f));
     }
 #endif
 }
 void VectorCmdSkiaRenderer::changeRenderMode(RenderModeE r) {
-    renderMode = r;
+    fRenderMode = r;
 }
 void VectorCmdSkiaRenderer::setVertexDrawPaint(SkPaint *vertexPaintP) {
-    vertexPaint = vertexPaintP;
+    fVertexPaint = vertexPaintP;
 }
 void VectorCmdSkiaRenderer::setParagraphHandler(std::shared_ptr<Paragraph> paragraph) {
     fParagraph = paragraph;
@@ -101,8 +88,8 @@ void VectorCmdSkiaRenderer::setParagraphHandler(std::shared_ptr<Paragraph> parag
     fFont.setEdging(SkFont::Edging::kSubpixelAntiAlias);
     fFont.setSubpixel(true);
 }
-RenderModeE VectorCmdSkiaRenderer::getRenderMode() {
-    return renderMode;
+RenderModeE VectorCmdSkiaRenderer::getRenderMode() const {
+    return fRenderMode;
 }
 
 static SkColor convertColor(uint32_t col) {
@@ -116,7 +103,7 @@ static SkColor convertColor(uint32_t col) {
         (col >> IM_COL32_B_SHIFT) & 0xff);
 #endif
 }
-VectorCmdSkiaRenderer::VectorCmdSkiaRenderer() {
+VectorCmdSkiaRenderer::VectorCmdSkiaRenderer() : fVertexPaint(nullptr),fRenderMode(RenderModeE_Normal) {
 #ifdef RENDER_MODE_BACKDROP_FILTER_ENABLED
     backdropFilter = SkImageFilters::Blur(8, 8, SkTileMode::kClamp, nullptr);
 #if 0
@@ -137,8 +124,9 @@ VectorCmdSkiaRenderer::VectorCmdSkiaRenderer() {
 #endif
     //sk_sp<SkImageFilter> filter = SkImageFilters::DropShadow(5.0f, 5.0f, 3.0f, 3.0f, SK_ColorBLACK, nullptr, rect);
 
-    renderMode = RenderModeE_BackdropBlur;
+    fRenderMode = RenderModeE_BackdropBlur;
     fParagraph = nullptr;
+    fVertexPaint = nullptr;
 #endif
 }
 VectorCmdSkiaRenderer::~VectorCmdSkiaRenderer() {
@@ -173,7 +161,7 @@ void VectorCmdSkiaRenderer::setupWindowRectPaint(SkPaint &paint, VectorCmdFB::Dr
     constexpr uint8_t windowBgColorA = 172;
     prepareFillPaint(paint,dlFlags);
     auto color = convertColor(col);
-    if((renderMode & RenderModeE_SVG) == 0) {
+    if((fRenderMode & RenderModeE_SVG) == 0) {
         color =  SkColorSetA(color, windowBgColorA);
     }
     paint.setColor(color);
@@ -226,13 +214,13 @@ void VectorCmdSkiaRenderer::drawVectorCmdsFBDrawList(const VectorCmdFB::DrawList
         SkAutoCanvasRestore acr(&canvas, true);
         int s = 0;
         if(!inner) {
-            ZoneText(drawListFb->name()->c_str(),drawListFb->name()->size());
+            ZoneText(drawListFb->name()->c_str(),drawListFb->name()->size())
         }
         
         loadVertices(drawListFb->vertices());
 
 #ifdef RENDER_MODE_BACKDROP_FILTER_ENABLED
-        if(!inner && (renderMode & RenderModeE_BackdropBlur) != 0) {
+        if(!inner && (fRenderMode & RenderModeE_BackdropBlur) != 0) {
             int n1 = std::min(n,5);
             for(int i=0;i<n1 && s == 0;i++) {
                 auto const cmdUnion = cmds->Get(i);
@@ -280,6 +268,7 @@ void VectorCmdSkiaRenderer::drawVectorCmdsFBDrawList(const VectorCmdFB::DrawList
     }
 }
 void VectorCmdSkiaRenderer::drawVectorCmdFB(const VectorCmdFB::SingleVectorCmdDto *cmdUnion, SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
+    auto const before = canvas.getSaveCount();
     auto t = cmdUnion->arg_type();
     switch(t) {
         case VectorCmdFB::VectorCmdArg_CmdPolyline:
@@ -367,6 +356,11 @@ void VectorCmdSkiaRenderer::drawVectorCmdFB(const VectorCmdFB::SingleVectorCmdDt
             // skipping unknown/invalid command
             ;
     }
+    if(before != canvas.getSaveCount()) {
+        fprintf(stderr,"%s changed the save count: before=%d,after=%d\n",
+                VectorCmdFB::EnumNamesVectorCmdArg()[t],
+                before,canvas.getSaveCount());
+    }
 }
 template <typename T>
 static inline void drawCmdPolyline_(const T &cmd,SkCanvas &canvas,SkPaint &paint) { ZoneScoped;
@@ -437,7 +431,7 @@ void VectorCmdSkiaRenderer::drawCmdLineFB(const VectorCmdFB::CmdLine &cmd,SkCanv
 
 void VectorCmdSkiaRenderer::drawRectRounded(const SkRect &rect, float r,SkCanvas &canvas,SkPaint &paint) { ZoneScoped;
 #ifdef RENDER_MODE_SKETCH_ENABLED
-    if(renderMode & (RenderModeE_Sketch | RenderModeE_SVG)) {
+    if(fRenderMode & (RenderModeE_Sketch | RenderModeE_SVG)) {
         SkPath pa;
         if(r > 0.0f) {
             pa.addRoundRect(rect,r,r);
@@ -456,7 +450,7 @@ void VectorCmdSkiaRenderer::drawRectRounded(const SkRect &rect, float r,SkCanvas
 }
 void VectorCmdSkiaRenderer::drawRRect(const SkRRect &rect, SkCanvas &canvas,SkPaint &paint) { ZoneScoped;
 #ifdef RENDER_MODE_SKETCH_ENABLED
-    if(renderMode & (RenderModeE_Sketch | RenderModeE_SVG)) {
+    if(fRenderMode & (RenderModeE_Sketch | RenderModeE_SVG)) {
         SkPath pa;
         pa.addRRect(rect);
         canvas.drawPath(pa,paint);
@@ -566,7 +560,7 @@ void VectorCmdSkiaRenderer::registerFont(const VectorCmdFB::CmdRegisterFont &cmd
     }
 }
 void VectorCmdSkiaRenderer::drawCmdVertexDraw(const VectorCmdFB::CmdVertexDraw &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
-    if(vertexPaint == nullptr) {
+    if(fVertexPaint == nullptr) {
         return;
     }    
 
@@ -584,7 +578,7 @@ void VectorCmdSkiaRenderer::drawCmdVertexDraw(const VectorCmdFB::CmdVertexDraw &
                                             vtxColors.begin()+vtxOffset,
                                             elementCount,
                                             vtxIndices.begin() + indexOffset);
-    canvas.drawVertices(vertices, SkBlendMode::kModulate, *vertexPaint);
+    canvas.drawVertices(vertices, SkBlendMode::kModulate, *fVertexPaint);
 }
 template <typename T>
 static void inline drawCmdQuad_(const T &cmd,SkCanvas &canvas, SkPaint &paint) { ZoneScoped;
@@ -656,11 +650,11 @@ void VectorCmdSkiaRenderer::drawCmdRenderTextFB(const VectorCmdFB::CmdRenderText
         fParagraph->layout(SkScalar(ww));
         fParagraph->paint(canvas, SkScalar(cmd.pos()->x()), SkScalar(cmd.pos()->y()));
     } else { ZoneScoped;
-        float dy = 0.0f;
+        float dy;
         { ZoneScoped;
-            SkFontMetrics metrics;
+            SkFontMetrics metrics{};
             font.getMetrics(&metrics);
-            dy = fabs(SkScalarToFloat(metrics.fAscent)) + size*ImGui::skiaFontDyFudge;
+            dy = fabsf(SkScalarToFloat(metrics.fAscent)) + size*ImGui::skiaFontDyFudge;
         }
         canvas.drawSimpleText(text->data(),
                                text->size(),
@@ -690,7 +684,7 @@ void VectorCmdSkiaRenderer::drawCmdCircleFB(const VectorCmdFB::CmdCircle &cmd, S
     prepareOutlinePaint(paint,dlFlags);
     paint.setStrokeWidth(SkScalar(cmd.thickness()));
 #ifdef RENDER_MODE_SKETCH_ENABLED
-    if(renderMode & (RenderModeE_Sketch | RenderModeE_SVG)) {
+    if(fRenderMode & (RenderModeE_Sketch | RenderModeE_SVG)) {
         drawCmdCircleAsPath_(cmd,canvas,paint);
         return;
     }
@@ -701,27 +695,60 @@ void VectorCmdSkiaRenderer::drawCmdCircleFilledFB(const VectorCmdFB::CmdCircleFi
     SkPaint paint;
     prepareFillPaint(paint,dlFlags);
 #ifdef RENDER_MODE_SKETCH_ENABLED
-    if(renderMode & (RenderModeE_Sketch | RenderModeE_SVG)) {
+    if(fRenderMode & (RenderModeE_Sketch | RenderModeE_SVG)) {
         drawCmdCircleAsPath_(cmd,canvas,paint);
         return;
     }
 #endif
     drawCmdCircle_(cmd,canvas,paint);
 }
+#ifdef SKIA_DRAW_BACKEND_DEBUG_CLIPPING
+static void applyClipRect(const SkRect &cr,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags,bool intersect) {
+    SkPaint paint;
+    paint.setStyle(SkPaint::kStroke_Style);
+    if(intersect) {
+        paint.setColor(SK_ColorGREEN);
+    } else {
+        paint.setColor(SK_ColorRED);
+    }
+    canvas.drawRect(cr,paint);
+#else
+static void applyClipRect(const SkRect &cr,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) {
+#endif
+    auto const aa = (dlFlags & VectorCmdFB::DrawListFlags_AntiAliasedClipping) != 0;
+    canvas.clipRect(cr,aa);
+}
 void VectorCmdSkiaRenderer::handleCmdPushClipRect(const VectorCmdFB::CmdPushClipRect &cmd, SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
     auto crV4 = cmd.rect();
     auto cr = SkRect::MakeLTRB(crV4->x(),crV4->y(),crV4->z(),crV4->w());
-    auto const intersect = cmd.intersect_with_current_clip_rect();
 
-    if(!intersect) {
-        auto n = canvas.getSaveCount();
-        canvas.restoreToCount(n);
-    }
+#ifdef SKIA_DRAW_BACKEND_DEBUG_CLIPPING
+    fClipStack.push_back(std::make_pair(cr,cmd.intersect_with_current_clip_rect()));
+#else
+    fClipStack.push_back(cr);
+#endif
+    canvas.restore();
     canvas.save();
-    canvas.clipRect(cr,false);
+
+#ifdef SKIA_DRAW_BACKEND_DEBUG_CLIPPING
+    auto const intersect = cmd.intersected_with_current_clip_rect();
+    applyClipRect(cr,canvas,dlFlags,intersect);
+#else
+    applyClipRect(cr,canvas,dlFlags);
+#endif
 }
 void VectorCmdSkiaRenderer::handleCmdPopClipRect(const VectorCmdFB::CmdPopClipRect &cmd, SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
     canvas.restore();
+    canvas.save();
+    fClipStack.pop_back();
+    if(!fClipStack.empty()) {
+        const auto p = fClipStack[fClipStack.size()-1];
+#ifdef SKIA_DRAW_BACKEND_DEBUG_CLIPPING
+        applyClipRect(p.first,canvas,dlFlags,p.second);
+#else
+        applyClipRect(p,canvas,dlFlags);
+#endif
+    }
 }
 template <typename T>
 void drawCmdEllipse_(const T &cmd,SkCanvas &canvas,SkPaint &paint) {
@@ -769,4 +796,7 @@ void VectorCmdSkiaRenderer::drawCmdBezierQuadraticFB(const VectorCmdFB::CmdBezie
     pa.conicTo(SkPoint::Make(SkScalar(cmd.p2()->x()),SkScalar(cmd.p2()->y())),
                SkPoint::Make(SkScalar(cmd.p3()->x()),SkScalar(cmd.p3()->y())),SkScalar(1.0f));
     canvas.drawPath(pa,paint);
+}
+void VectorCmdSkiaRenderer::prepareForDrawing() {
+    fClipStack.resize(0);
 }
