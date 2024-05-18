@@ -8,8 +8,9 @@ enum SaveFormatE_ {
     SaveFormatE_None = 0,
     SaveFormatE_SKP = 1,
     SaveFormatE_SVG = 2,
-    SaveFormatE_PNG = 3,
-    SaveFormatE_VECTORCMD = 4,
+    SaveFormatE_SVGNoFont = 3,
+    SaveFormatE_PNG = 4,
+    SaveFormatE_VECTORCMD = 5,
 };
 
 class ImZeroSkiaSetupUI {

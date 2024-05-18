@@ -292,7 +292,7 @@ void ImGuiLayer::onPaint(SkSurface* surface) { ZoneScoped
     if(saveFormat != SaveFormatE_None) {
         switch(saveFormat) {
             case SaveFormatE_SKP: { ZoneScoped
-                const auto path = "/tmp/skiaBackend.skp";
+                constexpr auto path = "/tmp/skiaBackend.skp";
 
                 SkPictureRecorder skiaRecorder;
                 auto skiaCanvas = skiaRecorder.beginRecording(SkIntToScalar(fWindow->width()),
@@ -310,19 +310,41 @@ void ImGuiLayer::onPaint(SkSurface* surface) { ZoneScoped
                 fprintf(stderr, "skp=%d\n", (int) fSkpBytesWritten);
                 break;
             }
-            case SaveFormatE_SVG: { ZoneScoped
-                const auto path = "/tmp/skiaBackend.svg";
-                SkFILEWStream svgStream(path);
+            case SaveFormatE_SVG: // fallthrough
+            case SaveFormatE_SVGNoFont: { ZoneScoped
                 SkRect bounds = SkRect::MakeIWH(fWindow->width(), fWindow->height());
-                std::unique_ptr<SkCanvas> skiaCanvas = SkSVGCanvas::Make(bounds, &svgStream);
                 fVectorCmdSkiaRenderer.changeRenderMode(renderMode | RenderModeE_SVG);
-                drawImGuiVectorCmdsFB(*skiaCanvas);
+
+                switch(saveFormat) {
+                    case SaveFormatE_SVG:
+                        {
+                            constexpr auto path1 = "/tmp/skiaBackend.svg";
+                            constexpr int flags1 = SkSVGCanvas::kNoPrettyXML_Flag;
+                            SkFILEWStream svgStream(path1);
+                            auto skiaCanvas = SkSVGCanvas::Make(bounds, &svgStream, flags1);
+                            drawImGuiVectorCmdsFB(*skiaCanvas);
+                            fSvgBytesWritten = svgStream.bytesWritten();
+                        }
+                        break;
+                    case SaveFormatE_SVGNoFont:
+                        {
+                            constexpr auto path = "/tmp/skiaBackend.nofont.svg";
+                            constexpr int flags = SkSVGCanvas::kConvertTextToPaths_Flag | SkSVGCanvas::kNoPrettyXML_Flag;
+                            SkFILEWStream svgStream(path);
+                            auto skiaCanvas = SkSVGCanvas::Make(bounds, &svgStream, flags);
+                            drawImGuiVectorCmdsFB(*skiaCanvas);
+                            fSvgBytesWritten = svgStream.bytesWritten();
+                        }
+                        break;
+                    default:
+                        ;
+                }
+
                 fVectorCmdSkiaRenderer.changeRenderMode(renderMode);
-                fSvgBytesWritten = svgStream.bytesWritten();
                 break;
             }
             case SaveFormatE_PNG: { ZoneScoped
-                const auto path = "/tmp/skiaBackend.png";
+                constexpr auto path = "/tmp/skiaBackend.png";
                 const auto s = SkISize::Make(fWindow->width(), fWindow->height());
                 const auto c = SkColorInfo(kRGBA_8888_SkColorType, kPremul_SkAlphaType, SkColorSpace::MakeSRGB());
                 sk_sp<SkSurface> rasterSurface = SkSurfaces::Raster(SkImageInfo::Make(s, c));
@@ -340,7 +362,7 @@ void ImGuiLayer::onPaint(SkSurface* surface) { ZoneScoped
                 break;
             }
             case SaveFormatE_VECTORCMD: { ZoneScoped
-                const auto path = "/tmp/skiaBackend.flatbuffers";
+                constexpr auto path = "/tmp/skiaBackend.flatbuffers";
                 SkFILEWStream stream(path);
 
                 const ImDrawData* drawData = ImGui::GetDrawData();

@@ -92,6 +92,9 @@ void ImZeroSkiaSetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &v
         if(ImGui::Button("Save Snapshot to /tmp/skiaBackend.svg")) {
             saveFormat = SaveFormatE_SVG;
         }
+        if(ImGui::Button("Save Snapshot to /tmp/skiaBackend.nofont.svg")) {
+            saveFormat = SaveFormatE_SVGNoFont;
+        }
         if(svgBytes > 0) {
             ImGui::Text("svg file size: %d Bytes", static_cast<int>(svgBytes));
         }
