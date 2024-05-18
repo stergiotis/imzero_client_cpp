@@ -1,5 +1,4 @@
 #include "paragraph.h"
-#include <cassert>
 
 Paragraph::Paragraph(sk_sp<SkFontMgr> fontMgr,sk_sp<SkTypeface> defaultTypeface) {
     fTlFontCollection = sk_make_sp<skia::textlayout::FontCollection>();

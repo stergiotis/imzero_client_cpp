@@ -88,7 +88,7 @@ Index of this file:
 
 #ifdef IMGUI_STB_NAMESPACE
 namespace IMGUI_STB_NAMESPACE
-{ ZoneScoped;
+{ ZoneScoped
 #endif
 
 #ifdef _MSC_VER
@@ -171,7 +171,7 @@ using namespace IMGUI_STB_NAMESPACE;
 
 #ifdef SKIA_DRAW_BACKEND
 #include "tracy/Tracy.hpp"
-#define SKIA_DRAW_BACKEND_BEGIN if(ImGui::skiaActive) { ZoneScoped;
+#define SKIA_DRAW_BACKEND_BEGIN if(ImGui::skiaActive) { ZoneScoped
 #define SKIA_DRAW_BACKEND_END }
 //-----------------------------------------------------------------------------
 // [SECTION] Skia
@@ -233,7 +233,7 @@ static VectorCmdFB::DrawListFlags getVectorCmdFBFlags(const ImDrawList &drawList
 }
 static flatbuffers::Offset<VectorCmdFB::DrawList> createVectorCmdFBDrawList(ImDrawList &drawList,bool inner,
     std::vector<flatbuffers::Offset<VectorCmdFB::SingleVectorCmdDto>> &fbCmds,
-    flatbuffers::FlatBufferBuilder &fbBuilder) { ZoneScoped;
+    flatbuffers::FlatBufferBuilder &fbBuilder) { ZoneScoped
     auto cmds = fbBuilder.CreateVector(fbCmds);
     flatbuffers::Offset<flatbuffers::String> name;
     if(inner) {
@@ -263,7 +263,7 @@ static flatbuffers::Offset<VectorCmdFB::DrawList> createVectorCmdFBDrawList(ImDr
     }
     return VectorCmdFB::CreateDrawList(fbBuilder,f,name,vertices,cmds);
 }
-void ImDrawList::serializeFB(const uint8_t *&out,size_t &size) { ZoneScoped;
+void ImDrawList::serializeFB(const uint8_t *&out,size_t &size) { ZoneScoped
     auto dlFb = createVectorCmdFBDrawList(*this,false,*_FbCmds,*fbBuilder);
     fbBuilder->Finish(dlFb,nullptr);
     size = fbBuilder->GetSize();
@@ -275,7 +275,7 @@ void ImDrawList::serializeFB(const uint8_t *&out,size_t &size) { ZoneScoped;
 // [SECTION] Style functions
 //-----------------------------------------------------------------------------
 void ImGui::StyleColorsDark(ImGuiStyle* dst)
-{ ZoneScoped;
+{ ZoneScoped
     ImGuiStyle* style = dst ? dst : &ImGui::GetStyle();
     ImVec4* colors = style->Colors;
 
@@ -337,7 +337,7 @@ void ImGui::StyleColorsDark(ImGuiStyle* dst)
 }
 
 void ImGui::StyleColorsClassic(ImGuiStyle* dst)
-{ ZoneScoped;
+{ ZoneScoped
     ImGuiStyle* style = dst ? dst : &ImGui::GetStyle();
     ImVec4* colors = style->Colors;
 
@@ -400,7 +400,7 @@ void ImGui::StyleColorsClassic(ImGuiStyle* dst)
 
 // Those light colors are better suited with a thicker font than the default one + FrameBorder
 void ImGui::StyleColorsLight(ImGuiStyle* dst)
-{ ZoneScoped;
+{ ZoneScoped
     ImGuiStyle* style = dst ? dst : &ImGui::GetStyle();
     ImVec4* colors = style->Colors;
 
@@ -466,7 +466,7 @@ void ImGui::StyleColorsLight(ImGuiStyle* dst)
 //-----------------------------------------------------------------------------
 
 ImDrawListSharedData::ImDrawListSharedData()
-{ ZoneScoped;
+{ ZoneScoped
     memset(this, 0, sizeof(*this));
     for (int i = 0; i < IM_ARRAYSIZE(ArcFastVtx); i++)
     {
@@ -477,7 +477,7 @@ ImDrawListSharedData::ImDrawListSharedData()
 }
 
 void ImDrawListSharedData::SetCircleTessellationMaxError(float max_error)
-{ ZoneScoped;
+{ ZoneScoped
     if (CircleSegmentMaxError == max_error)
         return;
 
@@ -493,7 +493,7 @@ void ImDrawListSharedData::SetCircleTessellationMaxError(float max_error)
 
 // Initialize before use in a new frame. We always have a command ready in the buffer.
 void ImDrawList::_ResetForNewFrame()
-{ ZoneScoped;
+{ ZoneScoped
     // Verify that the ImDrawCmd fields we want to memcmp() are contiguous in memory.
     IM_STATIC_ASSERT(offsetof(ImDrawCmd, ClipRect) == 0);
     IM_STATIC_ASSERT(offsetof(ImDrawCmd, TextureId) == sizeof(ImVec4));
@@ -532,7 +532,7 @@ SKIA_DRAW_BACKEND_END
 }
 
 void ImDrawList::_ClearFreeMemory()
-{ ZoneScoped;
+{ ZoneScoped
     CmdBuffer.clear();
     IdxBuffer.clear();
     VtxBuffer.clear();
@@ -559,7 +559,7 @@ SKIA_DRAW_BACKEND_END
 }
 
 ImDrawList* ImDrawList::CloneOutput() const
-{ ZoneScoped;
+{ ZoneScoped
     ImDrawList* dst = IM_NEW(ImDrawList(_Data));
     dst->CmdBuffer = CmdBuffer;
     dst->IdxBuffer = IdxBuffer;
@@ -569,7 +569,7 @@ ImDrawList* ImDrawList::CloneOutput() const
 }
 
 void ImDrawList::AddDrawCmd()
-{ ZoneScoped;
+{ ZoneScoped
     ImDrawCmd draw_cmd;
     draw_cmd.ClipRect = _CmdHeader.ClipRect;    // Same as calling ImDrawCmd_HeaderCopy()
     draw_cmd.TextureId = _CmdHeader.TextureId;
@@ -583,7 +583,7 @@ void ImDrawList::AddDrawCmd()
 // Pop trailing draw command (used before merging or presenting to user)
 // Note that this leaves the ImDrawList in a state unfit for further commands, as most code assume that CmdBuffer.Size > 0 && CmdBuffer.back().UserCallback == NULL
 void ImDrawList::_PopUnusedDrawCmd()
-{ ZoneScoped;
+{ ZoneScoped
     while (CmdBuffer.Size > 0)
     {
         ImDrawCmd* curr_cmd = &CmdBuffer.Data[CmdBuffer.Size - 1];
@@ -594,7 +594,7 @@ void ImDrawList::_PopUnusedDrawCmd()
 }
 
 void ImDrawList::AddCallback(ImDrawCallback callback, void* callback_data)
-{ ZoneScoped;
+{ ZoneScoped
     IM_ASSERT_PARANOID(CmdBuffer.Size > 0);
     ImDrawCmd* curr_cmd = &CmdBuffer.Data[CmdBuffer.Size - 1];
     IM_ASSERT(curr_cmd->UserCallback == NULL);
@@ -617,7 +617,7 @@ void ImDrawList::AddCallback(ImDrawCallback callback, void* callback_data)
 
 // Try to merge two last draw commands
 void ImDrawList::_TryMergeDrawCmds()
-{ ZoneScoped;
+{ ZoneScoped
     IM_ASSERT_PARANOID(CmdBuffer.Size > 0);
     ImDrawCmd* curr_cmd = &CmdBuffer.Data[CmdBuffer.Size - 1];
     ImDrawCmd* prev_cmd = curr_cmd - 1;
@@ -631,7 +631,7 @@ void ImDrawList::_TryMergeDrawCmds()
 // Our scheme may appears a bit unusual, basically we want the most-common calls AddLine AddRect etc. to not have to perform any check so we always have a command ready in the stack.
 // The cost of figuring out if a new command has to be added or if we can merge is paid in those Update** functions only.
 void ImDrawList::_OnChangedClipRect()
-{ ZoneScoped;
+{ ZoneScoped
     // If current command is used with different settings we need to add a new command
     IM_ASSERT_PARANOID(CmdBuffer.Size > 0);
     ImDrawCmd* curr_cmd = &CmdBuffer.Data[CmdBuffer.Size - 1];
@@ -654,7 +654,7 @@ void ImDrawList::_OnChangedClipRect()
 }
 
 void ImDrawList::_OnChangedTextureID()
-{ ZoneScoped;
+{ ZoneScoped
     // If current command is used with different settings we need to add a new command
     IM_ASSERT_PARANOID(CmdBuffer.Size > 0);
     ImDrawCmd* curr_cmd = &CmdBuffer.Data[CmdBuffer.Size - 1];
@@ -677,7 +677,7 @@ void ImDrawList::_OnChangedTextureID()
 }
 
 void ImDrawList::_OnChangedVtxOffset()
-{ ZoneScoped;
+{ ZoneScoped
     // We don't need to compare curr_cmd->VtxOffset != _CmdHeader.VtxOffset because we know it'll be different at the time we call this.
     _VtxCurrentIdx = 0;
     IM_ASSERT_PARANOID(CmdBuffer.Size > 0);
@@ -693,7 +693,7 @@ void ImDrawList::_OnChangedVtxOffset()
 }
 
 int ImDrawList::_CalcCircleAutoSegmentCount(float radius) const
-{ ZoneScoped;
+{ ZoneScoped
     // Automatic segment count
     const int radius_idx = (int)(radius + 0.999999f); // ceil to never reduce accuracy
     if (radius_idx >= 0 && radius_idx < IM_ARRAYSIZE(_Data->CircleSegmentCounts))
@@ -704,7 +704,7 @@ int ImDrawList::_CalcCircleAutoSegmentCount(float radius) const
 
 // Render-level scissoring. This is passed down to your render function but not used for CPU-side coarse clipping. Prefer using higher-level ImGui::PushClipRect() to affect logic (hit-testing and widget culling)
 void ImDrawList::PushClipRect(const ImVec2& cr_min, const ImVec2& cr_max, bool intersect_with_current_clip_rect)
-{ ZoneScoped;
+{ ZoneScoped
     ImVec4 cr(cr_min.x, cr_min.y, cr_max.x, cr_max.y);
     if (intersect_with_current_clip_rect)
     {
@@ -729,12 +729,12 @@ SKIA_DRAW_BACKEND_END
 }
 
 void ImDrawList::PushClipRectFullScreen()
-{ ZoneScoped;
+{ ZoneScoped
     PushClipRect(ImVec2(_Data->ClipRectFullscreen.x, _Data->ClipRectFullscreen.y), ImVec2(_Data->ClipRectFullscreen.z, _Data->ClipRectFullscreen.w));
 }
 
 void ImDrawList::PopClipRect()
-{ ZoneScoped;
+{ ZoneScoped
     _ClipRectStack.pop_back();
     _CmdHeader.ClipRect = (_ClipRectStack.Size == 0) ? _Data->ClipRectFullscreen : _ClipRectStack.Data[_ClipRectStack.Size - 1];
     _OnChangedClipRect();
@@ -748,14 +748,14 @@ SKIA_DRAW_BACKEND_END
 }
 
 void ImDrawList::PushTextureID(ImTextureID texture_id)
-{ ZoneScoped;
+{ ZoneScoped
     _TextureIdStack.push_back(texture_id);
     _CmdHeader.TextureId = texture_id;
     _OnChangedTextureID();
 }
 
 void ImDrawList::PopTextureID()
-{ ZoneScoped;
+{ ZoneScoped
     _TextureIdStack.pop_back();
     _CmdHeader.TextureId = (_TextureIdStack.Size == 0) ? (ImTextureID)NULL : _TextureIdStack.Data[_TextureIdStack.Size - 1];
     _OnChangedTextureID();
@@ -765,7 +765,7 @@ void ImDrawList::PopTextureID()
 // You must finish filling your reserved data before calling PrimReserve() again, as it may reallocate or
 // submit the intermediate results. PrimUnreserve() can be used to release unused allocations.
 void ImDrawList::PrimReserve(int idx_count, int vtx_count)
-{ ZoneScoped;
+{ ZoneScoped
     // Large mesh support (when enabled)
     IM_ASSERT_PARANOID(idx_count >= 0 && vtx_count >= 0);
     if (sizeof(ImDrawIdx) == 2 && (_VtxCurrentIdx + vtx_count >= (1 << 16)) && (Flags & ImDrawListFlags_AllowVtxOffset))
@@ -791,7 +791,7 @@ void ImDrawList::PrimReserve(int idx_count, int vtx_count)
 
 // Release the a number of reserved vertices/indices from the end of the last reservation made with PrimReserve().
 void ImDrawList::PrimUnreserve(int idx_count, int vtx_count)
-{ ZoneScoped;
+{ ZoneScoped
     IM_ASSERT_PARANOID(idx_count >= 0 && vtx_count >= 0);
 
     ImDrawCmd* draw_cmd = &CmdBuffer.Data[CmdBuffer.Size - 1];
@@ -802,7 +802,7 @@ void ImDrawList::PrimUnreserve(int idx_count, int vtx_count)
 
 // Fully unrolled with inline call to keep our debug builds decently fast.
 void ImDrawList::PrimRect(const ImVec2& a, const ImVec2& c, ImU32 col)
-{ ZoneScoped;
+{ ZoneScoped
     ImVec2 b(c.x, a.y), d(a.x, c.y), uv(_Data->TexUvWhitePixel);
     ImDrawIdx idx = (ImDrawIdx)_VtxCurrentIdx;
     _IdxWritePtr[0] = idx; _IdxWritePtr[1] = (ImDrawIdx)(idx+1); _IdxWritePtr[2] = (ImDrawIdx)(idx+2);
@@ -817,7 +817,7 @@ void ImDrawList::PrimRect(const ImVec2& a, const ImVec2& c, ImU32 col)
 }
 
 void ImDrawList::PrimRectUV(const ImVec2& a, const ImVec2& c, const ImVec2& uv_a, const ImVec2& uv_c, ImU32 col)
-{ ZoneScoped;
+{ ZoneScoped
     ImVec2 b(c.x, a.y), d(a.x, c.y), uv_b(uv_c.x, uv_a.y), uv_d(uv_a.x, uv_c.y);
     ImDrawIdx idx = (ImDrawIdx)_VtxCurrentIdx;
     _IdxWritePtr[0] = idx; _IdxWritePtr[1] = (ImDrawIdx)(idx+1); _IdxWritePtr[2] = (ImDrawIdx)(idx+2);
@@ -832,7 +832,7 @@ void ImDrawList::PrimRectUV(const ImVec2& a, const ImVec2& c, const ImVec2& uv_a
 }
 
 void ImDrawList::PrimQuadUV(const ImVec2& a, const ImVec2& b, const ImVec2& c, const ImVec2& d, const ImVec2& uv_a, const ImVec2& uv_b, const ImVec2& uv_c, const ImVec2& uv_d, ImU32 col)
-{ ZoneScoped;
+{ ZoneScoped
     ImDrawIdx idx = (ImDrawIdx)_VtxCurrentIdx;
     _IdxWritePtr[0] = idx; _IdxWritePtr[1] = (ImDrawIdx)(idx+1); _IdxWritePtr[2] = (ImDrawIdx)(idx+2);
     _IdxWritePtr[3] = idx; _IdxWritePtr[4] = (ImDrawIdx)(idx+2); _IdxWritePtr[5] = (ImDrawIdx)(idx+3);
@@ -855,7 +855,7 @@ void ImDrawList::PrimQuadUV(const ImVec2& a, const ImVec2& b, const ImVec2& c, c
 // TODO: Thickness anti-aliased lines cap are missing their AA fringe.
 // We avoid using the ImVec2 math operators here to reduce cost to a minimum for debug/non-inlined builds.
 void ImDrawList::AddPolyline(const ImVec2* points, const int points_count, ImU32 col, ImDrawFlags flags, float thickness)
-{ ZoneScoped;
+{ ZoneScoped
     if (points_count < 2 || (col & IM_COL32_A_MASK) == 0)
         return;
 
@@ -1124,7 +1124,7 @@ SKIA_DRAW_BACKEND_END
 // - We intentionally avoid using ImVec2 and its math operators here to reduce cost to a minimum for debug/non-inlined builds.
 // - Filled shapes must always use clockwise winding order. The anti-aliasing fringe depends on it. Counter-clockwise shapes will have "inward" anti-aliasing.
 void ImDrawList::AddConvexPolyFilled(const ImVec2* points, const int points_count, ImU32 col)
-{ ZoneScoped;
+{ ZoneScoped
     if (points_count < 3 || (col & IM_COL32_A_MASK) == 0)
         return;
 
@@ -1217,7 +1217,7 @@ SKIA_DRAW_BACKEND_END
 }
 
 void ImDrawList::_PathArcToFastEx(const ImVec2& center, float radius, int a_min_sample, int a_max_sample, int a_step)
-{ ZoneScoped;
+{ ZoneScoped
     if (radius < 0.5f)
     {
         _Path.push_back(center);
@@ -1309,7 +1309,7 @@ void ImDrawList::_PathArcToFastEx(const ImVec2& center, float radius, int a_min_
 }
 
 void ImDrawList::_PathArcToN(const ImVec2& center, float radius, float a_min, float a_max, int num_segments)
-{ ZoneScoped;
+{ ZoneScoped
     if (radius < 0.5f)
     {
         _Path.push_back(center);
@@ -1328,7 +1328,7 @@ void ImDrawList::_PathArcToN(const ImVec2& center, float radius, float a_min, fl
 
 // 0: East, 3: South, 6: West, 9: North, 12: East
 void ImDrawList::PathArcToFast(const ImVec2& center, float radius, int a_min_of_12, int a_max_of_12)
-{ ZoneScoped;
+{ ZoneScoped
     if (radius < 0.5f)
     {
         _Path.push_back(center);
@@ -1338,7 +1338,7 @@ void ImDrawList::PathArcToFast(const ImVec2& center, float radius, int a_min_of_
 }
 
 void ImDrawList::PathArcTo(const ImVec2& center, float radius, float a_min, float a_max, int num_segments)
-{ ZoneScoped;
+{ ZoneScoped
     if (radius < 0.5f)
     {
         _Path.push_back(center);
@@ -1388,7 +1388,7 @@ void ImDrawList::PathArcTo(const ImVec2& center, float radius, float a_min, floa
 }
 
 void ImDrawList::PathEllipticalArcTo(const ImVec2& center, float radius_x, float radius_y, float rot, float a_min, float a_max, int num_segments)
-{ ZoneScoped;
+{ ZoneScoped
     if (num_segments <= 0)
         num_segments = _CalcCircleAutoSegmentCount(ImMax(radius_x, radius_y)); // A bit pessimistic, maybe there's a better computation to do here.
 
@@ -1409,7 +1409,7 @@ void ImDrawList::PathEllipticalArcTo(const ImVec2& center, float radius_x, float
 }
 
 ImVec2 ImBezierCubicCalc(const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, const ImVec2& p4, float t)
-{ ZoneScoped;
+{ ZoneScoped
     float u = 1.0f - t;
     float w1 = u * u * u;
     float w2 = 3 * u * u * t;
@@ -1419,7 +1419,7 @@ ImVec2 ImBezierCubicCalc(const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, c
 }
 
 ImVec2 ImBezierQuadraticCalc(const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, float t)
-{ ZoneScoped;
+{ ZoneScoped
     float u = 1.0f - t;
     float w1 = u * u;
     float w2 = 2 * u * t;
@@ -1429,7 +1429,7 @@ ImVec2 ImBezierQuadraticCalc(const ImVec2& p1, const ImVec2& p2, const ImVec2& p
 
 // Closely mimics ImBezierCubicClosestPointCasteljau() in imgui.cpp
 static void PathBezierCubicCurveToCasteljau(ImVector<ImVec2>* path, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, float tess_tol, int level)
-{ ZoneScoped;
+{ ZoneScoped
     float dx = x4 - x1;
     float dy = y4 - y1;
     float d2 = (x2 - x4) * dy - (y2 - y4) * dx;
@@ -1454,7 +1454,7 @@ static void PathBezierCubicCurveToCasteljau(ImVector<ImVec2>* path, float x1, fl
 }
 
 static void PathBezierQuadraticCurveToCasteljau(ImVector<ImVec2>* path, float x1, float y1, float x2, float y2, float x3, float y3, float tess_tol, int level)
-{ ZoneScoped;
+{ ZoneScoped
     float dx = x3 - x1, dy = y3 - y1;
     float det = (x2 - x3) * dy - (y2 - y3) * dx;
     if (det * det * 4.0f < tess_tol * (dx * dx + dy * dy))
@@ -1472,7 +1472,7 @@ static void PathBezierQuadraticCurveToCasteljau(ImVector<ImVec2>* path, float x1
 }
 
 void ImDrawList::PathBezierCubicCurveTo(const ImVec2& p2, const ImVec2& p3, const ImVec2& p4, int num_segments)
-{ ZoneScoped;
+{ ZoneScoped
     ImVec2 p1 = _Path.back();
     if (num_segments == 0)
     {
@@ -1488,7 +1488,7 @@ void ImDrawList::PathBezierCubicCurveTo(const ImVec2& p2, const ImVec2& p3, cons
 }
 
 void ImDrawList::PathBezierQuadraticCurveTo(const ImVec2& p2, const ImVec2& p3, int num_segments)
-{ ZoneScoped;
+{ ZoneScoped
     ImVec2 p1 = _Path.back();
     if (num_segments == 0)
     {
@@ -1504,7 +1504,7 @@ void ImDrawList::PathBezierQuadraticCurveTo(const ImVec2& p2, const ImVec2& p3, 
 }
 
 static inline ImDrawFlags FixRectCornerFlags(ImDrawFlags flags)
-{ ZoneScoped;
+{ ZoneScoped
     /*
     IM_STATIC_ASSERT(ImDrawFlags_RoundCornersTopLeft == (1 << 4));
 #ifndef IMGUI_DISABLE_OBSOLETE_FUNCTIONS
@@ -1528,7 +1528,7 @@ static inline ImDrawFlags FixRectCornerFlags(ImDrawFlags flags)
 }
 
 void ImDrawList::PathRect(const ImVec2& a, const ImVec2& b, float rounding, ImDrawFlags flags)
-{ ZoneScoped;
+{ ZoneScoped
 
     if (rounding >= 0.5f)
     {
@@ -1557,7 +1557,7 @@ void ImDrawList::PathRect(const ImVec2& a, const ImVec2& b, float rounding, ImDr
 }
 
 void ImDrawList::AddLine(const ImVec2& p1, const ImVec2& p2, ImU32 col, float thickness)
-{ ZoneScoped;
+{ ZoneScoped
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 
@@ -1579,7 +1579,7 @@ SKIA_DRAW_BACKEND_END
 // p_min = upper-left, p_max = lower-right
 // Note we don't render 1 pixels sized rectangles properly.
 void ImDrawList::AddRect(const ImVec2& p_min, const ImVec2& p_max, ImU32 col, float rounding, ImDrawFlags flags, float thickness)
-{ ZoneScoped;
+{ ZoneScoped
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 
@@ -1620,7 +1620,7 @@ SKIA_DRAW_BACKEND_END
 }
 
 void ImDrawList::AddRectFilled(const ImVec2& p_min, const ImVec2& p_max, ImU32 col, float rounding, ImDrawFlags flags)
-{ ZoneScoped;
+{ ZoneScoped
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 
@@ -1668,7 +1668,7 @@ SKIA_DRAW_BACKEND_END
 
 // p_min = upper-left, p_max = lower-right
 void ImDrawList::AddRectFilledMultiColor(const ImVec2& p_min, const ImVec2& p_max, ImU32 col_upr_left, ImU32 col_upr_right, ImU32 col_bot_right, ImU32 col_bot_left)
-{ ZoneScoped;
+{ ZoneScoped
     if (((col_upr_left | col_upr_right | col_bot_right | col_bot_left) & IM_COL32_A_MASK) == 0)
         return;
 SKIA_DRAW_BACKEND_BEGIN
@@ -1692,7 +1692,7 @@ SKIA_DRAW_BACKEND_END
 }
 
 void ImDrawList::AddQuad(const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, const ImVec2& p4, ImU32 col, float thickness)
-{ ZoneScoped;
+{ ZoneScoped
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 
@@ -1716,7 +1716,7 @@ SKIA_DRAW_BACKEND_END
 }
 
 void ImDrawList::AddQuadFilled(const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, const ImVec2& p4, ImU32 col)
-{ ZoneScoped;
+{ ZoneScoped
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 
@@ -1740,7 +1740,7 @@ SKIA_DRAW_BACKEND_END
 }
 
 void ImDrawList::AddTriangle(const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, ImU32 col, float thickness)
-{ ZoneScoped;
+{ ZoneScoped
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 
@@ -1762,7 +1762,7 @@ SKIA_DRAW_BACKEND_END
 }
 
 void ImDrawList::AddTriangleFilled(const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, ImU32 col)
-{ ZoneScoped;
+{ ZoneScoped
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 
@@ -1784,7 +1784,7 @@ SKIA_DRAW_BACKEND_END
 }
 
 void ImDrawList::AddCircle(const ImVec2& center, float radius, ImU32 col, int num_segments, float thickness)
-{ ZoneScoped;
+{ ZoneScoped
     if ((col & IM_COL32_A_MASK) == 0 || radius < 0.5f)
         return;
 
@@ -1817,7 +1817,7 @@ SKIA_DRAW_BACKEND_END
 }
 
 void ImDrawList::AddCircleFilled(const ImVec2& center, float radius, ImU32 col, int num_segments)
-{ ZoneScoped;
+{ ZoneScoped
     if ((col & IM_COL32_A_MASK) == 0 || radius < 0.5f)
         return;
 
@@ -1851,7 +1851,7 @@ SKIA_DRAW_BACKEND_END
 
 // Guaranteed to honor 'num_segments'
 void ImDrawList::AddNgon(const ImVec2& center, float radius, ImU32 col, int num_segments, float thickness)
-{ ZoneScoped;
+{ ZoneScoped
     if ((col & IM_COL32_A_MASK) == 0 || num_segments <= 2)
         return;
 
@@ -1873,7 +1873,7 @@ SKIA_DRAW_BACKEND_END
 
 // Guaranteed to honor 'num_segments'
 void ImDrawList::AddNgonFilled(const ImVec2& center, float radius, ImU32 col, int num_segments)
-{ ZoneScoped;
+{ ZoneScoped
     if ((col & IM_COL32_A_MASK) == 0 || num_segments <= 2)
         return;
 
@@ -1894,7 +1894,7 @@ SKIA_DRAW_BACKEND_END
 
 // Ellipse
 void ImDrawList::AddEllipse(const ImVec2& center, float radius_x, float radius_y, ImU32 col, float rot, int num_segments, float thickness)
-{ ZoneScoped;
+{ ZoneScoped
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 
@@ -1917,7 +1917,7 @@ SKIA_DRAW_BACKEND_END
 }
 
 void ImDrawList::AddEllipseFilled(const ImVec2& center, float radius_x, float radius_y, ImU32 col, float rot, int num_segments)
-{ ZoneScoped;
+{ ZoneScoped
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 
@@ -1941,7 +1941,7 @@ SKIA_DRAW_BACKEND_END
 
 // Cubic Bezier takes 4 controls points
 void ImDrawList::AddBezierCubic(const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, const ImVec2& p4, ImU32 col, float thickness, int num_segments)
-{ ZoneScoped;
+{ ZoneScoped
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 SKIA_DRAW_BACKEND_BEGIN
@@ -1963,7 +1963,7 @@ SKIA_DRAW_BACKEND_END
 
 // Quadratic Bezier takes 3 controls points
 void ImDrawList::AddBezierQuadratic(const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, ImU32 col, float thickness, int num_segments)
-{ ZoneScoped;
+{ ZoneScoped
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 SKIA_DRAW_BACKEND_BEGIN
@@ -1983,7 +1983,7 @@ SKIA_DRAW_BACKEND_END
 }
 
 void ImDrawList::AddText(const ImFont* font, float font_size, const ImVec2& pos, ImU32 col, const char* text_begin, const char* text_end, float wrap_width, const ImVec4* cpu_fine_clip_rect)
-{ ZoneScoped;
+{ ZoneScoped
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 
@@ -2014,12 +2014,12 @@ void ImDrawList::AddText(const ImFont* font, float font_size, const ImVec2& pos,
 }
 
 void ImDrawList::AddText(const ImVec2& pos, ImU32 col, const char* text_begin, const char* text_end)
-{ ZoneScoped;
+{ ZoneScoped
     AddText(NULL, 0.0f, pos, col, text_begin, text_end);
 }
 
 void ImDrawList::AddImage(ImTextureID user_texture_id, const ImVec2& p_min, const ImVec2& p_max, const ImVec2& uv_min, const ImVec2& uv_max, ImU32 col)
-{ ZoneScoped;
+{ ZoneScoped
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 SKIA_DRAW_BACKEND_BEGIN
@@ -2046,7 +2046,7 @@ SKIA_DRAW_BACKEND_END
 }
 
 void ImDrawList::AddImageQuad(ImTextureID user_texture_id, const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, const ImVec2& p4, const ImVec2& uv1, const ImVec2& uv2, const ImVec2& uv3, const ImVec2& uv4, ImU32 col)
-{ ZoneScoped;
+{ ZoneScoped
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 
@@ -2078,7 +2078,7 @@ SKIA_DRAW_BACKEND_END
 }
 
 void ImDrawList::AddImageRounded(ImTextureID user_texture_id, const ImVec2& p_min, const ImVec2& p_max, const ImVec2& uv_min, const ImVec2& uv_max, ImU32 col, float rounding, ImDrawFlags flags)
-{ ZoneScoped;
+{ ZoneScoped
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 
@@ -2123,7 +2123,7 @@ SKIA_DRAW_BACKEND_END
 //-----------------------------------------------------------------------------
 
 void ImDrawListSplitter::ClearFreeMemory()
-{ ZoneScoped;
+{ ZoneScoped
     for (int i = 0; i < _Channels.Size; i++)
     {
         if (i == _Current) {
@@ -2154,7 +2154,7 @@ void ImDrawListSplitter::ClearFreeMemory()
 }
 
 void ImDrawListSplitter::Split(ImDrawList* draw_list, int channels_count)
-{ ZoneScoped;
+{ ZoneScoped
     IM_UNUSED(draw_list);
     IM_ASSERT(_Current == 0 && _Count <= 1 && "Nested channel splitting is not supported. Please use separate instances of ImDrawListSplitter.");
     int old_channels_count = _Channels.Size;
@@ -2198,7 +2198,7 @@ void ImDrawListSplitter::Split(ImDrawList* draw_list, int channels_count)
 }
 
 void ImDrawListSplitter::Merge(ImDrawList* draw_list)
-{ ZoneScoped;
+{ ZoneScoped
     // Note that we never use or rely on _Channels.Size because it is merely a buffer that we never shrink back to 0 to keep all sub-buffers ready for use.
     if (_Count <= 1)
         return;
@@ -2302,7 +2302,7 @@ void ImDrawListSplitter::Merge(ImDrawList* draw_list)
 }
 
 void ImDrawListSplitter::SetCurrentChannel(ImDrawList* draw_list, int idx)
-{ ZoneScoped;
+{ ZoneScoped
     IM_ASSERT(idx >= 0 && idx < _Count);
 
 #ifdef SKIA_DRAW_BACKEND
@@ -2360,7 +2360,7 @@ void ImDrawListSplitter::SetCurrentChannel(ImDrawList* draw_list, int idx)
 //-----------------------------------------------------------------------------
 
 void ImDrawData::Clear()
-{ ZoneScoped;
+{ ZoneScoped
     Valid = false;
     CmdListsCount = TotalIdxCount = TotalVtxCount = 0;
     CmdLists.resize(0); // The ImDrawList are NOT owned by ImDrawData but e.g. by ImGuiContext, so we don't clear them.
@@ -2371,7 +2371,7 @@ void ImDrawData::Clear()
 // Important: 'out_list' is generally going to be draw_data->CmdLists, but may be another temporary list
 // as long at it is expected that the result will be later merged into draw_data->CmdLists[].
 void ImGui::AddDrawListToDrawDataEx(ImDrawData* draw_data, ImVector<ImDrawList*>* out_list, ImDrawList* draw_list)
-{ ZoneScoped;
+{ ZoneScoped
 #ifdef SKIA_DRAW_BACKEND
     if(ImGui::skiaActive) {
         if(draw_list->_FbCmds->size() == 0) {
@@ -2421,7 +2421,7 @@ void ImGui::AddDrawListToDrawDataEx(ImDrawData* draw_data, ImVector<ImDrawList*>
 }
 
 void ImDrawData::AddDrawList(ImDrawList* draw_list)
-{ ZoneScoped;
+{ ZoneScoped
     IM_ASSERT(CmdLists.Size == CmdListsCount);
     draw_list->_PopUnusedDrawCmd();
     ImGui::AddDrawListToDrawDataEx(this, &CmdLists, draw_list);
@@ -2429,7 +2429,7 @@ void ImDrawData::AddDrawList(ImDrawList* draw_list)
 
 // For backward compatibility: convert all buffers from indexed to de-indexed, in case you cannot render indexed. Note: this is slow and most likely a waste of resources. Always prefer indexed rendering!
 void ImDrawData::DeIndexAllBuffers()
-{ ZoneScoped;
+{ ZoneScoped
     ImVector<ImDrawVert> new_vtx_buffer;
     TotalVtxCount = TotalIdxCount = 0;
     for (int i = 0; i < CmdListsCount; i++)
@@ -2450,7 +2450,7 @@ void ImDrawData::DeIndexAllBuffers()
 // Use if your final output buffer is at a different scale than draw_data->DisplaySize,
 // or if there is a difference between your window resolution and framebuffer resolution.
 void ImDrawData::ScaleClipRects(const ImVec2& fb_scale)
-{ ZoneScoped;
+{ ZoneScoped
     for (ImDrawList* draw_list : CmdLists)
         for (ImDrawCmd& cmd : draw_list->CmdBuffer)
             cmd.ClipRect = ImVec4(cmd.ClipRect.x * fb_scale.x, cmd.ClipRect.y * fb_scale.y, cmd.ClipRect.z * fb_scale.x, cmd.ClipRect.w * fb_scale.y);
@@ -2462,7 +2462,7 @@ void ImDrawData::ScaleClipRects(const ImVec2& fb_scale)
 
 // Generic linear color gradient, write to RGB fields, leave A untouched.
 void ImGui::ShadeVertsLinearColorGradientKeepAlpha(ImDrawList* draw_list, int vert_start_idx, int vert_end_idx, ImVec2 gradient_p0, ImVec2 gradient_p1, ImU32 col0, ImU32 col1)
-{ ZoneScoped;
+{ ZoneScoped
     ImVec2 gradient_extent = gradient_p1 - gradient_p0;
     float gradient_inv_length2 = 1.0f / ImLengthSqr(gradient_extent);
     ImDrawVert* vert_start = draw_list->VtxBuffer.Data + vert_start_idx;
@@ -2486,7 +2486,7 @@ void ImGui::ShadeVertsLinearColorGradientKeepAlpha(ImDrawList* draw_list, int ve
 
 // Distribute UV over (a, b) rectangle
 void ImGui::ShadeVertsLinearUV(ImDrawList* draw_list, int vert_start_idx, int vert_end_idx, const ImVec2& a, const ImVec2& b, const ImVec2& uv_a, const ImVec2& uv_b, bool clamp)
-{ ZoneScoped;
+{ ZoneScoped
     const ImVec2 size = b - a;
     const ImVec2 uv_size = uv_b - uv_a;
     const ImVec2 scale = ImVec2(
@@ -2510,7 +2510,7 @@ void ImGui::ShadeVertsLinearUV(ImDrawList* draw_list, int vert_start_idx, int ve
 }
 
 void ImGui::ShadeVertsTransformPos(ImDrawList* draw_list, int vert_start_idx, int vert_end_idx, const ImVec2& pivot_in, float cos_a, float sin_a, const ImVec2& pivot_out)
-{ ZoneScoped;
+{ ZoneScoped
     ImDrawVert* vert_start = draw_list->VtxBuffer.Data + vert_start_idx;
     ImDrawVert* vert_end = draw_list->VtxBuffer.Data + vert_end_idx;
     for (ImDrawVert* vertex = vert_start; vertex < vert_end; ++vertex)
@@ -2522,7 +2522,7 @@ void ImGui::ShadeVertsTransformPos(ImDrawList* draw_list, int vert_start_idx, in
 //-----------------------------------------------------------------------------
 
 ImFontConfig::ImFontConfig()
-{ ZoneScoped;
+{ ZoneScoped
     memset(this, 0, sizeof(*this));
     FontDataOwnedByAtlas = true;
     OversampleH = 2;
@@ -2588,20 +2588,20 @@ static const ImVec2 FONT_ATLAS_DEFAULT_TEX_CURSOR_DATA[ImGuiMouseCursor_COUNT][3
 };
 
 ImFontAtlas::ImFontAtlas()
-{ ZoneScoped;
+{ ZoneScoped
     memset(this, 0, sizeof(*this));
     TexGlyphPadding = 1;
     PackIdMouseCursors = PackIdLines = -1;
 }
 
 ImFontAtlas::~ImFontAtlas()
-{ ZoneScoped;
+{ ZoneScoped
     IM_ASSERT(!Locked && "Cannot modify a locked ImFontAtlas between NewFrame() and EndFrame/Render()!");
     Clear();
 }
 
 void    ImFontAtlas::ClearInputData()
-{ ZoneScoped;
+{ ZoneScoped
     IM_ASSERT(!Locked && "Cannot modify a locked ImFontAtlas between NewFrame() and EndFrame/Render()!");
     for (ImFontConfig& font_cfg : ConfigData)
         if (font_cfg.FontData && font_cfg.FontDataOwnedByAtlas)
@@ -2624,7 +2624,7 @@ void    ImFontAtlas::ClearInputData()
 }
 
 void    ImFontAtlas::ClearTexData()
-{ ZoneScoped;
+{ ZoneScoped
     IM_ASSERT(!Locked && "Cannot modify a locked ImFontAtlas between NewFrame() and EndFrame/Render()!");
     if (TexPixelsAlpha8)
         IM_FREE(TexPixelsAlpha8);
@@ -2637,21 +2637,21 @@ void    ImFontAtlas::ClearTexData()
 }
 
 void    ImFontAtlas::ClearFonts()
-{ ZoneScoped;
+{ ZoneScoped
     IM_ASSERT(!Locked && "Cannot modify a locked ImFontAtlas between NewFrame() and EndFrame/Render()!");
     Fonts.clear_delete();
     TexReady = false;
 }
 
 void    ImFontAtlas::Clear()
-{ ZoneScoped;
+{ ZoneScoped
     ClearInputData();
     ClearTexData();
     ClearFonts();
 }
 
 void    ImFontAtlas::GetTexDataAsAlpha8(unsigned char** out_pixels, int* out_width, int* out_height, int* out_bytes_per_pixel)
-{ ZoneScoped;
+{ ZoneScoped
     // Build atlas on demand
     if (TexPixelsAlpha8 == NULL)
         Build();
@@ -2663,7 +2663,7 @@ void    ImFontAtlas::GetTexDataAsAlpha8(unsigned char** out_pixels, int* out_wid
 }
 
 void    ImFontAtlas::GetTexDataAsRGBA32(unsigned char** out_pixels, int* out_width, int* out_height, int* out_bytes_per_pixel)
-{ ZoneScoped;
+{ ZoneScoped
     // Convert to RGBA32 format on demand
     // Although it is likely to be the most commonly used format, our font rendering is 1 channel / 8 bpp
     if (!TexPixelsRGBA32)
@@ -2687,7 +2687,7 @@ void    ImFontAtlas::GetTexDataAsRGBA32(unsigned char** out_pixels, int* out_wid
 }
 
 ImFont* ImFontAtlas::AddFont(const ImFontConfig* font_cfg)
-{ ZoneScoped;
+{ ZoneScoped
     IM_ASSERT(!Locked && "Cannot modify a locked ImFontAtlas between NewFrame() and EndFrame/Render()!");
     IM_ASSERT(font_cfg->FontData != NULL && font_cfg->FontDataSize > 0);
     IM_ASSERT(font_cfg->SizePixels > 0.0f);
@@ -2726,7 +2726,7 @@ static unsigned int stb_decompress(unsigned char* output, const unsigned char* i
 static const char*  GetDefaultCompressedFontDataTTFBase85();
 static unsigned int Decode85Byte(char c)                                    { return c >= '\\' ? c-36 : c-35; }
 static void         Decode85(const unsigned char* src, unsigned char* dst)
-{ ZoneScoped;
+{ ZoneScoped
     while (*src)
     {
         unsigned int tmp = Decode85Byte(src[0]) + 85 * (Decode85Byte(src[1]) + 85 * (Decode85Byte(src[2]) + 85 * (Decode85Byte(src[3]) + 85 * Decode85Byte(src[4]))));
@@ -2738,7 +2738,7 @@ static void         Decode85(const unsigned char* src, unsigned char* dst)
 
 // Load embedded ProggyClean.ttf at size 13, disable oversampling
 ImFont* ImFontAtlas::AddFontDefault(const ImFontConfig* font_cfg_template)
-{ ZoneScoped;
+{ ZoneScoped
     ImFontConfig font_cfg = font_cfg_template ? *font_cfg_template : ImFontConfig();
     if (!font_cfg_template)
     {
@@ -2759,7 +2759,7 @@ ImFont* ImFontAtlas::AddFontDefault(const ImFontConfig* font_cfg_template)
 }
 
 ImFont* ImFontAtlas::AddFontFromFileTTF(const char* filename, float size_pixels, const ImFontConfig* font_cfg_template, const ImWchar* glyph_ranges)
-{ ZoneScoped;
+{ ZoneScoped
     IM_ASSERT(!Locked && "Cannot modify a locked ImFontAtlas between NewFrame() and EndFrame/Render()!");
     size_t data_size = 0;
     void* data = ImFileLoadToMemory(filename, "rb", &data_size, 0);
@@ -2781,7 +2781,7 @@ ImFont* ImFontAtlas::AddFontFromFileTTF(const char* filename, float size_pixels,
 
 // NB: Transfer ownership of 'ttf_data' to ImFontAtlas, unless font_cfg_template->FontDataOwnedByAtlas == false. Owned TTF buffer will be deleted after Build().
 ImFont* ImFontAtlas::AddFontFromMemoryTTF(void* font_data, int font_data_size, float size_pixels, const ImFontConfig* font_cfg_template, const ImWchar* glyph_ranges)
-{ ZoneScoped;
+{ ZoneScoped
     IM_ASSERT(!Locked && "Cannot modify a locked ImFontAtlas between NewFrame() and EndFrame/Render()!");
     ImFontConfig font_cfg = font_cfg_template ? *font_cfg_template : ImFontConfig();
     IM_ASSERT(font_cfg.FontData == NULL);
@@ -2795,7 +2795,7 @@ ImFont* ImFontAtlas::AddFontFromMemoryTTF(void* font_data, int font_data_size, f
 }
 
 ImFont* ImFontAtlas::AddFontFromMemoryCompressedTTF(const void* compressed_ttf_data, int compressed_ttf_size, float size_pixels, const ImFontConfig* font_cfg_template, const ImWchar* glyph_ranges)
-{ ZoneScoped;
+{ ZoneScoped
     const unsigned int buf_decompressed_size = stb_decompress_length((const unsigned char*)compressed_ttf_data);
     unsigned char* buf_decompressed_data = (unsigned char*)IM_ALLOC(buf_decompressed_size);
     stb_decompress(buf_decompressed_data, (const unsigned char*)compressed_ttf_data, (unsigned int)compressed_ttf_size);
@@ -2807,7 +2807,7 @@ ImFont* ImFontAtlas::AddFontFromMemoryCompressedTTF(const void* compressed_ttf_d
 }
 
 ImFont* ImFontAtlas::AddFontFromMemoryCompressedBase85TTF(const char* compressed_ttf_data_base85, float size_pixels, const ImFontConfig* font_cfg, const ImWchar* glyph_ranges)
-{ ZoneScoped;
+{ ZoneScoped
     int compressed_ttf_size = (((int)strlen(compressed_ttf_data_base85) + 4) / 5) * 4;
     void* compressed_ttf = IM_ALLOC((size_t)compressed_ttf_size);
     Decode85((const unsigned char*)compressed_ttf_data_base85, (unsigned char*)compressed_ttf);
@@ -2817,7 +2817,7 @@ ImFont* ImFontAtlas::AddFontFromMemoryCompressedBase85TTF(const char* compressed
 }
 
 int ImFontAtlas::AddCustomRectRegular(int width, int height)
-{ ZoneScoped;
+{ ZoneScoped
     IM_ASSERT(width > 0 && width <= 0xFFFF);
     IM_ASSERT(height > 0 && height <= 0xFFFF);
     ImFontAtlasCustomRect r;
@@ -2828,7 +2828,7 @@ int ImFontAtlas::AddCustomRectRegular(int width, int height)
 }
 
 int ImFontAtlas::AddCustomRectFontGlyph(ImFont* font, ImWchar id, int width, int height, float advance_x, const ImVec2& offset)
-{ ZoneScoped;
+{ ZoneScoped
 #ifdef IMGUI_USE_WCHAR32
     IM_ASSERT(id <= IM_UNICODE_CODEPOINT_MAX);
 #endif
@@ -2847,7 +2847,7 @@ int ImFontAtlas::AddCustomRectFontGlyph(ImFont* font, ImWchar id, int width, int
 }
 
 void ImFontAtlas::CalcCustomRectUV(const ImFontAtlasCustomRect* rect, ImVec2* out_uv_min, ImVec2* out_uv_max) const
-{ ZoneScoped;
+{ ZoneScoped
     IM_ASSERT(TexWidth > 0 && TexHeight > 0);   // Font atlas needs to be built before we can calculate UV coordinates
     IM_ASSERT(rect->IsPacked());                // Make sure the rectangle has been packed
     *out_uv_min = ImVec2((float)rect->X * TexUvScale.x, (float)rect->Y * TexUvScale.y);
@@ -2855,7 +2855,7 @@ void ImFontAtlas::CalcCustomRectUV(const ImFontAtlasCustomRect* rect, ImVec2* ou
 }
 
 bool ImFontAtlas::GetMouseCursorTexData(ImGuiMouseCursor cursor_type, ImVec2* out_offset, ImVec2* out_size, ImVec2 out_uv_border[2], ImVec2 out_uv_fill[2])
-{ ZoneScoped;
+{ ZoneScoped
     if (cursor_type <= ImGuiMouseCursor_None || cursor_type >= ImGuiMouseCursor_COUNT)
         return false;
     if (Flags & ImFontAtlasFlags_NoMouseCursors)
@@ -2876,7 +2876,7 @@ bool ImFontAtlas::GetMouseCursorTexData(ImGuiMouseCursor cursor_type, ImVec2* ou
 }
 
 bool    ImFontAtlas::Build()
-{ ZoneScoped;
+{ ZoneScoped
     IM_ASSERT(!Locked && "Cannot modify a locked ImFontAtlas between NewFrame() and EndFrame/Render()!");
 
     // Default font is none are specified
@@ -2905,7 +2905,7 @@ bool    ImFontAtlas::Build()
 }
 
 void    ImFontAtlasBuildMultiplyCalcLookupTable(unsigned char out_table[256], float in_brighten_factor)
-{ ZoneScoped;
+{ ZoneScoped
     for (unsigned int i = 0; i < 256; i++)
     {
         unsigned int value = (unsigned int)(i * in_brighten_factor);
@@ -2914,7 +2914,7 @@ void    ImFontAtlasBuildMultiplyCalcLookupTable(unsigned char out_table[256], fl
 }
 
 void    ImFontAtlasBuildMultiplyRectAlpha8(const unsigned char table[256], unsigned char* pixels, int x, int y, int w, int h, int stride)
-{ ZoneScoped;
+{ ZoneScoped
     IM_ASSERT_PARANOID(w <= stride);
     unsigned char* data = pixels + x + y * stride;
     for (int j = h; j > 0; j--, data += stride - w)
@@ -2949,7 +2949,7 @@ struct ImFontBuildDstData
 };
 
 static void UnpackBitVectorToFlatIndexList(const ImBitVector* in, ImVector<int>* out)
-{ ZoneScoped;
+{ ZoneScoped
     IM_ASSERT(sizeof(in->Storage.Data[0]) == sizeof(int));
     const ImU32* it_begin = in->Storage.begin();
     const ImU32* it_end = in->Storage.end();
@@ -2961,7 +2961,7 @@ static void UnpackBitVectorToFlatIndexList(const ImBitVector* in, ImVector<int>*
 }
 
 static bool ImFontAtlasBuildWithStbTruetype(ImFontAtlas* atlas)
-{ ZoneScoped;
+{ ZoneScoped
     IM_ASSERT(atlas->ConfigData.Size > 0);
 
     ImFontAtlasBuildInit(atlas);
@@ -3224,7 +3224,7 @@ static bool ImFontAtlasBuildWithStbTruetype(ImFontAtlas* atlas)
 }
 
 const ImFontBuilderIO* ImFontAtlasGetBuilderForStbTruetype()
-{ ZoneScoped;
+{ ZoneScoped
     static ImFontBuilderIO io;
     io.FontBuilder_Build = ImFontAtlasBuildWithStbTruetype;
     return &io;
@@ -3233,7 +3233,7 @@ const ImFontBuilderIO* ImFontAtlasGetBuilderForStbTruetype()
 #endif // IMGUI_ENABLE_STB_TRUETYPE
 
 void ImFontAtlasUpdateConfigDataPointers(ImFontAtlas* atlas)
-{ ZoneScoped;
+{ ZoneScoped
     for (ImFontConfig& font_cfg : atlas->ConfigData)
     {
         ImFont* font = font_cfg.DstFont;
@@ -3247,7 +3247,7 @@ void ImFontAtlasUpdateConfigDataPointers(ImFontAtlas* atlas)
 }
 
 void ImFontAtlasBuildSetupFont(ImFontAtlas* atlas, ImFont* font, ImFontConfig* font_config, float ascent, float descent)
-{ ZoneScoped;
+{ ZoneScoped
     if (!font_config->MergeMode)
     {
         font->ClearOutputData();
@@ -3260,7 +3260,7 @@ void ImFontAtlasBuildSetupFont(ImFontAtlas* atlas, ImFont* font, ImFontConfig* f
 }
 
 void ImFontAtlasBuildPackCustomRects(ImFontAtlas* atlas, void* stbrp_context_opaque)
-{ ZoneScoped;
+{ ZoneScoped
     stbrp_context* pack_context = (stbrp_context*)stbrp_context_opaque;
     IM_ASSERT(pack_context != NULL);
 
@@ -3290,7 +3290,7 @@ void ImFontAtlasBuildPackCustomRects(ImFontAtlas* atlas, void* stbrp_context_opa
 }
 
 void ImFontAtlasBuildRender8bppRectFromString(ImFontAtlas* atlas, int x, int y, int w, int h, const char* in_str, char in_marker_char, unsigned char in_marker_pixel_value)
-{ ZoneScoped;
+{ ZoneScoped
     IM_ASSERT(x >= 0 && x + w <= atlas->TexWidth);
     IM_ASSERT(y >= 0 && y + h <= atlas->TexHeight);
     unsigned char* out_pixel = atlas->TexPixelsAlpha8 + x + (y * atlas->TexWidth);
@@ -3300,7 +3300,7 @@ void ImFontAtlasBuildRender8bppRectFromString(ImFontAtlas* atlas, int x, int y, 
 }
 
 void ImFontAtlasBuildRender32bppRectFromString(ImFontAtlas* atlas, int x, int y, int w, int h, const char* in_str, char in_marker_char, unsigned int in_marker_pixel_value)
-{ ZoneScoped;
+{ ZoneScoped
     IM_ASSERT(x >= 0 && x + w <= atlas->TexWidth);
     IM_ASSERT(y >= 0 && y + h <= atlas->TexHeight);
     unsigned int* out_pixel = atlas->TexPixelsRGBA32 + x + (y * atlas->TexWidth);
@@ -3310,7 +3310,7 @@ void ImFontAtlasBuildRender32bppRectFromString(ImFontAtlas* atlas, int x, int y,
 }
 
 static void ImFontAtlasBuildRenderDefaultTexData(ImFontAtlas* atlas)
-{ ZoneScoped;
+{ ZoneScoped
     ImFontAtlasCustomRect* r = atlas->GetCustomRectByIndex(atlas->PackIdMouseCursors);
     IM_ASSERT(r->IsPacked());
 
@@ -3350,7 +3350,7 @@ static void ImFontAtlasBuildRenderDefaultTexData(ImFontAtlas* atlas)
 }
 
 static void ImFontAtlasBuildRenderLinesTexData(ImFontAtlas* atlas)
-{ ZoneScoped;
+{ ZoneScoped
     if (atlas->Flags & ImFontAtlasFlags_NoBakedLines)
         return;
 
@@ -3402,7 +3402,7 @@ static void ImFontAtlasBuildRenderLinesTexData(ImFontAtlas* atlas)
 
 // Note: this is called / shared by both the stb_truetype and the FreeType builder
 void ImFontAtlasBuildInit(ImFontAtlas* atlas)
-{ ZoneScoped;
+{ ZoneScoped
     // Round font size
     // - We started rounding in 1.90 WIP (18991) as our layout system currently doesn't support non-rounded font size well yet.
     // - Note that using io.FontGlobalScale or SetWindowFontScale(), with are legacy-ish, partially supported features, can still lead to unrounded sizes.
@@ -3430,7 +3430,7 @@ void ImFontAtlasBuildInit(ImFontAtlas* atlas)
 
 // This is called/shared by both the stb_truetype and the FreeType builder.
 void ImFontAtlasBuildFinish(ImFontAtlas* atlas)
-{ ZoneScoped;
+{ ZoneScoped
     // Render into our custom data blocks
     IM_ASSERT(atlas->TexPixelsAlpha8 != NULL || atlas->TexPixelsRGBA32 != NULL);
     ImFontAtlasBuildRenderDefaultTexData(atlas);
@@ -3460,7 +3460,7 @@ void ImFontAtlasBuildFinish(ImFontAtlas* atlas)
 
 // Retrieve list of range (2 int per range, values are inclusive)
 const ImWchar*   ImFontAtlas::GetGlyphRangesDefault()
-{ ZoneScoped;
+{ ZoneScoped
     static const ImWchar ranges[] =
     {
         0x0020, 0x00FF, // Basic Latin + Latin Supplement
@@ -3470,7 +3470,7 @@ const ImWchar*   ImFontAtlas::GetGlyphRangesDefault()
 }
 
 const ImWchar*   ImFontAtlas::GetGlyphRangesGreek()
-{ ZoneScoped;
+{ ZoneScoped
     static const ImWchar ranges[] =
     {
         0x0020, 0x00FF, // Basic Latin + Latin Supplement
@@ -3481,7 +3481,7 @@ const ImWchar*   ImFontAtlas::GetGlyphRangesGreek()
 }
 
 const ImWchar*  ImFontAtlas::GetGlyphRangesKorean()
-{ ZoneScoped;
+{ ZoneScoped
     static const ImWchar ranges[] =
     {
         0x0020, 0x00FF, // Basic Latin + Latin Supplement
@@ -3494,7 +3494,7 @@ const ImWchar*  ImFontAtlas::GetGlyphRangesKorean()
 }
 
 const ImWchar*  ImFontAtlas::GetGlyphRangesChineseFull()
-{ ZoneScoped;
+{ ZoneScoped
     static const ImWchar ranges[] =
     {
         0x0020, 0x00FF, // Basic Latin + Latin Supplement
@@ -3510,7 +3510,7 @@ const ImWchar*  ImFontAtlas::GetGlyphRangesChineseFull()
 }
 
 static void UnpackAccumulativeOffsetsIntoRanges(int base_codepoint, const short* accumulative_offsets, int accumulative_offsets_count, ImWchar* out_ranges)
-{ ZoneScoped;
+{ ZoneScoped
     for (int n = 0; n < accumulative_offsets_count; n++, out_ranges += 2)
     {
         out_ranges[0] = out_ranges[1] = (ImWchar)(base_codepoint + accumulative_offsets[n]);
@@ -3524,7 +3524,7 @@ static void UnpackAccumulativeOffsetsIntoRanges(int base_codepoint, const short*
 //-------------------------------------------------------------------------
 
 const ImWchar*  ImFontAtlas::GetGlyphRangesChineseSimplifiedCommon()
-{ ZoneScoped;
+{ ZoneScoped
     // Store 2500 regularly used characters for Simplified Chinese.
     // Sourced from https://zh.wiktionary.org/wiki/%E9%99%84%E5%BD%95:%E7%8E%B0%E4%BB%A3%E6%B1%89%E8%AF%AD%E5%B8%B8%E7%94%A8%E5%AD%97%E8%A1%A8
     // This table covers 97.97% of all characters used during the month in July, 1987.
@@ -3592,7 +3592,7 @@ const ImWchar*  ImFontAtlas::GetGlyphRangesChineseSimplifiedCommon()
 }
 
 const ImWchar*  ImFontAtlas::GetGlyphRangesJapanese()
-{ ZoneScoped;
+{ ZoneScoped
     // 2999 ideograms code points for Japanese
     // - 2136 Joyo (meaning "for regular use" or "for common use") Kanji code points
     // - 863 Jinmeiyo (meaning "for personal name") Kanji code points
@@ -3682,7 +3682,7 @@ const ImWchar*  ImFontAtlas::GetGlyphRangesJapanese()
 }
 
 const ImWchar*  ImFontAtlas::GetGlyphRangesCyrillic()
-{ ZoneScoped;
+{ ZoneScoped
     static const ImWchar ranges[] =
     {
         0x0020, 0x00FF, // Basic Latin + Latin Supplement
@@ -3695,7 +3695,7 @@ const ImWchar*  ImFontAtlas::GetGlyphRangesCyrillic()
 }
 
 const ImWchar*  ImFontAtlas::GetGlyphRangesThai()
-{ ZoneScoped;
+{ ZoneScoped
     static const ImWchar ranges[] =
     {
         0x0020, 0x00FF, // Basic Latin
@@ -3707,7 +3707,7 @@ const ImWchar*  ImFontAtlas::GetGlyphRangesThai()
 }
 
 const ImWchar*  ImFontAtlas::GetGlyphRangesVietnamese()
-{ ZoneScoped;
+{ ZoneScoped
     static const ImWchar ranges[] =
     {
         0x0020, 0x00FF, // Basic Latin
@@ -3728,7 +3728,7 @@ const ImWchar*  ImFontAtlas::GetGlyphRangesVietnamese()
 //-----------------------------------------------------------------------------
 
 void ImFontGlyphRangesBuilder::AddText(const char* text, const char* text_end)
-{ ZoneScoped;
+{ ZoneScoped
     while (text_end ? (text < text_end) : *text)
     {
         unsigned int c = 0;
@@ -3741,14 +3741,14 @@ void ImFontGlyphRangesBuilder::AddText(const char* text, const char* text_end)
 }
 
 void ImFontGlyphRangesBuilder::AddRanges(const ImWchar* ranges)
-{ ZoneScoped;
+{ ZoneScoped
     for (; ranges[0]; ranges += 2)
         for (unsigned int c = ranges[0]; c <= ranges[1] && c <= IM_UNICODE_CODEPOINT_MAX; c++) //-V560
             AddChar((ImWchar)c);
 }
 
 void ImFontGlyphRangesBuilder::BuildRanges(ImVector<ImWchar>* out_ranges)
-{ ZoneScoped;
+{ ZoneScoped
     const int max_codepoint = IM_UNICODE_CODEPOINT_MAX;
     for (int n = 0; n <= max_codepoint; n++)
         if (GetBit(n))
@@ -3766,7 +3766,7 @@ void ImFontGlyphRangesBuilder::BuildRanges(ImVector<ImWchar>* out_ranges)
 //-----------------------------------------------------------------------------
 
 ImFont::ImFont()
-{ ZoneScoped;
+{ ZoneScoped
     FontSize = 0.0f;
     FallbackAdvanceX = 0.0f;
     FallbackChar = (ImWchar)-1;
@@ -3785,14 +3785,14 @@ ImFont::ImFont()
 }
 
 ImFont::~ImFont()
-{ ZoneScoped;
+{ ZoneScoped
 #ifdef SKIA_DRAW_BACKEND
 #endif
     ClearOutputData();
 }
 
 void    ImFont::ClearOutputData()
-{ ZoneScoped;
+{ ZoneScoped
     FontSize = 0.0f;
     FallbackAdvanceX = 0.0f;
     Glyphs.clear();
@@ -3806,7 +3806,7 @@ void    ImFont::ClearOutputData()
 }
 
 static ImWchar FindFirstExistingGlyph(ImFont* font, const ImWchar* candidate_chars, int candidate_chars_count)
-{ ZoneScoped;
+{ ZoneScoped
     for (int n = 0; n < candidate_chars_count; n++)
         if (font->FindGlyphNoFallback(candidate_chars[n]) != NULL)
             return candidate_chars[n];
@@ -3814,7 +3814,7 @@ static ImWchar FindFirstExistingGlyph(ImFont* font, const ImWchar* candidate_cha
 }
 
 void ImFont::BuildLookupTable()
-{ ZoneScoped;
+{ ZoneScoped
     int max_codepoint = 0;
     for (int i = 0; i != Glyphs.Size; i++)
         max_codepoint = ImMax(max_codepoint, (int)Glyphs[i].Codepoint);
@@ -3900,7 +3900,7 @@ void ImFont::BuildLookupTable()
 // API is designed this way to avoid exposing the 4K page size
 // e.g. use with IsGlyphRangeUnused(0, 255)
 bool ImFont::IsGlyphRangeUnused(unsigned int c_begin, unsigned int c_last)
-{ ZoneScoped;
+{ ZoneScoped
     unsigned int page_begin = (c_begin / 4096);
     unsigned int page_last = (c_last / 4096);
     for (unsigned int page_n = page_begin; page_n <= page_last; page_n++)
@@ -3911,13 +3911,13 @@ bool ImFont::IsGlyphRangeUnused(unsigned int c_begin, unsigned int c_last)
 }
 
 void ImFont::SetGlyphVisible(ImWchar c, bool visible)
-{ ZoneScoped;
+{ ZoneScoped
     if (ImFontGlyph* glyph = (ImFontGlyph*)(void*)FindGlyph((ImWchar)c))
         glyph->Visible = visible ? 1 : 0;
 }
 
 void ImFont::GrowIndex(int new_size)
-{ ZoneScoped;
+{ ZoneScoped
     IM_ASSERT(IndexAdvanceX.Size == IndexLookup.Size);
     if (new_size <= IndexLookup.Size)
         return;
@@ -3929,7 +3929,7 @@ void ImFont::GrowIndex(int new_size)
 // Not to be mistaken with texture coordinates, which are held by u0/v0/u1/v1 in normalized format (0.0..1.0 on each texture axis).
 // 'cfg' is not necessarily == 'this->ConfigData' because multiple source fonts+configs can be used to build one target font.
 void ImFont::AddGlyph(const ImFontConfig* cfg, ImWchar codepoint, float x0, float y0, float x1, float y1, float u0, float v0, float u1, float v1, float advance_x)
-{ ZoneScoped;
+{ ZoneScoped
     if (cfg != NULL)
     {
         // Clamp & recenter if needed
@@ -3973,7 +3973,7 @@ void ImFont::AddGlyph(const ImFontConfig* cfg, ImWchar codepoint, float x0, floa
 }
 
 void ImFont::AddRemapChar(ImWchar dst, ImWchar src, bool overwrite_dst)
-{ ZoneScoped;
+{ ZoneScoped
     IM_ASSERT(IndexLookup.Size > 0);    // Currently this can only be called AFTER the font has been built, aka after calling ImFontAtlas::GetTexDataAs*() function.
     unsigned int index_size = (unsigned int)IndexLookup.Size;
 
@@ -3988,7 +3988,7 @@ void ImFont::AddRemapChar(ImWchar dst, ImWchar src, bool overwrite_dst)
 }
 
 const ImFontGlyph* ImFont::FindGlyph(ImWchar c) const
-{ ZoneScoped;
+{ ZoneScoped
     if (c >= (size_t)IndexLookup.Size)
         return FallbackGlyph;
     const ImWchar i = IndexLookup.Data[c];
@@ -3998,7 +3998,7 @@ const ImFontGlyph* ImFont::FindGlyph(ImWchar c) const
 }
 
 const ImFontGlyph* ImFont::FindGlyphNoFallback(ImWchar c) const
-{ ZoneScoped;
+{ ZoneScoped
     if (c >= (size_t)IndexLookup.Size)
         return NULL;
     const ImWchar i = IndexLookup.Data[c];
@@ -4009,7 +4009,7 @@ const ImFontGlyph* ImFont::FindGlyphNoFallback(ImWchar c) const
 
 // Wrapping skips upcoming blanks
 static inline const char* CalcWordWrapNextLineStartA(const char* text, const char* text_end)
-{ ZoneScoped;
+{ ZoneScoped
     while (text < text_end && ImCharIsBlankA(*text))
         text++;
     if (*text == '\n')
@@ -4021,7 +4021,7 @@ static inline const char* CalcWordWrapNextLineStartA(const char* text, const cha
 // This will return the next location to wrap from. If no wrapping if necessary, this will fast-forward to e.g. text_end.
 // FIXME: Much possible improvements (don't cut things like "word !", "word!!!" but cut within "word,,,,", more sensible support for punctuations, support for Unicode punctuations, etc.)
 const char* ImFont::CalcWordWrapPositionA(float scale, const char* text, const char* text_end, float wrap_width) const
-{ ZoneScoped;
+{ ZoneScoped
     // For references, possible wrap point marked with ^
     //  "aaa bbb, ccc,ddd. eee   fff. ggg!"
     //      ^    ^    ^   ^   ^__    ^    ^
@@ -4123,7 +4123,7 @@ static inline bool isParagraphText(const char *text_begin, const char *text_end)
 }
 #endif
 ImVec2 ImFont::CalcTextSizeA(float size, float max_width, float wrap_width, const char* text_begin, const char* text_end, const char** remaining) const
-{ ZoneScoped;
+{ ZoneScoped
     if (!text_end)
         text_end = text_begin + strlen(text_begin); // FIXME-OPT: Need to avoid this.
 
@@ -4132,7 +4132,7 @@ SKIA_DRAW_BACKEND_BEGIN
         *remaining = nullptr;
     }
     auto is_paragraph = wrap_width > 0.0f || isParagraphText(text_begin,text_end);
-    if(is_paragraph) { ZoneScoped;
+    if(is_paragraph) { ZoneScoped
         if(wrap_width <= 0.0f) {
             wrap_width = ImGui::GetContentRegionAvail().x;
         }
@@ -4143,7 +4143,7 @@ SKIA_DRAW_BACKEND_BEGIN
         ImGui::paragraph->layout(SkScalar(wrap_width));
         return ImVec2(ImMax(wrap_width,SkScalarToFloat(ImGui::paragraph->getMaxWidth())),
                       SkScalarToFloat(ImGui::paragraph->getHeight()));
-    } else { ZoneScoped;
+    } else { ZoneScoped
         auto f = ImGui::skiaFont.makeWithSize(SkScalar(size));
         SkScalar advanceWidth = f.measureText(text_begin,text_end-text_begin,SkTextEncoding::kUTF8, nullptr);
         return ImVec2(SkScalarToFloat(advanceWidth), size);
@@ -4225,7 +4225,7 @@ SKIA_DRAW_BACKEND_END
 
 // Note: as with every ImDrawList drawing function, this expects that the font atlas texture is bound.
 void ImFont::RenderChar(ImDrawList* draw_list, float size, const ImVec2& pos, ImU32 col, ImWchar c) const
-{ ZoneScoped;
+{ ZoneScoped
 SKIA_DRAW_BACKEND_BEGIN
     // TODO: this may be inefficient --> add VectorCmdRenderChar dto, looks like it is currently only used to render ellipsis char?
     constexpr int max_utf8_codepoint_len_in_bytes = 6;
@@ -4255,7 +4255,7 @@ SKIA_DRAW_BACKEND_END
 
 // Note: as with every ImDrawList drawing function, this expects that the font atlas texture is bound.
 void ImFont::RenderText(ImDrawList* draw_list, float size, const ImVec2& pos, ImU32 col, const ImVec4& clip_rect, const char* text_begin, const char* text_end, float wrap_width, bool cpu_fine_clip) const
-{ ZoneScoped;
+{ ZoneScoped
     if (!text_end)
         text_end = text_begin + strlen(text_begin); // ImGui:: functions generally already provides a valid text_end, so this is merely to handle direct calls.
 
@@ -4472,7 +4472,7 @@ SKIA_DRAW_BACKEND_END
 
 // Render an arrow aimed to be aligned with text (p_min is a position in the same space text would be positioned). To e.g. denote expanded/collapsed state
 void ImGui::RenderArrow(ImDrawList* draw_list, ImVec2 pos, ImU32 col, ImGuiDir dir, float scale)
-{ ZoneScoped;
+{ ZoneScoped
     const float h = draw_list->_Data->FontSize * 1.00f;
     float r = h * 0.40f * scale;
     ImVec2 center = pos + ImVec2(h * 0.50f, h * 0.50f * scale);
@@ -4503,13 +4503,13 @@ void ImGui::RenderArrow(ImDrawList* draw_list, ImVec2 pos, ImU32 col, ImGuiDir d
 }
 
 void ImGui::RenderBullet(ImDrawList* draw_list, ImVec2 pos, ImU32 col)
-{ ZoneScoped;
+{ ZoneScoped
     // FIXME-OPT: This should be baked in font.
     draw_list->AddCircleFilled(pos, draw_list->_Data->FontSize * 0.20f, col, 8);
 }
 
 void ImGui::RenderCheckMark(ImDrawList* draw_list, ImVec2 pos, ImU32 col, float sz)
-{ ZoneScoped;
+{ ZoneScoped
     float thickness = ImMax(sz / 5.0f, 1.0f);
     sz -= thickness * 0.5f;
     pos += ImVec2(thickness * 0.25f, thickness * 0.25f);
@@ -4525,7 +4525,7 @@ void ImGui::RenderCheckMark(ImDrawList* draw_list, ImVec2 pos, ImU32 col, float 
 
 // Render an arrow. 'pos' is position of the arrow tip. half_sz.x is length from base to tip. half_sz.y is length on each side.
 void ImGui::RenderArrowPointingAt(ImDrawList* draw_list, ImVec2 pos, ImVec2 half_sz, ImGuiDir direction, ImU32 col)
-{ ZoneScoped;
+{ ZoneScoped
     switch (direction)
     {
     case ImGuiDir_Left:  draw_list->AddTriangleFilled(ImVec2(pos.x + half_sz.x, pos.y - half_sz.y), ImVec2(pos.x + half_sz.x, pos.y + half_sz.y), pos, col); return;
@@ -4539,13 +4539,13 @@ void ImGui::RenderArrowPointingAt(ImDrawList* draw_list, ImVec2 pos, ImVec2 half
 // This is less wide than RenderArrow() and we use in dock nodes instead of the regular RenderArrow() to denote a change of functionality,
 // and because the saved space means that the left-most tab label can stay at exactly the same position as the label of a loose window.
 void ImGui::RenderArrowDockMenu(ImDrawList* draw_list, ImVec2 p_min, float sz, ImU32 col)
-{ ZoneScoped;
+{ ZoneScoped
     draw_list->AddRectFilled(p_min + ImVec2(sz * 0.20f, sz * 0.15f), p_min + ImVec2(sz * 0.80f, sz * 0.30f), col);
     RenderArrowPointingAt(draw_list, p_min + ImVec2(sz * 0.50f, sz * 0.85f), ImVec2(sz * 0.30f, sz * 0.40f), ImGuiDir_Down, col);
 }
 
 static inline float ImAcos01(float x)
-{ ZoneScoped;
+{ ZoneScoped
     if (x <= 0.0f) return IM_PI * 0.5f;
     if (x >= 1.0f) return 0.0f;
     return ImAcos(x);
@@ -4554,7 +4554,7 @@ static inline float ImAcos01(float x)
 
 // FIXME: Cleanup and move code to ImDrawList.
 void ImGui::RenderRectFilledRangeH(ImDrawList* draw_list, const ImRect& rect, ImU32 col, float x_start_norm, float x_end_norm, float rounding)
-{ ZoneScoped;
+{ ZoneScoped
     if (x_end_norm == x_start_norm)
         return;
     if (x_start_norm > x_end_norm)
@@ -4614,7 +4614,7 @@ void ImGui::RenderRectFilledRangeH(ImDrawList* draw_list, const ImRect& rect, Im
 }
 
 void ImGui::RenderRectFilledWithHole(ImDrawList* draw_list, const ImRect& outer, const ImRect& inner, ImU32 col, float rounding)
-{ ZoneScoped;
+{ ZoneScoped
     const bool fill_L = (inner.Min.x > outer.Min.x);
     const bool fill_R = (inner.Max.x < outer.Max.x);
     const bool fill_U = (inner.Min.y > outer.Min.y);
@@ -4630,7 +4630,7 @@ void ImGui::RenderRectFilledWithHole(ImDrawList* draw_list, const ImRect& outer,
 }
 
 ImDrawFlags ImGui::CalcRoundingFlagsForRectInRect(const ImRect& r_in, const ImRect& r_outer, float threshold)
-{ ZoneScoped;
+{ ZoneScoped
     bool round_l = r_in.Min.x <= r_outer.Min.x + threshold;
     bool round_r = r_in.Max.x >= r_outer.Max.x - threshold;
     bool round_t = r_in.Min.y <= r_outer.Min.y + threshold;
@@ -4645,7 +4645,7 @@ ImDrawFlags ImGui::CalcRoundingFlagsForRectInRect(const ImRect& r_in, const ImRe
 // Spent a non reasonable amount of time trying to getting this right for ColorButton with rounding+anti-aliasing+ImGuiColorEditFlags_HalfAlphaPreview flag + various grid sizes and offsets, and eventually gave up... probably more reasonable to disable rounding altogether.
 // FIXME: uses ImGui::GetColorU32
 void ImGui::RenderColorRectWithAlphaCheckerboard(ImDrawList* draw_list, ImVec2 p_min, ImVec2 p_max, ImU32 col, float grid_step, ImVec2 grid_off, float rounding, ImDrawFlags flags)
-{ ZoneScoped;
+{ ZoneScoped
     if ((flags & ImDrawFlags_RoundCornersMask_) == 0)
         flags = ImDrawFlags_RoundCornersDefault_;
     if (((col & IM_COL32_A_MASK) >> IM_COL32_A_SHIFT) < 0xFF)
@@ -4691,7 +4691,7 @@ void ImGui::RenderColorRectWithAlphaCheckerboard(ImDrawList* draw_list, ImVec2 p
 //-----------------------------------------------------------------------------
 
 static unsigned int stb_decompress_length(const unsigned char *input)
-{ ZoneScoped;
+{ ZoneScoped
     return (input[8] << 24) + (input[9] << 16) + (input[10] << 8) + input[11];
 }
 
@@ -4699,7 +4699,7 @@ static unsigned char *stb__barrier_out_e, *stb__barrier_out_b;
 static const unsigned char *stb__barrier_in_b;
 static unsigned char *stb__dout;
 static void stb__match(const unsigned char *data, unsigned int length)
-{ ZoneScoped;
+{ ZoneScoped
     // INVERSE of memmove... write each byte before copying the next...
     IM_ASSERT(stb__dout + length <= stb__barrier_out_e);
     if (stb__dout + length > stb__barrier_out_e) { stb__dout += length; return; }
@@ -4708,7 +4708,7 @@ static void stb__match(const unsigned char *data, unsigned int length)
 }
 
 static void stb__lit(const unsigned char *data, unsigned int length)
-{ ZoneScoped;
+{ ZoneScoped
     IM_ASSERT(stb__dout + length <= stb__barrier_out_e);
     if (stb__dout + length > stb__barrier_out_e) { stb__dout += length; return; }
     if (data < stb__barrier_in_b) { stb__dout = stb__barrier_out_e+1; return; }
@@ -4721,7 +4721,7 @@ static void stb__lit(const unsigned char *data, unsigned int length)
 #define stb__in4(x)   ((i[x] << 24) + stb__in3((x)+1))
 
 static const unsigned char *stb_decompress_token(const unsigned char *i)
-{ ZoneScoped;
+{ ZoneScoped
     if (*i >= 0x20) { // use fewer if's for cases that expand small
         if (*i >= 0x80)       stb__match(stb__dout-i[1]-1, i[0] - 0x80 + 1), i += 2;
         else if (*i >= 0x40)  stb__match(stb__dout-(stb__in2(0) - 0x4000 + 1), i[2]+1), i += 3;
@@ -4738,7 +4738,7 @@ static const unsigned char *stb_decompress_token(const unsigned char *i)
 }
 
 static unsigned int stb_adler32(unsigned int adler32, unsigned char *buffer, unsigned int buflen)
-{ ZoneScoped;
+{ ZoneScoped
     const unsigned long ADLER_MOD = 65521;
     unsigned long s1 = adler32 & 0xffff, s2 = adler32 >> 16;
     unsigned long blocklen = buflen % 5552;
@@ -4769,7 +4769,7 @@ static unsigned int stb_adler32(unsigned int adler32, unsigned char *buffer, uns
 }
 
 static unsigned int stb_decompress(unsigned char *output, const unsigned char *i, unsigned int /*length*/)
-{ ZoneScoped;
+{ ZoneScoped
     if (stb__in4(0) != 0x57bC0000) return 0;
     if (stb__in4(4) != 0)          return 0; // error! stream is > 4GB
     const unsigned int olen = stb_decompress_length(i);
@@ -4901,7 +4901,7 @@ static const char proggy_clean_ttf_compressed_data_base85[11980 + 1] =
     "O?;xpO?;xpO?;xpO?;xpO?;xpO?;xpO?;xpO?;xpO?;xpO?;xpO?;xpO?;xpO?;xp;7q-#lLYI:xvD=#";
 
 static const char* GetDefaultCompressedFontDataTTFBase85()
-{ ZoneScoped;
+{ ZoneScoped
     return proggy_clean_ttf_compressed_data_base85;
 }
 

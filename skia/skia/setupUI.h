@@ -3,18 +3,6 @@
 #include "vectorCmdSkiaRenderer.h"
 #include "utils/SkEventTracer.h"
 
-template <typename T, int n>
-class ScrollingBuffer {
-    int Offset;
-    std::array<T,n> xs;
-    std::array<T,n> ys;
-    ScrollingBuffer() : Offset(0) {
-    }
-    void Add(T x, T y) {
-        xs[Offset] = x;
-        ys[Offset] = y;
-    }
-};
 typedef int SaveFormatE;
 enum SaveFormatE_ {
     SaveFormatE_None = 0,
@@ -39,8 +27,4 @@ private:
     float fontMetricsSize;
     ImVec4 colSize,colAscent,colDescent,colLeading,colXHeight,colCapHeight;
     SkEventTracer *fEventTracer = nullptr;
-
-    std::array<float,512> fBandwidthArena;
-    std::array<float,512> fBandwidthVectorCmds;
-    int fBandwidthPos = 0;
 };

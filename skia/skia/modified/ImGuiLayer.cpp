@@ -7,27 +7,6 @@
 
 #include "ImGuiLayer.h"
 
-#include "include/core/SkBlendMode.h"
-#include "include/core/SkCanvas.h"
-#include "include/core/SkColor.h"
-#include "include/core/SkImage.h"
-#include "include/core/SkImageInfo.h"
-#include "include/core/SkPixmap.h"
-#include "include/core/SkRect.h"
-#include "include/core/SkRefCnt.h"
-#include "include/core/SkSamplingOptions.h"
-#include "include/core/SkShader.h"
-#include "include/core/SkSurface.h"
-#include "include/core/SkSwizzle.h"
-#include "include/core/SkVertices.h"
-#include "include/private/base/SkTDArray.h"
-#include "src/base/SkTime.h"
-#include "tools/skui/InputState.h"
-#include "tools/skui/Key.h"
-#include "include/core/SkPictureRecorder.h"
-#include "include/core/SkPicture.h"
-#include "include/core/SkStream.h"
-#include "include/core/SkStream.h"
 #include "include/svg/SkSVGCanvas.h"
 #include "include/encode/SkPngEncoder.h"
 #include "tracy/Tracy.hpp"
@@ -46,8 +25,6 @@ using namespace sk_app;
 
 #include "imgui_internal.h"
 #include "../skiaTracyTracer.h"
-#include "../vectorCmdSkiaRenderer.h"
-#include "simple.h"
 #include "marshalling/receive.h"
 #include "marshalling/send.h"
 
@@ -57,7 +34,7 @@ static void build_ImFontAtlas(ImFontAtlas& atlas, SkPaint& fontPaint) {
     atlas.GetTexDataAsAlpha8(&pixels, &w, &h);
     SkImageInfo info = SkImageInfo::MakeA8(w, h);
     SkPixmap pmap(info, pixels, info.minRowBytes());
-    SkMatrix localMatrix = SkMatrix::Scale(1.0f / w, 1.0f / h);
+    SkMatrix localMatrix = SkMatrix::Scale(1.0f / static_cast<float>(w), 1.0f / static_cast<float>(h));
     auto fontImage = SkImages::RasterFromPixmap(pmap, nullptr, nullptr);
     auto fontShader = fontImage->makeShader(SkSamplingOptions(SkFilterMode::kLinear), localMatrix);
     fontPaint.setShader(fontShader);
@@ -250,7 +227,7 @@ void ImGuiLayer::drawImDrawData(SkCanvas &canvas) {
                     SkPoint tl = pos[rectIndex], br = pos[rectIndex + 2];
                     canvas.clipRect(SkRect::MakeLTRB(tl.fX, tl.fY, br.fX, br.fY));
                     canvas.translate(tl.fX, tl.fY);
-                    fSkiaWidgetFuncs[idIndex](&canvas);
+                    fSkiaWidgetFuncs[static_cast<int>(idIndex)](&canvas);
                 } else {
                     auto paint = static_cast<SkPaint*>(drawCmd->TextureId);
                     SkASSERT(paint);
@@ -259,15 +236,15 @@ void ImGuiLayer::drawImDrawData(SkCanvas &canvas) {
                                                       drawCmd->ClipRect.z, drawCmd->ClipRect.w));
                     auto vtxOffset = drawCmd->VtxOffset;
                     auto vertices = SkVertices::MakeCopy(SkVertices::kTriangles_VertexMode,
-                                                         drawList->VtxBuffer.size() - vtxOffset,
+                                                         static_cast<int>(drawList->VtxBuffer.size() - vtxOffset),
                                                          pos.begin() + vtxOffset,
                                                          uv.begin() + vtxOffset,
                                                          color.begin() + vtxOffset,
-                                                         drawCmd->ElemCount,
+                                                         static_cast<int>(drawCmd->ElemCount),
                                                          drawList->IdxBuffer.begin() + indexOffset);
                     canvas.drawVertices(vertices, SkBlendMode::kModulate, *paint);
                 }
-                indexOffset += drawCmd->ElemCount;
+                indexOffset += static_cast<int>(drawCmd->ElemCount);
             }
         }
     }
@@ -289,7 +266,7 @@ void ImGuiLayer::drawImGuiVectorCmdsFB(SkCanvas &canvas) {
     }
 }
 
-void ImGuiLayer::onPaint(SkSurface* surface) { ZoneScoped;
+void ImGuiLayer::onPaint(SkSurface* surface) { ZoneScoped
 
     ImGui::skiaActive = fSkiaBackendActive;
     auto renderMode = fVectorCmdSkiaRenderer.getRenderMode();
@@ -297,12 +274,12 @@ void ImGuiLayer::onPaint(SkSurface* surface) { ZoneScoped;
     resetSendStat();
     if(fStandalone) { ZoneScoped("demo window");
         ImGui::ShowDemoWindow();
-    } else { ZoneScopedN("render fffi commands");
+    } else { ZoneScopedN("render fffi commands")
         render_render();
     }
 
     SaveFormatE saveFormat = SaveFormatE_None;
-    if(ImGui::Begin("ImZeroSkia Settings")) { ZoneScoped;
+    if(ImGui::Begin("ImZeroSkia Settings")) { ZoneScoped
         fImZeroSkiaSetupUi.render(saveFormat, fVectorCmdSkiaRenderer, fSkiaBackendActive,
                                   fTotalVectorCmdSerializedSize, totalSentBytes+totalReceivedBytes,
                                   fSkpBytesWritten,fSvgBytesWritten, fPngBytesWritten,
@@ -312,7 +289,7 @@ void ImGuiLayer::onPaint(SkSurface* surface) { ZoneScoped;
     ImGui::End();
     ImGui::Render();
 
-    if((saveFormat & SaveFormatE_SKP) != SaveFormatE_None) { ZoneScoped;
+    if((saveFormat & SaveFormatE_SKP) != SaveFormatE_None) { ZoneScoped
         const auto path = "/tmp/skiaBackend.skp";
 
         SkPictureRecorder skiaRecorder;
@@ -328,7 +305,7 @@ void ImGuiLayer::onPaint(SkSurface* surface) { ZoneScoped;
         picture->serialize(&skpStream);
         fSkpBytesWritten = skpStream.bytesWritten();
     } else if((saveFormat & SaveFormatE_SVG) != SaveFormatE_None) {
-        ZoneScoped;
+        ZoneScoped
         const auto path = "/tmp/skiaBackend.svg";
         SkFILEWStream svgStream(path);
         SkRect bounds = SkRect::MakeIWH(fWindow->width(), fWindow->height());
@@ -338,7 +315,7 @@ void ImGuiLayer::onPaint(SkSurface* surface) { ZoneScoped;
         fVectorCmdSkiaRenderer.changeRenderMode(renderMode);
         fSvgBytesWritten = svgStream.bytesWritten();
     } else if((saveFormat & SaveFormatE_PNG) != SaveFormatE_None) {
-        ZoneScoped;
+        ZoneScoped
         const auto path = "/tmp/skiaBackend.png";
         const auto s = SkISize::Make(fWindow->width(), fWindow->height());
         const auto c = SkColorInfo(kRGBA_8888_SkColorType, kPremul_SkAlphaType, SkColorSpace::MakeSRGB());
@@ -367,7 +344,7 @@ void ImGuiLayer::onPaint(SkSurface* surface) { ZoneScoped;
             drawList->serializeFB(buf,sz);
             stream.write(buf,sz);
         }
-    } else if(fSkiaBackendActive) { ZoneScoped;
+    } else if(fSkiaBackendActive) { ZoneScoped
         auto skiaCanvas = surface->getCanvas();
 
         skiaCanvas->clear(SK_ColorTRANSPARENT);
@@ -376,7 +353,7 @@ void ImGuiLayer::onPaint(SkSurface* surface) { ZoneScoped;
         drawImGuiVectorCmdsFB(*skiaCanvas);
         //renderImDrawData(*skiaCanvas);
         skiaCanvas->restore();
-    } else { ZoneScoped;
+    } else { ZoneScoped
         drawImDrawData(*surface->getCanvas());
     }
 
