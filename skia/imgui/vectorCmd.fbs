@@ -198,15 +198,29 @@ table CmdPushClipRect {
 table CmdPopClipRect {
 }
 table CmdRenderText {
-    imfont: uint64; // ImFont*
+    imfont: uint64; // FIXME
+    size: float;
+    pos: SingleVec2;
+    col: uint32;
+    clip_rect: SingleVec4;
+    text: string;
+}
+enum TextAlignFlags:uint8 {
+    left = 0,
+    right = 1,
+    center = 2,
+    justify = 3
+}
+table CmdRenderParagraph {
+    imfont: uint64; // FIXME
     size: float;
     pos: SingleVec2;
     col: uint32;
     clip_rect: SingleVec4;
     text: string;
     wrap_width: float;
-    cpu_fine_clip: bool;
-    is_paragraph: bool;
+    letter_spacing: float;
+    text_align: TextAlignFlags;
 }
 table CmdTranslation {
     translation: SingleVec2;
@@ -263,6 +277,7 @@ union VectorCmdArg {
     CmdPushClipRect,
     CmdPopClipRect,
     CmdRenderText,
+    CmdRenderParagraph,
     CmdRectFilledMultiColor,
     CmdWrappedDrawList,
     CmdVertexDraw,

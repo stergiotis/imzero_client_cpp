@@ -21,6 +21,8 @@ class Paragraph {
         void setCacheEnable(bool enable);
         void resetCache();
         void setFontSize(SkScalar size);
+        void setLetterSpacing(SkScalar sp);
+        void setTextAlign(skia::textlayout::TextAlign align);
 
         sk_sp<SkTypeface> getDefaultTypeface();
 
@@ -29,7 +31,10 @@ class Paragraph {
         sk_sp<SkFontMgr> fFontMgr;
         sk_sp<SkTypeface> fDefaultTypeface;
         skia::textlayout::TextStyle fTlTextStyle;
-        skia::textlayout::ParagraphStyle fTlParaStyle;
-        std::unique_ptr<skia::textlayout::ParagraphBuilder> fParaBuilder;
+        skia::textlayout::ParagraphBuilder *fParaBuilder;
+        std::unique_ptr<skia::textlayout::ParagraphBuilder> fParaBuilderLeft;
+        std::unique_ptr<skia::textlayout::ParagraphBuilder> fParaBuilderRight;
+        std::unique_ptr<skia::textlayout::ParagraphBuilder> fParaBuilderCenter;
+        std::unique_ptr<skia::textlayout::ParagraphBuilder> fParaBuilderJustify;
         std::unique_ptr<skia::textlayout::Paragraph> fPara;
 };

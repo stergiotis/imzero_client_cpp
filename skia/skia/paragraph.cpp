@@ -1,14 +1,25 @@
+#include <cassert>
 #include "paragraph.h"
 
 Paragraph::Paragraph(sk_sp<SkFontMgr> fontMgr,sk_sp<SkTypeface> defaultTypeface) {
     fTlFontCollection = sk_make_sp<skia::textlayout::FontCollection>();
-    fTlParaStyle.setEllipsis(SkString("…"));
+    skia::textlayout::ParagraphStyle paraStyle;
+    paraStyle.setEllipsis(SkString("…"));
     //fTlParaStyle.setMaxLines(std::numeric_limits<size_t>::max()); // FIXME
-    fTlParaStyle.setMaxLines(1000); // FIXME
-    fTlParaStyle.setTextStyle(fTlTextStyle);
+    paraStyle.setMaxLines(1000); // FIXME
+    paraStyle.setTextStyle(fTlTextStyle);
     fTlFontCollection->setDefaultFontManager(fontMgr);
 
-    fParaBuilder = skia::textlayout::ParagraphBuilderImpl::make(fTlParaStyle, fTlFontCollection);
+    paraStyle.setTextAlign(skia::textlayout::TextAlign::kLeft);
+    fParaBuilderLeft = skia::textlayout::ParagraphBuilderImpl::make(paraStyle, fTlFontCollection);
+    paraStyle.setTextAlign(skia::textlayout::TextAlign::kRight);
+    fParaBuilderRight = skia::textlayout::ParagraphBuilderImpl::make(paraStyle, fTlFontCollection);
+    paraStyle.setTextAlign(skia::textlayout::TextAlign::kCenter);
+    fParaBuilderCenter = skia::textlayout::ParagraphBuilderImpl::make(paraStyle, fTlFontCollection);
+    paraStyle.setTextAlign(skia::textlayout::TextAlign::kJustify);
+    fParaBuilderJustify = skia::textlayout::ParagraphBuilderImpl::make(paraStyle, fTlFontCollection);
+    fParaBuilder = fParaBuilderLeft.get();
+
     fFontMgr = fontMgr;
     fDefaultTypeface = defaultTypeface;
 }
@@ -65,4 +76,19 @@ void Paragraph::paint(SkCanvas &canvas, SkScalar x, SkScalar y) {
 
 void Paragraph::setFontSize(SkScalar size) {
     fTlTextStyle.setFontSize(size);
+}
+
+void Paragraph::setLetterSpacing(SkScalar sp) {
+    fTlTextStyle.setLetterSpacing(sp);
+}
+
+void Paragraph::setTextAlign(skia::textlayout::TextAlign align) {
+    switch(align) {
+        case skia::textlayout::TextAlign::kLeft: fParaBuilder = fParaBuilderLeft.get(); break;
+        case skia::textlayout::TextAlign::kRight: fParaBuilder = fParaBuilderRight.get(); break;
+        case skia::textlayout::TextAlign::kCenter: fParaBuilder = fParaBuilderCenter.get(); break;
+        case skia::textlayout::TextAlign::kJustify: fParaBuilder = fParaBuilderJustify.get(); break;
+        default:
+            assert("unhandled align enumeration value");
+    }
 }

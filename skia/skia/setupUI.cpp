@@ -190,6 +190,11 @@ void ImZeroSkiaSetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &v
                     ImGui::Text("%f = |ascent|+|descent| != |size| = %f   => hard", fabs(metrics.fAscent)+fabs(metrics.fDescent), fontMetricsSize);
                 }
             }
+            if(f.isLinearMetrics()) {
+                ImGui::TextUnformatted("linear scalable metrics");
+            } else {
+                ImGui::TextUnformatted("non-linear scaling metrics");
+            }
 
             if(ImGui::BeginTable("metrics",5,ImGuiTableFlags_RowBg)) {
                 ImGui::TableSetupColumn("Metric");

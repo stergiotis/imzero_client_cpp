@@ -103,6 +103,9 @@ struct CmdPopClipRectBuilder;
 struct CmdRenderText;
 struct CmdRenderTextBuilder;
 
+struct CmdRenderParagraph;
+struct CmdRenderParagraphBuilder;
+
 struct CmdTranslation;
 struct CmdTranslationBuilder;
 
@@ -136,6 +139,42 @@ struct DrawListBuilder;
 struct IoRecord;
 struct IoRecordBuilder;
 
+enum TextAlignFlags : uint8_t {
+  TextAlignFlags_left = 0,
+  TextAlignFlags_right = 1,
+  TextAlignFlags_center = 2,
+  TextAlignFlags_justify = 3,
+  TextAlignFlags_MIN = TextAlignFlags_left,
+  TextAlignFlags_MAX = TextAlignFlags_justify
+};
+
+inline const TextAlignFlags (&EnumValuesTextAlignFlags())[4] {
+  static const TextAlignFlags values[] = {
+    TextAlignFlags_left,
+    TextAlignFlags_right,
+    TextAlignFlags_center,
+    TextAlignFlags_justify
+  };
+  return values;
+}
+
+inline const char * const *EnumNamesTextAlignFlags() {
+  static const char * const names[5] = {
+    "left",
+    "right",
+    "center",
+    "justify",
+    nullptr
+  };
+  return names;
+}
+
+inline const char *EnumNameTextAlignFlags(TextAlignFlags e) {
+  if (::flatbuffers::IsOutRange(e, TextAlignFlags_left, TextAlignFlags_justify)) return "";
+  const size_t index = static_cast<size_t>(e);
+  return EnumNamesTextAlignFlags()[index];
+}
+
 enum VectorCmdArg : uint8_t {
   VectorCmdArg_NONE = 0,
   VectorCmdArg_CmdRegisterFont = 1,
@@ -164,16 +203,17 @@ enum VectorCmdArg : uint8_t {
   VectorCmdArg_CmdPushClipRect = 24,
   VectorCmdArg_CmdPopClipRect = 25,
   VectorCmdArg_CmdRenderText = 26,
-  VectorCmdArg_CmdRectFilledMultiColor = 27,
-  VectorCmdArg_CmdWrappedDrawList = 28,
-  VectorCmdArg_CmdVertexDraw = 29,
-  VectorCmdArg_CmdPushRotation = 30,
-  VectorCmdArg_CmdPopRotation = 31,
+  VectorCmdArg_CmdRenderParagraph = 27,
+  VectorCmdArg_CmdRectFilledMultiColor = 28,
+  VectorCmdArg_CmdWrappedDrawList = 29,
+  VectorCmdArg_CmdVertexDraw = 30,
+  VectorCmdArg_CmdPushRotation = 31,
+  VectorCmdArg_CmdPopRotation = 32,
   VectorCmdArg_MIN = VectorCmdArg_NONE,
   VectorCmdArg_MAX = VectorCmdArg_CmdPopRotation
 };
 
-inline const VectorCmdArg (&EnumValuesVectorCmdArg())[32] {
+inline const VectorCmdArg (&EnumValuesVectorCmdArg())[33] {
   static const VectorCmdArg values[] = {
     VectorCmdArg_NONE,
     VectorCmdArg_CmdRegisterFont,
@@ -202,6 +242,7 @@ inline const VectorCmdArg (&EnumValuesVectorCmdArg())[32] {
     VectorCmdArg_CmdPushClipRect,
     VectorCmdArg_CmdPopClipRect,
     VectorCmdArg_CmdRenderText,
+    VectorCmdArg_CmdRenderParagraph,
     VectorCmdArg_CmdRectFilledMultiColor,
     VectorCmdArg_CmdWrappedDrawList,
     VectorCmdArg_CmdVertexDraw,
@@ -212,7 +253,7 @@ inline const VectorCmdArg (&EnumValuesVectorCmdArg())[32] {
 }
 
 inline const char * const *EnumNamesVectorCmdArg() {
-  static const char * const names[33] = {
+  static const char * const names[34] = {
     "NONE",
     "CmdRegisterFont",
     "CmdPolyline",
@@ -240,6 +281,7 @@ inline const char * const *EnumNamesVectorCmdArg() {
     "CmdPushClipRect",
     "CmdPopClipRect",
     "CmdRenderText",
+    "CmdRenderParagraph",
     "CmdRectFilledMultiColor",
     "CmdWrappedDrawList",
     "CmdVertexDraw",
@@ -362,6 +404,10 @@ template<> struct VectorCmdArgTraits<VectorCmdFB::CmdPopClipRect> {
 
 template<> struct VectorCmdArgTraits<VectorCmdFB::CmdRenderText> {
   static const VectorCmdArg enum_value = VectorCmdArg_CmdRenderText;
+};
+
+template<> struct VectorCmdArgTraits<VectorCmdFB::CmdRenderParagraph> {
+  static const VectorCmdArg enum_value = VectorCmdArg_CmdRenderParagraph;
 };
 
 template<> struct VectorCmdArgTraits<VectorCmdFB::CmdRectFilledMultiColor> {
@@ -2786,10 +2832,7 @@ struct CmdRenderText FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
     VT_POS = 8,
     VT_COL = 10,
     VT_CLIP_RECT = 12,
-    VT_TEXT = 14,
-    VT_WRAP_WIDTH = 16,
-    VT_CPU_FINE_CLIP = 18,
-    VT_IS_PARAGRAPH = 20
+    VT_TEXT = 14
   };
   uint64_t imfont() const {
     return GetField<uint64_t>(VT_IMFONT, 0);
@@ -2809,15 +2852,6 @@ struct CmdRenderText FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
   const ::flatbuffers::String *text() const {
     return GetPointer<const ::flatbuffers::String *>(VT_TEXT);
   }
-  float wrap_width() const {
-    return GetField<float>(VT_WRAP_WIDTH, 0.0f);
-  }
-  bool cpu_fine_clip() const {
-    return GetField<uint8_t>(VT_CPU_FINE_CLIP, 0) != 0;
-  }
-  bool is_paragraph() const {
-    return GetField<uint8_t>(VT_IS_PARAGRAPH, 0) != 0;
-  }
   bool Verify(::flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<uint64_t>(verifier, VT_IMFONT, 8) &&
@@ -2827,9 +2861,6 @@ struct CmdRenderText FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
            VerifyField<VectorCmdFB::SingleVec4>(verifier, VT_CLIP_RECT, 4) &&
            VerifyOffset(verifier, VT_TEXT) &&
            verifier.VerifyString(text()) &&
-           VerifyField<float>(verifier, VT_WRAP_WIDTH, 4) &&
-           VerifyField<uint8_t>(verifier, VT_CPU_FINE_CLIP, 1) &&
-           VerifyField<uint8_t>(verifier, VT_IS_PARAGRAPH, 1) &&
            verifier.EndTable();
   }
 };
@@ -2856,15 +2887,6 @@ struct CmdRenderTextBuilder {
   void add_text(::flatbuffers::Offset<::flatbuffers::String> text) {
     fbb_.AddOffset(CmdRenderText::VT_TEXT, text);
   }
-  void add_wrap_width(float wrap_width) {
-    fbb_.AddElement<float>(CmdRenderText::VT_WRAP_WIDTH, wrap_width, 0.0f);
-  }
-  void add_cpu_fine_clip(bool cpu_fine_clip) {
-    fbb_.AddElement<uint8_t>(CmdRenderText::VT_CPU_FINE_CLIP, static_cast<uint8_t>(cpu_fine_clip), 0);
-  }
-  void add_is_paragraph(bool is_paragraph) {
-    fbb_.AddElement<uint8_t>(CmdRenderText::VT_IS_PARAGRAPH, static_cast<uint8_t>(is_paragraph), 0);
-  }
   explicit CmdRenderTextBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
@@ -2883,20 +2905,14 @@ inline ::flatbuffers::Offset<CmdRenderText> CreateCmdRenderText(
     const VectorCmdFB::SingleVec2 *pos = nullptr,
     uint32_t col = 0,
     const VectorCmdFB::SingleVec4 *clip_rect = nullptr,
-    ::flatbuffers::Offset<::flatbuffers::String> text = 0,
-    float wrap_width = 0.0f,
-    bool cpu_fine_clip = false,
-    bool is_paragraph = false) {
+    ::flatbuffers::Offset<::flatbuffers::String> text = 0) {
   CmdRenderTextBuilder builder_(_fbb);
   builder_.add_imfont(imfont);
-  builder_.add_wrap_width(wrap_width);
   builder_.add_text(text);
   builder_.add_clip_rect(clip_rect);
   builder_.add_col(col);
   builder_.add_pos(pos);
   builder_.add_size(size);
-  builder_.add_is_paragraph(is_paragraph);
-  builder_.add_cpu_fine_clip(cpu_fine_clip);
   return builder_.Finish();
 }
 
@@ -2907,10 +2923,7 @@ inline ::flatbuffers::Offset<CmdRenderText> CreateCmdRenderTextDirect(
     const VectorCmdFB::SingleVec2 *pos = nullptr,
     uint32_t col = 0,
     const VectorCmdFB::SingleVec4 *clip_rect = nullptr,
-    const char *text = nullptr,
-    float wrap_width = 0.0f,
-    bool cpu_fine_clip = false,
-    bool is_paragraph = false) {
+    const char *text = nullptr) {
   auto text__ = text ? _fbb.CreateString(text) : 0;
   return VectorCmdFB::CreateCmdRenderText(
       _fbb,
@@ -2919,10 +2932,154 @@ inline ::flatbuffers::Offset<CmdRenderText> CreateCmdRenderTextDirect(
       pos,
       col,
       clip_rect,
+      text__);
+}
+
+struct CmdRenderParagraph FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef CmdRenderParagraphBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_IMFONT = 4,
+    VT_SIZE = 6,
+    VT_POS = 8,
+    VT_COL = 10,
+    VT_CLIP_RECT = 12,
+    VT_TEXT = 14,
+    VT_WRAP_WIDTH = 16,
+    VT_LETTER_SPACING = 18,
+    VT_TEXT_ALIGN = 20
+  };
+  uint64_t imfont() const {
+    return GetField<uint64_t>(VT_IMFONT, 0);
+  }
+  float size() const {
+    return GetField<float>(VT_SIZE, 0.0f);
+  }
+  const VectorCmdFB::SingleVec2 *pos() const {
+    return GetStruct<const VectorCmdFB::SingleVec2 *>(VT_POS);
+  }
+  uint32_t col() const {
+    return GetField<uint32_t>(VT_COL, 0);
+  }
+  const VectorCmdFB::SingleVec4 *clip_rect() const {
+    return GetStruct<const VectorCmdFB::SingleVec4 *>(VT_CLIP_RECT);
+  }
+  const ::flatbuffers::String *text() const {
+    return GetPointer<const ::flatbuffers::String *>(VT_TEXT);
+  }
+  float wrap_width() const {
+    return GetField<float>(VT_WRAP_WIDTH, 0.0f);
+  }
+  float letter_spacing() const {
+    return GetField<float>(VT_LETTER_SPACING, 0.0f);
+  }
+  VectorCmdFB::TextAlignFlags text_align() const {
+    return static_cast<VectorCmdFB::TextAlignFlags>(GetField<uint8_t>(VT_TEXT_ALIGN, 0));
+  }
+  bool Verify(::flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<uint64_t>(verifier, VT_IMFONT, 8) &&
+           VerifyField<float>(verifier, VT_SIZE, 4) &&
+           VerifyField<VectorCmdFB::SingleVec2>(verifier, VT_POS, 4) &&
+           VerifyField<uint32_t>(verifier, VT_COL, 4) &&
+           VerifyField<VectorCmdFB::SingleVec4>(verifier, VT_CLIP_RECT, 4) &&
+           VerifyOffset(verifier, VT_TEXT) &&
+           verifier.VerifyString(text()) &&
+           VerifyField<float>(verifier, VT_WRAP_WIDTH, 4) &&
+           VerifyField<float>(verifier, VT_LETTER_SPACING, 4) &&
+           VerifyField<uint8_t>(verifier, VT_TEXT_ALIGN, 1) &&
+           verifier.EndTable();
+  }
+};
+
+struct CmdRenderParagraphBuilder {
+  typedef CmdRenderParagraph Table;
+  ::flatbuffers::FlatBufferBuilder &fbb_;
+  ::flatbuffers::uoffset_t start_;
+  void add_imfont(uint64_t imfont) {
+    fbb_.AddElement<uint64_t>(CmdRenderParagraph::VT_IMFONT, imfont, 0);
+  }
+  void add_size(float size) {
+    fbb_.AddElement<float>(CmdRenderParagraph::VT_SIZE, size, 0.0f);
+  }
+  void add_pos(const VectorCmdFB::SingleVec2 *pos) {
+    fbb_.AddStruct(CmdRenderParagraph::VT_POS, pos);
+  }
+  void add_col(uint32_t col) {
+    fbb_.AddElement<uint32_t>(CmdRenderParagraph::VT_COL, col, 0);
+  }
+  void add_clip_rect(const VectorCmdFB::SingleVec4 *clip_rect) {
+    fbb_.AddStruct(CmdRenderParagraph::VT_CLIP_RECT, clip_rect);
+  }
+  void add_text(::flatbuffers::Offset<::flatbuffers::String> text) {
+    fbb_.AddOffset(CmdRenderParagraph::VT_TEXT, text);
+  }
+  void add_wrap_width(float wrap_width) {
+    fbb_.AddElement<float>(CmdRenderParagraph::VT_WRAP_WIDTH, wrap_width, 0.0f);
+  }
+  void add_letter_spacing(float letter_spacing) {
+    fbb_.AddElement<float>(CmdRenderParagraph::VT_LETTER_SPACING, letter_spacing, 0.0f);
+  }
+  void add_text_align(VectorCmdFB::TextAlignFlags text_align) {
+    fbb_.AddElement<uint8_t>(CmdRenderParagraph::VT_TEXT_ALIGN, static_cast<uint8_t>(text_align), 0);
+  }
+  explicit CmdRenderParagraphBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ::flatbuffers::Offset<CmdRenderParagraph> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = ::flatbuffers::Offset<CmdRenderParagraph>(end);
+    return o;
+  }
+};
+
+inline ::flatbuffers::Offset<CmdRenderParagraph> CreateCmdRenderParagraph(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    uint64_t imfont = 0,
+    float size = 0.0f,
+    const VectorCmdFB::SingleVec2 *pos = nullptr,
+    uint32_t col = 0,
+    const VectorCmdFB::SingleVec4 *clip_rect = nullptr,
+    ::flatbuffers::Offset<::flatbuffers::String> text = 0,
+    float wrap_width = 0.0f,
+    float letter_spacing = 0.0f,
+    VectorCmdFB::TextAlignFlags text_align = VectorCmdFB::TextAlignFlags_left) {
+  CmdRenderParagraphBuilder builder_(_fbb);
+  builder_.add_imfont(imfont);
+  builder_.add_letter_spacing(letter_spacing);
+  builder_.add_wrap_width(wrap_width);
+  builder_.add_text(text);
+  builder_.add_clip_rect(clip_rect);
+  builder_.add_col(col);
+  builder_.add_pos(pos);
+  builder_.add_size(size);
+  builder_.add_text_align(text_align);
+  return builder_.Finish();
+}
+
+inline ::flatbuffers::Offset<CmdRenderParagraph> CreateCmdRenderParagraphDirect(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    uint64_t imfont = 0,
+    float size = 0.0f,
+    const VectorCmdFB::SingleVec2 *pos = nullptr,
+    uint32_t col = 0,
+    const VectorCmdFB::SingleVec4 *clip_rect = nullptr,
+    const char *text = nullptr,
+    float wrap_width = 0.0f,
+    float letter_spacing = 0.0f,
+    VectorCmdFB::TextAlignFlags text_align = VectorCmdFB::TextAlignFlags_left) {
+  auto text__ = text ? _fbb.CreateString(text) : 0;
+  return VectorCmdFB::CreateCmdRenderParagraph(
+      _fbb,
+      imfont,
+      size,
+      pos,
+      col,
+      clip_rect,
       text__,
       wrap_width,
-      cpu_fine_clip,
-      is_paragraph);
+      letter_spacing,
+      text_align);
 }
 
 struct CmdTranslation FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
@@ -3385,6 +3542,9 @@ struct SingleVectorCmdDto FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table
   const VectorCmdFB::CmdRenderText *arg_as_CmdRenderText() const {
     return arg_type() == VectorCmdFB::VectorCmdArg_CmdRenderText ? static_cast<const VectorCmdFB::CmdRenderText *>(arg()) : nullptr;
   }
+  const VectorCmdFB::CmdRenderParagraph *arg_as_CmdRenderParagraph() const {
+    return arg_type() == VectorCmdFB::VectorCmdArg_CmdRenderParagraph ? static_cast<const VectorCmdFB::CmdRenderParagraph *>(arg()) : nullptr;
+  }
   const VectorCmdFB::CmdRectFilledMultiColor *arg_as_CmdRectFilledMultiColor() const {
     return arg_type() == VectorCmdFB::VectorCmdArg_CmdRectFilledMultiColor ? static_cast<const VectorCmdFB::CmdRectFilledMultiColor *>(arg()) : nullptr;
   }
@@ -3511,6 +3671,10 @@ template<> inline const VectorCmdFB::CmdPopClipRect *SingleVectorCmdDto::arg_as<
 
 template<> inline const VectorCmdFB::CmdRenderText *SingleVectorCmdDto::arg_as<VectorCmdFB::CmdRenderText>() const {
   return arg_as_CmdRenderText();
+}
+
+template<> inline const VectorCmdFB::CmdRenderParagraph *SingleVectorCmdDto::arg_as<VectorCmdFB::CmdRenderParagraph>() const {
+  return arg_as_CmdRenderParagraph();
 }
 
 template<> inline const VectorCmdFB::CmdRectFilledMultiColor *SingleVectorCmdDto::arg_as<VectorCmdFB::CmdRectFilledMultiColor>() const {
@@ -3896,6 +4060,10 @@ inline bool VerifyVectorCmdArg(::flatbuffers::Verifier &verifier, const void *ob
     }
     case VectorCmdArg_CmdRenderText: {
       auto ptr = reinterpret_cast<const VectorCmdFB::CmdRenderText *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case VectorCmdArg_CmdRenderParagraph: {
+      auto ptr = reinterpret_cast<const VectorCmdFB::CmdRenderParagraph *>(obj);
       return verifier.VerifyTable(ptr);
     }
     case VectorCmdArg_CmdRectFilledMultiColor: {

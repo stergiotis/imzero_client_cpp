@@ -263,7 +263,6 @@ void VectorCmdSkiaRenderer::drawVectorCmdsFBDrawList(const VectorCmdFB::DrawList
     }
 }
 void VectorCmdSkiaRenderer::drawVectorCmdFB(const VectorCmdFB::SingleVectorCmdDto *cmdUnion, SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped
-    auto const before = canvas.getSaveCount();
     auto t = cmdUnion->arg_type();
     switch(t) {
         case VectorCmdFB::VectorCmdArg_CmdPolyline:
@@ -335,6 +334,9 @@ void VectorCmdSkiaRenderer::drawVectorCmdFB(const VectorCmdFB::SingleVectorCmdDt
         case VectorCmdFB::VectorCmdArg_CmdRenderText:
             drawCmdRenderTextFB(*cmdUnion->arg_as_CmdRenderText(),canvas,dlFlags);
             break;
+        case VectorCmdFB::VectorCmdArg_CmdRenderParagraph:
+            drawCmdRenderParagraphFB(*cmdUnion->arg_as_CmdRenderParagraph(),canvas,dlFlags);
+            break;
         case VectorCmdFB::VectorCmdArg_CmdRectFilledMultiColor:
             drawCmdRectFilledMultiColorFB(*cmdUnion->arg_as_CmdRectFilledMultiColor(),canvas,dlFlags);
             break;
@@ -350,11 +352,6 @@ void VectorCmdSkiaRenderer::drawVectorCmdFB(const VectorCmdFB::SingleVectorCmdDt
         default:
             // skipping unknown/invalid command
             ;
-    }
-    if(before != canvas.getSaveCount()) {
-        fprintf(stderr,"%s changed the save count: before=%d,after=%d\n",
-                VectorCmdFB::EnumNamesVectorCmdArg()[t],
-                before,canvas.getSaveCount());
     }
 }
 template <typename T>
@@ -650,6 +647,42 @@ void VectorCmdSkiaRenderer::drawCmdTriangleFilledFB(const VectorCmdFB::CmdTriang
     drawCmdTriangle_(cmd,canvas,paint);
 }
 
+void VectorCmdSkiaRenderer::drawCmdRenderParagraphFB(const VectorCmdFB::CmdRenderParagraph &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) {
+    ZoneScoped
+    SkPaint paint;
+
+    canvas.save();
+    auto const &cr = cmd.clip_rect();
+    canvas.clipRect(SkRect::MakeLTRB(cr->x(), cr->y(), cr->z(),cr->w()));
+
+    paint.setColor(convertColor(cmd.col()));
+    paint.setColor(SK_ColorYELLOW);
+    auto size = cmd.size();
+    const auto text = cmd.text();
+
+    fParagraph->setFontSize(SkScalar(size));
+    fParagraph->setForegroundPaint(paint);
+    fParagraph->setLetterSpacing(cmd.letter_spacing());
+    {
+        skia::textlayout::TextAlign a;
+        switch(cmd.text_align()) {
+            case VectorCmdFB::TextAlignFlags_left: a = skia::textlayout::TextAlign::kLeft; break;
+            case VectorCmdFB::TextAlignFlags_right: a = skia::textlayout::TextAlign::kRight; break;
+            case VectorCmdFB::TextAlignFlags_center: a = skia::textlayout::TextAlign::kCenter; break;
+            case VectorCmdFB::TextAlignFlags_justify: a = skia::textlayout::TextAlign::kJustify; break;
+            default:
+                assert("unhandled text align option for paragraph");
+        }
+        fParagraph->setTextAlign(a);
+    }
+    fParagraph->build(text->data(), text->size());
+    const auto ww = cmd.wrap_width();
+    assert(ww > 0.0f && "wrap width is expected to be positive for paragraphs");
+    fParagraph->layout(SkScalar(ww));
+    fParagraph->paint(canvas, SkScalar(cmd.pos()->x()), SkScalar(cmd.pos()->y()));
+
+    canvas.restore();
+}
 void VectorCmdSkiaRenderer::drawCmdRenderTextFB(const VectorCmdFB::CmdRenderText &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped
     SkPaint paint;
 
@@ -661,29 +694,20 @@ void VectorCmdSkiaRenderer::drawCmdRenderTextFB(const VectorCmdFB::CmdRenderText
     auto size = cmd.size();
     auto font = fFont.makeWithSize(SkScalar(size));
     const auto text = cmd.text();
-    if(cmd.is_paragraph()){ ZoneScoped
-        fParagraph->setFontSize(SkScalar(size));
-        fParagraph->setForegroundPaint(paint);
-        fParagraph->build(text->data(), text->size());
-        const auto ww = cmd.wrap_width();
-        assert(ww > 0.0f && "wrap width is expected to be positive in case of is_paragraph=true");
-        fParagraph->layout(SkScalar(ww));
-        fParagraph->paint(canvas, SkScalar(cmd.pos()->x()), SkScalar(cmd.pos()->y()));
-    } else { ZoneScoped
-        float dy;
-        { ZoneScoped
-            SkFontMetrics metrics{};
-            font.getMetrics(&metrics);
-            dy = fabsf(SkScalarToFloat(metrics.fAscent)) + size*ImGui::skiaFontDyFudge;
-        }
-        canvas.drawSimpleText(text->data(),
-                               text->size(),
-                               SkTextEncoding::kUTF8,
-                               cmd.pos()->x(),
-                               cmd.pos()->y()+dy,
-                               font,
-                               paint);
+
+    float dy;
+    { ZoneScoped
+        SkFontMetrics metrics{};
+        font.getMetrics(&metrics);
+        dy = fabsf(SkScalarToFloat(metrics.fAscent)) + size*ImGui::skiaFontDyFudge;
     }
+    canvas.drawSimpleText(text->data(),
+                           text->size(),
+                           SkTextEncoding::kUTF8,
+                           cmd.pos()->x(),
+                           cmd.pos()->y()+dy,
+                           font,
+                           paint);
 
     canvas.restore();
 }

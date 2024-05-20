@@ -66,6 +66,7 @@ class VectorCmdSkiaRenderer {
         void drawCmdTriangleFB(const VectorCmdFB::CmdTriangle &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags);
         void drawCmdTriangleFilledFB(const VectorCmdFB::CmdTriangleFilled &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags);
         void drawCmdRenderTextFB(const VectorCmdFB::CmdRenderText &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags);
+        void drawCmdRenderParagraphFB(const VectorCmdFB::CmdRenderParagraph &cmd, SkCanvas &canvas, VectorCmdFB::DrawListFlags dlFlags);
         void drawCmdCircleFB(const VectorCmdFB::CmdCircle &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags);
         void drawCmdCircleFilledFB(const VectorCmdFB::CmdCircleFilled &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags);
         void handleCmdPushClipRect(const VectorCmdFB::CmdPushClipRect &cmd, SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags);
@@ -111,4 +112,5 @@ class VectorCmdSkiaRenderer {
 #endif
         void drawRectRounded(const SkRect &rect, float r,SkCanvas &canvas,SkPaint &paint);
         void drawRRect(const SkRRect &rect, SkCanvas &canvas,SkPaint &paint);
+
 };
