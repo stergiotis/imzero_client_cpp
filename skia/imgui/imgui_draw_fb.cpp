@@ -185,6 +185,33 @@ namespace ImGui {
     float skiaFontDyFudge = 0.0f;
     std::shared_ptr<Paragraph> paragraph = nullptr;
 }
+static char hiddenPwBuffer[512];
+static size_t hiddenPwBufferNChars = 0;
+static size_t hiddenPwBufferNBytesPerChar = 0;
+static inline void initHiddenPwBuffer(const ImFont &font) {
+    if (hiddenPwBufferNChars != 0) {
+        return;
+    }
+    unsigned int cp = ImGui::skiaPasswordDefaultCharacter;
+    if (font.FallbackGlyph != nullptr && font.FallbackGlyph->Codepoint > 0) {
+        cp = static_cast<unsigned int>(font.FallbackGlyph->Codepoint);
+    }
+    if (cp < 0x7f) {
+        // fast path: single byte character
+        hiddenPwBufferNChars = sizeof(hiddenPwBuffer);
+        memset(hiddenPwBuffer, static_cast<int>(cp), hiddenPwBufferNChars);
+        hiddenPwBufferNBytesPerChar = 1;
+    } else {
+        // slow path: multibyte character
+        ImTextCharToUtf8(hiddenPwBuffer, cp);
+        hiddenPwBufferNBytesPerChar = strnlen(hiddenPwBuffer, sizeof(hiddenPwBuffer));
+        hiddenPwBufferNChars = sizeof(hiddenPwBufferNChars) / hiddenPwBufferNBytesPerChar;
+        for (size_t i = 1; i < hiddenPwBufferNChars; i++) {
+            memcpy(&hiddenPwBuffer[i * hiddenPwBufferNBytesPerChar], hiddenPwBuffer,
+                   hiddenPwBufferNBytesPerChar);
+        }
+    }
+}
 #ifndef IMGUI_USE_BGRA_PACKED_COLOR
 //#error "skia uses BGRA packed colors, enable IMGUI_USE_BGRA_PACKED_COLOR in imconfig.h"
 #endif
@@ -268,6 +295,9 @@ void ImDrawList::serializeFB(const uint8_t *&out,size_t &size) { ZoneScoped
     fbBuilder->Finish(dlFb,nullptr);
     size = fbBuilder->GetSize();
     out = fbBuilder->GetBufferPointer();
+}
+static inline bool isPasswordFont(const ImFont &font) {
+    return font.Glyphs.empty();
 }
 #endif
 
@@ -4131,6 +4161,27 @@ SKIA_DRAW_BACKEND_BEGIN
     if(remaining != nullptr) {
         *remaining = nullptr;
     }
+
+    bool freeAllocatedText = false;
+
+    if(isPasswordFont(*this)) {
+        initHiddenPwBuffer(*this);
+        auto const len = text_end-text_begin;
+        if(len > hiddenPwBufferNChars) { ZoneScopedN("slow path password text allocation")
+            text_begin = static_cast<char *>(IM_ALLOC(len*hiddenPwBufferNBytesPerChar));
+            // slow path, very long or high codepoints password
+            for(size_t i=0;i<len;i++) {
+                memcpy(const_cast<char*>(&text_begin[i*hiddenPwBufferNBytesPerChar]), hiddenPwBuffer, hiddenPwBufferNBytesPerChar);
+            }
+            text_end = text_begin + len;
+            freeAllocatedText = true;
+        } else {
+            // fast path, password fits in buffer
+            text_begin = hiddenPwBuffer;
+        }
+        text_end = text_begin + len;
+    }
+
     auto is_paragraph = wrap_width > 0.0f || isParagraphText(text_begin,text_end);
     if(is_paragraph) { ZoneScoped
         if(wrap_width <= 0.0f) {
@@ -4147,6 +4198,10 @@ SKIA_DRAW_BACKEND_BEGIN
         auto f = ImGui::skiaFont.makeWithSize(SkScalar(size));
         SkScalar advanceWidth = f.measureText(text_begin,text_end-text_begin,SkTextEncoding::kUTF8, nullptr);
         return ImVec2(SkScalarToFloat(advanceWidth), size);
+    }
+
+    if(freeAllocatedText) {
+        IM_FREE(const_cast<char*>(text_begin));
     }
 SKIA_DRAW_BACKEND_END
 
@@ -4236,7 +4291,7 @@ SKIA_DRAW_BACKEND_BEGIN
     auto posFb = VectorCmdFB::SingleVec2(pos.x,pos.y);
     auto clipRectFb = VectorCmdFB::SingleVec4(0.0,0.0,0.0,0.0);
     auto textFb = draw_list->fbBuilder->CreateString(text_begin,len);
-    auto arg = VectorCmdFB::CreateCmdRenderText(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(this),size,&posFb,col,&clipRectFb,textFb,0.0,false,false);
+    auto arg = VectorCmdFB::CreateCmdRenderText(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(this),size,&posFb,col,&clipRectFb,textFb);
     draw_list->addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdRenderText,arg.Union());
     return;
 SKIA_DRAW_BACKEND_END
@@ -4253,6 +4308,7 @@ SKIA_DRAW_BACKEND_END
     draw_list->PrimRectUV(ImVec2(x + glyph->X0 * scale, y + glyph->Y0 * scale), ImVec2(x + glyph->X1 * scale, y + glyph->Y1 * scale), ImVec2(glyph->U0, glyph->V0), ImVec2(glyph->U1, glyph->V1), col);
 }
 
+
 // Note: as with every ImDrawList drawing function, this expects that the font atlas texture is bound.
 void ImFont::RenderText(ImDrawList* draw_list, float size, const ImVec2& pos, ImU32 col, const ImVec4& clip_rect, const char* text_begin, const char* text_end, float wrap_width, bool cpu_fine_clip) const
 { ZoneScoped
@@ -4260,16 +4316,65 @@ void ImFont::RenderText(ImDrawList* draw_list, float size, const ImVec2& pos, Im
         text_end = text_begin + strlen(text_begin); // ImGui:: functions generally already provides a valid text_end, so this is merely to handle direct calls.
 
 SKIA_DRAW_BACKEND_BEGIN
-    if(pos.y <= clip_rect.w) {
-        auto posFb = VectorCmdFB::SingleVec2(pos.x,pos.y);
-        auto clipRectFb = VectorCmdFB::SingleVec4(clip_rect.x,clip_rect.y,clip_rect.z,clip_rect.w);
-        auto textFb = draw_list->fbBuilder->CreateString(text_begin,static_cast<size_t>(text_end-text_begin));
+    auto const len = static_cast<size_t>(text_end-text_begin);
+    if(pos.y > clip_rect.w) {
+        return;
+    }
+
+    auto posFb = VectorCmdFB::SingleVec2(pos.x,pos.y);
+    auto clipRectFb = VectorCmdFB::SingleVec4(clip_rect.x,clip_rect.y,clip_rect.z,clip_rect.w);
+    flatbuffers::Offset<flatbuffers::String> textFb;
+    if(isPasswordFont(*this)) {
+        initHiddenPwBuffer(*this);
+        if(hiddenPwBufferNChars == 0) {
+            unsigned int cp = ImGui::skiaPasswordDefaultCharacter;
+            if(this->FallbackGlyph != nullptr && this->FallbackGlyph->Codepoint > 0) {
+                cp = static_cast<unsigned int>(this->FallbackGlyph->Codepoint);
+            }
+            if(cp < 0x7f) {
+                // fast path: single byte character
+                hiddenPwBufferNChars = sizeof(hiddenPwBuffer);
+                memset(hiddenPwBuffer,static_cast<int>(cp),hiddenPwBufferNChars);
+                hiddenPwBufferNBytesPerChar = 1;
+            } else {
+                // slow path: multibyte character
+                ImTextCharToUtf8(hiddenPwBuffer, cp);
+                hiddenPwBufferNBytesPerChar = strnlen(hiddenPwBuffer, sizeof(hiddenPwBuffer));
+                hiddenPwBufferNChars = sizeof(hiddenPwBufferNChars)/hiddenPwBufferNBytesPerChar;
+                for(size_t i=1;i<hiddenPwBufferNChars;i++) {
+                    memcpy(&hiddenPwBuffer[i * hiddenPwBufferNBytesPerChar], hiddenPwBuffer, hiddenPwBufferNBytesPerChar);
+                }
+            }
+        }
+
+        if(len > hiddenPwBufferNChars) {
+            auto bufferLong = static_cast<char *>(IM_ALLOC(len*hiddenPwBufferNBytesPerChar));
+            // slow path, very long or high codepoints password
+            for(size_t i=0;i<len;i++) {
+                memcpy(&bufferLong[i*hiddenPwBufferNBytesPerChar], hiddenPwBuffer, hiddenPwBufferNBytesPerChar);
+            }
+            textFb = draw_list->fbBuilder->CreateString(bufferLong,len*hiddenPwBufferNBytesPerChar);
+            IM_FREE(bufferLong);
+        } else {
+            // fast path, password fits in buffer
+            textFb = draw_list->fbBuilder->CreateString(hiddenPwBuffer, len*hiddenPwBufferNBytesPerChar);
+        }
+
+        auto const arg = VectorCmdFB::CreateCmdRenderText(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(this),size,&posFb,col,&clipRectFb,textFb);
+        draw_list->addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdRenderText,arg.Union());
+    } else {
+        textFb = draw_list->fbBuilder->CreateString(text_begin,len);
         auto isParagraph = wrap_width > 0.0f || isParagraphText(text_begin,text_end);
         if(isParagraph && wrap_width <= 0.0f) {
             wrap_width = ImGui::GetContentRegionAvail().x;
         }
-        auto arg = VectorCmdFB::CreateCmdRenderText(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(this),size,&posFb,col,&clipRectFb,textFb,wrap_width,cpu_fine_clip,isParagraph);
-        draw_list->addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdRenderText,arg.Union());
+        if(isParagraph) {
+            auto const arg = VectorCmdFB::CreateCmdRenderParagraph(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(this),size,&posFb,col,&clipRectFb,textFb,wrap_width,0.0f,VectorCmdFB::TextAlignFlags_left);
+            draw_list->addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdRenderParagraph,arg.Union());
+        } else {
+            auto const arg = VectorCmdFB::CreateCmdRenderText(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(this),size,&posFb,col,&clipRectFb,textFb);
+            draw_list->addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdRenderText,arg.Union());
+        }
     }
     return;
 SKIA_DRAW_BACKEND_END

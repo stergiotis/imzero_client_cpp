@@ -656,7 +656,6 @@ void VectorCmdSkiaRenderer::drawCmdRenderParagraphFB(const VectorCmdFB::CmdRende
     canvas.clipRect(SkRect::MakeLTRB(cr->x(), cr->y(), cr->z(),cr->w()));
 
     paint.setColor(convertColor(cmd.col()));
-    paint.setColor(SK_ColorYELLOW);
     auto size = cmd.size();
     const auto text = cmd.text();
 

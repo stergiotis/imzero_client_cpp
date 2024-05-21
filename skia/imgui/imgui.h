@@ -314,6 +314,7 @@ namespace ImGui
     extern bool skiaActive;
     extern float skiaFontDyFudge;
     extern std::shared_ptr<Paragraph> paragraph;
+    constexpr unsigned int skiaPasswordDefaultCharacter = U'*'; // TODO make this configurable or runtime selectable
 #endif
 
     // Context creation and access
@@ -3233,10 +3234,23 @@ struct ImFont
     IMGUI_API const ImFontGlyph*FindGlyph(ImWchar c) const;
     IMGUI_API const ImFontGlyph*FindGlyphNoFallback(ImWchar c) const;
 #ifdef SKIA_DRAW_BACKEND
-    float                       GetCharAdvance(ImWchar c) const     {
-        auto tmp = static_cast<uint32_t>(c);
-        constexpr auto encoding = SkTextEncoding::kUTF32;
-        return SkScalarToFloat(ImGui::skiaFont.makeWithSize(SkScalar(FontSize)).measureText(&tmp,sizeof(ImWchar),encoding, nullptr));
+    float GetCharAdvance(ImWchar c) const {
+        if(!ImGui::skiaActive) {
+            return ((int)c < IndexAdvanceX.Size) ? IndexAdvanceX[(int)c] : FallbackAdvanceX;
+        }
+
+        uint32_t tmp;
+        if(this->Glyphs.empty()) {
+            // password font
+            tmp = ImGui::skiaPasswordDefaultCharacter;
+        } else {
+            tmp = c;
+        }
+        auto const font = ImGui::skiaFont.makeWithSize(SkScalar(FontSize));
+        auto const glyph = font.unicharToGlyph(SkUnichar(tmp));
+        SkScalar advanceX;
+        font.getWidths(&glyph,1,&advanceX);
+        return SkScalarToFloat(advanceX);
     }
 #else
     float                       GetCharAdvance(ImWchar c) const     { return ((int)c < IndexAdvanceX.Size) ? IndexAdvanceX[(int)c] : FallbackAdvanceX; }
