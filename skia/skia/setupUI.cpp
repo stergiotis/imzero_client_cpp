@@ -315,7 +315,7 @@ void ImZeroSkiaSetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &v
             auto p0 = ImGui::GetItemRectMin();
             auto p1 = ImGui::GetItemRectMax();
             auto dl = ImGui::GetWindowDrawList();
-            dl->PushClipRect(p0, p1);
+            dl->PushClipRect(p0, p1,true);
             ImVec2 tl = p0+ImVec2(7.0f*5.0f,0.0f);
             auto bl0 = p0+ImVec2(0.0f,dy);
             auto bl = tl+ImVec2(0.0f,dy);
