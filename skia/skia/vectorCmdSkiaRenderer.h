@@ -67,6 +67,7 @@ class VectorCmdSkiaRenderer {
         void drawCmdTriangleFilledFB(const VectorCmdFB::CmdTriangleFilled &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags);
         void drawCmdRenderTextFB(const VectorCmdFB::CmdRenderText &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags);
         void drawCmdRenderParagraphFB(const VectorCmdFB::CmdRenderParagraph &cmd, SkCanvas &canvas, VectorCmdFB::DrawListFlags dlFlags);
+        void drawCmdRenderUnicodeCodepointFB(const VectorCmdFB::CmdRenderUnicodeCodepoint &cmd, SkCanvas &canvas, VectorCmdFB::DrawListFlags dlFlags);
         void drawCmdCircleFB(const VectorCmdFB::CmdCircle &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags);
         void drawCmdCircleFilledFB(const VectorCmdFB::CmdCircleFilled &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags);
         void handleCmdPushClipRect(const VectorCmdFB::CmdPushClipRect &cmd, SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags);

@@ -266,20 +266,20 @@ void ImGuiLayer::drawImGuiVectorCmdsFB(SkCanvas &canvas) {
     }
 }
 
-void ImGuiLayer::onPaint(SkSurface* surface) { ZoneScoped
+void ImGuiLayer::onPaint(SkSurface* surface) { ZoneScoped;
 
     ImGui::skiaActive = fSkiaBackendActive;
     auto renderMode = fVectorCmdSkiaRenderer.getRenderMode();
     resetReceiveStat();
     resetSendStat();
-    if(fStandalone) { ZoneScoped("demo window");
+    if(fStandalone) { ZoneScopedN("demo window");
         ImGui::ShowDemoWindow();
-    } else { ZoneScopedN("render fffi commands")
+    } else { ZoneScopedN("render fffi commands");
         render_render();
     }
 
     SaveFormatE saveFormat = SaveFormatE_None;
-    if(ImGui::Begin("ImZeroSkia Settings")) { ZoneScoped
+    if(ImGui::Begin("ImZeroSkia Settings")) { ZoneScoped;
         fImZeroSkiaSetupUi.render(saveFormat, fVectorCmdSkiaRenderer, fSkiaBackendActive,
                                   fTotalVectorCmdSerializedSize, totalSentBytes+totalReceivedBytes,
                                   fSkpBytesWritten,fSvgBytesWritten, fPngBytesWritten,
@@ -291,7 +291,7 @@ void ImGuiLayer::onPaint(SkSurface* surface) { ZoneScoped
 
     if(saveFormat != SaveFormatE_None) {
         switch(saveFormat) {
-            case SaveFormatE_SKP: { ZoneScoped
+            case SaveFormatE_SKP: { ZoneScoped;
                 constexpr auto path = "/tmp/skiaBackend.skp";
 
                 SkPictureRecorder skiaRecorder;
@@ -311,7 +311,7 @@ void ImGuiLayer::onPaint(SkSurface* surface) { ZoneScoped
                 break;
             }
             case SaveFormatE_SVG: // fallthrough
-            case SaveFormatE_SVGNoFont: { ZoneScoped
+            case SaveFormatE_SVGNoFont: { ZoneScoped;
                 SkRect bounds = SkRect::MakeIWH(fWindow->width(), fWindow->height());
                 fVectorCmdSkiaRenderer.changeRenderMode(renderMode | RenderModeE_SVG);
 
@@ -347,7 +347,7 @@ void ImGuiLayer::onPaint(SkSurface* surface) { ZoneScoped
                 fVectorCmdSkiaRenderer.changeRenderMode(renderMode);
                 break;
             }
-            case SaveFormatE_PNG: { ZoneScoped
+            case SaveFormatE_PNG: { ZoneScoped;
                 constexpr auto path = "/tmp/skiaBackend.png";
                 const auto s = SkISize::Make(fWindow->width(), fWindow->height());
                 const auto c = SkColorInfo(kRGBA_8888_SkColorType, kPremul_SkAlphaType, SkColorSpace::MakeSRGB());
@@ -365,7 +365,7 @@ void ImGuiLayer::onPaint(SkSurface* surface) { ZoneScoped
                 }
                 break;
             }
-            case SaveFormatE_VECTORCMD: { ZoneScoped
+            case SaveFormatE_VECTORCMD: { ZoneScoped;
                 constexpr auto path = "/tmp/skiaBackend.flatbuffers";
                 SkFILEWStream stream(path);
 
@@ -381,7 +381,7 @@ void ImGuiLayer::onPaint(SkSurface* surface) { ZoneScoped
                 break;
             }
         }
-    } else if(fSkiaBackendActive) { ZoneScoped
+    } else if(fSkiaBackendActive) { ZoneScoped;
         auto skiaCanvas = surface->getCanvas();
 
         skiaCanvas->clear(SK_ColorTRANSPARENT);
@@ -390,7 +390,7 @@ void ImGuiLayer::onPaint(SkSurface* surface) { ZoneScoped
         drawImGuiVectorCmdsFB(*skiaCanvas);
         //renderImDrawData(*skiaCanvas);
         skiaCanvas->restore();
-    } else { ZoneScoped
+    } else { ZoneScoped;
         drawImDrawData(*surface->getCanvas());
     }
 

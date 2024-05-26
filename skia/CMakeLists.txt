@@ -4,7 +4,7 @@ project(imgui_skia_exe)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_COMPILER clang++)
 
-set(COMPILE_DEFINITIONS TRACY_ENABLE)
+add_compile_definitions(TRACY_ENABLE)
 include_directories("${CMAKE_CURRENT_LIST_DIR}/./imgui"
 "${CMAKE_CURRENT_LIST_DIR}/./src/arena/simple"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/skia"
@@ -22,8 +22,16 @@ include_directories("${CMAKE_CURRENT_LIST_DIR}/./imgui"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/flatbuffers")
 set(COMPILE_OPTIONS -std=c++20
--O3)
-link_libraries(-DNDEBUG
+-g
+-gdwarf-4
+-Wall
+-Wformat
+-Wextra
+-O1
+-fsanitize=address
+-fno-omit-frame-pointer
+-DIMZERO_DEBUG_BUILD)
+link_libraries(-fsanitize=address
 -ldl
 -lpthread
 -lfreetype

@@ -222,6 +222,14 @@ table CmdRenderParagraph {
     letter_spacing: float;
     text_align: TextAlignFlags;
 }
+table CmdRenderUnicodeCodepoint {
+    imfont: uint64; // FIXME
+    size: float;
+    pos: SingleVec2;
+    col: uint32;
+    clip_rect: SingleVec4;
+    codepoint: uint32;
+}
 table CmdTranslation {
     translation: SingleVec2;
 }
@@ -278,6 +286,7 @@ union VectorCmdArg {
     CmdPopClipRect,
     CmdRenderText,
     CmdRenderParagraph,
+    CmdRenderUnicodeCodepoint,
     CmdRectFilledMultiColor,
     CmdWrappedDrawList,
     CmdVertexDraw,

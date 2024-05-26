@@ -106,6 +106,9 @@ struct CmdRenderTextBuilder;
 struct CmdRenderParagraph;
 struct CmdRenderParagraphBuilder;
 
+struct CmdRenderUnicodeCodepoint;
+struct CmdRenderUnicodeCodepointBuilder;
+
 struct CmdTranslation;
 struct CmdTranslationBuilder;
 
@@ -204,16 +207,17 @@ enum VectorCmdArg : uint8_t {
   VectorCmdArg_CmdPopClipRect = 25,
   VectorCmdArg_CmdRenderText = 26,
   VectorCmdArg_CmdRenderParagraph = 27,
-  VectorCmdArg_CmdRectFilledMultiColor = 28,
-  VectorCmdArg_CmdWrappedDrawList = 29,
-  VectorCmdArg_CmdVertexDraw = 30,
-  VectorCmdArg_CmdPushRotation = 31,
-  VectorCmdArg_CmdPopRotation = 32,
+  VectorCmdArg_CmdRenderUnicodeCodepoint = 28,
+  VectorCmdArg_CmdRectFilledMultiColor = 29,
+  VectorCmdArg_CmdWrappedDrawList = 30,
+  VectorCmdArg_CmdVertexDraw = 31,
+  VectorCmdArg_CmdPushRotation = 32,
+  VectorCmdArg_CmdPopRotation = 33,
   VectorCmdArg_MIN = VectorCmdArg_NONE,
   VectorCmdArg_MAX = VectorCmdArg_CmdPopRotation
 };
 
-inline const VectorCmdArg (&EnumValuesVectorCmdArg())[33] {
+inline const VectorCmdArg (&EnumValuesVectorCmdArg())[34] {
   static const VectorCmdArg values[] = {
     VectorCmdArg_NONE,
     VectorCmdArg_CmdRegisterFont,
@@ -243,6 +247,7 @@ inline const VectorCmdArg (&EnumValuesVectorCmdArg())[33] {
     VectorCmdArg_CmdPopClipRect,
     VectorCmdArg_CmdRenderText,
     VectorCmdArg_CmdRenderParagraph,
+    VectorCmdArg_CmdRenderUnicodeCodepoint,
     VectorCmdArg_CmdRectFilledMultiColor,
     VectorCmdArg_CmdWrappedDrawList,
     VectorCmdArg_CmdVertexDraw,
@@ -253,7 +258,7 @@ inline const VectorCmdArg (&EnumValuesVectorCmdArg())[33] {
 }
 
 inline const char * const *EnumNamesVectorCmdArg() {
-  static const char * const names[34] = {
+  static const char * const names[35] = {
     "NONE",
     "CmdRegisterFont",
     "CmdPolyline",
@@ -282,6 +287,7 @@ inline const char * const *EnumNamesVectorCmdArg() {
     "CmdPopClipRect",
     "CmdRenderText",
     "CmdRenderParagraph",
+    "CmdRenderUnicodeCodepoint",
     "CmdRectFilledMultiColor",
     "CmdWrappedDrawList",
     "CmdVertexDraw",
@@ -408,6 +414,10 @@ template<> struct VectorCmdArgTraits<VectorCmdFB::CmdRenderText> {
 
 template<> struct VectorCmdArgTraits<VectorCmdFB::CmdRenderParagraph> {
   static const VectorCmdArg enum_value = VectorCmdArg_CmdRenderParagraph;
+};
+
+template<> struct VectorCmdArgTraits<VectorCmdFB::CmdRenderUnicodeCodepoint> {
+  static const VectorCmdArg enum_value = VectorCmdArg_CmdRenderUnicodeCodepoint;
 };
 
 template<> struct VectorCmdArgTraits<VectorCmdFB::CmdRectFilledMultiColor> {
@@ -3082,6 +3092,97 @@ inline ::flatbuffers::Offset<CmdRenderParagraph> CreateCmdRenderParagraphDirect(
       text_align);
 }
 
+struct CmdRenderUnicodeCodepoint FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef CmdRenderUnicodeCodepointBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_IMFONT = 4,
+    VT_SIZE = 6,
+    VT_POS = 8,
+    VT_COL = 10,
+    VT_CLIP_RECT = 12,
+    VT_CODEPOINT = 14
+  };
+  uint64_t imfont() const {
+    return GetField<uint64_t>(VT_IMFONT, 0);
+  }
+  float size() const {
+    return GetField<float>(VT_SIZE, 0.0f);
+  }
+  const VectorCmdFB::SingleVec2 *pos() const {
+    return GetStruct<const VectorCmdFB::SingleVec2 *>(VT_POS);
+  }
+  uint32_t col() const {
+    return GetField<uint32_t>(VT_COL, 0);
+  }
+  const VectorCmdFB::SingleVec4 *clip_rect() const {
+    return GetStruct<const VectorCmdFB::SingleVec4 *>(VT_CLIP_RECT);
+  }
+  uint32_t codepoint() const {
+    return GetField<uint32_t>(VT_CODEPOINT, 0);
+  }
+  bool Verify(::flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<uint64_t>(verifier, VT_IMFONT, 8) &&
+           VerifyField<float>(verifier, VT_SIZE, 4) &&
+           VerifyField<VectorCmdFB::SingleVec2>(verifier, VT_POS, 4) &&
+           VerifyField<uint32_t>(verifier, VT_COL, 4) &&
+           VerifyField<VectorCmdFB::SingleVec4>(verifier, VT_CLIP_RECT, 4) &&
+           VerifyField<uint32_t>(verifier, VT_CODEPOINT, 4) &&
+           verifier.EndTable();
+  }
+};
+
+struct CmdRenderUnicodeCodepointBuilder {
+  typedef CmdRenderUnicodeCodepoint Table;
+  ::flatbuffers::FlatBufferBuilder &fbb_;
+  ::flatbuffers::uoffset_t start_;
+  void add_imfont(uint64_t imfont) {
+    fbb_.AddElement<uint64_t>(CmdRenderUnicodeCodepoint::VT_IMFONT, imfont, 0);
+  }
+  void add_size(float size) {
+    fbb_.AddElement<float>(CmdRenderUnicodeCodepoint::VT_SIZE, size, 0.0f);
+  }
+  void add_pos(const VectorCmdFB::SingleVec2 *pos) {
+    fbb_.AddStruct(CmdRenderUnicodeCodepoint::VT_POS, pos);
+  }
+  void add_col(uint32_t col) {
+    fbb_.AddElement<uint32_t>(CmdRenderUnicodeCodepoint::VT_COL, col, 0);
+  }
+  void add_clip_rect(const VectorCmdFB::SingleVec4 *clip_rect) {
+    fbb_.AddStruct(CmdRenderUnicodeCodepoint::VT_CLIP_RECT, clip_rect);
+  }
+  void add_codepoint(uint32_t codepoint) {
+    fbb_.AddElement<uint32_t>(CmdRenderUnicodeCodepoint::VT_CODEPOINT, codepoint, 0);
+  }
+  explicit CmdRenderUnicodeCodepointBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ::flatbuffers::Offset<CmdRenderUnicodeCodepoint> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = ::flatbuffers::Offset<CmdRenderUnicodeCodepoint>(end);
+    return o;
+  }
+};
+
+inline ::flatbuffers::Offset<CmdRenderUnicodeCodepoint> CreateCmdRenderUnicodeCodepoint(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    uint64_t imfont = 0,
+    float size = 0.0f,
+    const VectorCmdFB::SingleVec2 *pos = nullptr,
+    uint32_t col = 0,
+    const VectorCmdFB::SingleVec4 *clip_rect = nullptr,
+    uint32_t codepoint = 0) {
+  CmdRenderUnicodeCodepointBuilder builder_(_fbb);
+  builder_.add_imfont(imfont);
+  builder_.add_codepoint(codepoint);
+  builder_.add_clip_rect(clip_rect);
+  builder_.add_col(col);
+  builder_.add_pos(pos);
+  builder_.add_size(size);
+  return builder_.Finish();
+}
+
 struct CmdTranslation FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
   typedef CmdTranslationBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
@@ -3545,6 +3646,9 @@ struct SingleVectorCmdDto FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table
   const VectorCmdFB::CmdRenderParagraph *arg_as_CmdRenderParagraph() const {
     return arg_type() == VectorCmdFB::VectorCmdArg_CmdRenderParagraph ? static_cast<const VectorCmdFB::CmdRenderParagraph *>(arg()) : nullptr;
   }
+  const VectorCmdFB::CmdRenderUnicodeCodepoint *arg_as_CmdRenderUnicodeCodepoint() const {
+    return arg_type() == VectorCmdFB::VectorCmdArg_CmdRenderUnicodeCodepoint ? static_cast<const VectorCmdFB::CmdRenderUnicodeCodepoint *>(arg()) : nullptr;
+  }
   const VectorCmdFB::CmdRectFilledMultiColor *arg_as_CmdRectFilledMultiColor() const {
     return arg_type() == VectorCmdFB::VectorCmdArg_CmdRectFilledMultiColor ? static_cast<const VectorCmdFB::CmdRectFilledMultiColor *>(arg()) : nullptr;
   }
@@ -3675,6 +3779,10 @@ template<> inline const VectorCmdFB::CmdRenderText *SingleVectorCmdDto::arg_as<V
 
 template<> inline const VectorCmdFB::CmdRenderParagraph *SingleVectorCmdDto::arg_as<VectorCmdFB::CmdRenderParagraph>() const {
   return arg_as_CmdRenderParagraph();
+}
+
+template<> inline const VectorCmdFB::CmdRenderUnicodeCodepoint *SingleVectorCmdDto::arg_as<VectorCmdFB::CmdRenderUnicodeCodepoint>() const {
+  return arg_as_CmdRenderUnicodeCodepoint();
 }
 
 template<> inline const VectorCmdFB::CmdRectFilledMultiColor *SingleVectorCmdDto::arg_as<VectorCmdFB::CmdRectFilledMultiColor>() const {
@@ -4064,6 +4172,10 @@ inline bool VerifyVectorCmdArg(::flatbuffers::Verifier &verifier, const void *ob
     }
     case VectorCmdArg_CmdRenderParagraph: {
       auto ptr = reinterpret_cast<const VectorCmdFB::CmdRenderParagraph *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case VectorCmdArg_CmdRenderUnicodeCodepoint: {
+      auto ptr = reinterpret_cast<const VectorCmdFB::CmdRenderUnicodeCodepoint *>(obj);
       return verifier.VerifyTable(ptr);
     }
     case VectorCmdArg_CmdRectFilledMultiColor: {

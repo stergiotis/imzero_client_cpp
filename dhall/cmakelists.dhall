@@ -52,7 +52,7 @@ let cmakelistsToText = \(m : cmakelists.Type) ->
 	++ "set(CMAKE_CXX_STANDARD ${Natural/show m.cxxStandard})\n"
 	++ "set(CMAKE_CXX_COMPILER ${m.cxx})\n"
 	++ "\n"
-	++ "set(COMPILE_DEFINITIONS ${prelude.Text.concatSep "\n" gDefines})\n"
+	++ "add_compile_definitions(${prelude.Text.concatSep "\n" gDefines})\n"
 	++ "include_directories(${composePathList gIncludeDirs})\n"
 	++ "set(COMPILE_OPTIONS ${prelude.Text.concatSep "\n" gCompileOptions})\n"
 	++ "link_libraries(${prelude.Text.concatSep "\n" gLinkOptions})\n"
