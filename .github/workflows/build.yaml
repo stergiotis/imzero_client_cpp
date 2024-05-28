@@ -34,11 +34,9 @@ jobs:
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
       - name: Generate fffi dispatching code
         run: ./common/generate.sh
+      - name: Build Skia Backend
+        run: ./skia/build_ab_initio.sh
       - name: Build ImGui Glfw Executable
         run: ./imgui_glfw/build.sh
       - name: Build Wasm
         run: ./imgui_wasm/build.sh
-      - name: Build Skia
-        run: ./skia/build_skia.sh
-      - name: Build Skia Backend
-        run: ./skia/build.sh
