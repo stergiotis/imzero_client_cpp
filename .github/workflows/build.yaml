@@ -23,9 +23,9 @@ jobs:
           go-version-file: 'go.mod'
           cache-dependency-path: 'go.sum'
       - name: Install
+        run: ./scripts/install_nonportable.sh
+      - name: Install
         run: ./scripts/install.sh
-      - name: Install distribution dependent
-        run: ./scripts/install_ubuntu2204.sh
       - name: Install git repos
         run: ./scripts/install_3rd_party_git_repos.sh
       # Enable tmate debugging of manually-triggered workflows if the input option was provided
