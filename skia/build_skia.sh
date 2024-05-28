@@ -1,9 +1,7 @@
 #!/bin/bash
 here=$(dirname "$(readlink -f "$BASH_SOURCE")")
 set -ev
-cd ../../contrib
-git clone https://github.com/google/skia || true
-cd skia
+cd ../../contrib/skia
 #sudo apt install clang libjpeg-dev libicu-dev libwebp-dev libfontconfig-dev
 git checkout "chrome/m123"
 ./tools/install_dependencies.sh

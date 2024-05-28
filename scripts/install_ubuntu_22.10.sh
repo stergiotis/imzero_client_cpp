@@ -1,0 +1,1 @@
+install_ubuntu_22.04.sh
