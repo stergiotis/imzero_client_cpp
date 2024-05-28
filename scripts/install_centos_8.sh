@@ -15,7 +15,7 @@ if ! [ -x "$(command -v gcc)" ]; then
 	sudo yum install -y gcc
 fi
 if ! [ -x "$(command -v xsltproc)" ]; then
-	sudo yum install -y xsltproc
+	sudo yum install -y libxslt
 fi
 # freetype
 sudo yum install -y freetype-devel
