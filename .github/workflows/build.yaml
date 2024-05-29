@@ -15,14 +15,14 @@ jobs:
     name: build_ubuntu
     runs-on: ubuntu-22.04
     steps:
-      - name: Maximize build space
-        uses: easimon/maximize-build-space@master
-        with:
-          root-reserve-mb: 512
-          swap-size-mb: 1024
-          remove-dotnet: 'true'
-          remove-android: 'true'
-          remove-haskell: 'true'
+       #- name: Maximize build space
+       #  uses: easimon/maximize-build-space@master
+       #  with:
+       #    root-reserve-mb: 512
+       #    swap-size-mb: 1024
+       #    remove-dotnet: 'true'
+       #    remove-android: 'true'
+       #    remove-haskell: 'true'
       - name: Checkout
         uses: actions/checkout@v4
       - name: Set up Go
@@ -30,18 +30,16 @@ jobs:
         with:
           go-version-file: 'go.mod'
           cache-dependency-path: 'go.sum'
-      - name: Disk Space
-        run: "df -h"
+      # Enable tmate debugging of manually-triggered workflows if the input option was provided
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
       - name: Install
         run: ./scripts/install_nonportable.sh
       - name: Install
         run: ./scripts/install.sh
       - name: Install git repos
         run: ./scripts/install_3rd_party_git_repos.sh
-      # Enable tmate debugging of manually-triggered workflows if the input option was provided
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
       - name: Generate fffi dispatching code
         run: ./common/generate.sh
       - name: Build Skia Backend
