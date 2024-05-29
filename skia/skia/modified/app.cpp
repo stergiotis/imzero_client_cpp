@@ -87,10 +87,18 @@ Application* Application::Create(int argc, char** argv, void* platformData) {
     ImGui::SetAllocatorFunctions(imZeroMemAlloc,imZeroMemFree,nullptr);
     #endif
 
-    const auto ttfFilePath = findFlagValueDefault(argc,argv,"-ttfFilePath","./SauceCodeProNerdFontPropo-Regular.ttf");
-    const auto fffiInFile = findFlagValueDefault(argc, argv, "-fffiInFile", nullptr);
-    const auto fffiOutFile = findFlagValueDefault(argc, argv, "-fffiOutFile", nullptr);
-    const auto fontDyFudge = findFlagValueDefault(argc, argv, "-fontDyFudge", nullptr);
+    auto const ttfFilePath = findFlagValueDefault(argc,argv,"-ttfFilePath","./SauceCodeProNerdFontPropo-Regular.ttf");
+    auto const fffiInFile = findFlagValueDefault(argc, argv, "-fffiInFile", nullptr);
+    auto const fffiOutFile = findFlagValueDefault(argc, argv, "-fffiOutFile", nullptr);
+    auto const fontDyFudge = findFlagValueDefault(argc, argv, "-fontDyFudge", "0.0");
+
+    {
+        auto const fontDyFudgeNum = strtof(fontDyFudge, nullptr);
+        if(!isnanf(fontDyFudgeNum) && fontDyFudgeNum >= -10000.0f && fontDyFudgeNum <= 10000.0f) {
+            fprintf(stderr,"using font dy fudge value %f px to modify font baseline\n", fontDyFudgeNum);
+            ImGui::skiaFontDyFudge = fontDyFudgeNum;
+        }
+    }
 
     if(hasFlag(argc,argv,"-help")) {
         showUsage(argv[0],stderr);
