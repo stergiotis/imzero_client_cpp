@@ -30,6 +30,8 @@ jobs:
         with:
           go-version-file: 'go.mod'
           cache-dependency-path: 'go.sum'
+      - name: Disk Space
+        run: "df -h"
       - name: Install
         run: ./scripts/install_nonportable.sh
       - name: Install
