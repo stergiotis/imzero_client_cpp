@@ -23,9 +23,34 @@ let sourceTreeParts = [
 	, mainPart
 ]
 let cxx = "clang++"
-let cppstd = "c++20"
+let cppstd = 20
+let cxxflagsDebug = [
+        , "-g"
+        , "-gdwarf-4"
+        , "-Wall"
+        , "-Wformat"
+        , "-Wextra"
+        , "-O1"
+        , "-fsanitize=address"
+        , "-fno-omit-frame-pointer"
+        , "-DIMZERO_DEBUG_BUILD"
+        --, "-fno-optimize-sibling-calls" -- no tail calls for better stacktraces
+]
+let cxxflagsRelease = [
+        , "-O3"
+]
+let ldflagsDebug = ["-fsanitize=address"] : List Text
+let ldflagsRelease = ["-DNDEBUG"] : List Text
+--let stdlibFlags = ["-stdlib=libc++"] : List Text
+let stdlibFlags = [] : List Text
+let debug = False
 in {
-	, sourceTreeParts
-	, cxx
-	, cppstd
+    , sourceTreeParts
+    , cxx
+    , cppstd
+    , cxxflags = if debug then cxxflagsDebug else cxxflagsRelease
+    , ldflags = if debug then ldflagsDebug else ldflagsRelease
+    , stdlibFlags
+    , debug
 }
+
