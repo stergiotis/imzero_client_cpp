@@ -58,74 +58,36 @@ void operator delete(void* ptr) noexcept {
 #endif
 #endif
 
-static bool hasFlag(int argc, char **argv,const char *flag) {
-    for(int i=0;i<argc;i++) {
-        if(strcmp(argv[i],flag) == 0) {
-            return true;
-        }
-    }
-    return false;
-}
-static const char *findFlagValueDefault(int argc, char **argv,const char *flag,const char *defaultValue) {
-    for(int i=0;i<argc;i++) {
-        if(strcmp(argv[i],flag) == 0) {
-            if(i == argc) {
-                return defaultValue;
-            } else {
-                return argv[i+1];
-            }
-        }
-    }
-    return defaultValue;
-}
-static void showUsage(const char *name, FILE *file) {
-   fprintf(stderr, "%s -ttfFilePath <file.ttf> -fontDyFudge <float> -fffiInFile <fffiIn> -fffiOutFile <fffiOut> -disableVsync -disableFffi\n", name);
-}
+CliOptions opts;
 
 Application* Application::Create(int argc, char** argv, void* platformData) {
     #ifdef TRACY_ENABLE
     ImGui::SetAllocatorFunctions(imZeroMemAlloc,imZeroMemFree,nullptr);
     #endif
 
-    auto const ttfFilePath = findFlagValueDefault(argc,argv,"-ttfFilePath","./SauceCodeProNerdFontPropo-Regular.ttf");
-    auto const fffiInFile = findFlagValueDefault(argc, argv, "-fffiInFile", nullptr);
-    auto const fffiOutFile = findFlagValueDefault(argc, argv, "-fffiOutFile", nullptr);
-    auto const fontDyFudge = findFlagValueDefault(argc, argv, "-fontDyFudge", "0.0");
+    opts.parse(argc,argv);
+    ImGui::skiaFontDyFudge = opts.fontDyFudge;
 
-    {
-        auto const fontDyFudgeNum = strtof(fontDyFudge, nullptr);
-        if(!isnanf(fontDyFudgeNum) && fontDyFudgeNum >= -10000.0f && fontDyFudgeNum <= 10000.0f) {
-            fprintf(stderr,"using font dy fudge value %f px to modify font baseline\n", fontDyFudgeNum);
-            ImGui::skiaFontDyFudge = fontDyFudgeNum;
-        }
-    }
-
-    if(hasFlag(argc,argv,"-help")) {
-        showUsage(argv[0],stderr);
-        exit(0);
-    }
-
-    const auto standalone = hasFlag(argc, argv, "-disableFffi");
-    if(!standalone) {
-        if(fffiInFile != nullptr) {
-            fdIn = fopen(fffiInFile, "r");
+    if(opts.fffiInterpreter) {
+        if(opts.fffiInFile != nullptr) {
+            fdIn = fopen(opts.fffiInFile, "r");
             if(fdIn == nullptr) {
-                fprintf(stderr, "unable to open fffInFile %s: %s", fffiInFile, strerror(errno));
+                fprintf(stderr, "unable to open fffInFile %s: %s", opts.fffiInFile, strerror(errno));
                 exit(1);
             }
             setvbuf(fdIn, nullptr,_IONBF,0);
         }
-        if(fffiOutFile != nullptr) {
-            fdOut = fopen(fffiOutFile, "w");
+        if(opts.fffiOutFile != nullptr) {
+            fdOut = fopen(opts.fffiOutFile, "w");
             if(fdOut == nullptr) {
-                fprintf(stderr, "unable to open fffOutFile %s: %s", fffiOutFile, strerror(errno));
+                fprintf(stderr, "unable to open fffOutFile %s: %s", opts.fffiOutFile, strerror(errno));
                 exit(1);
             }
             setvbuf(fdOut, nullptr,_IONBF,0);
         }
     }
 
-    auto ttfData = SkData::MakeFromFileName(ttfFilePath);
+    auto ttfData = SkData::MakeFromFileName(opts.ttfFilePath);
     auto fontMgr = SkFontMgr_New_Custom_Data(SkSpan<sk_sp<SkData>>(&ttfData,1));
 
     const auto typeface = fontMgr->makeFromData(ttfData);
@@ -140,30 +102,37 @@ Application* Application::Create(int argc, char** argv, void* platformData) {
     return new ImZeroSkiaClient(argc, argv, platformData);
 }
 
-ImZeroSkiaClient::ImZeroSkiaClient(int argc, char** argv, void* platformData)
+ImZeroSkiaClient::ImZeroSkiaClient(int argc, char** argv, void* platformData) : fBackendType(Window::kRaster_BackendType) {
+    if(strcmp(opts.skiaBackendType,"gl") == 0) {
 #if defined(SK_GL)
-        : fBackendType(Window::kNativeGL_BackendType)
-#elif defined(SK_VULKAN)
-        : fBackendType(Window::kVulkan_BackendType)
+        fBackendType=Window::kNativeGL_BackendType;
 #else
-        : fBackendType(Window::kRaster_BackendType)
+        fprintf(stderr,"gl backend is not supported (SK_GL not defined)\n");
+        exit(1);
 #endif
-        {
-    const auto standalone = hasFlag(argc, argv, "-disableFffi");
+    }
+    if(strcmp(opts.skiaBackendType,"vulkan") == 0) {
+#if defined(SK_VULKAN)
+        fBackendType=Window::kVulkan_BackendType;
+#else
+        fprintf(stderr,"vulkan backend is not supported (SK_VULKAN not defined)\n");
+        exit(1);
+#endif
+    }
+    if(strcmp(opts.skiaBackendType,"raster") == 0) {
+        fBackendType=Window::kRaster_BackendType;
+    }
 
     SkGraphics::Init();
 
     fWindow = Window::CreateNativeWindow(platformData);
     {
         auto params = DisplayParams();
-
-        if(hasFlag(argc,argv,"-disableVsync")) {
-            params.fDisableVsync = true;
-        }
+        params.fDisableVsync = !opts.vsync;
         fWindow->setRequestedDisplayParams(params);
     }
 
-    fImGuiLayer = std::make_unique<ImGuiLayer>(standalone);
+    fImGuiLayer = std::make_unique<ImGuiLayer>(&opts);
     fImGuiLayer->setScaleFactor(fWindow->scaleFactor());
 
     // register callbacks
@@ -183,22 +152,7 @@ void ImZeroSkiaClient::updateTitle() {
         return;
     }
 
-    SkString title("ImZeroSkiaClient ");
-    if (Window::kRaster_BackendType == fBackendType) {
-        title.append("Raster");
-    } else {
-#if defined(SK_GL)
-        title.append("GL");
-#elif defined(SK_VULKAN)
-        title.append("Vulkan");
-#elif defined(SK_DAWN)
-        title.append("Dawn");
-#else
-        title.append("Unknown GPU backend");
-#endif
-    }
-
-    fWindow->setTitle(title.c_str());
+    fWindow->setTitle(opts.appTitle);
 }
 
 void ImZeroSkiaClient::onBackendCreated() {

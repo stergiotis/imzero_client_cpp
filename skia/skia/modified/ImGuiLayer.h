@@ -27,6 +27,7 @@
 
 #include "../vectorCmdSkiaRenderer.h"
 #include "../setupUI.h"
+#include "cliOptions.h"
 
 class SkCanvas;
 class SkSurface;
@@ -39,7 +40,7 @@ enum class ModifierKey;
 
 class ImGuiLayer : public sk_app::Window::Layer {
 public:
-    ImGuiLayer(bool standalone);
+    ImGuiLayer(const CliOptions *opts);
     ~ImGuiLayer() override;
 
     void setScaleFactor(float scaleFactor);
@@ -66,7 +67,7 @@ private:
     size_t fSvgBytesWritten;
     size_t fPngBytesWritten;
     ImZeroSkiaSetupUI fImZeroSkiaSetupUi;
-    bool fStandalone;
+    bool ffffiInterpreter;
 
     void drawImDrawData(SkCanvas &canvas);
     void drawImGuiVectorCmdsFB(SkCanvas &canvas);

@@ -42,7 +42,7 @@ static void build_ImFontAtlas(ImFontAtlas& atlas, SkPaint& fontPaint) {
     atlas.TexID = &fontPaint;
 }
 
-ImGuiLayer::ImGuiLayer(bool standalone) : fWindow(nullptr), fSvgBytesWritten(0), fSkpBytesWritten(0), fPngBytesWritten(0), fStandalone(standalone), fTotalVectorCmdSerializedSize(0) {
+ImGuiLayer::ImGuiLayer(const CliOptions *opts) : fWindow(nullptr), fSvgBytesWritten(0), fSkpBytesWritten(0), fPngBytesWritten(0), ffffiInterpreter(opts->fffiInterpreter), fTotalVectorCmdSerializedSize(0) {
     // ImGui initialization:
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
@@ -70,7 +70,7 @@ ImGuiLayer::ImGuiLayer(bool standalone) : fWindow(nullptr), fSvgBytesWritten(0),
     io.KeyMap[ImGuiKey_Y]          = (int)skui::Key::kY;
     io.KeyMap[ImGuiKey_Z]          = (int)skui::Key::kZ;
 
-    if(!fStandalone) {
+    if(ffffiInterpreter) {
         render_init();
     }
 
@@ -79,12 +79,20 @@ ImGuiLayer::ImGuiLayer(bool standalone) : fWindow(nullptr), fSvgBytesWritten(0),
 
     fVectorCmdSkiaRenderer.setVertexDrawPaint(&fFontPaint);
     fVectorCmdSkiaRenderer.setParagraphHandler(ImGui::paragraph);
+    RenderModeE mode = 0;
+    if(opts->backdropFilter) {
+        mode |= RenderModeE_BackdropBlur;
+    }
+    if(opts->sketchFilter) {
+        mode |= RenderModeE_Sketch;
+    }
+    fVectorCmdSkiaRenderer.changeRenderMode(mode);
 
     fSkiaBackendActive = true;
 }
 
 ImGuiLayer::~ImGuiLayer() {
-    if(!fStandalone) {
+    if(ffffiInterpreter) {
         render_cleanup();
     }
     ImGui::DestroyContext();
@@ -272,14 +280,15 @@ void ImGuiLayer::onPaint(SkSurface* surface) { ZoneScoped;
     auto renderMode = fVectorCmdSkiaRenderer.getRenderMode();
     resetReceiveStat();
     resetSendStat();
-    if(fStandalone) { ZoneScopedN("demo window");
-        ImGui::ShowDemoWindow();
-    } else { ZoneScopedN("render fffi commands");
+    if(ffffiInterpreter) { ZoneScopedN("render fffi commands");
         render_render();
+    } else { ZoneScopedN("demo window");
+        ImGui::ShowDemoWindow();
     }
 
     SaveFormatE saveFormat = SaveFormatE_None;
     if(ImGui::Begin("ImZeroSkia Settings")) { ZoneScoped;
+        ImGui::Text("gitCommit=\"%s\",dirty=%s",buildinfo::gitCommit,buildinfo::gitDirty ? "yes" : "no");
         fImZeroSkiaSetupUi.render(saveFormat, fVectorCmdSkiaRenderer, fSkiaBackendActive,
                                   fTotalVectorCmdSerializedSize, totalSentBytes+totalReceivedBytes,
                                   fSkpBytesWritten,fSvgBytesWritten, fPngBytesWritten,

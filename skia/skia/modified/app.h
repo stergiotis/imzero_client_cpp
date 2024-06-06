@@ -15,6 +15,7 @@
 #include "tools/skui/ModifierKey.h"
 
 #include "ImGuiLayer.h"
+#include "cliOptions.h"
 
 class SkSurface;
 

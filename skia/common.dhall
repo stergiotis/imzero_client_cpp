@@ -1,3 +1,5 @@
+let lib = ../dhall/lib.dhall
+let debug = False
 let sourceTreePartsRepo = ../dhall/sourceTreeParts.dhall
 let sourceTreeParts = [
 	, sourceTreePartsRepo.imguiWithSkia
@@ -13,9 +15,8 @@ let sourceTreeParts = [
 	, sourceTreePartsRepo.imguiTextedit
 	, sourceTreePartsRepo.binding
 	, sourceTreePartsRepo.skia
-	, sourceTreePartsRepo.tracyEnabled
 	, sourceTreePartsRepo.flatbuffers
-]
+] # (if debug then [ , sourceTreePartsRepo.tracyEnabled ] else [ ,sourceTreePartsRepo.tracyDisabled ] : List lib.sourceTreePart.Type )
 let cxx = "clang++"
 let cppstd = 20
 let cxxflagsDebug = [
@@ -37,7 +38,6 @@ let ldflagsDebug = ["-fsanitize=address"] : List Text
 let ldflagsRelease = ["-DNDEBUG"] : List Text
 --let stdlibFlags = ["-stdlib=libc++"] : List Text
 let stdlibFlags = [] : List Text
-let debug = False
 in {
     , sourceTreeParts
     , cxx

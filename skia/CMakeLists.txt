@@ -4,7 +4,7 @@ project(imgui_skia_exe)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_COMPILER clang++)
 
-add_compile_definitions(TRACY_ENABLE)
+add_compile_definitions()
 include_directories("${CMAKE_CURRENT_LIST_DIR}/./imgui"
 "${CMAKE_CURRENT_LIST_DIR}/./src/arena/simple"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/skia"
@@ -19,19 +19,11 @@ include_directories("${CMAKE_CURRENT_LIST_DIR}/./imgui"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/modules/svg/include"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/include"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/include/core"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/flatbuffers")
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/flatbuffers"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public")
 set(COMPILE_OPTIONS -std=c++20
--g
--gdwarf-4
--Wall
--Wformat
--Wextra
--O1
--fsanitize=address
--fno-omit-frame-pointer
--DIMZERO_DEBUG_BUILD)
-link_libraries(-fsanitize=address
+-O3)
+link_libraries(-DNDEBUG
 -ldl
 -lpthread
 -lfreetype
@@ -224,8 +216,8 @@ set_property(TARGET skia_imported PROPERTY IMPORTED_OBJECTS "${CMAKE_CURRENT_LIS
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/libpiex.a"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/libpng.a")
 
-add_library(tracyEnabled OBJECT "${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public/TracyClient.cpp")
 
+add_library(tracyDisabled OBJECT "${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public/TracyClient.cpp")
 add_executable(imgui_skia_exe $<TARGET_OBJECTS:imguiWithSkia>
 $<TARGET_OBJECTS:render>
 $<TARGET_OBJECTS:marshalling>
@@ -239,5 +231,5 @@ $<TARGET_OBJECTS:imguiFlamegraph>
 $<TARGET_OBJECTS:imguiTextedit>
 $<TARGET_OBJECTS:skia>
 $<TARGET_OBJECTS:skia_imported>
-$<TARGET_OBJECTS:tracyEnabled>)
+$<TARGET_OBJECTS:tracyDisabled>)
 
