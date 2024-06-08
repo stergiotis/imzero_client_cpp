@@ -30,3 +30,4 @@
 
 imgui.ini
 imzero
+*.gen.*

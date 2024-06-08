@@ -71,13 +71,13 @@ let imguiBackendGlfw = let dir = "./imgui" in sourceTreePart::{
 		, global = [
 		] : List Text
 		, local = [
-			, "`pkg-config --static --cflags glfw3`"
+			, env:PKG_CONFIG_OUTPUT_CFLAGS_GLFW3 as Text
 		] : List Text
 	}
 	, ldflags = {
 		, global = [
 			, "-lGL"
-			, "`pkg-config --static --libs glfw3`"
+			, env:PKG_CONFIG_OUTPUT_LIBS_GLFW3 as Text
 		]
 	}
 }
@@ -95,12 +95,12 @@ let imguiFreetype = let dir = "./imgui/misc/freetype" in sourceTreePart::{
 		, global = [
 		] : List Text
 		, local = [
-			, "`pkg-config --cflags freetype2`"
+			, env:PKG_CONFIG_OUTPUT_CFLAGS_FREETYPE2 as Text
 		] : List Text
 	}
 	, ldflags = {
 		, global = [
-			, "`pkg-config --libs freetype2`"
+			, env:PKG_CONFIG_OUTPUT_LIBS_FREETYPE2 as Text
 		] : List Text
 	}
 }
@@ -370,6 +370,7 @@ let skia =
 		, "${dir}/modified/app.cpp"
 		, "${dir}/modified/ImGuiLayer.cpp"
 		, "${dir}/paragraph.cpp"
+		, "${dir}/cliOptions.cpp"
 		, "${dir}/setupUI.cpp"
 		, "${dir}/vectorCmdSkiaRenderer.cpp"
 		, "${dir}/skiaTracyTracer.cpp"
