@@ -1,6 +1,8 @@
 #include "imconfig.h"
 #include "imgui.h"
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cstdint>
 #include "src/marshalling/casts.h"
 #include "src/render.h"
 
@@ -17,9 +19,44 @@ static void glfw_error_callback(int error, const char* description)
    fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
 
+static const char *findFlagValueDefault(FILE *logChannel, uint64_t &markUsed, int argc, char **argv,const char *flag,const char *defaultValue) {
+    for(int i=1;i<argc;i++) {
+        auto t = uint64_t(1) << (i);
+        if(((markUsed & t) == 0) && strcmp(argv[i],flag) == 0) {
+            if(i == argc) {
+                fprintf(logChannel, "expecting argument for flag %s\n", flag);
+                exit(1);
+            } else {
+                markUsed |= t;
+                markUsed |= (t << 1);
+                return argv[i+1];
+            }
+        }
+    }
+    return defaultValue;
+}
+static float findFlagValueDefaultFloat(FILE *logChannel, uint64_t &markUsed, int argc, char **argv,const char *flag,const char *defaultValue) {
+    const char *v = findFlagValueDefault(logChannel, markUsed,argc,argv,flag,defaultValue);
+    char *end;
+    auto f = strtof(v, &end);
+    if(f == 0.0f && end == v) {
+        fprintf(stderr,"unable to parse argument for flag %s as float", flag);
+        exit(1);
+    }
+    if(end[0] != '\0') {
+        fprintf(stderr,"unable to parse argument for flag %s as float: trailing data found '%s'", flag, end);
+        exit(1);
+    }
+    return f;
+}
+static bool getBoolFlagValue(FILE *logChannel, uint64_t &markUsed, int argc, char **argv,const char *flag,bool defaultValue) {
+    return strcmp(findFlagValueDefault(logChannel, markUsed, argc,argv,flag,defaultValue ? "on" : "off"),"on") == 0;
+}
+
+
 
 // Main code
-int main(int, char**)
+int main(int argc, char** argv)
 {
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit())
@@ -53,11 +90,12 @@ int main(int, char**)
     if (window == nullptr)
         return 1;
     glfwMakeContextCurrent(window);
-#if 1
-    glfwSwapInterval(1); // Enable vsync
-#else
-    glfwSwapInterval(0); // Disable vsync
-#endif
+    uint64_t usedFlagsMask=0;
+    if(getBoolFlagValue(stderr,usedFlagsMask,argc,argv,"-vsync","on")) {
+       glfwSwapInterval(1); // Enable vsync
+    } else {
+       glfwSwapInterval(0); // Disable vsync
+    }
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();

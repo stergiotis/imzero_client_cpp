@@ -7,5 +7,4 @@ source /etc/os-release
 
 #../scripts/install.sh
 #../scripts/install_nonportable.sh
-./build_flatbuffers.sh
 ./build.sh
