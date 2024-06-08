@@ -27,6 +27,7 @@ using namespace sk_app;
 #include "../skiaTracyTracer.h"
 #include "marshalling/receive.h"
 #include "marshalling/send.h"
+#include "buildinfo.gen.h"
 
 static void build_ImFontAtlas(ImFontAtlas& atlas, SkPaint& fontPaint) {
     int w, h;

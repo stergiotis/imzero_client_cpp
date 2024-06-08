@@ -65,7 +65,7 @@ Application* Application::Create(int argc, char** argv, void* platformData) {
     ImGui::SetAllocatorFunctions(imZeroMemAlloc,imZeroMemFree,nullptr);
     #endif
 
-    opts.parse(argc,argv);
+    opts.parse(argc,argv,stderr);
     ImGui::skiaFontDyFudge = opts.fontDyFudge;
 
     if(opts.fffiInterpreter) {

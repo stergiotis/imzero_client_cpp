@@ -93,6 +93,7 @@ target_compile_options(imguiTextedit PUBLIC -Wno-unused-variable)
 add_library(skia OBJECT "${CMAKE_CURRENT_LIST_DIR}/./skia/modified/app.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./skia/modified/ImGuiLayer.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./skia/paragraph.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./skia/cliOptions.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./skia/setupUI.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./skia/vectorCmdSkiaRenderer.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./skia/skiaTracyTracer.cpp")
