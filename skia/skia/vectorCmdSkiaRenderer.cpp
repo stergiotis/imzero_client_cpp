@@ -346,7 +346,10 @@ void VectorCmdSkiaRenderer::drawVectorCmdFB(const VectorCmdFB::SingleVectorCmdDt
         case VectorCmdFB::VectorCmdArg_CmdVertexDraw: 
             drawCmdVertexDraw(*cmdUnion->arg_as_CmdVertexDraw(),canvas,dlFlags);
             break;
-        case VectorCmdFB::VectorCmdArg_CmdWrappedDrawList: 
+        case VectorCmdFB::VectorCmdArg_CmdSimpleVertexDraw:
+            drawCmdSimpleVertexDraw(*cmdUnion->arg_as_CmdSimpleVertexDraw(),canvas,dlFlags);
+            break;
+        case VectorCmdFB::VectorCmdArg_CmdWrappedDrawList:
             drawVectorCmdsFBDrawList(cmdUnion->arg_as_CmdWrappedDrawList()->buffer_nested_root(),canvas,true);
             break;
         case VectorCmdFB::VectorCmdArg_CmdRegisterFont: 
@@ -554,6 +557,63 @@ void VectorCmdSkiaRenderer::registerFont(const VectorCmdFB::CmdRegisterFont &cmd
         }
     }
 }
+void VectorCmdSkiaRenderer::drawCmdSimpleVertexDraw(const VectorCmdFB::CmdSimpleVertexDraw &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
+    auto cr = cmd.clip_rect();
+    auto const crRect = SkRect::MakeLTRB(cr->x(), cr->y(), cr->z(), cr->w());
+
+    SkPaint paint;
+    prepareFillPaint(paint,dlFlags);
+    paint.setColor(convertColor(cmd.col()));
+    constexpr auto blendMode = SkBlendMode::kDst;
+
+#ifdef RENDER_MODE_SVG_ENABLED
+    SkCanvas *rasterCanvas;
+    sk_sp<SkSurface> rasterSurface;
+    const auto dx = SkScalar(cr->x());
+    const auto dy = SkScalar(cr->y());
+    if(fRenderMode & RenderModeE_SVG) {
+        const auto s = SkSize::Make(SkScalar(cr->z())-dx,SkScalar(cr->w())-dy);
+        const auto c = SkColorInfo(kRGBA_8888_SkColorType, kPremul_SkAlphaType, SkColorSpace::MakeSRGB());
+        rasterSurface = SkSurfaces::Raster(SkImageInfo::Make(s.toCeil(), c));
+        rasterCanvas = rasterSurface->getCanvas();
+    }
+#endif
+    auto nVertices = static_cast<int>(cmd.pos_xy()->size()/2);
+    auto const p = cmd.pos_xy()->data();
+
+#if 0
+    vtxXYSimples.clear();
+    for(int i=0;i<nVertices;i++) {
+        vtxXYSimples.push_back(SkPoint::Make(p[2*i],p[2*i+1]));
+    }
+    auto vertices = SkVertices::MakeCopy(SkVertices::kTriangles_VertexMode,
+                                         nVertices,
+                                         vtxXYSimples.begin(),
+                                         nullptr,
+                                         nullptr);
+#else
+    static_assert(sizeof(SkPoint) == 2*sizeof(float));
+    auto vertices = SkVertices::MakeCopy(SkVertices::kTriangles_VertexMode,
+                                         nVertices,
+                                         reinterpret_cast<const SkPoint *>(p),
+                                         nullptr,
+                                         nullptr);
+#endif
+
+#ifdef RENDER_MODE_SVG_ENABLED
+    if(fRenderMode & RenderModeE_SVG) {
+        rasterCanvas->setMatrix(SkMatrix::Translate(-dx,-dy));
+        rasterCanvas->drawVertices(vertices, blendMode, paint);
+        sk_sp<SkImage> img(rasterSurface->makeImageSnapshot());
+        canvas.drawImage(img,dx,dy);
+        return;
+    }
+#endif
+
+    SkAutoCanvasRestore acr(&canvas, true); // FIXME necessary
+    //canvas.clipRect(crRect);
+    canvas.drawVertices(vertices, blendMode, paint);
+}
 void VectorCmdSkiaRenderer::drawCmdVertexDraw(const VectorCmdFB::CmdVertexDraw &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
     if(fVertexPaint == nullptr) {
         return;
@@ -563,6 +623,7 @@ void VectorCmdSkiaRenderer::drawCmdVertexDraw(const VectorCmdFB::CmdVertexDraw &
     auto indexOffset = cmd.index_offset();
     auto vtxOffset = cmd.vtx_offset();
     auto const crRect = SkRect::MakeLTRB(cr->x(), cr->y(), cr->z(), cr->w());
+    constexpr auto blendMode = SkBlendMode::kModulate;
 
 #ifdef RENDER_MODE_SVG_ENABLED
     SkCanvas *rasterCanvas;
@@ -589,16 +650,16 @@ void VectorCmdSkiaRenderer::drawCmdVertexDraw(const VectorCmdFB::CmdVertexDraw &
 #ifdef RENDER_MODE_SVG_ENABLED
     if(fRenderMode & RenderModeE_SVG) {
         rasterCanvas->setMatrix(SkMatrix::Translate(-dx,-dy));
-        rasterCanvas->drawVertices(vertices, SkBlendMode::kModulate, *fVertexPaint);
+        rasterCanvas->drawVertices(vertices, blendMode, *fVertexPaint);
         sk_sp<SkImage> img(rasterSurface->makeImageSnapshot());
         canvas.drawImage(img,dx,dy);
         return;
     }
 #endif
 
-    SkAutoCanvasRestore acr(&canvas, true);
+    SkAutoCanvasRestore acr(&canvas, true); // FIXME necessary
     canvas.clipRect(crRect);
-    canvas.drawVertices(vertices, SkBlendMode::kModulate, *fVertexPaint);
+    canvas.drawVertices(vertices, blendMode, *fVertexPaint);
 }
 template <typename T>
 static void inline drawCmdQuad_(const T &cmd,SkCanvas &canvas, SkPaint &paint) { ZoneScoped;

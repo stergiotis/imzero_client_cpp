@@ -130,6 +130,9 @@ struct CmdWrappedDrawListBuilder;
 struct CmdVertexDraw;
 struct CmdVertexDrawBuilder;
 
+struct CmdSimpleVertexDraw;
+struct CmdSimpleVertexDrawBuilder;
+
 struct SingleVectorCmdDto;
 struct SingleVectorCmdDtoBuilder;
 
@@ -213,11 +216,12 @@ enum VectorCmdArg : uint8_t {
   VectorCmdArg_CmdVertexDraw = 31,
   VectorCmdArg_CmdPushRotation = 32,
   VectorCmdArg_CmdPopRotation = 33,
+  VectorCmdArg_CmdSimpleVertexDraw = 34,
   VectorCmdArg_MIN = VectorCmdArg_NONE,
-  VectorCmdArg_MAX = VectorCmdArg_CmdPopRotation
+  VectorCmdArg_MAX = VectorCmdArg_CmdSimpleVertexDraw
 };
 
-inline const VectorCmdArg (&EnumValuesVectorCmdArg())[34] {
+inline const VectorCmdArg (&EnumValuesVectorCmdArg())[35] {
   static const VectorCmdArg values[] = {
     VectorCmdArg_NONE,
     VectorCmdArg_CmdRegisterFont,
@@ -252,13 +256,14 @@ inline const VectorCmdArg (&EnumValuesVectorCmdArg())[34] {
     VectorCmdArg_CmdWrappedDrawList,
     VectorCmdArg_CmdVertexDraw,
     VectorCmdArg_CmdPushRotation,
-    VectorCmdArg_CmdPopRotation
+    VectorCmdArg_CmdPopRotation,
+    VectorCmdArg_CmdSimpleVertexDraw
   };
   return values;
 }
 
 inline const char * const *EnumNamesVectorCmdArg() {
-  static const char * const names[35] = {
+  static const char * const names[36] = {
     "NONE",
     "CmdRegisterFont",
     "CmdPolyline",
@@ -293,13 +298,14 @@ inline const char * const *EnumNamesVectorCmdArg() {
     "CmdVertexDraw",
     "CmdPushRotation",
     "CmdPopRotation",
+    "CmdSimpleVertexDraw",
     nullptr
   };
   return names;
 }
 
 inline const char *EnumNameVectorCmdArg(VectorCmdArg e) {
-  if (::flatbuffers::IsOutRange(e, VectorCmdArg_NONE, VectorCmdArg_CmdPopRotation)) return "";
+  if (::flatbuffers::IsOutRange(e, VectorCmdArg_NONE, VectorCmdArg_CmdSimpleVertexDraw)) return "";
   const size_t index = static_cast<size_t>(e);
   return EnumNamesVectorCmdArg()[index];
 }
@@ -438,6 +444,10 @@ template<> struct VectorCmdArgTraits<VectorCmdFB::CmdPushRotation> {
 
 template<> struct VectorCmdArgTraits<VectorCmdFB::CmdPopRotation> {
   static const VectorCmdArg enum_value = VectorCmdArg_CmdPopRotation;
+};
+
+template<> struct VectorCmdArgTraits<VectorCmdFB::CmdSimpleVertexDraw> {
+  static const VectorCmdArg enum_value = VectorCmdArg_CmdSimpleVertexDraw;
 };
 
 bool VerifyVectorCmdArg(::flatbuffers::Verifier &verifier, const void *obj, VectorCmdArg type);
@@ -3552,6 +3562,81 @@ inline ::flatbuffers::Offset<CmdVertexDraw> CreateCmdVertexDraw(
   return builder_.Finish();
 }
 
+struct CmdSimpleVertexDraw FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef CmdSimpleVertexDrawBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_CLIP_RECT = 4,
+    VT_POS_XY = 6,
+    VT_COL = 8
+  };
+  const VectorCmdFB::SingleVec4 *clip_rect() const {
+    return GetStruct<const VectorCmdFB::SingleVec4 *>(VT_CLIP_RECT);
+  }
+  const ::flatbuffers::Vector<float> *pos_xy() const {
+    return GetPointer<const ::flatbuffers::Vector<float> *>(VT_POS_XY);
+  }
+  uint32_t col() const {
+    return GetField<uint32_t>(VT_COL, 0);
+  }
+  bool Verify(::flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<VectorCmdFB::SingleVec4>(verifier, VT_CLIP_RECT, 4) &&
+           VerifyOffset(verifier, VT_POS_XY) &&
+           verifier.VerifyVector(pos_xy()) &&
+           VerifyField<uint32_t>(verifier, VT_COL, 4) &&
+           verifier.EndTable();
+  }
+};
+
+struct CmdSimpleVertexDrawBuilder {
+  typedef CmdSimpleVertexDraw Table;
+  ::flatbuffers::FlatBufferBuilder &fbb_;
+  ::flatbuffers::uoffset_t start_;
+  void add_clip_rect(const VectorCmdFB::SingleVec4 *clip_rect) {
+    fbb_.AddStruct(CmdSimpleVertexDraw::VT_CLIP_RECT, clip_rect);
+  }
+  void add_pos_xy(::flatbuffers::Offset<::flatbuffers::Vector<float>> pos_xy) {
+    fbb_.AddOffset(CmdSimpleVertexDraw::VT_POS_XY, pos_xy);
+  }
+  void add_col(uint32_t col) {
+    fbb_.AddElement<uint32_t>(CmdSimpleVertexDraw::VT_COL, col, 0);
+  }
+  explicit CmdSimpleVertexDrawBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ::flatbuffers::Offset<CmdSimpleVertexDraw> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = ::flatbuffers::Offset<CmdSimpleVertexDraw>(end);
+    return o;
+  }
+};
+
+inline ::flatbuffers::Offset<CmdSimpleVertexDraw> CreateCmdSimpleVertexDraw(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    const VectorCmdFB::SingleVec4 *clip_rect = nullptr,
+    ::flatbuffers::Offset<::flatbuffers::Vector<float>> pos_xy = 0,
+    uint32_t col = 0) {
+  CmdSimpleVertexDrawBuilder builder_(_fbb);
+  builder_.add_col(col);
+  builder_.add_pos_xy(pos_xy);
+  builder_.add_clip_rect(clip_rect);
+  return builder_.Finish();
+}
+
+inline ::flatbuffers::Offset<CmdSimpleVertexDraw> CreateCmdSimpleVertexDrawDirect(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    const VectorCmdFB::SingleVec4 *clip_rect = nullptr,
+    const std::vector<float> *pos_xy = nullptr,
+    uint32_t col = 0) {
+  auto pos_xy__ = pos_xy ? _fbb.CreateVector<float>(*pos_xy) : 0;
+  return VectorCmdFB::CreateCmdSimpleVertexDraw(
+      _fbb,
+      clip_rect,
+      pos_xy__,
+      col);
+}
+
 struct SingleVectorCmdDto FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
   typedef SingleVectorCmdDtoBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
@@ -3663,6 +3748,9 @@ struct SingleVectorCmdDto FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table
   }
   const VectorCmdFB::CmdPopRotation *arg_as_CmdPopRotation() const {
     return arg_type() == VectorCmdFB::VectorCmdArg_CmdPopRotation ? static_cast<const VectorCmdFB::CmdPopRotation *>(arg()) : nullptr;
+  }
+  const VectorCmdFB::CmdSimpleVertexDraw *arg_as_CmdSimpleVertexDraw() const {
+    return arg_type() == VectorCmdFB::VectorCmdArg_CmdSimpleVertexDraw ? static_cast<const VectorCmdFB::CmdSimpleVertexDraw *>(arg()) : nullptr;
   }
   bool Verify(::flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -3803,6 +3891,10 @@ template<> inline const VectorCmdFB::CmdPushRotation *SingleVectorCmdDto::arg_as
 
 template<> inline const VectorCmdFB::CmdPopRotation *SingleVectorCmdDto::arg_as<VectorCmdFB::CmdPopRotation>() const {
   return arg_as_CmdPopRotation();
+}
+
+template<> inline const VectorCmdFB::CmdSimpleVertexDraw *SingleVectorCmdDto::arg_as<VectorCmdFB::CmdSimpleVertexDraw>() const {
+  return arg_as_CmdSimpleVertexDraw();
 }
 
 struct SingleVectorCmdDtoBuilder {
@@ -4196,6 +4288,10 @@ inline bool VerifyVectorCmdArg(::flatbuffers::Verifier &verifier, const void *ob
     }
     case VectorCmdArg_CmdPopRotation: {
       auto ptr = reinterpret_cast<const VectorCmdFB::CmdPopRotation *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case VectorCmdArg_CmdSimpleVertexDraw: {
+      auto ptr = reinterpret_cast<const VectorCmdFB::CmdSimpleVertexDraw *>(obj);
       return verifier.VerifyTable(ptr);
     }
     default: return true;

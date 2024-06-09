@@ -258,6 +258,11 @@ table CmdVertexDraw {
     index_offset: uint32;
     vtx_offset: uint32;
 }
+table CmdSimpleVertexDraw {
+    clip_rect: SingleVec4;
+    pos_xy: [float];
+    col: uint32;
+}
 union VectorCmdArg {
     CmdRegisterFont,
     CmdPolyline,
@@ -291,7 +296,8 @@ union VectorCmdArg {
     CmdWrappedDrawList,
     CmdVertexDraw,
     CmdPushRotation,
-    CmdPopRotation
+    CmdPopRotation,
+    CmdSimpleVertexDraw,
 }
 
 table SingleVectorCmdDto {

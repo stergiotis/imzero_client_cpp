@@ -1,9 +1,15 @@
 #pragma once
 
 #include "modules/skparagraph/include/Paragraph.h"
+#include "src/gpu/ganesh/GrEagerVertexAllocator.h"
 #include "modules/skparagraph/src/ParagraphBuilderImpl.h"
 #include "core/SkFontMgr.h"
 #include "core/SkTypeface.h"
+
+#include "src/gpu/ganesh/GrEagerVertexAllocator.h"
+#include "src/gpu/ganesh/geometry/GrPathUtils.h"
+#include "src/gpu/ganesh/geometry/GrTriangulator.h"
+#include "core/SkSpan.h"
 
 class Paragraph {
     public:
@@ -14,6 +20,11 @@ class Paragraph {
         SkScalar getHeight();
         void build(const char *text,size_t len);
         void layout(SkScalar width);
+        int getPath(int lineNumber, SkPath &dest);
+        int getNumberOfLines();
+        bool hasLine(int lineNumber);
+        void triangulate(int lineNumber,const SkRect &clipBounds,const float *&vertices,size_t &numVertices,int &unrenderedGlyphs);
+
         void paint(SkCanvas &canvas, SkScalar x, SkScalar y);
         void setForegroundPaint(SkPaint &paint);
 
@@ -37,4 +48,5 @@ class Paragraph {
         std::unique_ptr<skia::textlayout::ParagraphBuilder> fParaBuilderCenter;
         std::unique_ptr<skia::textlayout::ParagraphBuilder> fParaBuilderJustify;
         std::unique_ptr<skia::textlayout::Paragraph> fPara;
+        GrCpuVertexAllocator vertexAllocator;
 };

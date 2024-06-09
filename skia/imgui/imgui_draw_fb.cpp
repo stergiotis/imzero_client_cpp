@@ -177,6 +177,7 @@ using namespace IMGUI_STB_NAMESPACE;
 // [SECTION] Skia
 //-----------------------------------------------------------------------------
 #include "include/core/SkCanvas.h"
+#include "include/core/SkStream.h"
 #include "modules/skparagraph/src/ParagraphImpl.h"
 #include "vectorCmd_generated.h"
 namespace ImGui {
@@ -4375,10 +4376,99 @@ SKIA_DRAW_BACKEND_BEGIN
         auto isParagraph = wrap_width > 0.0f || isParagraphText(text_begin,text_end);
         if(isParagraph && wrap_width <= 0.0f) {
             wrap_width = ImGui::GetContentRegionAvail().x;
+            if(wrap_width <= 0.0f) {
+                // skip text, not visible
+                return;
+            }
         }
         if(isParagraph) {
+#ifndef SKIA_DRAW_BACKEND_TRIANGULATE_PARAGRAPHS
             auto const arg = VectorCmdFB::CreateCmdRenderParagraph(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(this),size,&posFb,col,&clipRectFb,textFb,wrap_width,0.0f,VectorCmdFB::TextAlignFlags_left);
             draw_list->addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdRenderParagraph,arg.Union());
+#else
+            ImGui::paragraph->setFontSize(SkScalar(size));
+            ImGui::paragraph->build(text_begin,static_cast<size_t>(text_end-text_begin));
+            ImGui::paragraph->layout(SkScalar(wrap_width));
+            SkPoint pts[128];
+            uint8_t verbs[128];
+            auto const clipRectSkia = SkRect::MakeLTRB(SkScalar(clip_rect.x),SkScalar(clip_rect.y),SkScalar(clip_rect.z),SkScalar(clip_rect.w));
+            int lineNumber = 0;
+            float t[2];
+            t[0] = pos.x;
+            t[1] = pos.y;
+            const float *vertices;
+            size_t numVertices;
+            int unrenderedGlyphs;
+            do {
+                ImGui::paragraph->triangulate(lineNumber,clipRectSkia,vertices,numVertices,unrenderedGlyphs);
+
+                // FIXME use fbBuilder.StartVector and EndVector to eliminate the lambda
+                auto posXYs = draw_list->fbBuilder->CreateVector<float>(numVertices*2,[&vertices,&t](size_t i) -> float { return t[i%2]+vertices[i]; });
+                auto const arg = VectorCmdFB::CreateCmdSimpleVertexDraw(*draw_list->fbBuilder,&clipRectFb,posXYs,col);
+                draw_list->addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdSimpleVertexDraw,arg.Union());
+
+#if 0
+                //SkPath p;
+                //auto unrenderedGlyphs = ImGui::paragraph->getPath(lineNumber,p);
+                //auto bounds = p.getBounds();
+                //draw_list->AddRectFilled(ImVec2(pos.x+ SkScalarToFloat(bounds.top()), pos.y+SkScalarToFloat(bounds.left())),
+                //                         ImVec2(pos.x+SkScalarToFloat(bounds.right()), pos.y+SkScalarToFloat(bounds.bottom())),
+                //                         0xaa1199ff);
+
+                //auto stream = SkFILEStream(stderr);
+                //p.dump((SkWStream*)&stream,true);
+                //p.dump(nullptr,true);
+                ImVec2 cur = pos;
+                SkPath::Iter    iter(p, false);
+                SkPoint pts[4];
+                SkPath::Verb    verb;
+                while ((verb = iter.next(pts)) != SkPath::Verb::kDone_Verb) {
+                    switch (verb) {
+                        case SkPath::Verb::kMove_Verb:
+                            cur = ImVec2(SkScalarToFloat(pts[0].x()), SkScalarToFloat(pts[0].y()));
+                            //append_params(&builder, "path.moveTo", &pts[0], 1, asType);
+                            break;
+                        case SkPath::Verb::kLine_Verb:
+                            draw_list->PathLineTo(ImVec2(SkScalarToFloat(pts[1].x()), SkScalarToFloat(pts[1].y())));
+                            //append_params(&builder, "path.lineTo", &pts[1], 1, asType);
+                            break;
+                        case SkPath::Verb::kQuad_Verb:
+                            draw_list->PathBezierQuadraticCurveTo(
+                                    ImVec2(SkScalarToFloat(pts[1].x()), SkScalarToFloat(pts[1].y())),
+                                    ImVec2(SkScalarToFloat(pts[2].x()), SkScalarToFloat(pts[2].y())));
+                            //append_params(&builder, "path.quadTo", &pts[1], 2, asType);
+                            break;
+                        case SkPath::Verb::kConic_Verb:
+                            //draw_list->PathBezierCubicCurveTo(
+                            //        ImVec2(SkScalarToFloat(pts[1].x()), SkScalarToFloat(pts[1].y())),
+                            //        ImVec2(SkScalarToFloat(pts[2].x()), SkScalarToFloat(pts[2].y())),
+                            //        ImVec2(SkScalarToFloat(pts[3].x()), SkScalarToFloat(pts[3].y())));
+                            //append_params(&builder, "path.conicTo", &pts[1], 2, asType, iter.conicWeight());
+                            break;
+                        case SkPath::Verb::kCubic_Verb:
+                            draw_list->PathBezierCubicCurveTo(
+                                    ImVec2(SkScalarToFloat(pts[1].x()), SkScalarToFloat(pts[1].y())),
+                                    ImVec2(SkScalarToFloat(pts[2].x()), SkScalarToFloat(pts[2].y())),
+                                    ImVec2(SkScalarToFloat(pts[3].x()), SkScalarToFloat(pts[3].y())));
+                            //append_params(&builder, "path.cubicTo", &pts[1], 3, asType);
+                            break;
+                        case SkPath::Verb::kClose_Verb:
+                            draw_list->PathStroke(col);
+                            //builder.append("path.close();\n");
+                            break;
+                        case SkPath::Verb::kDone_Verb:
+                            draw_list->PathStroke(col);
+                            break;
+                    }
+                }
+
+                auto nPts = p.getPoints(pts,128);
+                for(int j=0;j<nPts;j++) {
+                    draw_list->AddCircleFilled(ImVec2(pos.x+SkScalarToFloat(pts[j].x()),pos.y+ SkScalarToFloat(pts[j].y())),2.0,0xaa1199ff);
+                }
+#endif
+            } while(ImGui::paragraph->hasLine(++lineNumber));
+#endif
         } else {
             auto const arg = VectorCmdFB::CreateCmdRenderText(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(this),size,&posFb,col,&clipRectFb,textFb);
             draw_list->addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdRenderText,arg.Union());

@@ -67,6 +67,9 @@ void Paragraph::build(const char *text,size_t len) {
 void Paragraph::layout(SkScalar width) {
     fPara->layout(width);
 }
+int Paragraph::getPath(int lineNumber, SkPath &dest) {
+    return fPara->getPath(lineNumber,&dest);
+}
 void Paragraph::setForegroundPaint(SkPaint &paint) {
     fTlTextStyle.setForegroundPaint(paint);
 }
@@ -90,5 +93,36 @@ void Paragraph::setTextAlign(skia::textlayout::TextAlign align) {
         case skia::textlayout::TextAlign::kJustify: fParaBuilder = fParaBuilderJustify.get(); break;
         default:
             assert("unhandled align enumeration value");
+    }
+}
+
+int Paragraph::getNumberOfLines() {
+    int m = 0;
+    fPara->visit([&m](int lineNumber,const skia::textlayout::Paragraph::VisitorInfo *info){
+       m = std::max(m, lineNumber);
+    });
+    return m;
+}
+bool Paragraph::hasLine(int lineNumber) {
+    return fPara->getLineMetricsAt(lineNumber, nullptr);
+}
+void Paragraph::triangulate(int lineNumber,const SkRect &clipBounds,const float *&vertices,size_t &numVertices, int &unrenderedGlyphs) {
+    if(!hasLine(lineNumber)) {
+        return;
+    }
+    SkPath p;
+    unrenderedGlyphs = getPath(lineNumber,p);
+    auto const tol = GrPathUtils::scaleToleranceToSrc(GrPathUtils::kDefaultTolerance, SkMatrix::I(), p.getBounds());
+    bool isLinear;
+
+    int count = GrTriangulator::PathToTriangles(p, tol, clipBounds, &vertexAllocator, &isLinear);
+    if (count > 0) {
+        auto const data = vertexAllocator.detachVertexData();
+        assert(data->vertexSize() == 2*sizeof(float));
+        vertices = static_cast<const float*>(data->vertices());
+        numVertices = data->numVertices();
+    } else {
+        vertices = nullptr;
+        numVertices = 0;
     }
 }

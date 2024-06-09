@@ -77,6 +77,7 @@ class VectorCmdSkiaRenderer {
         void drawCmdBezierCubicFB(const VectorCmdFB::CmdBezierCubic &cmd, SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags);
         void drawCmdBezierQuadraticFB(const VectorCmdFB::CmdBezierQuadratic &cmd, SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags);
         void drawCmdVertexDraw(const VectorCmdFB::CmdVertexDraw &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags);
+        void drawCmdSimpleVertexDraw(const VectorCmdFB::CmdSimpleVertexDraw &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags);
         void registerFont(const VectorCmdFB::CmdRegisterFont &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags);
 
         RenderModeE getRenderMode() const;
@@ -99,6 +100,7 @@ class VectorCmdSkiaRenderer {
         SkTDArray<uint16_t> vtxIndices;
         void loadVertices(const VectorCmdFB::VertexData *vertices);
 
+        //SkTDArray<SkPoint> vtxXYSimples;
         std::shared_ptr<Paragraph> fParagraph;
         SkFont fFont;
 
