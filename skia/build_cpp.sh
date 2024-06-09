@@ -5,6 +5,12 @@ cd "$here"
 flatc="../../contrib/flatbuffers/flatc"
 "$flatc" -o imgui --cpp imgui/vectorCmd.fbs
 
+# FIXME, needed by dhall
+export PKG_CONFIG_OUTPUT_CFLAGS_FREETYPE2=""
+export PKG_CONFIG_OUTPUT_LIBS_FREETYPE2=""
+export PKG_CONFIG_OUTPUT_CFLAGS_GLFW3=""
+export PKG_CONFIG_OUTPUT_LIBS_GLFW3=""
+
 ./cmakelists.dhall
 
 generate_buildinfo() {
