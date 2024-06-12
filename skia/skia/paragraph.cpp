@@ -67,6 +67,16 @@ void Paragraph::build(const char *text,size_t len) {
 void Paragraph::layout(SkScalar width) {
     fPara->layout(width);
 }
+SkRect Paragraph::boundingRect(int lineNumber, bool &found) {
+    skia::textlayout::LineMetrics metrics;
+    if(!fPara->getLineMetricsAt(lineNumber,&metrics)) {
+        found = false;
+        return SkRect::MakeEmpty();
+    }
+    found = true;
+    return SkRect::MakeXYWH(static_cast<float>(metrics.fLeft),static_cast<float>(metrics.fBaseline-metrics.fAscent),
+                            static_cast<float>(metrics.fLeft+metrics.fWidth),static_cast<float>(metrics.fBaseline+metrics.fDescent));
+}
 int Paragraph::getPath(int lineNumber, SkPath &dest) {
     return fPara->getPath(lineNumber,&dest);
 }

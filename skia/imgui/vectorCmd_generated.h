@@ -133,6 +133,12 @@ struct CmdVertexDrawBuilder;
 struct CmdSimpleVertexDraw;
 struct CmdSimpleVertexDrawBuilder;
 
+struct CmdSvgPathSubset;
+struct CmdSvgPathSubsetBuilder;
+
+struct CmdPath;
+struct CmdPathBuilder;
+
 struct SingleVectorCmdDto;
 struct SingleVectorCmdDtoBuilder;
 
@@ -181,6 +187,87 @@ inline const char *EnumNameTextAlignFlags(TextAlignFlags e) {
   return EnumNamesTextAlignFlags()[index];
 }
 
+enum PathVerb : uint8_t {
+  PathVerb_move = 0,
+  PathVerb_line = 1,
+  PathVerb_quad = 2,
+  PathVerb_conic = 3,
+  PathVerb_cubic = 4,
+  PathVerb_close = 5,
+  PathVerb_done = 6,
+  PathVerb_MIN = PathVerb_move,
+  PathVerb_MAX = PathVerb_done
+};
+
+inline const PathVerb (&EnumValuesPathVerb())[7] {
+  static const PathVerb values[] = {
+    PathVerb_move,
+    PathVerb_line,
+    PathVerb_quad,
+    PathVerb_conic,
+    PathVerb_cubic,
+    PathVerb_close,
+    PathVerb_done
+  };
+  return values;
+}
+
+inline const char * const *EnumNamesPathVerb() {
+  static const char * const names[8] = {
+    "move",
+    "line",
+    "quad",
+    "conic",
+    "cubic",
+    "close",
+    "done",
+    nullptr
+  };
+  return names;
+}
+
+inline const char *EnumNamePathVerb(PathVerb e) {
+  if (::flatbuffers::IsOutRange(e, PathVerb_move, PathVerb_done)) return "";
+  const size_t index = static_cast<size_t>(e);
+  return EnumNamesPathVerb()[index];
+}
+
+enum PathFillType : uint8_t {
+  PathFillType_winding = 0,
+  PathFillType_evenOdd = 1,
+  PathFillType_inverseWinding = 2,
+  PathFillType_inverseEvenOdd = 3,
+  PathFillType_MIN = PathFillType_winding,
+  PathFillType_MAX = PathFillType_inverseEvenOdd
+};
+
+inline const PathFillType (&EnumValuesPathFillType())[4] {
+  static const PathFillType values[] = {
+    PathFillType_winding,
+    PathFillType_evenOdd,
+    PathFillType_inverseWinding,
+    PathFillType_inverseEvenOdd
+  };
+  return values;
+}
+
+inline const char * const *EnumNamesPathFillType() {
+  static const char * const names[5] = {
+    "winding",
+    "evenOdd",
+    "inverseWinding",
+    "inverseEvenOdd",
+    nullptr
+  };
+  return names;
+}
+
+inline const char *EnumNamePathFillType(PathFillType e) {
+  if (::flatbuffers::IsOutRange(e, PathFillType_winding, PathFillType_inverseEvenOdd)) return "";
+  const size_t index = static_cast<size_t>(e);
+  return EnumNamesPathFillType()[index];
+}
+
 enum VectorCmdArg : uint8_t {
   VectorCmdArg_NONE = 0,
   VectorCmdArg_CmdRegisterFont = 1,
@@ -217,11 +304,13 @@ enum VectorCmdArg : uint8_t {
   VectorCmdArg_CmdPushRotation = 32,
   VectorCmdArg_CmdPopRotation = 33,
   VectorCmdArg_CmdSimpleVertexDraw = 34,
+  VectorCmdArg_CmdSvgPathSubset = 35,
+  VectorCmdArg_CmdPath = 36,
   VectorCmdArg_MIN = VectorCmdArg_NONE,
-  VectorCmdArg_MAX = VectorCmdArg_CmdSimpleVertexDraw
+  VectorCmdArg_MAX = VectorCmdArg_CmdPath
 };
 
-inline const VectorCmdArg (&EnumValuesVectorCmdArg())[35] {
+inline const VectorCmdArg (&EnumValuesVectorCmdArg())[37] {
   static const VectorCmdArg values[] = {
     VectorCmdArg_NONE,
     VectorCmdArg_CmdRegisterFont,
@@ -257,13 +346,15 @@ inline const VectorCmdArg (&EnumValuesVectorCmdArg())[35] {
     VectorCmdArg_CmdVertexDraw,
     VectorCmdArg_CmdPushRotation,
     VectorCmdArg_CmdPopRotation,
-    VectorCmdArg_CmdSimpleVertexDraw
+    VectorCmdArg_CmdSimpleVertexDraw,
+    VectorCmdArg_CmdSvgPathSubset,
+    VectorCmdArg_CmdPath
   };
   return values;
 }
 
 inline const char * const *EnumNamesVectorCmdArg() {
-  static const char * const names[36] = {
+  static const char * const names[38] = {
     "NONE",
     "CmdRegisterFont",
     "CmdPolyline",
@@ -299,13 +390,15 @@ inline const char * const *EnumNamesVectorCmdArg() {
     "CmdPushRotation",
     "CmdPopRotation",
     "CmdSimpleVertexDraw",
+    "CmdSvgPathSubset",
+    "CmdPath",
     nullptr
   };
   return names;
 }
 
 inline const char *EnumNameVectorCmdArg(VectorCmdArg e) {
-  if (::flatbuffers::IsOutRange(e, VectorCmdArg_NONE, VectorCmdArg_CmdSimpleVertexDraw)) return "";
+  if (::flatbuffers::IsOutRange(e, VectorCmdArg_NONE, VectorCmdArg_CmdPath)) return "";
   const size_t index = static_cast<size_t>(e);
   return EnumNamesVectorCmdArg()[index];
 }
@@ -448,6 +541,14 @@ template<> struct VectorCmdArgTraits<VectorCmdFB::CmdPopRotation> {
 
 template<> struct VectorCmdArgTraits<VectorCmdFB::CmdSimpleVertexDraw> {
   static const VectorCmdArg enum_value = VectorCmdArg_CmdSimpleVertexDraw;
+};
+
+template<> struct VectorCmdArgTraits<VectorCmdFB::CmdSvgPathSubset> {
+  static const VectorCmdArg enum_value = VectorCmdArg_CmdSvgPathSubset;
+};
+
+template<> struct VectorCmdArgTraits<VectorCmdFB::CmdPath> {
+  static const VectorCmdArg enum_value = VectorCmdArg_CmdPath;
 };
 
 bool VerifyVectorCmdArg(::flatbuffers::Verifier &verifier, const void *obj, VectorCmdArg type);
@@ -3637,6 +3738,182 @@ inline ::flatbuffers::Offset<CmdSimpleVertexDraw> CreateCmdSimpleVertexDrawDirec
       col);
 }
 
+struct CmdSvgPathSubset FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef CmdSvgPathSubsetBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_SVG = 4,
+    VT_COL = 6,
+    VT_FILL = 8
+  };
+  const ::flatbuffers::String *svg() const {
+    return GetPointer<const ::flatbuffers::String *>(VT_SVG);
+  }
+  uint32_t col() const {
+    return GetField<uint32_t>(VT_COL, 0);
+  }
+  bool fill() const {
+    return GetField<uint8_t>(VT_FILL, 0) != 0;
+  }
+  bool Verify(::flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyOffset(verifier, VT_SVG) &&
+           verifier.VerifyString(svg()) &&
+           VerifyField<uint32_t>(verifier, VT_COL, 4) &&
+           VerifyField<uint8_t>(verifier, VT_FILL, 1) &&
+           verifier.EndTable();
+  }
+};
+
+struct CmdSvgPathSubsetBuilder {
+  typedef CmdSvgPathSubset Table;
+  ::flatbuffers::FlatBufferBuilder &fbb_;
+  ::flatbuffers::uoffset_t start_;
+  void add_svg(::flatbuffers::Offset<::flatbuffers::String> svg) {
+    fbb_.AddOffset(CmdSvgPathSubset::VT_SVG, svg);
+  }
+  void add_col(uint32_t col) {
+    fbb_.AddElement<uint32_t>(CmdSvgPathSubset::VT_COL, col, 0);
+  }
+  void add_fill(bool fill) {
+    fbb_.AddElement<uint8_t>(CmdSvgPathSubset::VT_FILL, static_cast<uint8_t>(fill), 0);
+  }
+  explicit CmdSvgPathSubsetBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ::flatbuffers::Offset<CmdSvgPathSubset> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = ::flatbuffers::Offset<CmdSvgPathSubset>(end);
+    return o;
+  }
+};
+
+inline ::flatbuffers::Offset<CmdSvgPathSubset> CreateCmdSvgPathSubset(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    ::flatbuffers::Offset<::flatbuffers::String> svg = 0,
+    uint32_t col = 0,
+    bool fill = false) {
+  CmdSvgPathSubsetBuilder builder_(_fbb);
+  builder_.add_col(col);
+  builder_.add_svg(svg);
+  builder_.add_fill(fill);
+  return builder_.Finish();
+}
+
+inline ::flatbuffers::Offset<CmdSvgPathSubset> CreateCmdSvgPathSubsetDirect(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    const char *svg = nullptr,
+    uint32_t col = 0,
+    bool fill = false) {
+  auto svg__ = svg ? _fbb.CreateString(svg) : 0;
+  return VectorCmdFB::CreateCmdSvgPathSubset(
+      _fbb,
+      svg__,
+      col,
+      fill);
+}
+
+struct CmdPath FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef CmdPathBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_VERBS = 4,
+    VT_POINTS_XY = 6,
+    VT_COL = 8,
+    VT_FILL = 10,
+    VT_FILLTYPE = 12
+  };
+  const ::flatbuffers::Vector<uint8_t> *verbs() const {
+    return GetPointer<const ::flatbuffers::Vector<uint8_t> *>(VT_VERBS);
+  }
+  const ::flatbuffers::Vector<float> *points_xy() const {
+    return GetPointer<const ::flatbuffers::Vector<float> *>(VT_POINTS_XY);
+  }
+  uint32_t col() const {
+    return GetField<uint32_t>(VT_COL, 0);
+  }
+  bool fill() const {
+    return GetField<uint8_t>(VT_FILL, 0) != 0;
+  }
+  VectorCmdFB::PathFillType fillType() const {
+    return static_cast<VectorCmdFB::PathFillType>(GetField<uint8_t>(VT_FILLTYPE, 0));
+  }
+  bool Verify(::flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyOffset(verifier, VT_VERBS) &&
+           verifier.VerifyVector(verbs()) &&
+           VerifyOffset(verifier, VT_POINTS_XY) &&
+           verifier.VerifyVector(points_xy()) &&
+           VerifyField<uint32_t>(verifier, VT_COL, 4) &&
+           VerifyField<uint8_t>(verifier, VT_FILL, 1) &&
+           VerifyField<uint8_t>(verifier, VT_FILLTYPE, 1) &&
+           verifier.EndTable();
+  }
+};
+
+struct CmdPathBuilder {
+  typedef CmdPath Table;
+  ::flatbuffers::FlatBufferBuilder &fbb_;
+  ::flatbuffers::uoffset_t start_;
+  void add_verbs(::flatbuffers::Offset<::flatbuffers::Vector<uint8_t>> verbs) {
+    fbb_.AddOffset(CmdPath::VT_VERBS, verbs);
+  }
+  void add_points_xy(::flatbuffers::Offset<::flatbuffers::Vector<float>> points_xy) {
+    fbb_.AddOffset(CmdPath::VT_POINTS_XY, points_xy);
+  }
+  void add_col(uint32_t col) {
+    fbb_.AddElement<uint32_t>(CmdPath::VT_COL, col, 0);
+  }
+  void add_fill(bool fill) {
+    fbb_.AddElement<uint8_t>(CmdPath::VT_FILL, static_cast<uint8_t>(fill), 0);
+  }
+  void add_fillType(VectorCmdFB::PathFillType fillType) {
+    fbb_.AddElement<uint8_t>(CmdPath::VT_FILLTYPE, static_cast<uint8_t>(fillType), 0);
+  }
+  explicit CmdPathBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ::flatbuffers::Offset<CmdPath> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = ::flatbuffers::Offset<CmdPath>(end);
+    return o;
+  }
+};
+
+inline ::flatbuffers::Offset<CmdPath> CreateCmdPath(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    ::flatbuffers::Offset<::flatbuffers::Vector<uint8_t>> verbs = 0,
+    ::flatbuffers::Offset<::flatbuffers::Vector<float>> points_xy = 0,
+    uint32_t col = 0,
+    bool fill = false,
+    VectorCmdFB::PathFillType fillType = VectorCmdFB::PathFillType_winding) {
+  CmdPathBuilder builder_(_fbb);
+  builder_.add_col(col);
+  builder_.add_points_xy(points_xy);
+  builder_.add_verbs(verbs);
+  builder_.add_fillType(fillType);
+  builder_.add_fill(fill);
+  return builder_.Finish();
+}
+
+inline ::flatbuffers::Offset<CmdPath> CreateCmdPathDirect(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    const std::vector<uint8_t> *verbs = nullptr,
+    const std::vector<float> *points_xy = nullptr,
+    uint32_t col = 0,
+    bool fill = false,
+    VectorCmdFB::PathFillType fillType = VectorCmdFB::PathFillType_winding) {
+  auto verbs__ = verbs ? _fbb.CreateVector<uint8_t>(*verbs) : 0;
+  auto points_xy__ = points_xy ? _fbb.CreateVector<float>(*points_xy) : 0;
+  return VectorCmdFB::CreateCmdPath(
+      _fbb,
+      verbs__,
+      points_xy__,
+      col,
+      fill,
+      fillType);
+}
+
 struct SingleVectorCmdDto FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
   typedef SingleVectorCmdDtoBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
@@ -3751,6 +4028,12 @@ struct SingleVectorCmdDto FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table
   }
   const VectorCmdFB::CmdSimpleVertexDraw *arg_as_CmdSimpleVertexDraw() const {
     return arg_type() == VectorCmdFB::VectorCmdArg_CmdSimpleVertexDraw ? static_cast<const VectorCmdFB::CmdSimpleVertexDraw *>(arg()) : nullptr;
+  }
+  const VectorCmdFB::CmdSvgPathSubset *arg_as_CmdSvgPathSubset() const {
+    return arg_type() == VectorCmdFB::VectorCmdArg_CmdSvgPathSubset ? static_cast<const VectorCmdFB::CmdSvgPathSubset *>(arg()) : nullptr;
+  }
+  const VectorCmdFB::CmdPath *arg_as_CmdPath() const {
+    return arg_type() == VectorCmdFB::VectorCmdArg_CmdPath ? static_cast<const VectorCmdFB::CmdPath *>(arg()) : nullptr;
   }
   bool Verify(::flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -3895,6 +4178,14 @@ template<> inline const VectorCmdFB::CmdPopRotation *SingleVectorCmdDto::arg_as<
 
 template<> inline const VectorCmdFB::CmdSimpleVertexDraw *SingleVectorCmdDto::arg_as<VectorCmdFB::CmdSimpleVertexDraw>() const {
   return arg_as_CmdSimpleVertexDraw();
+}
+
+template<> inline const VectorCmdFB::CmdSvgPathSubset *SingleVectorCmdDto::arg_as<VectorCmdFB::CmdSvgPathSubset>() const {
+  return arg_as_CmdSvgPathSubset();
+}
+
+template<> inline const VectorCmdFB::CmdPath *SingleVectorCmdDto::arg_as<VectorCmdFB::CmdPath>() const {
+  return arg_as_CmdPath();
 }
 
 struct SingleVectorCmdDtoBuilder {
@@ -4292,6 +4583,14 @@ inline bool VerifyVectorCmdArg(::flatbuffers::Verifier &verifier, const void *ob
     }
     case VectorCmdArg_CmdSimpleVertexDraw: {
       auto ptr = reinterpret_cast<const VectorCmdFB::CmdSimpleVertexDraw *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case VectorCmdArg_CmdSvgPathSubset: {
+      auto ptr = reinterpret_cast<const VectorCmdFB::CmdSvgPathSubset *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case VectorCmdArg_CmdPath: {
+      auto ptr = reinterpret_cast<const VectorCmdFB::CmdPath *>(obj);
       return verifier.VerifyTable(ptr);
     }
     default: return true;

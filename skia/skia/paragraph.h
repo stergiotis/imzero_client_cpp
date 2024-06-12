@@ -24,6 +24,7 @@ class Paragraph {
         int getNumberOfLines();
         bool hasLine(int lineNumber);
         void triangulate(int lineNumber,const SkRect &clipBounds,const float *&vertices,size_t &numVertices,int &unrenderedGlyphs);
+        SkRect boundingRect(int lineNumber, bool &found);
 
         void paint(SkCanvas &canvas, SkScalar x, SkScalar y);
         void setForegroundPaint(SkPaint &paint);

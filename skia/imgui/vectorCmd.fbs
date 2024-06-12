@@ -263,6 +263,38 @@ table CmdSimpleVertexDraw {
     pos_xy: [float];
     col: uint32;
 }
+// Supported are: Q, M, L, C, Z, q, m, l, c, z SVG path commands (relative or absolute coordinates)
+table CmdSvgPathSubset {
+    svg: string;
+    col: uint32;
+    fill: bool;
+}
+enum PathVerb:uint8 {
+    move = 0, // 1 point
+    line = 1, // 2 points
+    quad = 2, // 3 points
+    conic = 3, // 3 points + 1 weight
+    cubic = 4, // 4 points
+    close = 5, // 0 points
+    done = 6,
+}
+enum PathFillType:uint8 {
+    /** Specifies that "inside" is computed by a non-zero sum of signed edge crossings */
+    winding = 0,
+    /** Specifies that "inside" is computed by an odd number of edge crossings */
+    evenOdd = 1,
+    /** Same as Winding, but draws outside of the path, rather than inside */
+    inverseWinding = 2,
+    /** Same as EvenOdd, but draws outside of the path, rather than inside */
+    inverseEvenOdd = 3
+}
+table CmdPath {
+    verbs: [PathVerb];
+    points_xy: [float];
+    col: uint32;
+    fill: bool;
+    fillType : PathFillType;
+}
 union VectorCmdArg {
     CmdRegisterFont,
     CmdPolyline,
@@ -298,6 +330,8 @@ union VectorCmdArg {
     CmdPushRotation,
     CmdPopRotation,
     CmdSimpleVertexDraw,
+    CmdSvgPathSubset,
+    CmdPath,
 }
 
 table SingleVectorCmdDto {

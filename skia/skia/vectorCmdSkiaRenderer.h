@@ -78,6 +78,8 @@ class VectorCmdSkiaRenderer {
         void drawCmdBezierQuadraticFB(const VectorCmdFB::CmdBezierQuadratic &cmd, SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags);
         void drawCmdVertexDraw(const VectorCmdFB::CmdVertexDraw &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags);
         void drawCmdSimpleVertexDraw(const VectorCmdFB::CmdSimpleVertexDraw &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags);
+        void drawCmdSvgPathSubset(const VectorCmdFB::CmdSvgPathSubset &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags);
+        void drawCmdPath(const VectorCmdFB::CmdPath &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags);
         void registerFont(const VectorCmdFB::CmdRegisterFont &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags);
 
         RenderModeE getRenderMode() const;
