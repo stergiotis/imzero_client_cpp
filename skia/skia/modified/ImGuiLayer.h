@@ -68,6 +68,7 @@ private:
     size_t fPngBytesWritten;
     ImZeroSkiaSetupUI fImZeroSkiaSetupUi;
     bool ffffiInterpreter;
+    SkColor fBackground;
 
     void drawImDrawData(SkCanvas &canvas);
     void drawImGuiVectorCmdsFB(SkCanvas &canvas);

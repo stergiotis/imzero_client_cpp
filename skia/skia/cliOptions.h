@@ -11,7 +11,11 @@ struct CliOptions {
     bool sketchFilter = false;
     bool fffiInterpreter = true;
     bool vsync = true;
+    bool imguiNavKeyboard = false;
+    bool imguiNavGamepad = false;
+    bool imguiDocking = true;
     const char *skiaBackendType = "gl";
+    const char *backgroundColorRGBA = "000000ff";
     CliOptions() = default;
     ~CliOptions() = default;
 

@@ -49,6 +49,7 @@ void CliOptions::usage(const char *name, FILE *file) const {
     fprintf(file,"    -fffiOutFile [path:%s]\n",fffiOutFile == nullptr ? "<stdout>" : fffiOutFile);
     fprintf(file,"    -appTitle [title:%s]\n", appTitle);
     fprintf(file,"    -skiaBackendType [type:%s]    choices: raster,gl,vulkan\n",skiaBackendType);
+    fprintf(file,"    -backgroundColorRGBA [hexrgba:%s]   example: 1199ffaa\n",backgroundColorRGBA);
     fprintf(file," float flags:\n");
     fprintf(file,"    -fontDyFudge [float:%f]\n", fontDyFudge);
     fprintf(file," bool flags:\n");
@@ -56,6 +57,9 @@ void CliOptions::usage(const char *name, FILE *file) const {
     fprintf(file,"    -vsync [bool:%s]\n",vsync ? "on" : "off");
     fprintf(file, "    -backdropFilter [bool:%s]\n", backdropFilter ? "on" : "off");
     fprintf(file, "    -sketchFilter [bool:%s]\n", sketchFilter ? "on" : "off");
+    fprintf(file, "    -imguiNavKeyboard [bool:%s]\n", imguiNavKeyboard ? "on" : "off");
+    fprintf(file, "    -imguiNavGamepad [bool:%s]\n", imguiNavGamepad ? "on" : "off");
+    fprintf(file, "    -imguiDocking [bool:%s]\n", imguiDocking ? "on" : "off");
 }
 void CliOptions::parse(int argc,char **argv,FILE *logChannel) {
     if(argc > 1) {
@@ -71,6 +75,11 @@ void CliOptions::parse(int argc,char **argv,FILE *logChannel) {
     fffiOutFile = findFlagValueDefault(logChannel,u, argc, argv, "-fffiOutFile", fffiOutFile);
     appTitle = findFlagValueDefault(logChannel,u, argc, argv, "-appTitle", appTitle);
     skiaBackendType = findFlagValueDefault(logChannel,u, argc, argv, "-skiaBackendType", skiaBackendType);
+    backgroundColorRGBA = findFlagValueDefault(logChannel, u, argc, argv, "-backgroundColorRGBA", backgroundColorRGBA);
+    if(strlen(backgroundColorRGBA) != 8) {
+        fprintf(logChannel,"backgroundColorRGBA is not a valid rgba hex color: %s\n", backgroundColorRGBA);
+        exit(1);
+    }
 
     fontDyFudge = findFlagValueDefaultFloat(logChannel,u, argc, argv, "-fontDyFudge", "0.0");
     if(std::isnan(fontDyFudge) || fontDyFudge < -10000.0f || fontDyFudge > 10000.0f) {
@@ -82,6 +91,9 @@ void CliOptions::parse(int argc,char **argv,FILE *logChannel) {
     vsync = getBoolFlagValue(logChannel,u,argc,argv,"-vsync",vsync);
     backdropFilter = getBoolFlagValue(logChannel,u, argc, argv, "-backdropFilter",backdropFilter);
     sketchFilter = getBoolFlagValue(logChannel,u, argc, argv, "-sketchFilter",sketchFilter);
+    imguiNavKeyboard = getBoolFlagValue(logChannel,u, argc, argv, "-imguiNavKeyboard",imguiNavKeyboard);
+    imguiNavGamepad = getBoolFlagValue(logChannel,u, argc, argv, "-imguiNavGamepad",imguiNavGamepad);
+    imguiDocking = getBoolFlagValue(logChannel,u, argc, argv, "-imguiDocking",imguiDocking);
 
     if(std::popcount(u) != (argc-1)) {
         for(int i=1;i<argc;i++) {

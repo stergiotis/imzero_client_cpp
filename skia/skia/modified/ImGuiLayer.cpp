@@ -43,12 +43,35 @@ static void build_ImFontAtlas(ImFontAtlas& atlas, SkPaint& fontPaint) {
     atlas.TexID = &fontPaint;
 }
 
+template <typename T>
+static inline void applyFlag(int &flag,T val,bool v) {
+    if(v) {
+        flag |= val;
+    } else {
+        flag &= ~(val);
+    }
+}
+
 ImGuiLayer::ImGuiLayer(const CliOptions *opts) : fWindow(nullptr), fSvgBytesWritten(0), fSkpBytesWritten(0), fPngBytesWritten(0), ffffiInterpreter(opts->fffiInterpreter), fTotalVectorCmdSerializedSize(0) {
     // ImGui initialization:
+    IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
 
+    applyFlag(io.ConfigFlags, ImGuiConfigFlags_NavEnableKeyboard, opts->imguiNavKeyboard);
+    applyFlag(io.ConfigFlags, ImGuiConfigFlags_NavEnableGamepad, opts->imguiNavGamepad);
+    applyFlag(io.ConfigFlags, ImGuiConfigFlags_DockingEnable, opts->imguiDocking);
+
     io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset;
+
+    if(opts->backgroundColorRGBA != nullptr && strlen(opts->backgroundColorRGBA) == 8) {
+        auto const n = static_cast<uint32_t>(strtoul(opts->backgroundColorRGBA,nullptr,16));
+        uint8_t a = n & 0xff;
+        uint8_t b = (n >> 8) & 0xff;
+        uint8_t g = (n >> 16) & 0xff;
+        uint8_t r = (n >> 24) & 0xff;
+        fBackground = SkColorSetARGB(a,r,g,b);
+    }
 
     // Keymap...
     io.KeyMap[ImGuiKey_Tab]        = (int)skui::Key::kTab;
@@ -308,7 +331,7 @@ void ImGuiLayer::onPaint(SkSurface* surface) { ZoneScoped;
                 auto skiaCanvas = skiaRecorder.beginRecording(SkIntToScalar(fWindow->width()),
                                                               SkIntToScalar(fWindow->height()));
 
-                skiaCanvas->clear(SK_ColorDKGRAY);
+                skiaCanvas->clear(fBackground);
                 skiaCanvas->save();
                 drawImGuiVectorCmdsFB(*skiaCanvas);
                 skiaCanvas->restore();
@@ -394,7 +417,7 @@ void ImGuiLayer::onPaint(SkSurface* surface) { ZoneScoped;
     } else if(fSkiaBackendActive) { ZoneScoped;
         auto skiaCanvas = surface->getCanvas();
 
-        skiaCanvas->clear(SK_ColorTRANSPARENT);
+        skiaCanvas->clear(fBackground);
     
         skiaCanvas->save();
         drawImGuiVectorCmdsFB(*skiaCanvas);
