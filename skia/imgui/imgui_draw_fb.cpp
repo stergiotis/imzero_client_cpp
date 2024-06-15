@@ -225,7 +225,7 @@ static inline void initHiddenPwBuffer(const ImFont &font) {
 #ifdef SKIA_DRAW_BACKEND
 #include "flatbufferHelpers.h"
 static constexpr bool enableVectorCmdFBVertexDraw = true;
-void ImDrawList::addVerticesAsVectorCmd() {
+bool ImDrawList::addVerticesAsVectorCmd() {
     auto sz = CmdBuffer.Size;
     if(sz >= 2) {
         _TryMergeDrawCmds();
@@ -237,19 +237,23 @@ void ImDrawList::addVerticesAsVectorCmd() {
             continue;
         }
         auto cr = VectorCmdFB::SingleVec4(cur.ClipRect.x,cur.ClipRect.y,cur.ClipRect.z,cur.ClipRect.w);
-        auto cmd = VectorCmdFB::CreateCmdVertexDraw(*fbBuilder,&cr,cur.ElemCount,_FbProcessedDrawCmdIndexOffset,cur.VtxOffset);
+        auto cmd = VectorCmdFB::CreateCmdVertexDraw(*fbBuilder,
+                                                    &cr,
+                                                    cur.ElemCount,
+                                                    _FbProcessedDrawCmdIndexOffset,
+                                                    cur.VtxOffset);
         _FbCmds->push_back(VectorCmdFB::CreateSingleVectorCmdDto(*fbBuilder,VectorCmdFB::VectorCmdArg_CmdVertexDraw,cmd.Union()));
         _FbProcessedDrawCmdIndexOffset += cur.ElemCount;
         added = true;
     }
-    if(added) {
-        CmdBuffer.clear();
-        AddDrawCmd();
-    }
+    return added;
 }
 void ImDrawList::addVectorCmdFB(VectorCmdFB::VectorCmdArg arg_type, flatbuffers::Offset<void> arg) {
     if(enableVectorCmdFBVertexDraw && ImGui::useVectorCmd) {
-        addVerticesAsVectorCmd();
+        if(addVerticesAsVectorCmd()) {
+            CmdBuffer.clear();
+            AddDrawCmd();
+        }
     }
     _FbCmds->push_back(VectorCmdFB::CreateSingleVectorCmdDto(*fbBuilder,arg_type,arg));
 }
@@ -275,7 +279,7 @@ static flatbuffers::Offset<VectorCmdFB::DrawList> createVectorCmdFBDrawList(ImDr
     auto f = getVectorCmdFBFlags(drawList);
 
     flatbuffers::Offset<VectorCmdFB::VertexData> vertices = 0;
-    if(enableVectorCmdFBVertexDraw) { ZoneScopedN("de-interleaving vertices");
+    if(enableVectorCmdFBVertexDraw || !ImGui::useVectorCmd) { ZoneScopedN("de-interleaving vertices");
         flatbuffers::Offset<flatbuffers::Vector<float>> posXYs,texUVs;
         flatbuffers::Offset<flatbuffers::Vector<uint32_t>> cols;
         flatbuffers::Offset<flatbuffers::Vector<uint16_t>> indices;

@@ -2969,7 +2969,7 @@ struct ImDrawList
     uint32_t _FbProcessedDrawCmdIndexOffset;
 public: // public: ImFont needs to access this method, in spirit of the rest of imgui I do not use C++'s friend keyword
     void addVectorCmdFB(VectorCmdFB::VectorCmdArg arg_type, flatbuffers::Offset<void> arg);
-    void addVerticesAsVectorCmd();
+    bool addVerticesAsVectorCmd();
     #ifdef SKIA_DRAW_BACKEND_PARAGRAPH_AS_PATH
     ImVector<uint8_t> fPathVerbBuffer;
     ImVector<float> fPathPointBuffer;
