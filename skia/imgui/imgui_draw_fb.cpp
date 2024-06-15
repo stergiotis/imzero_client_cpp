@@ -4407,6 +4407,7 @@ SKIA_DRAW_BACKEND_BEGIN
             }
         }
         if(isParagraph) {
+//#define SKIA_DRAW_BACKEND_PARAGRAPH_AS_PATH
 #ifdef SKIA_DRAW_BACKEND_PARAGRAPH_AS_PATH
             const bool renderAsParagraph = SKIA_DRAW_BACKEND_PARAGRAPH_AS_PATH;
 #else
@@ -4515,6 +4516,7 @@ SKIA_DRAW_BACKEND_BEGIN
                     while ((verb = iter.next(pts)) != SkPath::kDone_Verb) {
                         draw_list->fPathVerbBuffer.push_back(verb);
                         const int o = verb == SkPath::kMove_Verb ? 0 : 1;
+                        // TODO optionally use SkPath::ConvertConicToQuads() to approximate conics (hyperbolic,elliptic,parabolic) using quadratic bezier curves
                         for(int i=0;i<nPointsLU[verb];i++) {
                             draw_list->fPathPointBuffer.push_back(pts[o+i].x());
                             draw_list->fPathPointBuffer.push_back(pts[o+i].y());
