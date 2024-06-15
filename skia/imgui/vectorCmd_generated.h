@@ -3743,13 +3743,17 @@ struct CmdSvgPathSubset FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
     VT_SVG = 4,
     VT_COL = 6,
-    VT_FILL = 8
+    VT_STROKE = 8,
+    VT_FILL = 10
   };
   const ::flatbuffers::String *svg() const {
     return GetPointer<const ::flatbuffers::String *>(VT_SVG);
   }
   uint32_t col() const {
     return GetField<uint32_t>(VT_COL, 0);
+  }
+  bool stroke() const {
+    return GetField<uint8_t>(VT_STROKE, 0) != 0;
   }
   bool fill() const {
     return GetField<uint8_t>(VT_FILL, 0) != 0;
@@ -3759,6 +3763,7 @@ struct CmdSvgPathSubset FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
            VerifyOffset(verifier, VT_SVG) &&
            verifier.VerifyString(svg()) &&
            VerifyField<uint32_t>(verifier, VT_COL, 4) &&
+           VerifyField<uint8_t>(verifier, VT_STROKE, 1) &&
            VerifyField<uint8_t>(verifier, VT_FILL, 1) &&
            verifier.EndTable();
   }
@@ -3773,6 +3778,9 @@ struct CmdSvgPathSubsetBuilder {
   }
   void add_col(uint32_t col) {
     fbb_.AddElement<uint32_t>(CmdSvgPathSubset::VT_COL, col, 0);
+  }
+  void add_stroke(bool stroke) {
+    fbb_.AddElement<uint8_t>(CmdSvgPathSubset::VT_STROKE, static_cast<uint8_t>(stroke), 0);
   }
   void add_fill(bool fill) {
     fbb_.AddElement<uint8_t>(CmdSvgPathSubset::VT_FILL, static_cast<uint8_t>(fill), 0);
@@ -3792,11 +3800,13 @@ inline ::flatbuffers::Offset<CmdSvgPathSubset> CreateCmdSvgPathSubset(
     ::flatbuffers::FlatBufferBuilder &_fbb,
     ::flatbuffers::Offset<::flatbuffers::String> svg = 0,
     uint32_t col = 0,
+    bool stroke = false,
     bool fill = false) {
   CmdSvgPathSubsetBuilder builder_(_fbb);
   builder_.add_col(col);
   builder_.add_svg(svg);
   builder_.add_fill(fill);
+  builder_.add_stroke(stroke);
   return builder_.Finish();
 }
 
@@ -3804,32 +3814,46 @@ inline ::flatbuffers::Offset<CmdSvgPathSubset> CreateCmdSvgPathSubsetDirect(
     ::flatbuffers::FlatBufferBuilder &_fbb,
     const char *svg = nullptr,
     uint32_t col = 0,
+    bool stroke = false,
     bool fill = false) {
   auto svg__ = svg ? _fbb.CreateString(svg) : 0;
   return VectorCmdFB::CreateCmdSvgPathSubset(
       _fbb,
       svg__,
       col,
+      stroke,
       fill);
 }
 
 struct CmdPath FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
   typedef CmdPathBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
-    VT_VERBS = 4,
-    VT_POINTS_XY = 6,
-    VT_COL = 8,
-    VT_FILL = 10,
-    VT_FILLTYPE = 12
+    VT_OFFSET = 4,
+    VT_VERBS = 6,
+    VT_POINTS_XY = 8,
+    VT_CONIC_WEIGHTS = 10,
+    VT_COL = 12,
+    VT_STROKE = 14,
+    VT_FILL = 16,
+    VT_FILLTYPE = 18
   };
+  const VectorCmdFB::SingleVec2 *offset() const {
+    return GetStruct<const VectorCmdFB::SingleVec2 *>(VT_OFFSET);
+  }
   const ::flatbuffers::Vector<uint8_t> *verbs() const {
     return GetPointer<const ::flatbuffers::Vector<uint8_t> *>(VT_VERBS);
   }
   const ::flatbuffers::Vector<float> *points_xy() const {
     return GetPointer<const ::flatbuffers::Vector<float> *>(VT_POINTS_XY);
   }
+  const ::flatbuffers::Vector<float> *conic_weights() const {
+    return GetPointer<const ::flatbuffers::Vector<float> *>(VT_CONIC_WEIGHTS);
+  }
   uint32_t col() const {
     return GetField<uint32_t>(VT_COL, 0);
+  }
+  bool stroke() const {
+    return GetField<uint8_t>(VT_STROKE, 0) != 0;
   }
   bool fill() const {
     return GetField<uint8_t>(VT_FILL, 0) != 0;
@@ -3839,11 +3863,15 @@ struct CmdPath FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
   }
   bool Verify(::flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
+           VerifyField<VectorCmdFB::SingleVec2>(verifier, VT_OFFSET, 4) &&
            VerifyOffset(verifier, VT_VERBS) &&
            verifier.VerifyVector(verbs()) &&
            VerifyOffset(verifier, VT_POINTS_XY) &&
            verifier.VerifyVector(points_xy()) &&
+           VerifyOffset(verifier, VT_CONIC_WEIGHTS) &&
+           verifier.VerifyVector(conic_weights()) &&
            VerifyField<uint32_t>(verifier, VT_COL, 4) &&
+           VerifyField<uint8_t>(verifier, VT_STROKE, 1) &&
            VerifyField<uint8_t>(verifier, VT_FILL, 1) &&
            VerifyField<uint8_t>(verifier, VT_FILLTYPE, 1) &&
            verifier.EndTable();
@@ -3854,14 +3882,23 @@ struct CmdPathBuilder {
   typedef CmdPath Table;
   ::flatbuffers::FlatBufferBuilder &fbb_;
   ::flatbuffers::uoffset_t start_;
+  void add_offset(const VectorCmdFB::SingleVec2 *offset) {
+    fbb_.AddStruct(CmdPath::VT_OFFSET, offset);
+  }
   void add_verbs(::flatbuffers::Offset<::flatbuffers::Vector<uint8_t>> verbs) {
     fbb_.AddOffset(CmdPath::VT_VERBS, verbs);
   }
   void add_points_xy(::flatbuffers::Offset<::flatbuffers::Vector<float>> points_xy) {
     fbb_.AddOffset(CmdPath::VT_POINTS_XY, points_xy);
   }
+  void add_conic_weights(::flatbuffers::Offset<::flatbuffers::Vector<float>> conic_weights) {
+    fbb_.AddOffset(CmdPath::VT_CONIC_WEIGHTS, conic_weights);
+  }
   void add_col(uint32_t col) {
     fbb_.AddElement<uint32_t>(CmdPath::VT_COL, col, 0);
+  }
+  void add_stroke(bool stroke) {
+    fbb_.AddElement<uint8_t>(CmdPath::VT_STROKE, static_cast<uint8_t>(stroke), 0);
   }
   void add_fill(bool fill) {
     fbb_.AddElement<uint8_t>(CmdPath::VT_FILL, static_cast<uint8_t>(fill), 0);
@@ -3882,34 +3919,47 @@ struct CmdPathBuilder {
 
 inline ::flatbuffers::Offset<CmdPath> CreateCmdPath(
     ::flatbuffers::FlatBufferBuilder &_fbb,
+    const VectorCmdFB::SingleVec2 *offset = nullptr,
     ::flatbuffers::Offset<::flatbuffers::Vector<uint8_t>> verbs = 0,
     ::flatbuffers::Offset<::flatbuffers::Vector<float>> points_xy = 0,
+    ::flatbuffers::Offset<::flatbuffers::Vector<float>> conic_weights = 0,
     uint32_t col = 0,
+    bool stroke = false,
     bool fill = false,
     VectorCmdFB::PathFillType fillType = VectorCmdFB::PathFillType_winding) {
   CmdPathBuilder builder_(_fbb);
   builder_.add_col(col);
+  builder_.add_conic_weights(conic_weights);
   builder_.add_points_xy(points_xy);
   builder_.add_verbs(verbs);
+  builder_.add_offset(offset);
   builder_.add_fillType(fillType);
   builder_.add_fill(fill);
+  builder_.add_stroke(stroke);
   return builder_.Finish();
 }
 
 inline ::flatbuffers::Offset<CmdPath> CreateCmdPathDirect(
     ::flatbuffers::FlatBufferBuilder &_fbb,
+    const VectorCmdFB::SingleVec2 *offset = nullptr,
     const std::vector<uint8_t> *verbs = nullptr,
     const std::vector<float> *points_xy = nullptr,
+    const std::vector<float> *conic_weights = nullptr,
     uint32_t col = 0,
+    bool stroke = false,
     bool fill = false,
     VectorCmdFB::PathFillType fillType = VectorCmdFB::PathFillType_winding) {
   auto verbs__ = verbs ? _fbb.CreateVector<uint8_t>(*verbs) : 0;
   auto points_xy__ = points_xy ? _fbb.CreateVector<float>(*points_xy) : 0;
+  auto conic_weights__ = conic_weights ? _fbb.CreateVector<float>(*conic_weights) : 0;
   return VectorCmdFB::CreateCmdPath(
       _fbb,
+      offset,
       verbs__,
       points_xy__,
+      conic_weights__,
       col,
+      stroke,
       fill,
       fillType);
 }

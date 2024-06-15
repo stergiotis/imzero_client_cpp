@@ -14,6 +14,7 @@ struct CliOptions {
     bool imguiNavKeyboard = false;
     bool imguiNavGamepad = false;
     bool imguiDocking = true;
+    bool vectorCmd = true;
     const char *skiaBackendType = "gl";
     const char *backgroundColorRGBA = "000000ff";
     CliOptions() = default;

@@ -311,7 +311,7 @@ namespace ImGui
 {
 #ifdef SKIA_DRAW_BACKEND
     extern SkFont skiaFont;
-    extern bool skiaActive;
+    extern bool useVectorCmd;
     extern float skiaFontDyFudge;
     extern std::shared_ptr<Paragraph> paragraph;
     constexpr unsigned int skiaPasswordDefaultCharacter = U'*'; // TODO make this configurable or runtime selectable
@@ -2966,10 +2966,10 @@ struct ImDrawList
     #ifdef SKIA_DRAW_BACKEND
     flatbuffers::FlatBufferBuilder *fbBuilder;
     std::vector<flatbuffers::Offset<VectorCmdFB::SingleVectorCmdDto>> *_FbCmds;
-    int _FbProcessedDrawCmdIdx;
     uint32_t _FbProcessedDrawCmdIndexOffset;
 public: // public: ImFont needs to access this method, in spirit of the rest of imgui I do not use C++'s friend keyword
     void addVectorCmdFB(VectorCmdFB::VectorCmdArg arg_type, flatbuffers::Offset<void> arg);
+    void addVerticesAsVectorCmd();
     #ifdef SKIA_DRAW_BACKEND_PARAGRAPH_AS_PATH
     ImVector<uint8_t> fPathVerbBuffer;
     ImVector<float> fPathPointBuffer;
@@ -3240,7 +3240,7 @@ struct ImFont
     IMGUI_API const ImFontGlyph*FindGlyphNoFallback(ImWchar c) const;
 #ifdef SKIA_DRAW_BACKEND
     float GetCharAdvance(ImWchar c) const {
-        if(!ImGui::skiaActive) {
+        if(!ImGui::useVectorCmd) {
             return ((int)c < IndexAdvanceX.Size) ? IndexAdvanceX[(int)c] : FallbackAdvanceX;
         }
 

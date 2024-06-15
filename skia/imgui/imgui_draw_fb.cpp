@@ -171,7 +171,7 @@ using namespace IMGUI_STB_NAMESPACE;
 
 #ifdef SKIA_DRAW_BACKEND
 #include "tracy/Tracy.hpp"
-#define SKIA_DRAW_BACKEND_BEGIN if(ImGui::skiaActive) { ZoneScoped;
+#define SKIA_DRAW_BACKEND_BEGIN if(ImGui::useVectorCmd) { ZoneScoped;
 #define SKIA_DRAW_BACKEND_END }
 //-----------------------------------------------------------------------------
 // [SECTION] Skia
@@ -183,7 +183,7 @@ using namespace IMGUI_STB_NAMESPACE;
 #include "vectorCmd_generated.h"
 namespace ImGui {
     SkFont skiaFont;
-    bool skiaActive = false;
+    bool useVectorCmd = false;
     float skiaFontDyFudge = 0.0f;
     std::shared_ptr<Paragraph> paragraph = nullptr;
 }
@@ -225,29 +225,31 @@ static inline void initHiddenPwBuffer(const ImFont &font) {
 #ifdef SKIA_DRAW_BACKEND
 #include "flatbufferHelpers.h"
 static constexpr bool enableVectorCmdFBVertexDraw = true;
-void ImDrawList::addVectorCmdFB(VectorCmdFB::VectorCmdArg arg_type, flatbuffers::Offset<void> arg) {
-    if(enableVectorCmdFBVertexDraw && ImGui::skiaActive) {
-        auto sz = CmdBuffer.Size;
-        if(sz >= 2) {
-            _TryMergeDrawCmds();
+void ImDrawList::addVerticesAsVectorCmd() {
+    auto sz = CmdBuffer.Size;
+    if(sz >= 2) {
+        _TryMergeDrawCmds();
+    }
+    bool added = false;
+    for(int i=0;i<sz;i++) {
+        auto &cur = CmdBuffer.Data[i];
+        if(cur.ElemCount == 0 || cur.UserCallback != nullptr) {
+            continue;
         }
-        IM_ASSERT(_FbProcessedDrawCmdIdx >= 0);
-        bool added = false;
-        for(int i=_FbProcessedDrawCmdIdx;i<sz;i++) {
-            auto &cur = CmdBuffer.Data[i];
-            if(cur.ElemCount == 0 || cur.UserCallback != nullptr) {
-                continue;
-            }
-            auto cr = VectorCmdFB::SingleVec4(cur.ClipRect.x,cur.ClipRect.y,cur.ClipRect.z,cur.ClipRect.w);
-            auto cmd = VectorCmdFB::CreateCmdVertexDraw(*fbBuilder,&cr,cur.ElemCount,_FbProcessedDrawCmdIndexOffset,cur.VtxOffset);
-            _FbCmds->push_back(VectorCmdFB::CreateSingleVectorCmdDto(*fbBuilder,VectorCmdFB::VectorCmdArg_CmdVertexDraw,cmd.Union()));
-            _FbProcessedDrawCmdIndexOffset += cur.ElemCount;
-            added = true;
-        }
-        if(added) {
+        auto cr = VectorCmdFB::SingleVec4(cur.ClipRect.x,cur.ClipRect.y,cur.ClipRect.z,cur.ClipRect.w);
+        auto cmd = VectorCmdFB::CreateCmdVertexDraw(*fbBuilder,&cr,cur.ElemCount,_FbProcessedDrawCmdIndexOffset,cur.VtxOffset);
+        _FbCmds->push_back(VectorCmdFB::CreateSingleVectorCmdDto(*fbBuilder,VectorCmdFB::VectorCmdArg_CmdVertexDraw,cmd.Union()));
+        _FbProcessedDrawCmdIndexOffset += cur.ElemCount;
+        added = true;
+    }
+    if(added) {
         CmdBuffer.clear();
         AddDrawCmd();
-        }
+    }
+}
+void ImDrawList::addVectorCmdFB(VectorCmdFB::VectorCmdArg arg_type, flatbuffers::Offset<void> arg) {
+    if(enableVectorCmdFBVertexDraw && ImGui::useVectorCmd) {
+        addVerticesAsVectorCmd();
     }
     _FbCmds->push_back(VectorCmdFB::CreateSingleVectorCmdDto(*fbBuilder,arg_type,arg));
 }
@@ -293,6 +295,11 @@ static flatbuffers::Offset<VectorCmdFB::DrawList> createVectorCmdFBDrawList(ImDr
     return VectorCmdFB::CreateDrawList(fbBuilder,f,name,vertices,cmds);
 }
 void ImDrawList::serializeFB(const uint8_t *&out,size_t &size) { ZoneScoped;
+    if(!ImGui::useVectorCmd) {
+        // no native drawing commands, add all vertices as command (this will emulate the standard ImGui backend implementation)
+        addVerticesAsVectorCmd();
+    }
+
     auto dlFb = createVectorCmdFBDrawList(*this,false,*_FbCmds,*fbBuilder);
     fbBuilder->Finish(dlFb,nullptr);
     size = fbBuilder->GetSize();
@@ -534,8 +541,7 @@ void ImDrawList::_ResetForNewFrame()
         _Splitter.Merge(this);
 
     CmdBuffer.resize(0);
-SKIA_DRAW_BACKEND_BEGIN
-    _FbProcessedDrawCmdIdx = 0;
+#ifdef SKIA_DRAW_BACKEND
     _FbProcessedDrawCmdIndexOffset = 0;
     if(fbBuilder == nullptr) {
         fbBuilder = new flatbuffers::FlatBufferBuilder();
@@ -547,7 +553,7 @@ SKIA_DRAW_BACKEND_BEGIN
     } else {
         _FbCmds->resize(0);
     }
-SKIA_DRAW_BACKEND_END
+#endif
     IdxBuffer.resize(0);
     VtxBuffer.resize(0);
     Flags = _Data->InitialFlags;
@@ -568,7 +574,7 @@ void ImDrawList::_ClearFreeMemory()
     CmdBuffer.clear();
     IdxBuffer.clear();
     VtxBuffer.clear();
-SKIA_DRAW_BACKEND_BEGIN
+#ifdef SKIA_DRAW_BACKEND
     if(fbBuilder != nullptr) {
         fbBuilder->Reset();
         delete fbBuilder;
@@ -584,7 +590,7 @@ SKIA_DRAW_BACKEND_BEGIN
     fPathPointBuffer.clear();
     fPathWeightBuffer.clear();
 #endif
-SKIA_DRAW_BACKEND_END
+#endif
     Flags = ImDrawListFlags_None;
     _VtxCurrentIdx = 0;
     _VtxWritePtr = NULL;
@@ -2419,7 +2425,7 @@ void ImDrawData::Clear()
 void ImGui::AddDrawListToDrawDataEx(ImDrawData* draw_data, ImVector<ImDrawList*>* out_list, ImDrawList* draw_list)
 { ZoneScoped;
 #ifdef SKIA_DRAW_BACKEND
-    if(ImGui::skiaActive) {
+    if(ImGui::useVectorCmd) {
         if(draw_list->_FbCmds->size() == 0) {
             // skip empty drawlist
             return;
@@ -4419,13 +4425,14 @@ SKIA_DRAW_BACKEND_BEGIN
                     if(!found) {
                         break;
                     }
-                    //draw_list->AddRect(ImVec2(pos.x+ SkScalarToFloat(bounds.top()), pos.y+SkScalarToFloat(bounds.left())),
-                    //                         ImVec2(pos.x+SkScalarToFloat(bounds.right()), pos.y+SkScalarToFloat(bounds.bottom())),
-                    //                         0xaa1199ff,0.0f,0,2.0f);
                     if(!bounds.intersect(clipRectSkiaTrans)) {
                         // clipped
                         continue;
                     }
+
+                    //draw_list->AddRect(ImVec2(pos.x+ SkScalarToFloat(bounds.top()), pos.y+SkScalarToFloat(bounds.left())),
+                    //                         ImVec2(pos.x+SkScalarToFloat(bounds.right()), pos.y+SkScalarToFloat(bounds.bottom())),
+                    //                         0xaa1199ff,0.0f,0,2.0f);
 
                     SkPath p;
                     auto unrenderedGlyphs = ImGui::paragraph->getPath(lineNumber,p);

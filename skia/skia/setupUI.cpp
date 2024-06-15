@@ -7,6 +7,7 @@
 #include "tools/trace/ChromeTracingTracer.h"
 #include "skiaTracyTracer.h"
 #include "implot.h"
+#include "buildinfo.gen.h"
 
 ImZeroSkiaSetupUI::ImZeroSkiaSetupUI() {
     fontMetricsText[0] = 'H';
@@ -44,13 +45,15 @@ static void helpMarker(const char* desc)
         ImGui::EndTooltip();
     }
 }
-void ImZeroSkiaSetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &vectorCmdSkiaRenderer, bool &skiaBackendActive,
+void ImZeroSkiaSetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &vectorCmdSkiaRenderer, bool &useVectorCmd,
                                size_t totalVectorCmdSerializedSz, size_t totalFffiSz,
                                size_t skpBytes, size_t svgBytes, size_t pngBytes, int windowW, int windowH
                                ) { ZoneScoped;
+    ImGui::Text("gitCommit=\"%s\",dirty=%s",buildinfo::gitCommit,buildinfo::gitDirty ? "yes" : "no");
+
     if(ImGui::CollapsingHeader("Skia Backend")) {
         auto renderMode = vectorCmdSkiaRenderer.getRenderMode();
-        ImGui::Checkbox("Render##Skia",&skiaBackendActive);
+        ImGui::Checkbox("Use vector commands##Skia",&useVectorCmd);
 
 #ifdef RENDER_MODE_SKETCH_ENABLED
         if(ImGui::CheckboxFlags("Sketch",&renderMode,RenderModeE_Sketch)) {
@@ -400,7 +403,8 @@ void ImZeroSkiaSetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &v
         }
     }
     if(ImGui::CollapsingHeader("Paragraph")) {
-        ImGui::TextUnformatted("this is a multiline\ntext with many words that will\nhopefully form a paragraph.");
+        //ImGui::TextUnformatted("this is a multiline\ntext with many words that will\nhopefully form a paragraph.");
+        ImGui::TextUnformatted("this is a multiline\ntext with many words that will\n🫠👩🏼‍🤝‍👩🏻\nhopefully form a paragraph.");
     }
 
     if(ImGui::CollapsingHeader("Paragraph Cache")) {

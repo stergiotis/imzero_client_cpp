@@ -55,11 +55,12 @@ void CliOptions::usage(const char *name, FILE *file) const {
     fprintf(file," bool flags:\n");
     fprintf(file,"    -fffiInterpreter [bool:%s]\n",fffiInterpreter ? "on" : "off");
     fprintf(file,"    -vsync [bool:%s]\n",vsync ? "on" : "off");
-    fprintf(file, "    -backdropFilter [bool:%s]\n", backdropFilter ? "on" : "off");
-    fprintf(file, "    -sketchFilter [bool:%s]\n", sketchFilter ? "on" : "off");
-    fprintf(file, "    -imguiNavKeyboard [bool:%s]\n", imguiNavKeyboard ? "on" : "off");
-    fprintf(file, "    -imguiNavGamepad [bool:%s]\n", imguiNavGamepad ? "on" : "off");
-    fprintf(file, "    -imguiDocking [bool:%s]\n", imguiDocking ? "on" : "off");
+    fprintf(file,"    -backdropFilter [bool:%s]\n", backdropFilter ? "on" : "off");
+    fprintf(file,"    -sketchFilter [bool:%s]\n", sketchFilter ? "on" : "off");
+    fprintf(file,"    -imguiNavKeyboard [bool:%s]\n", imguiNavKeyboard ? "on" : "off");
+    fprintf(file,"    -imguiNavGamepad [bool:%s]\n", imguiNavGamepad ? "on" : "off");
+    fprintf(file,"    -imguiDocking [bool:%s]\n", imguiDocking ? "on" : "off");
+    fprintf(file,"    -vectorCmd [bool:%s]   on: intercept ImGui DrawList draw commands and replay them on client (e.g. skia)\n", vectorCmd ? "on" : "off");
 }
 void CliOptions::parse(int argc,char **argv,FILE *logChannel) {
     if(argc > 1) {
@@ -94,6 +95,7 @@ void CliOptions::parse(int argc,char **argv,FILE *logChannel) {
     imguiNavKeyboard = getBoolFlagValue(logChannel,u, argc, argv, "-imguiNavKeyboard",imguiNavKeyboard);
     imguiNavGamepad = getBoolFlagValue(logChannel,u, argc, argv, "-imguiNavGamepad",imguiNavGamepad);
     imguiDocking = getBoolFlagValue(logChannel,u, argc, argv, "-imguiDocking",imguiDocking);
+    vectorCmd = getBoolFlagValue(logChannel,u, argc, argv, "-vectorCmd",vectorCmd);
 
     if(std::popcount(u) != (argc-1)) {
         for(int i=1;i<argc;i++) {

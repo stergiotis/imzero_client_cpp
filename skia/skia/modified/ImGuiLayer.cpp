@@ -52,7 +52,7 @@ static inline void applyFlag(int &flag,T val,bool v) {
     }
 }
 
-ImGuiLayer::ImGuiLayer(const CliOptions *opts) : fWindow(nullptr), fSvgBytesWritten(0), fSkpBytesWritten(0), fPngBytesWritten(0), ffffiInterpreter(opts->fffiInterpreter), fTotalVectorCmdSerializedSize(0) {
+ImGuiLayer::ImGuiLayer(const CliOptions *opts) : fWindow(nullptr), fSvgBytesWritten(0), fSkpBytesWritten(0), fPngBytesWritten(0), ffffiInterpreter(opts->fffiInterpreter), fTotalVectorCmdSerializedSize(0), fBackground(SK_ColorTRANSPARENT), fUseVectorCmd(true) {
     // ImGui initialization:
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -72,6 +72,8 @@ ImGuiLayer::ImGuiLayer(const CliOptions *opts) : fWindow(nullptr), fSvgBytesWrit
         uint8_t r = (n >> 24) & 0xff;
         fBackground = SkColorSetARGB(a,r,g,b);
     }
+
+    fUseVectorCmd = opts->vectorCmd;
 
     // Keymap...
     io.KeyMap[ImGuiKey_Tab]        = (int)skui::Key::kTab;
@@ -111,8 +113,6 @@ ImGuiLayer::ImGuiLayer(const CliOptions *opts) : fWindow(nullptr), fSvgBytesWrit
         mode |= RenderModeE_Sketch;
     }
     fVectorCmdSkiaRenderer.changeRenderMode(mode);
-
-    fSkiaBackendActive = true;
 }
 
 ImGuiLayer::~ImGuiLayer() {
@@ -181,12 +181,6 @@ bool ImGuiLayer::onMouseWheel(float delta, int, int, skui::ModifierKey modifiers
     return io.WantCaptureMouse;
 }
 
-void ImGuiLayer::skiaWidget(const ImVec2& size, SkiaWidgetFunc func) {
-    intptr_t funcIndex = fSkiaWidgetFuncs.size();
-    fSkiaWidgetFuncs.push_back(func);
-    ImGui::Image((ImTextureID)funcIndex, size);
-}
-
 void ImGuiLayer::onPrePaint() {
     // Update ImGui input
     ImGuiIO& io = ImGui::GetIO();
@@ -214,76 +208,6 @@ void ImGuiLayer::onPrePaint() {
     ImGui::NewFrame();
 }
 
-void ImGuiLayer::drawImDrawData(SkCanvas &canvas) {
-    // Then we fetch the most recent data, and convert it so we can render with Skia
-    const ImDrawData* drawData = ImGui::GetDrawData();
-    SkTDArray<SkPoint> pos;
-    SkTDArray<SkPoint> uv;
-    SkTDArray<SkColor> color;
-
-    for (int i = 0; i < drawData->CmdListsCount; ++i) {
-        const ImDrawList* drawList = drawData->CmdLists[i];
-
-        // De-interleave all vertex data (sigh), convert to Skia types
-        pos.clear(); uv.clear(); color.clear();
-        for (int j = 0; j < drawList->VtxBuffer.size(); ++j) {
-            const ImDrawVert& vert = drawList->VtxBuffer[j];
-            pos.push_back(SkPoint::Make(vert.pos.x, vert.pos.y));
-            uv.push_back(SkPoint::Make(vert.uv.x, vert.uv.y));
-            color.push_back(vert.col);
-        }
-        // ImGui colors are RGBA
-#ifndef IMGUI_USE_BGRA_PACKED_COLOR
-        SkSwapRB(color.begin(), color.begin(), color.size());
-#endif
-
-        int indexOffset = 0;
-
-        // Draw everything with canvas.drawVertices...
-        for (int j = 0; j < drawList->CmdBuffer.size(); ++j) {
-            const ImDrawCmd* drawCmd = &drawList->CmdBuffer[j];
-
-            SkAutoCanvasRestore acr(&canvas, true);
-
-            // TODO: Find min/max index for each draw, so we know how many vertices (sigh)
-            if (drawCmd->UserCallback) {
-                drawCmd->UserCallback(drawList, drawCmd);
-            } else {
-                auto idIndex = reinterpret_cast<intptr_t>(drawCmd->TextureId);
-                if (idIndex < fSkiaWidgetFuncs.size()) {
-                    // Small image IDs are actually indices into a list of callbacks. We directly
-                    // examing the vertex data to deduce the image rectangle, then reconfigure the
-                    // canvas to be clipped and translated so that the callback code gets to use
-                    // Skia to render a widget in the middle of an ImGui panel.
-                    ImDrawIdx rectIndex = drawList->IdxBuffer[indexOffset];
-                    SkPoint tl = pos[rectIndex], br = pos[rectIndex + 2];
-                    canvas.clipRect(SkRect::MakeLTRB(tl.fX, tl.fY, br.fX, br.fY));
-                    canvas.translate(tl.fX, tl.fY);
-                    fSkiaWidgetFuncs[static_cast<int>(idIndex)](&canvas);
-                } else {
-                    auto paint = static_cast<SkPaint*>(drawCmd->TextureId);
-                    SkASSERT(paint);
-
-                    canvas.clipRect(SkRect::MakeLTRB(drawCmd->ClipRect.x, drawCmd->ClipRect.y,
-                                                      drawCmd->ClipRect.z, drawCmd->ClipRect.w));
-                    auto vtxOffset = drawCmd->VtxOffset;
-                    auto vertices = SkVertices::MakeCopy(SkVertices::kTriangles_VertexMode,
-                                                         static_cast<int>(drawList->VtxBuffer.size() - vtxOffset),
-                                                         pos.begin() + vtxOffset,
-                                                         uv.begin() + vtxOffset,
-                                                         color.begin() + vtxOffset,
-                                                         static_cast<int>(drawCmd->ElemCount),
-                                                         drawList->IdxBuffer.begin() + indexOffset);
-                    canvas.drawVertices(vertices, SkBlendMode::kModulate, *paint);
-                }
-                indexOffset += static_cast<int>(drawCmd->ElemCount);
-            }
-        }
-    }
-
-    fSkiaWidgetFuncs.clear();
-}
-
 void ImGuiLayer::drawImGuiVectorCmdsFB(SkCanvas &canvas) {
     const ImDrawData* drawData = ImGui::GetDrawData();
     fTotalVectorCmdSerializedSize = 0;
@@ -299,8 +223,7 @@ void ImGuiLayer::drawImGuiVectorCmdsFB(SkCanvas &canvas) {
 }
 
 void ImGuiLayer::onPaint(SkSurface* surface) { ZoneScoped;
-
-    ImGui::skiaActive = fSkiaBackendActive;
+    ImGui::useVectorCmd = fUseVectorCmd;
     auto renderMode = fVectorCmdSkiaRenderer.getRenderMode();
     resetReceiveStat();
     resetSendStat();
@@ -312,10 +235,9 @@ void ImGuiLayer::onPaint(SkSurface* surface) { ZoneScoped;
 
     SaveFormatE saveFormat = SaveFormatE_None;
     if(ImGui::Begin("ImZeroSkia Settings")) { ZoneScoped;
-        ImGui::Text("gitCommit=\"%s\",dirty=%s",buildinfo::gitCommit,buildinfo::gitDirty ? "yes" : "no");
-        fImZeroSkiaSetupUi.render(saveFormat, fVectorCmdSkiaRenderer, fSkiaBackendActive,
+        fImZeroSkiaSetupUi.render(saveFormat, fVectorCmdSkiaRenderer, fUseVectorCmd,
                                   fTotalVectorCmdSerializedSize, totalSentBytes+totalReceivedBytes,
-                                  fSkpBytesWritten,fSvgBytesWritten, fPngBytesWritten,
+                                  fSkpBytesWritten, fSvgBytesWritten, fPngBytesWritten,
                                   fWindow->width(), fWindow->height()
                                   );
     }
@@ -414,17 +336,13 @@ void ImGuiLayer::onPaint(SkSurface* surface) { ZoneScoped;
                 break;
             }
         }
-    } else if(fSkiaBackendActive) { ZoneScoped;
+    } else { ZoneScoped;
         auto skiaCanvas = surface->getCanvas();
-
         skiaCanvas->clear(fBackground);
     
         skiaCanvas->save();
         drawImGuiVectorCmdsFB(*skiaCanvas);
-        //renderImDrawData(*skiaCanvas);
         skiaCanvas->restore();
-    } else { ZoneScoped;
-        drawImDrawData(*surface->getCanvas());
     }
 
     FrameMark;

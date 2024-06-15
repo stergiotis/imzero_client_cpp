@@ -18,7 +18,7 @@ public:
     ImZeroSkiaSetupUI();
     ~ImZeroSkiaSetupUI();
 
-    void render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &vectorCmdSkiaRenderer,bool &skiaBackendActive,
+    void render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &vectorCmdSkiaRenderer,bool &useVectorCmd,
                 size_t totalVectorCmdSerializedSize, size_t fTotalFffiSz,
                 size_t skpBytes, size_t svgBytes, size_t pngBytes,
                 int windowW, int windowH);

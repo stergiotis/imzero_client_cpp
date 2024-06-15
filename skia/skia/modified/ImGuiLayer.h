@@ -46,7 +46,6 @@ public:
     void setScaleFactor(float scaleFactor);
 
     typedef std::function<void(SkCanvas*)> SkiaWidgetFunc;
-    void skiaWidget(const ImVec2& size, SkiaWidgetFunc func);
 
     void onAttach(sk_app::Window* window) override;
     void onPrePaint() override;
@@ -59,7 +58,6 @@ public:
 private:
     sk_app::Window* fWindow;
     SkPaint fFontPaint;
-    skia_private::TArray<SkiaWidgetFunc> fSkiaWidgetFuncs;
 
     VectorCmdSkiaRenderer fVectorCmdSkiaRenderer;
     size_t fTotalVectorCmdSerializedSize{};
@@ -70,9 +68,8 @@ private:
     bool ffffiInterpreter;
     SkColor fBackground;
 
-    void drawImDrawData(SkCanvas &canvas);
     void drawImGuiVectorCmdsFB(SkCanvas &canvas);
-    bool fSkiaBackendActive;
+    bool fUseVectorCmd;
 };
 
 #endif
