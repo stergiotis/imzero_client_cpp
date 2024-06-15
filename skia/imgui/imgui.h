@@ -299,7 +299,7 @@ IM_MSVC_RUNTIME_CHECKS_RESTORE
 #include "include/core/SkFont.h"
 #include "vectorCmd_generated.h"
 #include "../skia/paragraph.h"
-
+#include "imzero_config.h"
 #endif
 
 //-----------------------------------------------------------------------------
@@ -2964,15 +2964,17 @@ struct ImDrawList
     IMGUI_API void  _PathArcToN(const ImVec2& center, float radius, float a_min, float a_max, int num_segments);
 
     #ifdef SKIA_DRAW_BACKEND
-    size_t fPathVerbBufferSize = 0;
     flatbuffers::FlatBufferBuilder *fbBuilder;
     std::vector<flatbuffers::Offset<VectorCmdFB::SingleVectorCmdDto>> *_FbCmds;
     int _FbProcessedDrawCmdIdx;
     uint32_t _FbProcessedDrawCmdIndexOffset;
 public: // public: ImFont needs to access this method, in spirit of the rest of imgui I do not use C++'s friend keyword
     void addVectorCmdFB(VectorCmdFB::VectorCmdArg arg_type, flatbuffers::Offset<void> arg);
-    uint8_t *fPathVerbBuffer = nullptr;
-    void ensurePathVerbBufferCapacity(size_t capacity);
+    #ifdef SKIA_DRAW_BACKEND_PARAGRAPH_AS_PATH
+    ImVector<uint8_t> fPathVerbBuffer;
+    ImVector<float> fPathPointBuffer;
+    ImVector<float> fPathWeightBuffer;
+    #endif
     // serializeFB: out is valid until next frame
     void serializeFB(const uint8_t *&out,size_t &sz);
     #endif

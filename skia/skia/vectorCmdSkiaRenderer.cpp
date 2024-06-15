@@ -68,6 +68,15 @@ void VectorCmdSkiaRenderer::prepareFillPaint(SkPaint &paint, VectorCmdFB::DrawLi
     }
 #endif
 }
+void VectorCmdSkiaRenderer::prepareFillAndOutlinePaint(SkPaint &paint, VectorCmdFB::DrawListFlags dlFlags) const {
+    paint.setAntiAlias(dlFlags & VectorCmdFB::DrawListFlags_AntiAliasedFill);
+    paint.setStyle(SkPaint::kStrokeAndFill_Style);
+#ifdef RENDER_MODE_SKETCH_ENABLED
+    if(fRenderMode & RenderModeE_Sketch) {
+        paint.setPathEffect(SkDiscretePathEffect::Make(10.0f, 1.0f));
+    }
+#endif
+}
 void VectorCmdSkiaRenderer::changeRenderMode(RenderModeE r) {
     fRenderMode = r;
 }
@@ -566,10 +575,16 @@ void VectorCmdSkiaRenderer::registerFont(const VectorCmdFB::CmdRegisterFont &cmd
 }
 void VectorCmdSkiaRenderer::drawCmdSvgPathSubset(const VectorCmdFB::CmdSvgPathSubset &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;
-    if(cmd.fill()) {
-        prepareFillPaint(paint,dlFlags);
-    } else {
-        prepareOutlinePaint(paint,dlFlags);
+    {
+        auto const fill = cmd.fill();
+        auto const stroke = cmd.stroke();
+        if(fill && stroke) {
+            prepareFillAndOutlinePaint(paint,dlFlags);
+        } else if(fill) {
+            prepareOutlinePaint(paint,dlFlags);
+        } else if(stroke) {
+            prepareFillPaint(paint,dlFlags);
+        }
     }
     paint.setColor(convertColor(cmd.col()));
 
@@ -584,26 +599,51 @@ void VectorCmdSkiaRenderer::drawCmdSvgPathSubset(const VectorCmdFB::CmdSvgPathSu
 }
 void VectorCmdSkiaRenderer::drawCmdPath(const VectorCmdFB::CmdPath &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;
-    if(cmd.fill()) {
-        prepareFillPaint(paint,dlFlags);
-    } else {
-        prepareOutlinePaint(paint,dlFlags);
+    {
+        auto const fill = cmd.fill();
+        auto const stroke = cmd.stroke();
+        if(fill && stroke) {
+            prepareFillAndOutlinePaint(paint,dlFlags);
+        } else if(fill) {
+            prepareFillPaint(paint,dlFlags);
+        } else if(stroke) {
+            prepareOutlinePaint(paint,dlFlags);
+        }
     }
     paint.setColor(convertColor(cmd.col()));
 
-    auto const pointsXY = cmd.points_xy()->data();
+    auto const pointsXYFb = cmd.points_xy();
+    auto const pointsXY = pointsXYFb->data();
     auto const verbsFb = cmd.verbs();
-    auto const nVerbs = verbsFb->size();
+    auto const weightsFb = cmd.conic_weights();
+    auto const weights = weightsFb->data();
+    auto const offset = cmd.offset();
     static_assert(sizeof(VectorCmdFB::PathVerb) == 1);
-    auto verbs = reinterpret_cast<const VectorCmdFB::PathVerb*>(verbsFb->data());
 
-    SkPath pa;
     static_assert(static_cast<int64_t>(VectorCmdFB::PathFillType_evenOdd) == static_cast<int64_t>(SkPathFillType::kEvenOdd));
     static_assert(static_cast<int64_t>(VectorCmdFB::PathFillType_winding) == static_cast<int64_t>(SkPathFillType::kWinding));
     static_assert(static_cast<int64_t>(VectorCmdFB::PathFillType_inverseEvenOdd) == static_cast<int64_t>(SkPathFillType::kInverseEvenOdd));
     static_assert(static_cast<int64_t>(VectorCmdFB::PathFillType_inverseWinding) == static_cast<int64_t>(SkPathFillType::kInverseWinding));
+    static_assert(std::is_same<SkScalar,float>::value);
+#if 1
+    SkTDArray<SkPoint> pointsXYVec;
+    int nPoints = pointsXYFb->size()/2;
+    pointsXYVec.reserve(nPoints);
+    for(int i=0;i<nPoints;i++) {
+        pointsXYVec.push_back(SkPoint::Make(pointsXY[2*i],pointsXY[2*i+1]));
+    }
+    //auto pa = SkPath::Make(reinterpret_cast<const SkPoint*>(pointsXY),static_cast<int>(pointsXYFb->size()/2),
+    auto pa = SkPath::Make(pointsXYVec.data(),nPoints,
+                 verbsFb->data(),static_cast<int>(verbsFb->size()),
+                 reinterpret_cast<const SkScalar *>(weights),static_cast<int>(weightsFb->size()),
+                 static_cast<SkPathFillType>(cmd.fillType()),true);
+#else
+    auto const nVerbs = verbsFb->size();
+    auto verbs = reinterpret_cast<const VectorCmdFB::PathVerb*>(verbsFb->data());
+    SkPath pa;
     pa.setFillType(static_cast<SkPathFillType>(cmd.fillType()));
     int p=0;
+    int pw=0;
     for(int i=0;i<nVerbs;i++) {
         switch(verbs[i]) {
             case VectorCmdFB::PathVerb_move:
@@ -635,7 +675,7 @@ void VectorCmdSkiaRenderer::drawCmdPath(const VectorCmdFB::CmdPath &cmd,SkCanvas
                 auto y0 = pointsXY[p]; p++;
                 auto x1 = pointsXY[p]; p++;
                 auto y1 = pointsXY[p]; p++;
-                auto w = pointsXY[p]; p++;
+                auto w = weights[pw]; pw++;
                 pa.conicTo(SkScalar(x0),SkScalar(y0),SkScalar(x1),SkScalar(y1),SkScalar(w));
                 break;
             }
@@ -654,16 +694,19 @@ void VectorCmdSkiaRenderer::drawCmdPath(const VectorCmdFB::CmdPath &cmd,SkCanvas
                 pa.close();
                 break;
             case VectorCmdFB::PathVerb_done:
+                // FIXME correct?
                 break;
         }
     }
     assert(p == cmd.points_xy()->size());
-
-    canvas.drawPath(pa,paint);
-
+#endif
     //auto stream = SkFILEStream(stderr);
     //pa.dump((SkWStream*)&stream,true);
     //pa.dump(nullptr,true);
+
+    pa.offset(SkScalar(offset->x()),SkScalar(offset->y()));
+
+    canvas.drawPath(pa,paint);
 }
 void VectorCmdSkiaRenderer::drawCmdSimpleVertexDraw(const VectorCmdFB::CmdSimpleVertexDraw &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
     auto cr = cmd.clip_rect();

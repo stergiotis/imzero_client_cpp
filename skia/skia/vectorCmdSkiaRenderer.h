@@ -110,6 +110,7 @@ class VectorCmdSkiaRenderer {
 
         void prepareFillPaint(SkPaint &paint,VectorCmdFB::DrawListFlags dlFlags) const;
         void prepareOutlinePaint(SkPaint &paint,VectorCmdFB::DrawListFlags dlFlags) const;
+        void prepareFillAndOutlinePaint(SkPaint &paint,VectorCmdFB::DrawListFlags dlFlags) const;
 
 #ifdef RENDER_MODE_BACKDROP_FILTER_ENABLED
         sk_sp<SkImageFilter> backdropFilter;

@@ -267,6 +267,7 @@ table CmdSimpleVertexDraw {
 table CmdSvgPathSubset {
     svg: string;
     col: uint32;
+    stroke: bool;
     fill: bool;
 }
 enum PathVerb:uint8 {
@@ -289,9 +290,12 @@ enum PathFillType:uint8 {
     inverseEvenOdd = 3
 }
 table CmdPath {
+    offset: SingleVec2;
     verbs: [PathVerb];
     points_xy: [float];
+    conic_weights: [float];
     col: uint32;
+    stroke: bool;
     fill: bool;
     fillType : PathFillType;
 }

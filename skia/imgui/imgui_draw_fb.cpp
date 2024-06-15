@@ -223,16 +223,6 @@ static inline void initHiddenPwBuffer(const ImFont &font) {
 #endif
 
 #ifdef SKIA_DRAW_BACKEND
-void ImDrawList::ensurePathVerbBufferCapacity(size_t capacity) {
-    if(fPathVerbBuffer == nullptr) {
-        fPathVerbBuffer = static_cast<uint8_t*>(IM_ALLOC(capacity));
-        fPathVerbBufferSize = capacity;
-    } else if(fPathVerbBufferSize < capacity) {
-        IM_FREE(fPathVerbBuffer);
-        fPathVerbBuffer = static_cast<uint8_t*>(IM_ALLOC(capacity));
-        fPathVerbBufferSize = capacity;
-    }
-}
 #include "flatbufferHelpers.h"
 static constexpr bool enableVectorCmdFBVertexDraw = true;
 void ImDrawList::addVectorCmdFB(VectorCmdFB::VectorCmdArg arg_type, flatbuffers::Offset<void> arg) {
@@ -589,9 +579,11 @@ SKIA_DRAW_BACKEND_BEGIN
         delete _FbCmds;
         _FbCmds = nullptr;
     }
-    if(fPathVerbBuffer != nullptr) {
-        IM_DELETE(fPathVerbBuffer);
-    }
+#ifdef SKIA_DRAW_BACKEND_PARAGRAPH_AS_PATH
+    fPathVerbBuffer.clear();
+    fPathPointBuffer.clear();
+    fPathWeightBuffer.clear();
+#endif
 SKIA_DRAW_BACKEND_END
     Flags = ImDrawListFlags_None;
     _VtxCurrentIdx = 0;
@@ -610,6 +602,15 @@ ImDrawList* ImDrawList::CloneOutput() const
     dst->IdxBuffer = IdxBuffer;
     dst->VtxBuffer = VtxBuffer;
     dst->Flags = Flags;
+#ifdef SKIA_DRAW_BACKEND
+    dst->fbBuilder = fbBuilder;
+    dst->_FbCmds = _FbCmds;
+#ifdef SKIA_DRAW_BACKEND_PARAGRAPH_AS_PATH
+    dst->fPathVerbBuffer = fPathVerbBuffer;
+    dst->fPathPointBuffer = fPathPointBuffer;
+    dst->fPathWeightBuffer = fPathWeightBuffer;
+#endif
+#endif
     return dst;
 }
 
@@ -4396,67 +4397,145 @@ SKIA_DRAW_BACKEND_BEGIN
             }
         }
         if(isParagraph) {
-//#define SKIA_DRAW_BACKEND_TRIANGULATE_PARAGRAPHS
-#ifndef SKIA_DRAW_BACKEND_TRIANGULATE_PARAGRAPHS
-            auto const arg = VectorCmdFB::CreateCmdRenderParagraph(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(this),size,&posFb,col,&clipRectFb,textFb,wrap_width,0.0f,VectorCmdFB::TextAlignFlags_left);
-            draw_list->addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdRenderParagraph,arg.Union());
+#ifdef SKIA_DRAW_BACKEND_PARAGRAPH_AS_PATH
+            const bool renderAsParagraph = SKIA_DRAW_BACKEND_PARAGRAPH_AS_PATH;
 #else
-            auto const clipRectSkia = SkRect::MakeLTRB(SkScalar(clip_rect.x),SkScalar(clip_rect.y),SkScalar(clip_rect.z),SkScalar(clip_rect.w));
-            auto const clipRectSkiaTrans = clipRectSkia.makeOffset(-pos.x,-pos.y);
+            constexpr bool renderAsParagraph = true;
+#endif
+            if(renderAsParagraph) {
+                auto const arg = VectorCmdFB::CreateCmdRenderParagraph(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(this),size,&posFb,col,&clipRectFb,textFb,wrap_width,0.0f,VectorCmdFB::TextAlignFlags_left);
+                draw_list->addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdRenderParagraph,arg.Union());
+            } else { ZoneScopedN("paragraphAsPath");
+#ifdef SKIA_DRAW_BACKEND_PARAGRAPH_AS_PATH
+                auto const clipRectSkia = SkRect::MakeLTRB(SkScalar(clip_rect.x),SkScalar(clip_rect.y),SkScalar(clip_rect.z),SkScalar(clip_rect.w));
+                auto const clipRectSkiaTrans = clipRectSkia.makeOffset(-pos.x,-pos.y);
 
-            ImGui::paragraph->setFontSize(SkScalar(size));
-            ImGui::paragraph->build(text_begin,static_cast<size_t>(text_end-text_begin));
-            ImGui::paragraph->layout(SkScalar(wrap_width));
-            for(int lineNumber=0;;lineNumber++) {
-                bool found;
-                auto bounds = ImGui::paragraph->boundingRect(lineNumber,found);
-                if(!found) {
-                    break;
-                }
-                ////draw_list->AddRect(ImVec2(pos.x+ SkScalarToFloat(bounds.top()), pos.y+SkScalarToFloat(bounds.left())),
-                ////                         ImVec2(pos.x+SkScalarToFloat(bounds.right()), pos.y+SkScalarToFloat(bounds.bottom())),
-                ////                         0xaa1199ff,0.0f,0,2.0f);
-                if(!bounds.intersect(clipRectSkiaTrans)) {
-                    // clipped
-                    continue;
-                }
+                ImGui::paragraph->setFontSize(SkScalar(size));
+                ImGui::paragraph->build(text_begin,static_cast<size_t>(text_end-text_begin));
+                ImGui::paragraph->layout(SkScalar(wrap_width));
+                for(int lineNumber=0;;lineNumber++) {
+                    bool found;
+                    auto bounds = ImGui::paragraph->boundingRect(lineNumber,found);
+                    if(!found) {
+                        break;
+                    }
+                    //draw_list->AddRect(ImVec2(pos.x+ SkScalarToFloat(bounds.top()), pos.y+SkScalarToFloat(bounds.left())),
+                    //                         ImVec2(pos.x+SkScalarToFloat(bounds.right()), pos.y+SkScalarToFloat(bounds.bottom())),
+                    //                         0xaa1199ff,0.0f,0,2.0f);
+                    if(!bounds.intersect(clipRectSkiaTrans)) {
+                        // clipped
+                        continue;
+                    }
 
-                SkPath p;
-                auto unrenderedGlyphs = ImGui::paragraph->getPath(lineNumber,p);
-                p.transform(SkMatrix::Translate(SkScalar(pos.x),SkScalar(pos.y)));
+                    SkPath p;
+                    auto unrenderedGlyphs = ImGui::paragraph->getPath(lineNumber,p);
+                    /*
+                    // example data
+                    p.lineTo(1.0f,2.0f);
+                    p.conicTo(3.0f,4.0f,5.0f,6.0f,7.0f);
+                    p.cubicTo(8.0f,9.0f,10.0f,11.0f,12.0f,13.0f);
+                    p.quadTo(14.0f,15.0f,16.0f,18.0f);
+
+                    // output
+                    auto stream = SkFILEStream(stderr);
+                    p.dump((SkWStream*)&stream,true);
+                    p.dump(nullptr,true);
+
+                    // should produce the following output
+                    path.setFillType(SkPathFillType::kWinding);
+                    path.moveTo(SkBits2Float(0x00000000), SkBits2Float(0x00000000));  // 0, 0
+                    path.lineTo(SkBits2Float(0x3f800000), SkBits2Float(0x40000000));  // 1, 2
+                    path.conicTo(SkBits2Float(0x40400000), SkBits2Float(0x40800000), SkBits2Float(0x40a00000), SkBits2Float(0x40c00000), SkBits2Float(0x40e00000));  // 3, 4, 5, 6, 7
+                    path.cubicTo(SkBits2Float(0x41000000), SkBits2Float(0x41100000), SkBits2Float(0x41200000), SkBits2Float(0x41300000), SkBits2Float(0x41400000), SkBits2Float(0x41500000));  // 8, 9, 10, 11, 12, 13
+                    path.quadTo(SkBits2Float(0x41600000), SkBits2Float(0x41700000), SkBits2Float(0x41800000), SkBits2Float(0x41900000));  // 14, 15, 16, 18
+                    */
 #if 0
+                    p.offset(SkScalar(pos.x),SkScalar(pos.y));
                 auto svg = SkParsePath::ToSVGString(p);
                 auto svgFb = draw_list->fbBuilder->CreateString(svg.data(),svg.size());
                 auto arg = VectorCmdFB::CreateCmdSvgPathSubset(*draw_list->fbBuilder,svgFb,col,true);
                 draw_list->addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdSvgPathSubset,arg.Union());
 #else
-                static_assert(static_cast<int64_t>(VectorCmdFB::PathFillType_evenOdd) == static_cast<int64_t>(SkPathFillType::kEvenOdd));
-                static_assert(static_cast<int64_t>(VectorCmdFB::PathFillType_winding) == static_cast<int64_t>(SkPathFillType::kWinding));
-                static_assert(static_cast<int64_t>(VectorCmdFB::PathFillType_inverseEvenOdd) == static_cast<int64_t>(SkPathFillType::kInverseEvenOdd));
-                static_assert(static_cast<int64_t>(VectorCmdFB::PathFillType_inverseWinding) == static_cast<int64_t>(SkPathFillType::kInverseWinding));
-                static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_move) == static_cast<int64_t>( SkPath::Verb::kMove_Verb));
-                static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_conic) == static_cast<int64_t>( SkPath::Verb::kConic_Verb));
-                static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_cubic) == static_cast<int64_t>( SkPath::Verb::kCubic_Verb));
-                static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_line) == static_cast<int64_t>( SkPath::Verb::kLine_Verb));
-                static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_close) == static_cast<int64_t>( SkPath::Verb::kClose_Verb));
-                static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_done) == static_cast<int64_t>( SkPath::Verb::kDone_Verb));
-                static_assert(sizeof(VectorCmdFB::PathVerb) == 1);
+                    static_assert(static_cast<int64_t>(VectorCmdFB::PathFillType_evenOdd) == static_cast<int64_t>(SkPathFillType::kEvenOdd));
+                    static_assert(static_cast<int64_t>(VectorCmdFB::PathFillType_winding) == static_cast<int64_t>(SkPathFillType::kWinding));
+                    static_assert(static_cast<int64_t>(VectorCmdFB::PathFillType_inverseEvenOdd) == static_cast<int64_t>(SkPathFillType::kInverseEvenOdd));
+                    static_assert(static_cast<int64_t>(VectorCmdFB::PathFillType_inverseWinding) == static_cast<int64_t>(SkPathFillType::kInverseWinding));
+                    static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_move) == static_cast<int64_t>( SkPath::Verb::kMove_Verb));
+                    static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_line) == static_cast<int64_t>( SkPath::Verb::kLine_Verb));
+                    static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_quad) == static_cast<int64_t>( SkPath::Verb::kQuad_Verb));
+                    static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_conic) == static_cast<int64_t>( SkPath::Verb::kConic_Verb));
+                    static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_cubic) == static_cast<int64_t>( SkPath::Verb::kCubic_Verb));
+                    static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_close) == static_cast<int64_t>( SkPath::Verb::kClose_Verb));
+                    static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_done) == static_cast<int64_t>( SkPath::Verb::kDone_Verb));
+                    static_assert(sizeof(VectorCmdFB::PathVerb) == 1);
 
-                auto const nVerbs = p.countVerbs();
-                draw_list->ensurePathVerbBufferCapacity(nVerbs);
-                p.getVerbs(draw_list->fPathVerbBuffer,nVerbs);
+                    auto const nVerbs = p.countVerbs();
+                    draw_list->fPathVerbBuffer.resize(0);
+                    draw_list->fPathVerbBuffer.reserve(nVerbs);
+                    draw_list->fPathWeightBuffer.resize(0);
+                    draw_list->fPathWeightBuffer.reserve(nVerbs); // upper bound, only needed for conic
+                    auto const nPoints = p.countPoints();
+                    draw_list->fPathPointBuffer.resize(0);
+                    draw_list->fPathPointBuffer.reserve(nPoints*2);
+                    static_assert(sizeof(SkPoint) == 2*sizeof(float));
 
-                // FIXME slow?
-                auto const pointXYs = draw_list->fbBuilder->CreateVector<float>(p.countPoints()*2,[&p](size_t i) -> float { return (i == 0 ? p.getPoint(i/2).x() : p.getPoint(i/2).y()); });
-                //auto const verbs = draw_list->fbBuilder->CreateVector<uint8_t>(draw_list->fPathVerbBuffer,nVerbs);
-                auto const verbs = draw_list->fbBuilder->CreateVector<uint8_t>(nVerbs,[draw_list](size_t i) -> uint8_t { return draw_list->fPathVerbBuffer[i]; });
+                    SkPath::Iter iter(p, false);
+                    SkPoint pts[4];
+                    SkPath::Verb verb;
+                    static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_move) == 0);
+                    static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_line) == 1);
+                    static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_quad) == 2);
+                    static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_conic) == 3);
+                    static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_cubic) == 4);
+                    static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_close) == 5);
+                    static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_done) == 6);
+                    constexpr int nPointsLU[SkPath::kDone_Verb+1] = {1, /* move */
+                                                                     1, /* line */
+                                                                     2, /* quad */
+                                                                     2, /* conic */
+                                                                     3, /* cubic */
+                                                                     0, /* close */
+                                                                     0 /* done */
+                    };
 
-                auto arg = VectorCmdFB::CreateCmdPath(*draw_list->fbBuilder,verbs,pointXYs,col,true,static_cast<VectorCmdFB::PathFillType>(p.getFillType()));
-                draw_list->addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdPath,arg.Union());
+                    // NOTE: iter seems to be the only method to get conic weights.
+                    // live would be much easier if methods p.getWeight(),p.getWeights() and p.getWeightCounts()
+                    // would exist --> skia pull request?
+                    while ((verb = iter.next(pts)) != SkPath::kDone_Verb) {
+                        draw_list->fPathVerbBuffer.push_back(verb);
+                        const int o = verb == SkPath::kMove_Verb ? 0 : 1;
+                        for(int i=0;i<nPointsLU[verb];i++) {
+                            draw_list->fPathPointBuffer.push_back(pts[o+i].x());
+                            draw_list->fPathPointBuffer.push_back(pts[o+i].y());
+                        }
+                        if(verb == SkPath::kConic_Verb) {
+                            draw_list->fPathWeightBuffer.push_back(iter.conicWeight());
+                        }
+                        pts[0] = SkPoint::Make(-2.0f,-2.0f);
+                        pts[1] = SkPoint::Make(-2.0f,-2.0f);
+                        pts[2] = SkPoint::Make(-2.0f,-2.0f);
+                        pts[3] = SkPoint::Make(-2.0f,-2.0f);
+                    }
+
+                    auto const pointXYs = draw_list->fbBuilder->CreateVector<float>(draw_list->fPathPointBuffer.Data,nPoints*2);
+                    auto const verbs = draw_list->fbBuilder->CreateVector<uint8_t>(draw_list->fPathVerbBuffer.Data,nVerbs);
+                    auto const weights = draw_list->fbBuilder->CreateVector<float>(draw_list->fPathWeightBuffer.Data,draw_list->fPathWeightBuffer.Size);
+
+                    auto arg = VectorCmdFB::CreateCmdPath(*draw_list->fbBuilder,
+                                                          &posFb,
+                                                          verbs,
+                                                          pointXYs,
+                                                          weights,
+                                                          col,
+                                                          false,
+                                                          true,
+                                                          static_cast<VectorCmdFB::PathFillType>(p.getFillType()));
+                    draw_list->addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdPath,arg.Union());
 #endif
 
+                }
+#endif
             }
-#endif
         } else {
             auto const arg = VectorCmdFB::CreateCmdRenderText(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(this),size,&posFb,col,&clipRectFb,textFb);
             draw_list->addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdRenderText,arg.Union());
