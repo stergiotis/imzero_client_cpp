@@ -2,9 +2,11 @@
 #include "imgui_internal.h"
 #include "tracy/Tracy.hpp"
 
+#ifdef IMZERO_SKIA_TRACING
 #include "src/core/SkATrace.h"
 #include "tools/trace/SkDebugfTracer.h"
 #include "tools/trace/ChromeTracingTracer.h"
+#endif
 #include "skiaTracyTracer.h"
 #include "implot.h"
 #include "buildinfo.gen.h"
@@ -318,6 +320,7 @@ void ImZeroSkiaSetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &v
             auto p0 = ImGui::GetItemRectMin();
             auto p1 = ImGui::GetItemRectMax();
             auto dl = ImGui::GetWindowDrawList();
+
             dl->PushClipRect(p0, p1,true);
             ImVec2 tl = p0+ImVec2(7.0f*5.0f,0.0f);
             auto bl0 = p0+ImVec2(0.0f,dy);
@@ -357,6 +360,7 @@ void ImZeroSkiaSetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &v
             }*/
         } else {
             int opt = 0;
+#ifdef IMZERO_SKIA_TRACING
             if(ImGui::Button("atrace (android)")) {
                 opt = 1;
             }
@@ -369,6 +373,7 @@ void ImZeroSkiaSetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &v
             if(ImGui::Button("chromium (/tmp/skiatrace.json)")) {
                 opt = 4;
             }
+#endif
 #ifndef TRACY_ENABLE
             ImGui::BeginDisabled();
 #endif
@@ -380,6 +385,7 @@ void ImZeroSkiaSetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &v
 #endif
 
             switch(opt) {
+#ifdef IMZERO_SKIA_TRACING
                 case 1:
                     fEventTracer = new SkATrace();
                     break;
@@ -392,6 +398,7 @@ void ImZeroSkiaSetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &v
                 case 4:
                     fEventTracer = new ChromeTracingTracer("/tmp/skiatrace.json");
                     break;
+#endif
                 case 5:
                     fEventTracer = new skiaTracyTracer();
                     break;

@@ -516,16 +516,147 @@ let skia =
         , "${objDir}/tools/tool_utils.SvgPathExtractor.o"
         , "${objDir}/tools/tool_utils.CrashHandler.o"
         , "${objDir}/tools/tool_utils.CrashHandler.o"
-	, "${objDir}/tools/trace/trace.ChromeTracingTracer.o"
-	, "${objDir}/tools/trace/trace.EventTracingPriv.o"
-	, "${objDir}/tools/trace/trace.SkDebugfTracer.o"
-	, "${objDir}/tools/trace/trace.SkPerfettoTrace.o"
+		, "${objDir}/tools/trace/trace.ChromeTracingTracer.o"
+		, "${objDir}/tools/trace/trace.EventTracingPriv.o"
+		, "${objDir}/tools/trace/trace.SkDebugfTracer.o"
+		, "${objDir}/tools/trace/trace.SkPerfettoTrace.o"
         , "${contribDir}/out/Static/libsvg.a"
         , "${contribDir}/out/Static/libskia.a"
         , "${contribDir}/out/Static/libskshaper.a"
         , "${contribDir}/out/Static/libskparagraph.a"
         , "${contribDir}/out/Static/libskunicode.a"
         , "${contribDir}/out/Static/libwindow.a"
+	] # static3rdPartyLibraries
+}
+let skiaSdl = 
+    let dir = "./skia"
+    let contribDir = "./contrib/skia"
+	let objDir = "${contribDir}/out/Static/obj"
+	let static3rdPartyLibraries = [
+		-- static libaries (offial_build=false mode)
+		, "${contribDir}/out/Static/libcompression_utils_portable.a"
+		, "${contribDir}/out/Static/libdng_sdk.a"
+		, "${contribDir}/out/Static/libexpat.a"
+		, "${contribDir}/out/Static/libharfbuzz.a"
+		, "${contribDir}/out/Static/libicu.a"
+		, "${contribDir}/out/Static/libicu_bidi.a"
+		, "${contribDir}/out/Static/libjpeg.a"
+		, "${contribDir}/out/Static/libmicrohttpd.a"
+		, "${contribDir}/out/Static/libpathkit.a"
+		, "${contribDir}/out/Static/libperfetto.a"
+		, "${contribDir}/out/Static/libpiex.a"
+		, "${contribDir}/out/Static/libpng.a"
+	]
+    in sourceTreePart::{
+	, name = "skiaSdl"
+	, dir = dir
+	, sources = [
+		, "${dir}/sdl3/imgui_impl_opengl3.cpp"
+		, "${dir}/sdl3/imgui_impl_sdl3.cpp"
+		, "${dir}/sdl3/main.cpp"
+
+		, "${dir}/paragraph.cpp"
+		, "${dir}/cliOptions.cpp"
+		, "${dir}/setupUI.cpp"
+		, "${dir}/vectorCmdSkiaRenderer.cpp"
+		, "${dir}/skiaTracyTracer.cpp"
+	]
+	, includeDirs = {
+		, local = [
+			, imgui.dir
+			, imguiImplot.dir
+			, render.dir
+			, "./contrib/sdl3/include"
+			]
+		, global = [
+			, "${contribDir}"
+			, "${contribDir}/modules/sksg/include"
+			, "${contribDir}/modules/bentleyottmann/include"
+			, "${contribDir}/modules/skottie/include"
+			, "${contribDir}/modules/skparagraph/include"
+			, "${contribDir}/modules/skplaintexteditor/include"
+			, "${contribDir}/modules/skresources/include"
+			, "${contribDir}/modules/skshaper/include"
+			, "${contribDir}/modules/skunicode/include"
+			, "${contribDir}/modules/svg/include"
+			--, "${contribDir}/experimental/sktext/include"
+			, "${contribDir}/include"
+			, "${contribDir}/include/core"
+		] : List Text
+	}
+	, defines = {, local = [
+        , "SK_TRIVIAL_ABI=\\[\\[clang::trivial_abi\\]\\]"
+        , "SK_GAMMA_APPLY_TO_A8"
+        , "SK_ALLOW_STATIC_GLOBAL_INITIALIZERS=1"
+        --, "GR_TEST_UTILS=1"
+        , "SK_TYPEFACE_FACTORY_FREETYPE"
+        --, "SK_FONTMGR_ANDROID_AVAILABLE"
+        --, "SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE"
+        , "SK_FONTMGR_FREETYPE_EMBEDDED_AVAILABLE"
+        , "SK_FONTMGR_FREETYPE_EMPTY_AVAILABLE"
+        --, "SK_FONTMGR_FONTCONFIG_AVAILABLE"
+        , "SK_GL"
+        , "SK_SUPPORT_PDF"
+        , "SK_CODEC_DECODES_JPEG"
+        , "SK_CODEC_DECODES_JPEG_GAINMAPS"
+        , "SK_XML"
+        --, "SK_ENABLE_ANDROID_UTILS"
+        , "SK_HAS_HEIF_LIBRARY"
+        , "SK_CODEC_DECODES_PNG"
+        , "SK_CODEC_DECODES_RAW"
+        , "SK_CODEC_DECODES_WEBP"
+        , "SK_HAS_WUFFS_LIBRARY"
+        , "SK_DEFAULT_TYPEFACE_IS_EMPTY"
+        , "SK_DISABLE_LEGACY_DEFAULT_TYPEFACE"
+        , "SK_R32_SHIFT=16"
+        , "SK_ENABLE_PRECOMPILE"
+        --, "SKSL_ENABLE_TRACING"
+        , "SK_GANESH"
+        --, "SK_USE_PERFETTO"
+        --, "SK_ENABLE_SKOTTIE"
+        --, "SK_ENABLE_SKOTTIE_SKSLEFFECT"
+        , "SK_ENABLE_PARAGRAPH"
+        , "SK_UNICODE_AVAILABLE"
+        , "SK_UNICODE_ICU_IMPLEMENTATION"
+        , "SK_SHAPER_PRIMITIVE_AVAILABLE"
+        , "SK_SHAPER_HARFBUZZ_AVAILABLE"
+        , "SK_SHAPER_UNICODE_AVAILABLE"
+        , "SK_ENABLE_SVG"
+        , "SK_BUILD_FOR_UNIX"
+	], global = [
+		--, "IMGUI_USE_BGRA_PACKED_COLOR"
+	] : List Text}
+	, cxxflags = {
+		, global = [
+		] : List Text
+		, local = [
+		, "-Wno-unused-parameter"
+		] : List Text
+	}
+	, ldflags = {
+		, global = [
+			, "-ldl"
+			, "-lpthread"
+			, "-lfreetype"
+			, "-lz"
+			, "-lglfw"
+			, "-lfontconfig"
+			, "-lwebpmux"
+			, "-lwebpdemux"
+			, "-lX11"
+			, "-lGLU"
+			, "-lGL"
+			--, "-Wl,--verbose"
+		] : List Text
+	}
+	, nonSourceObjs = [
+        , "${contribDir}/out/Static/libskparagraph.a"
+        , "${contribDir}/out/Static/libsvg.a"
+        , "${contribDir}/out/Static/libskia.a"
+        , "${contribDir}/out/Static/libskshaper.a"
+        , "${contribDir}/out/Static/libskunicode.a"
+        , "${contribDir}/out/Static/libwindow.a"
+		, "./contrib/sdl3/build/libSDL3.a"
 	] # static3rdPartyLibraries
 }
 let flatbuffers = let dir = "./contrib/flatbuffers" in
@@ -537,6 +668,19 @@ let flatbuffers = let dir = "./contrib/flatbuffers" in
 		, global = ["${dir}"] : List Text
 	}
 	, sources = [] : List Text
+}
+let sdl3 = let dir = "./contrib/sdl" in
+ sourceTreePart::{
+	, dir = dir
+	, name = "sdl3"
+	, includeDirs = {
+		, local = [] : List Text
+		, global = ["${dir}/include"] : List Text
+	}
+	, sources = [] : List Text
+	, nonSourceObjs = [
+	  , "build/libSDL3.a"
+	]
 }
 let imguiWithSkia = imgui // {
 	, name = "imguiWithSkia"
@@ -571,6 +715,8 @@ in
 	, imguiTextedit
 	, binding
 	, skia
+	, skiaSdl
 	, tracyEnabled
 	, tracyDisabled
+	, sdl3
 }

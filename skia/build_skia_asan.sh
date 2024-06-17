@@ -3,7 +3,6 @@ here=$(dirname "$(readlink -f "$BASH_SOURCE")")
 set -ev
 cd ../../contrib/skia/
 
-git checkout "chrome/m123"
 ./tools/install_dependencies.sh
 
 python3 tools/git-sync-deps
