@@ -14,7 +14,8 @@ let sourceTreeParts = [
 	, sourceTreePartsRepo.imguiFlamegraph
 	, sourceTreePartsRepo.imguiTextedit
 	, sourceTreePartsRepo.binding
-	, sourceTreePartsRepo.skia
+	--, sourceTreePartsRepo.skia
+	, sourceTreePartsRepo.skiaSdl
 	, sourceTreePartsRepo.flatbuffers
 ] # (if debug then [ , sourceTreePartsRepo.tracyEnabled ] else [ ,sourceTreePartsRepo.tracyDisabled ] : List lib.sourceTreePart.Type )
 let cxx = "clang++"

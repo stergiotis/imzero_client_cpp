@@ -26,6 +26,10 @@
 #include "include/core/SkFont.h"
 #include "include/core/SkSurface.h"
 #include "include/gpu/gl/GrGLInterface.h"
+#include "gpu/ganesh/gl/GrGLDirectContext.h"
+#include "gpu/ganesh/SkSurfaceGanesh.h"
+#include "gpu/GpuTypes.h"
+#include "gpu/ganesh/gl/GrGLBackendSurface.h"
 
 //#include "tools/trace/SkPerfettoTrace.h"
 #include "tools/trace/ChromeTracingTracer.h"
@@ -47,6 +51,9 @@
 #include "marshalling/send.h"
 #include "cliOptions.h"
 #include "setupUI.h"
+#include "SkBitmap.h"
+#include "src/gpu/ganesh/gl/GrGLDefines.h"
+#include "src/gpu/ganesh/gl/GrGLUtil.h"
 
 // This example doesn't compile with Emscripten yet! Awaiting SDL3 support.
 #ifdef __EMSCRIPTEN__
@@ -288,6 +295,10 @@ int main(int argc, char** argv) {
     SDL_Window *window = nullptr;
     SDL_GLContext gl_context = nullptr;
     const char *glsl_version = nullptr;
+    uint32_t windowFormat = 0;
+    int contextType;
+    constexpr int msaaSampleCount = 0; //4;
+    constexpr int stencilBits = 8;  // Skia needs 8 stencil bits
     {
         // Setup SDL
         if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMEPAD) != 0) {
@@ -319,15 +330,28 @@ int main(int argc, char** argv) {
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
     #endif
 
+        SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+        SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+        SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
+        SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, stencilBits);
+
+        SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+
+        if(msaaSampleCount > 0) {
+            SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+            SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, msaaSampleCount);
+        }
+
         // Enable native IME.
         SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
 
         // Create window with graphics context
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-        SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+        //SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
         Uint32 window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN;
-        window = SDL_CreateWindow(opts.appTitle, 1280, 720, window_flags);
+        auto const dm = SDL_GetDesktopDisplayMode(SDL_GetPrimaryDisplay());
+        window = SDL_CreateWindow(opts.appTitle, dm->w, dm->h, window_flags);
         if (window == nullptr) {
             fprintf(stderr, "Error: SDL_CreateWindow(): %s\n", SDL_GetError());
             exit(1);
@@ -336,7 +360,10 @@ int main(int argc, char** argv) {
         gl_context = SDL_GL_CreateContext(window);
         SDL_GL_MakeCurrent(window, gl_context);
         SDL_GL_SetSwapInterval(1); // Enable vsync
+        // SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
         SDL_ShowWindow(window);
+        windowFormat = SDL_GetWindowPixelFormat(window);
+        SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &contextType);
     }
 
     // Setup Dear ImGui context
@@ -371,6 +398,64 @@ int main(int argc, char** argv) {
 
         clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     }
+    int w, h;
+    SDL_GetWindowSizeInPixels(window, &w, &h);
+
+    glViewport(0, 0, w, h);
+    glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
+    glClearStencil(0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+    auto nativeInterface = GrGLMakeNativeInterface();
+    auto context = GrDirectContexts::MakeGL(nativeInterface).release();
+    if(context == nullptr) {
+        fprintf(stderr,"unable to create skia GrDirectContext (GL)\n");
+        exit(1);
+    }
+
+    // Wrap the frame buffer object attached to the screen in a Skia render target so Skia can render to it
+    GrGLint buffer;
+    GR_GL_GetIntegerv(nativeInterface.get(), GR_GL_FRAMEBUFFER_BINDING, &buffer);
+    GrGLFramebufferInfo info;
+    info.fFBOID = (GrGLuint) buffer;
+    SkColorType colorType;
+
+    //SkDebugf("%s", SDL_GetPixelFormatName(windowFormat));
+    // TODO: the windowFormat is never any of these?
+    if (windowFormat == SDL_PIXELFORMAT_RGBA8888) {
+        info.fFormat = GR_GL_RGBA8;
+        colorType = kRGBA_8888_SkColorType;
+    } else {
+        colorType = kBGRA_8888_SkColorType;
+        if (contextType == SDL_GL_CONTEXT_PROFILE_ES) {
+            info.fFormat = GR_GL_BGRA8;
+        } else {
+            // We assume the internal format is RGBA8 on desktop GL
+            info.fFormat = GR_GL_RGBA8;
+        }
+    }
+    constexpr bool createProtectedNativeBackend = false;
+    info.fProtected = skgpu::Protected(createProtectedNativeBackend);
+    auto target = GrBackendRenderTargets::MakeGL(w,
+                                                    h,
+                                                    msaaSampleCount,
+                                                    stencilBits,
+                                                    info);
+    GrGLFramebufferInfo fbInfo;
+    fbInfo.fFBOID = buffer;
+
+    // setup SkSurface
+    // To use distance field text, use commented out SkSurfaceProps instead
+    // SkSurfaceProps props(SkSurfaceProps::kUseDeviceIndependentFonts_Flag,
+    //                      SkSurfaceProps::kUnknown_SkPixelGeometry);
+    SkSurfaceProps props;
+    auto surface = SkSurfaces::WrapBackendRenderTarget(context,
+                                                       target,
+                                                       kBottomLeft_GrSurfaceOrigin,
+                                                       colorType,
+                                                       SkColorSpace::MakeSRGB(),
+                                                       &props);
+
 
     // Main loop
     bool done = false;
@@ -392,10 +477,12 @@ int main(int argc, char** argv) {
         while (SDL_PollEvent(&event))
         {
             ImGui_ImplSDL3_ProcessEvent(&event);
-            if (event.type == SDL_EVENT_QUIT)
+            if (event.type == SDL_EVENT_QUIT) {
                 done = true;
-            if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(window))
+            }
+            if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(window)) {
                 done = true;
+            }
         }
 
         // Start the Dear ImGui frame
@@ -406,14 +493,17 @@ int main(int argc, char** argv) {
         {
             auto const width = static_cast<int>(io.DisplaySize.x);
             auto const height = static_cast<int>(io.DisplaySize.y);
+
 #if 1
-            const auto s = SkISize::Make(width, height);
-            const auto c = SkColorInfo(kRGBA_8888_SkColorType, kPremul_SkAlphaType, SkColorSpace::MakeSRGB());
-            sk_sp<SkSurface> rasterSurface = SkSurfaces::Raster(SkImageInfo::Make(s, c));
+            ImGui::ShowMetricsWindow();
+            //auto const s = SkISize::Make(width, height);
+            //auto const c = SkColorInfo(kRGBA_8888_SkColorType, kPremul_SkAlphaType, SkColorSpace::MakeSRGB());
+            //auto const im = SkImageInfo::Make(s,c);
+            //sk_sp<SkSurface> rasterSurface = SkSurfaces::Raster(im);
 
-            paint(rasterSurface.get(),width,height); // will call ImGui::Render();
+            paint(surface.get(),width,height); // will call ImGui::Render();
+            context->flush();
 
-            sk_sp<SkImage> image = rasterSurface->makeImageSnapshot();
 #else
             if(ImGui::Begin("Hello, world!")) {
                 ImGui::TextUnformatted("uh, it works!");
@@ -423,10 +513,7 @@ int main(int argc, char** argv) {
             ImGui::Render();
 #endif
 
-            glViewport(0, 0, width, height);
-            glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
-            glClear(GL_COLOR_BUFFER_BIT);
-            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+            //ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
             // Update and Render additional Platform Windows
             // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.

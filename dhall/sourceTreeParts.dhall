@@ -560,6 +560,9 @@ let skiaSdl =
 		, "${dir}/setupUI.cpp"
 		, "${dir}/vectorCmdSkiaRenderer.cpp"
 		, "${dir}/skiaTracyTracer.cpp"
+		-- FIXME
+		, "${contribDir}/src/gpu/ganesh/gl/GrGLInterfaceAutogen.cpp"
+		, "${contribDir}/src/gpu/ganesh/gl/GrGLUtil.cpp"
 	]
 	, includeDirs = {
 		, local = [
