@@ -297,7 +297,7 @@ table CmdPath {
     col: uint32;
     stroke: bool;
     fill: bool;
-    fillType : PathFillType;
+    fill_type : PathFillType;
 }
 union VectorCmdArg {
     CmdRegisterFont,

@@ -540,23 +540,22 @@ void VectorCmdSkiaRenderer::registerFont(const VectorCmdFB::CmdRegisterFont &cmd
         fParagraph = nullptr;
     }
     
-    sk_sp<SkData> fontData;
     {
         constexpr auto pfx = "file://";
         const auto pfxLen = strlen(pfx);
         if(urlLen > pfxLen && memcmp(urlCStr,pfx,pfxLen) == 0) {
             const auto path = urlCStr+pfxLen;
-            fontData = SkData::MakeFromFileName(path);
+            fFontData = SkData::MakeFromFileName(path);
         } else {
             // TODO handle error
             return;
         }
     }
 
-    auto fontMgr = SkFontMgr_New_Custom_Data(SkSpan<sk_sp<SkData>>(&fontData,1));
-    const auto typeface = fontMgr->makeFromData(fontData);
-    assert(typeface != nullptr);
-    setParagraphHandler(std::make_shared<Paragraph>(fontMgr, typeface));
+    fFontMgr = SkFontMgr_New_Custom_Data(SkSpan<sk_sp<SkData>>(&fFontData,1));
+    fTypeface = fFontMgr->makeFromData(fFontData);
+    assert(fTypeface != nullptr);
+    setParagraphHandler(std::make_shared<Paragraph>(fFontMgr, fTypeface));
 
     const auto aa = (dlFlags & VectorCmdFB::DrawListFlags_AntiAliasedText) != 0;
     if(cmd.subpixel()) {
@@ -636,12 +635,12 @@ void VectorCmdSkiaRenderer::drawCmdPath(const VectorCmdFB::CmdPath &cmd,SkCanvas
     auto pa = SkPath::Make(pointsXYVec.data(),nPoints,
                  verbsFb->data(),static_cast<int>(verbsFb->size()),
                  reinterpret_cast<const SkScalar *>(weights),static_cast<int>(weightsFb->size()),
-                 static_cast<SkPathFillType>(cmd.fillType()),true);
+                 static_cast<SkPathFillType>(cmd.fill_type()),true);
 #else
     auto const nVerbs = verbsFb->size();
     auto verbs = reinterpret_cast<const VectorCmdFB::PathVerb*>(verbsFb->data());
     SkPath pa;
-    pa.setFillType(static_cast<SkPathFillType>(cmd.fillType()));
+    pa.setFillType(static_cast<SkPathFillType>(cmd.fill_type()));
     int p=0;
     int pw=0;
     for(int i=0;i<nVerbs;i++) {
@@ -1074,4 +1073,8 @@ void VectorCmdSkiaRenderer::drawCmdBezierQuadraticFB(const VectorCmdFB::CmdBezie
 }
 void VectorCmdSkiaRenderer::prepareForDrawing() {
     fClipStack.resize(0);
+}
+
+sk_sp<SkTypeface> VectorCmdSkiaRenderer::getTypeface() const {
+    return fFont.refTypeface();
 }

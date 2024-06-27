@@ -350,18 +350,18 @@ let skia =
 	let objDir = "${contribDir}/out/Static/obj"
 	let static3rdPartyLibraries = [
 		-- static libaries (offial_build=false mode)
-		, "${contribDir}/out/Static/libcompression_utils_portable.a"
-		, "${contribDir}/out/Static/libdng_sdk.a"
-		, "${contribDir}/out/Static/libexpat.a"
-		, "${contribDir}/out/Static/libharfbuzz.a"
-		, "${contribDir}/out/Static/libicu.a"
-		, "${contribDir}/out/Static/libicu_bidi.a"
-		, "${contribDir}/out/Static/libjpeg.a"
-		, "${contribDir}/out/Static/libmicrohttpd.a"
-		, "${contribDir}/out/Static/libpathkit.a"
-		, "${contribDir}/out/Static/libperfetto.a"
-		, "${contribDir}/out/Static/libpiex.a"
-		, "${contribDir}/out/Static/libpng.a"
+		, "${objDir}/../libcompression_utils_portable.a"
+		, "${objDir}/../libdng_sdk.a"
+		, "${objDir}/../libexpat.a"
+		, "${objDir}/../libharfbuzz.a"
+		, "${objDir}/../libicu.a"
+		, "${objDir}/../libicu_bidi.a"
+		, "${objDir}/../libjpeg.a"
+		, "${objDir}/../libmicrohttpd.a"
+		, "${objDir}/../libpathkit.a"
+		, "${objDir}/../libperfetto.a"
+		, "${objDir}/../libpiex.a"
+		, "${objDir}/../libpng.a"
 	]
     in sourceTreePart::{
 	, name = "skia"
@@ -520,32 +520,32 @@ let skia =
 		, "${objDir}/tools/trace/trace.EventTracingPriv.o"
 		, "${objDir}/tools/trace/trace.SkDebugfTracer.o"
 		, "${objDir}/tools/trace/trace.SkPerfettoTrace.o"
-        , "${contribDir}/out/Static/libsvg.a"
-        , "${contribDir}/out/Static/libskia.a"
-        , "${contribDir}/out/Static/libskshaper.a"
-        , "${contribDir}/out/Static/libskparagraph.a"
-        , "${contribDir}/out/Static/libskunicode.a"
-        , "${contribDir}/out/Static/libwindow.a"
+        , "${objDir}/../libsvg.a"
+        , "${objDir}/../libskia.a"
+        , "${objDir}/../libskshaper.a"
+        , "${objDir}/../libskparagraph.a"
+        , "${objDir}/../libskunicode.a"
+        , "${objDir}/../libwindow.a"
 	] # static3rdPartyLibraries
 }
-let skiaSdl = 
+let skiaSdl = \(asan : Bool) -> 
     let dir = "./skia"
     let contribDir = "./contrib/skia"
-	let objDir = "${contribDir}/out/Static/obj"
+	let objDir = if asan then "${contribDir}/out/asan/obj" else "${contribDir}/out/Static/obj"
 	let static3rdPartyLibraries = [
 		-- static libaries (offial_build=false mode)
-		, "${contribDir}/out/Static/libcompression_utils_portable.a"
-		, "${contribDir}/out/Static/libdng_sdk.a"
-		, "${contribDir}/out/Static/libexpat.a"
-		, "${contribDir}/out/Static/libharfbuzz.a"
-		, "${contribDir}/out/Static/libicu.a"
-		, "${contribDir}/out/Static/libicu_bidi.a"
-		, "${contribDir}/out/Static/libjpeg.a"
-		, "${contribDir}/out/Static/libmicrohttpd.a"
-		, "${contribDir}/out/Static/libpathkit.a"
-		, "${contribDir}/out/Static/libperfetto.a"
-		, "${contribDir}/out/Static/libpiex.a"
-		, "${contribDir}/out/Static/libpng.a"
+		, "${objDir}/../libcompression_utils_portable.a"
+		, "${objDir}/../libdng_sdk.a"
+		, "${objDir}/../libexpat.a"
+		, "${objDir}/../libharfbuzz.a"
+		, "${objDir}/../libicu.a"
+		, "${objDir}/../libicu_bidi.a"
+		, "${objDir}/../libjpeg.a"
+		, "${objDir}/../libmicrohttpd.a"
+		, "${objDir}/../libpathkit.a"
+		, "${objDir}/../libperfetto.a"
+		, "${objDir}/../libpiex.a"
+		, "${objDir}/../libpng.a"
 	]
     in sourceTreePart::{
 	, name = "skiaSdl"
@@ -563,6 +563,8 @@ let skiaSdl =
 		-- FIXME
 		, "${contribDir}/src/gpu/ganesh/gl/GrGLInterfaceAutogen.cpp"
 		, "${contribDir}/src/gpu/ganesh/gl/GrGLUtil.cpp"
+		-- FIXME
+		--, "skia/sdl3/SkFontMgr_custom_embedded.cpp"
 	]
 	, includeDirs = {
 		, local = [
@@ -588,6 +590,7 @@ let skiaSdl =
 		] : List Text
 	}
 	, defines = {, local = [
+		      , "SK_DEBUG"
         , "SK_TRIVIAL_ABI=\\[\\[clang::trivial_abi\\]\\]"
         , "SK_GAMMA_APPLY_TO_A8"
         , "SK_ALLOW_STATIC_GLOBAL_INITIALIZERS=1"
@@ -653,12 +656,12 @@ let skiaSdl =
 		] : List Text
 	}
 	, nonSourceObjs = [
-        , "${contribDir}/out/Static/libskparagraph.a"
-        , "${contribDir}/out/Static/libsvg.a"
-        , "${contribDir}/out/Static/libskia.a"
-        , "${contribDir}/out/Static/libskshaper.a"
-        , "${contribDir}/out/Static/libskunicode.a"
-        , "${contribDir}/out/Static/libwindow.a"
+        , "${objDir}/../libskparagraph.a"
+        , "${objDir}/../libsvg.a"
+        , "${objDir}/../libskia.a"
+        , "${objDir}/../libskshaper.a"
+        , "${objDir}/../libskunicode.a"
+        , "${objDir}/../libwindow.a"
 		, "./contrib/sdl3/build/libSDL3.a"
 	] # static3rdPartyLibraries
 }

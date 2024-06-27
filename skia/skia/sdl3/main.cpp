@@ -1,11 +1,9 @@
 #include <cstdio>
-#include <cstdint>
-#include <chrono>
 #include <cstring>
 
 #include "imgui.h"
 #include "imgui_impl_sdl3.h"
-#include "imgui_impl_opengl3.h"
+//#include "imgui_impl_opengl3.h"
 
 #include <SDL3/SDL.h>
 #if defined(IMGUI_IMPL_OPENGL_ES2)
@@ -20,22 +18,16 @@
 #include "include/svg/SkSVGCanvas.h"
 #include "include/core/SkColorSpace.h"
 #include "include/encode/SkPngEncoder.h"
-#include "include/gpu/GrBackendSurface.h"
 #include "include/gpu/GrDirectContext.h"
 #include "include/core/SkCanvas.h"
-#include "include/core/SkFont.h"
-#include "include/core/SkSurface.h"
 #include "include/gpu/gl/GrGLInterface.h"
 #include "gpu/ganesh/gl/GrGLDirectContext.h"
 #include "gpu/ganesh/SkSurfaceGanesh.h"
-#include "gpu/GpuTypes.h"
 #include "gpu/ganesh/gl/GrGLBackendSurface.h"
-
-//#include "tools/trace/SkPerfettoTrace.h"
-#include "tools/trace/ChromeTracingTracer.h"
-#include "tools/trace/SkDebugfTracer.h"
-#include "src/core/SkATrace.h"
-#include "../skiaTracyTracer.h"
+#include "src/gpu/ganesh/gl/GrGLDefines.h"
+#include "src/gpu/ganesh/gl/GrGLUtil.h"
+#include "SkFontMgr_custom.h"
+//#include "SkBitmap.h"
 
 #include "tracy/Tracy.hpp"
 
@@ -47,18 +39,8 @@
 #include "buildinfo.gen.h"
 
 #include "vectorCmdSkiaRenderer.h"
-#include "marshalling/receive.h"
-#include "marshalling/send.h"
 #include "cliOptions.h"
 #include "setupUI.h"
-#include "SkBitmap.h"
-#include "src/gpu/ganesh/gl/GrGLDefines.h"
-#include "src/gpu/ganesh/gl/GrGLUtil.h"
-
-// This example doesn't compile with Emscripten yet! Awaiting SDL3 support.
-#ifdef __EMSCRIPTEN__
-#include "../libs/emscripten/emscripten_mainloop_stub.h"
-#endif
 
 SkPaint fFontPaint;
 VectorCmdSkiaRenderer fVectorCmdSkiaRenderer{};
@@ -70,6 +52,43 @@ ImZeroSkiaSetupUI fImZeroSkiaSetupUi{};
 bool fFffiInterpreter;
 SkColor fBackgroundColor;
 bool fUseVectorCmd;
+
+#ifdef TRACY_ENABLE
+#include <cstdlib>
+#include "tracy/Tracy.hpp"
+static const char *tracyMemPoolNameImgui = "imgui";
+static void *imZeroMemAlloc(size_t sz,void *user_data) noexcept { ZoneScoped;
+
+    auto ptr = malloc(sz);
+#ifdef IMZERO_DEBUG_BUILD
+    TracyAllocNS(ptr, sz, 6, tracyMemPoolNameImgui);
+#else
+    TracyAllocN(ptr, sz, tracyMemPoolNameImgui);
+#endif
+    return ptr;
+}
+static void imZeroMemFree(void *ptr,void *user_data) noexcept { ZoneScoped;
+#ifdef IMZERO_DEBUG_BUILD
+    TracyFreeNS(ptr, 6, tracyMemPoolNameImgui);
+#else
+    TracyFreeN(ptr, tracyMemPoolNameImgui);
+#endif
+    free(ptr);
+}
+#if 0
+// NOTE: not compatible with address sanitizier asan
+static const char *tracyMemPoolNameOperators = "operator new/delete";
+void* operator new(std::size_t count) {
+    auto ptr = malloc(count);
+    TracyAllocN(ptr, count, tracyMemPoolNameOperators);
+    return ptr;
+}
+void operator delete(void* ptr) noexcept {
+    free(ptr);
+    TracyFreeN(ptr, tracyMemPoolNameOperators);
+}
+#endif
+#endif
 
 template <typename T>
 static inline void applyFlag(int &flag,T val,bool v) {
@@ -222,6 +241,19 @@ static void paint(SkSurface* surface, int width, int height) { ZoneScoped;
 
     FrameMark;
 }
+#if 0
+static void aa() {
+    SkSpan<sk_sp<SkData>> sp;
+    sk_sp<SkData>* datas;
+    int n;
+    const sk_sp<SkData>* fDatas;
+    const int fNum;
+    sp.data()
+
+    SkDebugf("fDatas=%p,fNum=%d\n",fDatas,fNum);
+    SkDebugf("datas=%p,fNum=%d\n",datas->get(),(int)datas->size());
+}
+#endif
 
 int main(int argc, char** argv) {
 #ifdef TRACY_ENABLE
@@ -229,9 +261,15 @@ int main(int argc, char** argv) {
 #endif
 
     CliOptions opts{};
-    VectorCmdSkiaRenderer vectorCmdSkiaRenderer{};
-
     opts.parse(argc, argv, stderr);
+
+    sk_sp<SkImageFilter> test = nullptr;
+
+    VectorCmdSkiaRenderer vectorCmdSkiaRenderer{};
+    sk_sp<SkFontMgr> fontMgr = nullptr;
+    sk_sp<SkTypeface> typeface = nullptr;
+    sk_sp<SkData> ttfData = nullptr;
+    SkMemoryStream *ttfStream = nullptr;
     { // setup skia/imgui shared objects
         if (opts.fffiInterpreter) {
             if (opts.fffiInFile != nullptr) {
@@ -263,10 +301,27 @@ int main(int argc, char** argv) {
 
         fUseVectorCmd = opts.vectorCmd;
 
-        auto ttfData = SkData::MakeFromFileName(opts.ttfFilePath);
-        auto fontMgr = SkFontMgr_New_Custom_Data(SkSpan<sk_sp<SkData>>(&ttfData, 1));
-        auto const typeface = fontMgr->makeFromData(ttfData);
-        //auto const typeface = fontMgr->matchFamilyStyle(nullptr,SkFontStyle());
+        {
+            auto stream = SkStream::MakeFromFile(opts.ttfFilePath);
+            if(stream == nullptr || !stream->hasLength()) {
+                fprintf(stderr, "unable to open ttf file %s\n",opts.ttfFilePath);
+                exit(1);
+            }
+            auto sz = stream->getLength();
+            fprintf(stderr,"sz=%d\n",(int)sz);
+            auto mem = malloc(sz);
+            if(mem == nullptr) {
+                fprintf(stderr,"unable to allocate %d bytes for the ttf file content\n", static_cast<int>(sz));
+                exit(1);
+            }
+            stream->read(mem,sz);
+            ttfStream = SkMemoryStream::MakeDirect(mem,sz).release();
+            ttfData = SkData::MakeFromMalloc(mem,sz);
+            ttfData->ref();
+        }
+        fontMgr = SkFontMgr_New_Custom_Data(SkSpan(&ttfData,1));
+        typeface = fontMgr->makeFromData(ttfData);
+        ////auto const typeface = fontMgr->matchFamilyStyle(nullptr,SkFontStyle());
         if(typeface == nullptr || fontMgr->countFamilies() <= 0) {
             fprintf(stderr, "unable to initialize font manager with supplied ttf font file %s\n",opts.ttfFilePath);
             exit(1);
@@ -394,7 +449,7 @@ int main(int argc, char** argv) {
 
         // Setup Platform/Renderer backends
         ImGui_ImplSDL3_InitForOpenGL(window, gl_context);
-        ImGui_ImplOpenGL3_Init(glsl_version);
+        //ImGui_ImplOpenGL3_Init(glsl_version);
 
         clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     }
@@ -449,7 +504,8 @@ int main(int argc, char** argv) {
     // SkSurfaceProps props(SkSurfaceProps::kUseDeviceIndependentFonts_Flag,
     //                      SkSurfaceProps::kUnknown_SkPixelGeometry);
     SkSurfaceProps props;
-    auto surface = SkSurfaces::WrapBackendRenderTarget(context,
+    sk_sp<SkSurface> surface;
+    surface = SkSurfaces::WrapBackendRenderTarget(context,
                                                        target,
                                                        kBottomLeft_GrSurfaceOrigin,
                                                        colorType,
@@ -459,15 +515,7 @@ int main(int argc, char** argv) {
 
     // Main loop
     bool done = false;
-#ifdef __EMSCRIPTEN__
-    // For an Emscripten build we are disabling file-system access, so let's not attempt to do a fopen() of the imgui.ini file.
-    // You may manually call LoadIniSettingsFromMemory() to load settings from your own storage.
-    io.IniFilename = nullptr;
-    EMSCRIPTEN_MAINLOOP_BEGIN
-#else
-    while (!done)
-#endif
-    {
+    while (!done) {
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
         // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
@@ -486,7 +534,7 @@ int main(int argc, char** argv) {
         }
 
         // Start the Dear ImGui frame
-        ImGui_ImplOpenGL3_NewFrame();
+        //ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
 
@@ -530,12 +578,9 @@ int main(int argc, char** argv) {
             SDL_GL_SwapWindow(window);
         }
     }
-#ifdef __EMSCRIPTEN__
-    EMSCRIPTEN_MAINLOOP_END;
-#endif
 
     // Cleanup
-    ImGui_ImplOpenGL3_Shutdown();
+    //ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL3_Shutdown();
     if(opts.fffiInterpreter) {
         render_cleanup();

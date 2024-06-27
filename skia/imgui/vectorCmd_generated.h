@@ -3835,7 +3835,7 @@ struct CmdPath FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
     VT_COL = 12,
     VT_STROKE = 14,
     VT_FILL = 16,
-    VT_FILLTYPE = 18
+    VT_FILL_TYPE = 18
   };
   const VectorCmdFB::SingleVec2 *offset() const {
     return GetStruct<const VectorCmdFB::SingleVec2 *>(VT_OFFSET);
@@ -3858,8 +3858,8 @@ struct CmdPath FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
   bool fill() const {
     return GetField<uint8_t>(VT_FILL, 0) != 0;
   }
-  VectorCmdFB::PathFillType fillType() const {
-    return static_cast<VectorCmdFB::PathFillType>(GetField<uint8_t>(VT_FILLTYPE, 0));
+  VectorCmdFB::PathFillType fill_type() const {
+    return static_cast<VectorCmdFB::PathFillType>(GetField<uint8_t>(VT_FILL_TYPE, 0));
   }
   bool Verify(::flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -3873,7 +3873,7 @@ struct CmdPath FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
            VerifyField<uint32_t>(verifier, VT_COL, 4) &&
            VerifyField<uint8_t>(verifier, VT_STROKE, 1) &&
            VerifyField<uint8_t>(verifier, VT_FILL, 1) &&
-           VerifyField<uint8_t>(verifier, VT_FILLTYPE, 1) &&
+           VerifyField<uint8_t>(verifier, VT_FILL_TYPE, 1) &&
            verifier.EndTable();
   }
 };
@@ -3903,8 +3903,8 @@ struct CmdPathBuilder {
   void add_fill(bool fill) {
     fbb_.AddElement<uint8_t>(CmdPath::VT_FILL, static_cast<uint8_t>(fill), 0);
   }
-  void add_fillType(VectorCmdFB::PathFillType fillType) {
-    fbb_.AddElement<uint8_t>(CmdPath::VT_FILLTYPE, static_cast<uint8_t>(fillType), 0);
+  void add_fill_type(VectorCmdFB::PathFillType fill_type) {
+    fbb_.AddElement<uint8_t>(CmdPath::VT_FILL_TYPE, static_cast<uint8_t>(fill_type), 0);
   }
   explicit CmdPathBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
@@ -3926,14 +3926,14 @@ inline ::flatbuffers::Offset<CmdPath> CreateCmdPath(
     uint32_t col = 0,
     bool stroke = false,
     bool fill = false,
-    VectorCmdFB::PathFillType fillType = VectorCmdFB::PathFillType_winding) {
+    VectorCmdFB::PathFillType fill_type = VectorCmdFB::PathFillType_winding) {
   CmdPathBuilder builder_(_fbb);
   builder_.add_col(col);
   builder_.add_conic_weights(conic_weights);
   builder_.add_points_xy(points_xy);
   builder_.add_verbs(verbs);
   builder_.add_offset(offset);
-  builder_.add_fillType(fillType);
+  builder_.add_fill_type(fill_type);
   builder_.add_fill(fill);
   builder_.add_stroke(stroke);
   return builder_.Finish();
@@ -3948,7 +3948,7 @@ inline ::flatbuffers::Offset<CmdPath> CreateCmdPathDirect(
     uint32_t col = 0,
     bool stroke = false,
     bool fill = false,
-    VectorCmdFB::PathFillType fillType = VectorCmdFB::PathFillType_winding) {
+    VectorCmdFB::PathFillType fill_type = VectorCmdFB::PathFillType_winding) {
   auto verbs__ = verbs ? _fbb.CreateVector<uint8_t>(*verbs) : 0;
   auto points_xy__ = points_xy ? _fbb.CreateVector<float>(*points_xy) : 0;
   auto conic_weights__ = conic_weights ? _fbb.CreateVector<float>(*conic_weights) : 0;
@@ -3961,7 +3961,7 @@ inline ::flatbuffers::Offset<CmdPath> CreateCmdPathDirect(
       col,
       stroke,
       fill,
-      fillType);
+      fill_type);
 }
 
 struct SingleVectorCmdDto FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {

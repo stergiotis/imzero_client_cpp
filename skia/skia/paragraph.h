@@ -40,7 +40,6 @@ class Paragraph {
 
     private:
         sk_sp<skia::textlayout::FontCollection> fTlFontCollection;
-        sk_sp<SkFontMgr> fFontMgr;
         sk_sp<SkTypeface> fDefaultTypeface;
         skia::textlayout::TextStyle fTlTextStyle;
         skia::textlayout::ParagraphBuilder *fParaBuilder;

@@ -4,7 +4,7 @@ project(imgui_skia_exe)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_COMPILER clang++)
 
-add_compile_definitions()
+add_compile_definitions(TRACY_ENABLE)
 include_directories("${CMAKE_CURRENT_LIST_DIR}/./imgui"
 "${CMAKE_CURRENT_LIST_DIR}/./src/arena/simple"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/skia"
@@ -22,9 +22,16 @@ include_directories("${CMAKE_CURRENT_LIST_DIR}/./imgui"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/flatbuffers"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public")
 set(COMPILE_OPTIONS -std=c++20
--O3)
-link_libraries(-DNDEBUG
--ldl
+-g
+-gdwarf-4
+-Wall
+-Wformat
+-Wextra
+-O1
+-fsanitize=address
+-fno-omit-frame-pointer
+-DIMZERO_DEBUG_BUILD)
+link_libraries(-ldl
 -lpthread
 -lfreetype
 -lz
@@ -101,7 +108,8 @@ add_library(skiaSdl OBJECT "${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/imgui_impl_ope
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/src/gpu/ganesh/gl/GrGLInterfaceAutogen.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/src/gpu/ganesh/gl/GrGLUtil.cpp")
 target_compile_options(skiaSdl PUBLIC -Wno-unused-parameter)
-target_compile_definitions(skiaSdl PUBLIC SK_TRIVIAL_ABI=\[\[clang::trivial_abi\]\]
+target_compile_definitions(skiaSdl PUBLIC SK_DEBUG
+SK_TRIVIAL_ABI=\[\[clang::trivial_abi\]\]
 SK_GAMMA_APPLY_TO_A8
 SK_ALLOW_STATIC_GLOBAL_INITIALIZERS=1
 SK_TYPEFACE_FACTORY_FREETYPE
@@ -136,28 +144,28 @@ target_include_directories(skiaSdl PUBLIC "${CMAKE_CURRENT_LIST_DIR}/./skia"
 "${CMAKE_CURRENT_LIST_DIR}/./src"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/sdl3/include")
 add_library(skiaSdl_imported OBJECT IMPORTED)
-set_property(TARGET skiaSdl_imported PROPERTY IMPORTED_OBJECTS "${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/libskparagraph.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/libsvg.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/libskia.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/libskshaper.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/libskunicode.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/libwindow.a"
+set_property(TARGET skiaSdl_imported PROPERTY IMPORTED_OBJECTS "${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libskparagraph.a"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libsvg.a"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libskia.a"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libskshaper.a"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libskunicode.a"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libwindow.a"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/sdl3/build/libSDL3.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/libcompression_utils_portable.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/libdng_sdk.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/libexpat.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/libharfbuzz.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/libicu.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/libicu_bidi.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/libjpeg.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/libmicrohttpd.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/libpathkit.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/libperfetto.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/libpiex.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/libpng.a")
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libcompression_utils_portable.a"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libdng_sdk.a"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libexpat.a"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libharfbuzz.a"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libicu.a"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libicu_bidi.a"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libjpeg.a"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libmicrohttpd.a"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libpathkit.a"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libperfetto.a"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libpiex.a"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libpng.a")
 
 
-add_library(tracyDisabled OBJECT "${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public/TracyClient.cpp")
+add_library(tracyEnabled OBJECT "${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public/TracyClient.cpp")
 add_executable(imgui_skia_exe $<TARGET_OBJECTS:imguiWithSkia>
 $<TARGET_OBJECTS:render>
 $<TARGET_OBJECTS:marshalling>
@@ -171,5 +179,5 @@ $<TARGET_OBJECTS:imguiFlamegraph>
 $<TARGET_OBJECTS:imguiTextedit>
 $<TARGET_OBJECTS:skiaSdl>
 $<TARGET_OBJECTS:skiaSdl_imported>
-$<TARGET_OBJECTS:tracyDisabled>)
+$<TARGET_OBJECTS:tracyEnabled>)
 

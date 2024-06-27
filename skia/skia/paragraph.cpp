@@ -20,7 +20,6 @@ Paragraph::Paragraph(sk_sp<SkFontMgr> fontMgr,sk_sp<SkTypeface> defaultTypeface)
     fParaBuilderJustify = skia::textlayout::ParagraphBuilderImpl::make(paraStyle, fTlFontCollection);
     fParaBuilder = fParaBuilderLeft.get();
 
-    fFontMgr = fontMgr;
     fDefaultTypeface = defaultTypeface;
 }
 Paragraph::~Paragraph() = default;

@@ -86,6 +86,7 @@ class VectorCmdSkiaRenderer {
         void changeRenderMode(RenderModeE r);
         void setVertexDrawPaint(SkPaint *vertexPaintP);
         void setParagraphHandler(std::shared_ptr<Paragraph> paragraph);
+        sk_sp<SkTypeface> getTypeface() const;
 
     private:
         // stack of pre-intersected clipping rectangles
@@ -105,6 +106,9 @@ class VectorCmdSkiaRenderer {
         //SkTDArray<SkPoint> vtxXYSimples;
         std::shared_ptr<Paragraph> fParagraph;
         SkFont fFont;
+        sk_sp<SkData> fFontData;
+        sk_sp<SkTypeface> fTypeface;
+        sk_sp<SkFontMgr> fFontMgr;
 
         RenderModeE fRenderMode;
 
