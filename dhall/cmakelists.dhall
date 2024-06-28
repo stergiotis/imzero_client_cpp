@@ -2,6 +2,7 @@ let prelude = ./prelude.dhall
 let lib = ./lib.dhall
 let cmakelists = let T = {
     , cxx : Text
+    , linker : Text
     , exe : Text
 	, cxxflags : List Text
 	, ldflags : List Text
@@ -50,6 +51,7 @@ let cmakelistsToText = \(m : cmakelists.Type) ->
 	++ "cmake_minimum_required(VERSION 3.24)\n"
 	++ "project(${m.projectName})\n"
 	++ "set(CMAKE_CXX_STANDARD ${Natural/show m.cxxStandard})\n"
+	++ "set(CMAKE_LINKER ${m.linker})\n"
 	++ "set(CMAKE_CXX_COMPILER ${m.cxx})\n"
 	++ "\n"
 	++ "add_compile_definitions(${prelude.Text.concatSep "\n" gDefines})\n"

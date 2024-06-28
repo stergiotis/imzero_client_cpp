@@ -10,6 +10,7 @@ export PKG_CONFIG_OUTPUT_CFLAGS_FREETYPE2=""
 export PKG_CONFIG_OUTPUT_LIBS_FREETYPE2=""
 export PKG_CONFIG_OUTPUT_CFLAGS_GLFW3=""
 export PKG_CONFIG_OUTPUT_LIBS_GLFW3=""
+export CLANGDIR="$here/../../contrib/clang"
 
 ./cmakelists.dhall
 
