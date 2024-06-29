@@ -2,8 +2,6 @@
 here=$(dirname "$(readlink -f "$BASH_SOURCE")")
 set -ev
 cd ../../contrib/skia
-#sudo apt install clang libjpeg-dev libicu-dev libwebp-dev libfontconfig-dev
-./tools/install_dependencies.sh
 python3 tools/git-sync-deps
 ./bin/fetch-ninja
 #ninja -t clean

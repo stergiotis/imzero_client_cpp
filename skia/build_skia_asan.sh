@@ -3,8 +3,6 @@ here=$(dirname "$(readlink -f "$BASH_SOURCE")")
 set -ev
 cd ../../contrib/skia/
 
-./tools/install_dependencies.sh
-
 python3 tools/git-sync-deps
 clangdir="$here/../../contrib/clang"
 mkdir -p $clangdir
