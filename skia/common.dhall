@@ -1,7 +1,7 @@
 let lib = ../dhall/lib.dhall
 let debug = False
 let asan = False
-let clangdir = env:CLANGDIR as Text -- FIXME sync with ./build_skia_asan.sh
+--let clangdir = env:CLANGDIR as Text -- FIXME sync with ./build_skia_asan.sh
 let sourceTreePartsRepo = ../dhall/sourceTreeParts.dhall
 let sourceTreeParts = [
 	, sourceTreePartsRepo.imguiWithSkia
@@ -20,7 +20,8 @@ let sourceTreeParts = [
 	, sourceTreePartsRepo.skiaSdl asan
 	, sourceTreePartsRepo.flatbuffers
 ] # (if debug then [ , sourceTreePartsRepo.tracyEnabled ] else [ ,sourceTreePartsRepo.tracyDisabled ] : List lib.sourceTreePart.Type )
-let cxx = "${clangdir}/bin/clang++"
+--let cxx = "${clangdir}/bin/clang++"
+let cxx = "clang++"
 let cppstd = 20
 let cxxflags = ["-fno-exceptions"]
 let cxxflagsDebug = [
@@ -43,7 +44,7 @@ let ldflagsDebug = if asan then [
 	, "-fsanitize=undefined"
 	, "-fuse-ld=lld"
 	, "-v"
-	, "-Wl,-rpath,${clangdir}/lib/x86_64-unknown-linux-gnu"
+--	, "-Wl,-rpath,${clangdir}/lib/x86_64-unknown-linux-gnu"
 	] else [] : List Text
 let ldflagsRelease = ["-DNDEBUG"] : List Text
 --let stdlibFlags = ["-stdlib=libc++"] : List Text

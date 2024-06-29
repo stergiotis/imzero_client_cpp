@@ -6,6 +6,7 @@
 //#include "imgui_impl_opengl3.h"
 
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_main.h>
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <SDL3/SDL_opengles2.h>
 #else

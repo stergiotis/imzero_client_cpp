@@ -9,4 +9,5 @@ source /etc/os-release
 ../scripts/install_nonportable.sh
 ./build_skia.sh
 ./build_flatbuffers.sh
+./build_sdl3.sh
 ./build.sh
