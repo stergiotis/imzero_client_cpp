@@ -554,6 +554,7 @@ let skiaSdl = \(asan : Bool) ->
 		, "${dir}/sdl3/imgui_impl_opengl3.cpp"
 		, "${dir}/sdl3/imgui_impl_sdl3.cpp"
 		, "${dir}/sdl3/main.cpp"
+		, "${dir}/sdl3/app.cpp"
 
 		, "${dir}/paragraph.cpp"
 		, "${dir}/cliOptions.cpp"
