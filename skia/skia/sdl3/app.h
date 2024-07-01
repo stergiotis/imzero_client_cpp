@@ -15,14 +15,14 @@ private:
     void Paint(SkSurface* surface, int width, int height);
     void DrawImGuiVectorCmdsFB(SkCanvas &canvas);
 
-    SkPaint fFontPaint{};
-    VectorCmdSkiaRenderer fVectorCmdSkiaRenderer{};
-    size_t fTotalVectorCmdSerializedSize{};
-    size_t fSkpBytesWritten{};
-    size_t fSvgBytesWritten{};
-    size_t fPngBytesWritten{};
-    ImZeroSkiaSetupUI fImZeroSkiaSetupUi{};
-    bool fFffiInterpreter{};
-    SkColor fBackgroundColor{};
-    bool fUseVectorCmd{};
+    SkPaint fFontPaint;
+    VectorCmdSkiaRenderer fVectorCmdSkiaRenderer;
+    size_t fTotalVectorCmdSerializedSize;
+    size_t fSkpBytesWritten;
+    size_t fSvgBytesWritten;
+    size_t fPngBytesWritten;
+    ImZeroSkiaSetupUI fImZeroSkiaSetupUi;
+    bool fFffiInterpreter;
+    SkColor fBackgroundColor;
+    bool fUseVectorCmd;
 };

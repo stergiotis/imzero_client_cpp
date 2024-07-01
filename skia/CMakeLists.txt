@@ -95,6 +95,7 @@ target_compile_options(imguiTextedit PUBLIC -Wno-unused-variable)
 add_library(skiaSdl OBJECT "${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/imgui_impl_opengl3.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/imgui_impl_sdl3.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/main.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/app.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./skia/paragraph.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./skia/cliOptions.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./skia/setupUI.cpp"
@@ -104,7 +105,6 @@ add_library(skiaSdl OBJECT "${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/imgui_impl_ope
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/src/gpu/ganesh/gl/GrGLUtil.cpp")
 target_compile_options(skiaSdl PUBLIC -Wno-unused-parameter)
 target_compile_definitions(skiaSdl PUBLIC SK_DEBUG
-SK_TRIVIAL_ABI=\[\[clang::trivial_abi\]\]
 SK_GAMMA_APPLY_TO_A8
 SK_ALLOW_STATIC_GLOBAL_INITIALIZERS=1
 SK_TYPEFACE_FACTORY_FREETYPE

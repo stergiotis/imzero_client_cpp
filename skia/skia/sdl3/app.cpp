@@ -520,4 +520,12 @@ int App::Run(CliOptions &opts) {
     return 0;
 }
 
-App::App() = default;
+App::App() {
+    fTotalVectorCmdSerializedSize = 0;
+    fSkpBytesWritten = 0;
+    fSvgBytesWritten = 0;
+    fPngBytesWritten = 0;
+    fBackgroundColor = SK_ColorRED;
+    fFffiInterpreter = false;
+    fUseVectorCmd = false;
+}

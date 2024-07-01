@@ -108,7 +108,7 @@ static SkColor convertColor(uint32_t col) {
         (col >> IM_COL32_B_SHIFT) & 0xff);
 #endif
 }
-VectorCmdSkiaRenderer::VectorCmdSkiaRenderer() : fVertexPaint(nullptr),fRenderMode(RenderModeE_Normal) {
+VectorCmdSkiaRenderer::VectorCmdSkiaRenderer() : fVertexPaint(nullptr),fRenderMode(RenderModeE_Normal), backdropFilter(nullptr) {
 #ifdef RENDER_MODE_BACKDROP_FILTER_ENABLED
     backdropFilter = SkImageFilters::Blur(8, 8, SkTileMode::kClamp, nullptr);
 #if 0

@@ -397,7 +397,6 @@ let skia =
 		] : List Text
 	}
 	, defines = {, local = [
-        , "SK_TRIVIAL_ABI=\\[\\[clang::trivial_abi\\]\\]"
         , "SK_GAMMA_APPLY_TO_A8"
         , "SK_ALLOW_STATIC_GLOBAL_INITIALIZERS=1"
         , "GR_TEST_UTILS=1"
@@ -440,6 +439,15 @@ let skia =
 	] : List Text}
 	, cxxflags = {
 		, global = [
+         , "-ffp-contract=off" -- standard compliant fp processing
+         , "-fstrict-aliasing" -- is on on >=O2 optimization
+         , "-fPIC"
+         , "-fvisibility=hidden"
+         , "-fdata-sections"
+         , "-ffunction-sections"
+         , "-fvisibility-inlines-hidden"
+         , "-fno-exceptions"
+         , "-fno-rtti"
 		] : List Text
 		, local = [
 		, "-Wno-unused-parameter"
@@ -592,7 +600,6 @@ let skiaSdl = \(asan : Bool) ->
 	}
 	, defines = {, local = [
 		      , "SK_DEBUG"
-        , "SK_TRIVIAL_ABI=\\[\\[clang::trivial_abi\\]\\]"
         , "SK_GAMMA_APPLY_TO_A8"
         , "SK_ALLOW_STATIC_GLOBAL_INITIALIZERS=1"
         --, "GR_TEST_UTILS=1"
