@@ -1,4 +1,5 @@
 #include "setupUI.h"
+#include <sys/time.h>
 #include "imgui_internal.h"
 #include "tracy/Tracy.hpp"
 
@@ -52,6 +53,22 @@ void ImZeroSkiaSetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &v
                                size_t skpBytes, size_t svgBytes, size_t pngBytes, int windowW, int windowH
                                ) { ZoneScoped;
     ImGui::Text("gitCommit=\"%s\",dirty=%s",buildinfo::gitCommit,buildinfo::gitDirty ? "yes" : "no");
+    {
+        struct timeval tv;
+        struct timezone tz;
+
+        gettimeofday(&tv, &tz);
+
+        char buf[sizeof "9999-12-31T23:59:59.999+0000000"];
+        size_t bufsize = sizeof buf;
+        size_t off = 0;
+        struct tm *local = localtime(&tv.tv_sec);
+        off = strftime(buf, bufsize, "%FT%T", local); // same as "%Y-%m-%dT%H:%M:%S"
+        off += snprintf(buf+off, bufsize-off, ".%06ld", tv.tv_usec);
+        off += strftime(buf+off, bufsize-off, "%z", local);
+
+        ImGui::TextUnformatted(buf);
+    }
 
     if(ImGui::CollapsingHeader("Skia Backend")) {
         auto renderMode = vectorCmdSkiaRenderer.getRenderMode();

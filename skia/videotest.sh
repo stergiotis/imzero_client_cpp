@@ -26,16 +26,36 @@
 
 # see https://gist.github.com/Brainiarc7/4636a162ef7dc2e8c9c4c1d4ae887c0e
 
-ffmpeg -hide_banner \
-	-threads 1 -filter_threads 1 \
-	-f lavfi \
-	-i "testsrc=size=hd1080:rate=60,drawtext=text='%{localtime\:%S-%6N}':fontsize=144:box=1:boxcolor=black:fontcolor=yellow:y=(main_h/2)-text_h,format=pix_fmts=yuv420p" \
-	-threads 0 -frame_drop_threshold -1 -g 1 \
-	-vaapi_device /dev/dri/renderD128 -vf 'hwmap=derive_device=vaapi,scale_vaapi=w=1920:h=1080:format=nv12' \
-	-c:v h264_vaapi -qp:v 19 -bf 4 -threads 4 -aspect 16:9 \
-	-loglevel debug \
-	-f nut "pipe:1" #| \
+#ffmpeg -hide_banner \
+#	-threads 1 -filter_threads 1 \
+#	-f lavfi \
+#	-i "testsrc=size=hd1080:rate=60,drawtext=text='%{localtime\:%S-%6N}':fontsize=144:box=1:boxcolor=black:fontcolor=yellow:y=(main_h/2)-text_h,format=pix_fmts=yuv420p" \
+#	-threads 0 -frame_drop_threshold -1 -g 1 \
+#	-vaapi_device /dev/dri/renderD128 -vf 'hwmap=derive_device=vaapi,scale_vaapi=w=1920:h=1080:format=nv12' \
+#	-c:v h264_vaapi -qp:v 19 -bf 4 -threads 4 -aspect 16:9 \
+#	-loglevel debug \
+#	-f nut "pipe:1" | \
 #ffplay -hide_banner \
 #        -threads 1 -filter_threads 1 \
 #	-probesize 32 -sync ext \
 #	-fpsprobesize 0 -framedrop -fast -infbuf -f nut -fflags '+nobuffer' -flags2 '+fast' -i "pipe:0" -vf "drawtext=text='%{localtime\:%S-%6N}':fontsize=144:box=1:boxcolor=black:fontcolor=red:y=(main_h/2)+text_h"
+       #-c:v h264_vaapi -qp:v 19 -bf 4 -threads 4 -aspect 16:9 \
+       #-vf "format=nv12,hwupload,scale_vaapi=w=1920:h=1080" \
+       #-vf 'hwmap=derive_device=vaapi,scale_vaapi=w=1920:h=1080:format=nv12' \
+       #-c:v h264_vaapi -qp:v 26 -bf 0 \
+ffmpeg -hide_banner \
+       -threads 1 -filter_threads 1 \
+       -f lavfi \
+       -i "testsrc=size=hd1080:rate=60,drawtext=text='%{localtime\:%S-%6N}':fontsize=144:box=1:boxcolor=black:fontcolor=yellow:y=(main_h/2)-text_h,format=pix_fmts=yuv420p" \
+       -threads 0 -frame_drop_threshold -1 -g 1 \
+       -vaapi_device /dev/dri/renderD128 \
+       -c:v h264_vaapi -qp:v 26 -bf 0 \
+       -async_depth 4 \
+       -vf "format=nv12,hwupload,scale_vaapi=w=1920:h=1080" \
+       -f nut "pipe:1" | \
+ffplay -hide_banner \
+       -threads 1 -filter_threads 1 \
+       -probesize 32 -sync ext \
+       -fpsprobesize 0 -framedrop -fast -infbuf \
+       -f nut -fflags '+nobuffer' -flags2 '+fast' -i "pipe:0" \
+       -vf "drawtext=text='%{localtime\:%S-%6N}':fontsize=144:box=1:boxcolor=black:fontcolor=red:y=(main_h/2)+text_h"
