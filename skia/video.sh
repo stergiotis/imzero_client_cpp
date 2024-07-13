@@ -1,4 +1,7 @@
 #!/bin/bash
+rm -f transferRawFrames
+mkfifo transferRawFrames
+
 #./imgui_skia_exe -fffiInterpreter off -ttfFilePath ./SauceCodeProNerdFontPropo-Regular.ttf -backdropFilter off | \
 #  ffmpeg -readrate 1 \
 #         -report \
@@ -51,19 +54,24 @@
 ## -f nut -i "pipe:0"
 
 # needs apt install intel-media-va-driver-non-free
-./imgui_skia_exe -fffiInterpreter off -ttfFilePath ./SauceCodeProNerdFontPropo-Regular.ttf -backdropFilter off | \
+
+#./imgui_skia_exe -fffiInterpreter off -ttfFilePath ./SauceCodeProNerdFontPropo-Regular.ttf -backdropFilter off -videoRawFramesFile transferRawFrames -videoResolutionWidth 1024 -videoResolutionHeight 768 &
+./run_pipe.sh &
+pid=$!
 ffmpeg -hide_banner \
--loglevel debug \
--re -fflags +genpts  \
--f image2pipe -i - \
--flags +global_header -r 30000/1001 \
--vaapi_device /dev/dri/renderD128 \
--vf 'format=nv12,hwupload,scale_vaapi=w=1920:h=1080' \
--c:v h264_vaapi -qp:v 26 -bf 0 -tune zerolatency \
--c:a aac -ar 48000 -b:a 96k \
--f nut "pipe:1" | \
+       -loglevel debug \
+       -re -fflags +genpts  \
+       -f image2pipe -i transferRawFrames \
+       -flags +global_header -r 30000/1001 \
+       -vaapi_device /dev/dri/renderD128 \
+       -vf 'format=nv12,hwupload,scale_vaapi=w=1920:h=1080' \
+       -c:v h264_vaapi -qp:v 26 -bf 0 -tune zerolatency \
+       -c:a aac -ar 48000 -b:a 96k \
+       -f nut "pipe:1" | \
 mpv --no-cache --untimed --no-demuxer-thread --video-sync=audio \
   --vd-lavc-threads=1 -
+kill $pid
+
 #ffplay -hide_banner \
 # -analyzeduration 1 -fflags -nobuffer -probesize 32 -sync ext \
 # -f nut -i "pipe:0"

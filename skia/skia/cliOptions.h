@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdio>
+#include <cstdint>
 auto constexpr defaultTtfFilePath = "./SauceCodeProNerdFontPropo-Regular.ttf";
 struct CliOptions {
     const char *ttfFilePath = defaultTtfFilePath;

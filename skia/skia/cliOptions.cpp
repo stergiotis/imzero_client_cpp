@@ -120,7 +120,7 @@ void CliOptions::parse(int argc,char **argv,FILE *logChannel) {
 
     videoRawFramesFile = findFlagValueDefault(logChannel,u, argc, argv,"-videoRawFramesFile",videoRawFramesFile);
     videoResolutionWidth = static_cast<uint32_t>(findFlagValueDefaultInt(logChannel, u, argc, argv, "-videoResolutionWidth", "1920"));
-    videoResolutionWidth = static_cast<uint32_t>(findFlagValueDefaultInt(logChannel, u, argc, argv, "-videoResolutionHeight", "1080"));
+    videoResolutionHeight = static_cast<uint32_t>(findFlagValueDefaultInt(logChannel, u, argc, argv, "-videoResolutionHeight", "1080"));
 
     if(std::popcount(u) != (argc-1)) {
         for(int i=1;i<argc;i++) {

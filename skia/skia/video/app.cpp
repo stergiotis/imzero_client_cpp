@@ -268,14 +268,18 @@ int App::Run(CliOptions &opts) {
         fVectorCmdSkiaRenderer.changeRenderMode(mode);
     }
 
-    int w = opts.videoResolutionWidth;
-    constexpr auto wf = static_cast<float>(w);
-    int h = opts.videoResolutionHeight;
-    constexpr auto hf = static_cast<float>(h);
+    const int w = opts.videoResolutionWidth;
+    const auto wf = static_cast<float>(w);
+    const int h = opts.videoResolutionHeight;
+    const auto hf = static_cast<float>(h);
+    if(w == 0 || h == 0) {
+        fprintf(stderr, "invalid video resolution: %ux%u\n", w,h);
+        exit(1);
+    }
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImVec4 clear_color;
+    ImVec4 clearColorImVec4;
     ImGuiIO &io = ImGui::GetIO();
     {
         applyFlag(io.ConfigFlags, ImGuiConfigFlags_NavEnableKeyboard, opts.imguiNavKeyboard);
@@ -298,7 +302,7 @@ int App::Run(CliOptions &opts) {
             style.Colors[ImGuiCol_WindowBg].w = 1.0f;
         }
 
-        clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+        clearColorImVec4 = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
         io.DisplaySize.x = wf;
         io.DisplaySize.y = hf;
@@ -328,7 +332,7 @@ int App::Run(CliOptions &opts) {
     bool done = false;
     char pathBuffer[4096];
     uint32_t frame = 0;
-    auto clearColor = SkColorSetARGB(clear_color.w*255.0f,clear_color.x*255.0f,clear_color.y*255.0f,clear_color.z*255.0f);
+    auto clearColor = SkColorSetARGB(clearColorImVec4.w * 255.0f, clearColorImVec4.x * 255.0f, clearColorImVec4.y * 255.0f, clearColorImVec4.z * 255.0f);
     SkWebpEncoder::Options options;
     if(true) {
         options.fCompression = SkWebpEncoder::Compression::kLossless;
@@ -337,8 +341,7 @@ int App::Run(CliOptions &opts) {
         options.fCompression = SkWebpEncoder::Compression::kLossy;
         options.fQuality = 70.0f;
     }
-    auto stream = SkDynamicMemoryWStream();
-    auto buffer = malloc(10*1024*1024);
+    auto stream = SkFILEWStream(opts.videoRawFramesFile);
     while(!done) {
         ImGui::NewFrame();
 
@@ -352,17 +355,12 @@ int App::Run(CliOptions &opts) {
                 Paint(rasterSurface.get(),w,h); // will call ImGui::Render();
             }
             { ZoneScoped;
-                //snprintf(pathBuffer,sizeof(pathBuffer),"/tmp/video/out_%09u.webp",frame);
-                //SkFILEWStream stream(pathBuffer);
                 SkPixmap pixmap;
                 if(img->peekPixels(&pixmap)) {
-                    if (SkWebpEncoder::Encode(static_cast<SkWStream *>(&stream), pixmap, options)) {
-                        //fprintf(stderr,"successfully written %d Bytes to %s\n",(int)stream.bytesWritten(), pathBuffer);
+                    if (!SkWebpEncoder::Encode(static_cast<SkWStream *>(&stream), pixmap, options)) {
+                        fprintf(stderr,"unable to encode frame as image. Skipping.\n");
                     }
                 }
-                auto sz = stream.bytesWritten();
-                stream.copyToAndReset(buffer);
-                fwrite(buffer,sz,1,stdout);
             }
         } else {
             Paint(nullptr,w,h); // will call ImGui::Render();
