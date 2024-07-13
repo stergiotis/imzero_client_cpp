@@ -17,6 +17,12 @@ struct CliOptions {
     bool vectorCmd = true;
     const char *skiaBackendType = "gl";
     const char *backgroundColorRGBA = "000000ff";
+
+    /* video mode fields */
+    const char *videoRawFramesFile = nullptr;
+    uint32_t videoResolutionWidth = 0;
+    uint32_t videoResolutionHeight = 0;
+
     CliOptions() = default;
     ~CliOptions() = default;
 

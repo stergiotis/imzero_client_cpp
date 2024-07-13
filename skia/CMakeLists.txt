@@ -92,10 +92,8 @@ add_library(imguiTextedit OBJECT "${CMAKE_CURRENT_LIST_DIR}/./imcolortextedit/Te
 target_compile_options(imguiTextedit PUBLIC -Wno-unused-variable)
 
 
-add_library(skiaSdl OBJECT "${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/imgui_impl_opengl3.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/imgui_impl_sdl3.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/main.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/app.cpp"
+add_library(skiaVideo OBJECT "${CMAKE_CURRENT_LIST_DIR}/./skia/video/main.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./skia/video/app.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./skia/paragraph.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./skia/cliOptions.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./skia/setupUI.cpp"
@@ -103,8 +101,8 @@ add_library(skiaSdl OBJECT "${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/imgui_impl_ope
 "${CMAKE_CURRENT_LIST_DIR}/./skia/skiaTracyTracer.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/src/gpu/ganesh/gl/GrGLInterfaceAutogen.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/src/gpu/ganesh/gl/GrGLUtil.cpp")
-target_compile_options(skiaSdl PUBLIC -Wno-unused-parameter)
-target_compile_definitions(skiaSdl PUBLIC SK_DEBUG
+target_compile_options(skiaVideo PUBLIC -Wno-unused-parameter)
+target_compile_definitions(skiaVideo PUBLIC SK_DEBUG
 SK_GAMMA_APPLY_TO_A8
 SK_ALLOW_STATIC_GLOBAL_INITIALIZERS=1
 SK_TYPEFACE_FACTORY_FREETYPE
@@ -133,19 +131,17 @@ SK_SHAPER_HARFBUZZ_AVAILABLE
 SK_SHAPER_UNICODE_AVAILABLE
 SK_ENABLE_SVG
 SK_BUILD_FOR_UNIX)
-target_include_directories(skiaSdl PUBLIC "${CMAKE_CURRENT_LIST_DIR}/./skia"
+target_include_directories(skiaVideo PUBLIC "${CMAKE_CURRENT_LIST_DIR}/./skia"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui"
 "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_implot"
-"${CMAKE_CURRENT_LIST_DIR}/./src"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/sdl3/include")
-add_library(skiaSdl_imported OBJECT IMPORTED)
-set_property(TARGET skiaSdl_imported PROPERTY IMPORTED_OBJECTS "${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libskparagraph.a"
+"${CMAKE_CURRENT_LIST_DIR}/./src")
+add_library(skiaVideo_imported OBJECT IMPORTED)
+set_property(TARGET skiaVideo_imported PROPERTY IMPORTED_OBJECTS "${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libskparagraph.a"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libsvg.a"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libskia.a"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libskshaper.a"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libskunicode.a"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libwindow.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/sdl3/build/libSDL3.a"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libcompression_utils_portable.a"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libdng_sdk.a"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libexpat.a"
@@ -172,7 +168,7 @@ $<TARGET_OBJECTS:imguiKnobs>
 $<TARGET_OBJECTS:imguiCoolbar>
 $<TARGET_OBJECTS:imguiFlamegraph>
 $<TARGET_OBJECTS:imguiTextedit>
-$<TARGET_OBJECTS:skiaSdl>
-$<TARGET_OBJECTS:skiaSdl_imported>
+$<TARGET_OBJECTS:skiaVideo>
+$<TARGET_OBJECTS:skiaVideo_imported>
 $<TARGET_OBJECTS:tracyDisabled>)
 

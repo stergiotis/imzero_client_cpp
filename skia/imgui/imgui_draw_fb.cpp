@@ -255,6 +255,7 @@ void ImDrawList::addVectorCmdFB(VectorCmdFB::VectorCmdArg arg_type, flatbuffers:
             AddDrawCmd();
         }
     }
+    //fprintf(stderr,"%s: adding %s\n", _OwnerName, VectorCmdFB::EnumNameVectorCmdArg(arg_type));
     _FbCmds->push_back(VectorCmdFB::CreateSingleVectorCmdDto(*fbBuilder,arg_type,arg));
 }
 template<typename T,typename U, typename V>
@@ -305,7 +306,7 @@ void ImDrawList::serializeFB(const uint8_t *&out,size_t &size) { ZoneScoped;
     }
 
     auto dlFb = createVectorCmdFBDrawList(*this,false,*_FbCmds,*fbBuilder);
-    fbBuilder->Finish(dlFb,nullptr);
+    fbBuilder->FinishSizePrefixed(dlFb,nullptr);
     size = fbBuilder->GetSize();
     out = fbBuilder->GetBufferPointer();
 }

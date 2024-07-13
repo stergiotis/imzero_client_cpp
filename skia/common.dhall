@@ -17,7 +17,7 @@ let sourceTreeParts = [
 	, sourceTreePartsRepo.imguiTextedit
 	, sourceTreePartsRepo.binding
 	--, sourceTreePartsRepo.skia
-	, sourceTreePartsRepo.skiaSdl asan
+	, sourceTreePartsRepo.skiaVideo asan
 	, sourceTreePartsRepo.flatbuffers
 ] # (if debug then [ , sourceTreePartsRepo.tracyEnabled ] else [ ,sourceTreePartsRepo.tracyDisabled ] : List lib.sourceTreePart.Type )
 --let cxx = "${clangdir}/bin/clang++"

@@ -36,6 +36,20 @@ static float findFlagValueDefaultFloat(FILE *logChannel, uint64_t &markUsed, int
     }
     return f;
 }
+static int64_t findFlagValueDefaultInt(FILE *logChannel, uint64_t &markUsed, int argc, char **argv,const char *flag,const char *defaultValue) {
+    const char *v = findFlagValueDefault(logChannel, markUsed,argc,argv,flag,defaultValue);
+    char *end;
+    auto f = strtol(v, &end,0);
+    if(f == 0 && end == v) {
+        fprintf(stderr,"unable to parse argument for flag %s as integer", flag);
+        exit(1);
+    }
+    if(end[0] != '\0') {
+        fprintf(stderr,"unable to parse argument for flag %s as integer: trailing data found '%s'", flag, end);
+        exit(1);
+    }
+    return f;
+}
 static bool getBoolFlagValue(FILE *logChannel, uint64_t &markUsed, int argc, char **argv,const char *flag,bool defaultValue) {
     return strcmp(findFlagValueDefault(logChannel, markUsed, argc,argv,flag,defaultValue ? "on" : "off"),"on") == 0;
 }
@@ -61,6 +75,13 @@ void CliOptions::usage(const char *name, FILE *file) const {
     fprintf(file,"    -imguiNavGamepad [bool:%s]\n", imguiNavGamepad ? "on" : "off");
     fprintf(file,"    -imguiDocking [bool:%s]\n", imguiDocking ? "on" : "off");
     fprintf(file,"    -vectorCmd [bool:%s]   on: intercept ImGui DrawList draw commands and replay them on client (e.g. skia)\n", vectorCmd ? "on" : "off");
+
+    fprintf(file, "video mode flags:\n");
+    fprintf(file, "string flags:\n");
+    fprintf(file, "   -videoRawFramesFile [path:%s]\n", videoRawFramesFile);
+    fprintf(file, "integer flags:\n");
+    fprintf(file, "   -videoResolutionWidth [int:%u]\n", videoResolutionWidth);
+    fprintf(file, "   -videoResolutionHeight [int:%u]\n", videoResolutionHeight);
 }
 void CliOptions::parse(int argc,char **argv,FILE *logChannel) {
     if(argc > 1) {
@@ -96,6 +117,10 @@ void CliOptions::parse(int argc,char **argv,FILE *logChannel) {
     imguiNavGamepad = getBoolFlagValue(logChannel,u, argc, argv, "-imguiNavGamepad",imguiNavGamepad);
     imguiDocking = getBoolFlagValue(logChannel,u, argc, argv, "-imguiDocking",imguiDocking);
     vectorCmd = getBoolFlagValue(logChannel,u, argc, argv, "-vectorCmd",vectorCmd);
+
+    videoRawFramesFile = findFlagValueDefault(logChannel,u, argc, argv,"-videoRawFramesFile",videoRawFramesFile);
+    videoResolutionWidth = static_cast<uint32_t>(findFlagValueDefaultInt(logChannel, u, argc, argv, "-videoResolutionWidth", "1920"));
+    videoResolutionWidth = static_cast<uint32_t>(findFlagValueDefaultInt(logChannel, u, argc, argv, "-videoResolutionHeight", "1080"));
 
     if(std::popcount(u) != (argc-1)) {
         for(int i=1;i<argc;i++) {

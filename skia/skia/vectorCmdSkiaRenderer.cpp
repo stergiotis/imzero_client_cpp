@@ -173,7 +173,7 @@ void VectorCmdSkiaRenderer::setupWindowRectPaint(SkPaint &paint, VectorCmdFB::Dr
 }
 #endif
 void VectorCmdSkiaRenderer::drawSerializedVectorCmdsFB(const uint8_t *buf, SkCanvas &canvas) { ZoneScoped;
-        auto drawListFb = VectorCmdFB::GetDrawList(buf);
+        auto drawListFb = VectorCmdFB::GetSizePrefixedDrawList(buf);
         drawVectorCmdsFBDrawList(drawListFb,canvas,false);
 }
 
