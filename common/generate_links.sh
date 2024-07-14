@@ -14,6 +14,7 @@ link ../../contrib/imgui_knobs contrib/imgui_knobs
 link ../../contrib/imgui_toggle contrib/imgui_toggle
 link ../../contrib/tracy contrib/tracy
 link ../../contrib/sdl contrib/sdl3
+link ../../contrib/qoi contrib/qoi
 link ./contrib/imgui_toggle/imgui_toggle.cpp ./src/widgets/imgui_toggle/imgui_toggle.cpp 
 link ./contrib/imgui_toggle/imgui_toggle_palette.cpp ./src/widgets/imgui_toggle/imgui_toggle_palette.cpp 
 link ./contrib/imgui_toggle/imgui_toggle_presets.cpp ./src/widgets/imgui_toggle/imgui_toggle_presets.cpp 

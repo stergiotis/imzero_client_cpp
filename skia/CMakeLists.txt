@@ -134,7 +134,8 @@ SK_BUILD_FOR_UNIX)
 target_include_directories(skiaVideo PUBLIC "${CMAKE_CURRENT_LIST_DIR}/./skia"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui"
 "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_implot"
-"${CMAKE_CURRENT_LIST_DIR}/./src")
+"${CMAKE_CURRENT_LIST_DIR}/./src"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/qoi")
 add_library(skiaVideo_imported OBJECT IMPORTED)
 set_property(TARGET skiaVideo_imported PROPERTY IMPORTED_OBJECTS "${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libskparagraph.a"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libsvg.a"

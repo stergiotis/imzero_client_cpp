@@ -14,19 +14,7 @@
 #include "include/encode/SkWebpEncoder.h"
 #include "include/gpu/GrDirectContext.h"
 #include "include/gpu/gl/GrGLInterface.h"
-#if defined(__linux__)
-#include "include/gpu/gl/glx/GrGLMakeGLXInterface.h"
-#include <X11/Xlib.h>
-#include <GL/glx.h>
-#include <GL/gl.h>
-#endif
 
-#include "gpu/ganesh/gl/GrGLDirectContext.h"
-#include "gpu/ganesh/SkSurfaceGanesh.h"
-#include "gpu/ganesh/gl/GrGLBackendSurface.h"
-#include "src/gpu/ganesh/gl/GrGLDefines.h"
-#include "src/gpu/ganesh/gl/GrGLUtil.h"
-//#include "SkBitmap.h"
 
 #include "tracy/Tracy.hpp"
 
@@ -35,6 +23,22 @@
 #include "imgui_internal.h"
 #include "marshalling/receive.h"
 #include "marshalling/send.h"
+
+#define QOI_IMPLEMENTATION
+#define QOI_NO_STDIO
+#define QOI_FREE static_assert(false && "free should never be called")
+#define QOI_MALLOC(sz) qoi_malloc(sz)
+static void *qoi_malloc(size_t sz) {
+    static void *qoiBuffer = nullptr;
+    static size_t lastSz = 0;
+    if(qoiBuffer == nullptr) {
+        lastSz = sz;
+        qoiBuffer = malloc(sz);
+    }
+    assert(lastSz == sz && "assuming constant width, height and depth of qoi images");
+    return qoiBuffer;
+}
+#include "qoi.h"
 
 template <typename T>
 static inline void applyFlag(int &flag,T val,bool v) {
@@ -342,41 +346,72 @@ int App::Run(CliOptions &opts) {
         options.fQuality = 70.0f;
     }
     auto stream = SkFILEWStream(opts.videoRawFramesFile);
+    qoi_desc qd{
+            static_cast<unsigned int>(w),
+            static_cast<unsigned int>(h),
+            4,
+            QOI_SRGB
+    };
+    char pamHeader[4096];
+    snprintf(pamHeader, sizeof(pamHeader), "P7\nWIDTH %d\nHEIGHT %d\nDEPTH 4\nMAXVAL 255\nTUPLTYPE RGB_ALPHA\nENDHDR\n", w, h);
+    auto pamHeaderLen = strlen(pamHeader);
     while(!done) {
         ImGui::NewFrame();
 
         ImGui::ShowMetricsWindow();
 
         sk_sp<SkImage> img(rasterSurface->makeImageSnapshot(SkIRect::MakeWH(w,h)));
-        if(true) {
-            { ZoneScoped;
-                auto canvas = rasterSurface->getCanvas();
-                canvas->clear(clearColor);
-                Paint(rasterSurface.get(),w,h); // will call ImGui::Render();
-            }
-            { ZoneScoped;
-                SkPixmap pixmap;
-                if(img->peekPixels(&pixmap)) {
-                    if (!SkWebpEncoder::Encode(static_cast<SkWStream *>(&stream), pixmap, options)) {
-                        fprintf(stderr,"unable to encode frame as image. Skipping.\n");
+        { ZoneScoped;
+            auto canvas = rasterSurface->getCanvas();
+            canvas->clear(clearColor);
+            Paint(rasterSurface.get(),w,h); // will call ImGui::Render();
+        }
+        switch(1) {
+            case 0:
+                { ZoneScoped;
+                    SkPixmap pixmap;
+                    if(img->peekPixels(&pixmap)) {
+                        if (!SkWebpEncoder::Encode(static_cast<SkWStream *>(&stream), pixmap, options)) {
+                            fprintf(stderr,"unable to encode frame as image. Skipping.\n");
+                        }
                     }
                 }
-            }
-        } else {
-            Paint(nullptr,w,h); // will call ImGui::Render();
-
-            snprintf(pathBuffer,sizeof(pathBuffer),"/tmp/video/out_%09u.flatbuffers",frame);
-            SkFILEWStream stream(pathBuffer);
-
-            const ImDrawData* drawData = ImGui::GetDrawData();
-            fTotalVectorCmdSerializedSize = 0;
-            for (int i = 0; i < drawData->CmdListsCount; ++i) {
-                ImDrawList* drawList = drawData->CmdLists[i];
-                const uint8_t *buf;
-                size_t sz;
-                drawList->serializeFB(buf,sz);
-                stream.write(buf,sz);
-            }
+                break;
+            case 1:
+                { ZoneScoped;
+                    SkPixmap pixmap;
+                    if (img->peekPixels(&pixmap)) {
+                        int imgLen;
+                        auto const imgMem = qoi_encode(pixmap.addr(), &qd, &imgLen);
+                        stream.write(imgMem, static_cast<size_t>(imgLen));
+                        stream.flush();
+                    }
+                }
+                break;
+            case 2:
+                { ZoneScoped;
+                    SkPixmap pixmap;
+                    if (img->peekPixels(&pixmap)) {
+                        stream.write(pamHeader, pamHeaderLen);
+                        stream.write(pixmap.addr(),pixmap.computeByteSize());
+                        stream.flush();
+                    }
+                }
+                break;
+            case 3:
+                { ZoneScoped;
+                    const ImDrawData* drawData = ImGui::GetDrawData();
+                    fTotalVectorCmdSerializedSize = 0;
+                    for (int i = 0; i < drawData->CmdListsCount; ++i) {
+                        ImDrawList* drawList = drawData->CmdLists[i];
+                        const uint8_t *buf;
+                        size_t sz;
+                        drawList->serializeFB(buf,sz);
+                        stream.write(buf,sz);
+                    }
+                    stream.flush();
+                }
+                break;
         }
 
         {

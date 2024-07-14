@@ -578,6 +578,7 @@ let skiaVideo = \(asan : Bool) ->
 			, imgui.dir
 			, imguiImplot.dir
 			, render.dir
+			, "./contrib/qoi"
 			]
 		, global = [
 			, "${contribDir}"

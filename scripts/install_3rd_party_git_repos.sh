@@ -52,4 +52,5 @@ getContribRepo "https://github.com/google/flatbuffers.git" "flatbuffers" "master
 getContribRepo "https://github.com/google/skia" "skia" "chrome/m124" ""
 getContribRepo "https://github.com/wolfpld/tracy" "tracy" "master" "0d5bd53be393b590da9c7b29079d919d488412c1"
 getContribRepo "https://github.com/libsdl-org/SDL.git" "sdl" "main" "e049098733739664ffbeac6967568b2421a0cb2e"
+getContribRepo "https://github.com/phoboslab/qoi.git" "qoi" "master" "bf7b41c2ff3f24a2031193b62aa76d35e8842b5a"
 getMyRepo "https://github.com/stergiotis/boxer.git" "boxer" "main" ""

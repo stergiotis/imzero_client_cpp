@@ -65,7 +65,7 @@ pid=$!
        #-loglevel debug \
 ffmpeg -hide_banner \
        -re -fflags +genpts  \
-       -f image2pipe -i transferRawFrames \
+       -f image2pipe -vcodec qoi -i transferRawFrames \
        -flags +global_header -r 30000/1001 \
        -an \
        -vaapi_device /dev/dri/renderD128 \
