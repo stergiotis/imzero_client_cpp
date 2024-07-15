@@ -4,11 +4,23 @@ mkfifo transferRawFrames
 
 resW=1920
 resH=1080
+outputFormat="bmp_bgra8888"
+#outputFormat="jpeg"
+#outputFormat="png"
+#outputFormat="webp_lossy"
 
-./imgui_skia_exe -fffiInterpreter off -ttfFilePath ./SauceCodeProNerdFontPropo-Regular.ttf -backdropFilter off -videoRawFramesFile transferRawFrames -videoResolutionWidth $resW -videoResolutionHeight $resH &
+./imgui_skia_exe -fffiInterpreter off \
+	         -ttfFilePath ./SauceCodeProNerdFontPropo-Regular.ttf \
+		 -backdropFilter off \
+		 -videoRawFramesFile transferRawFrames \
+		 -videoResolutionWidth $resW \
+		 -videoResolutionHeight $resH \
+		 -videoRawOutputFormat $outputFormat &
 pid=$!
-cat transferRawFrames | tee out.raw | \
-    mpv --no-cache --untimed --no-demuxer-thread -
+#cat transferRawFrames | tee out.raw | \
+#    mpv --no-cache --untimed --no-demuxer-thread -
+
+mpv --no-cache --untimed --no-demuxer-thread transferRawFrames
 #ffplay -hide_banner \
 #       -threads 1 -filter_threads 1 \
 #       -probesize 32 -sync ext \

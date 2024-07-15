@@ -23,6 +23,8 @@ struct CliOptions {
     const char *videoRawFramesFile = nullptr;
     uint32_t videoResolutionWidth = 0;
     uint32_t videoResolutionHeight = 0;
+    const char *videoRawOutputFormat = nullptr;
+    uint32_t videoExitAfterNFrames = 0;
 
     CliOptions() = default;
     ~CliOptions() = default;

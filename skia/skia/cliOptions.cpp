@@ -79,9 +79,11 @@ void CliOptions::usage(const char *name, FILE *file) const {
     fprintf(file, "video mode flags:\n");
     fprintf(file, "string flags:\n");
     fprintf(file, "   -videoRawFramesFile [path:%s]\n", videoRawFramesFile);
+    fprintf(file, "   -videoRawOutputFormat [format:%s]\n", videoRawOutputFormat);
     fprintf(file, "integer flags:\n");
     fprintf(file, "   -videoResolutionWidth [int:%u]\n", videoResolutionWidth);
     fprintf(file, "   -videoResolutionHeight [int:%u]\n", videoResolutionHeight);
+    fprintf(file, "   -videoExitAfterNFrames [int:%u]\n", videoExitAfterNFrames);
 }
 void CliOptions::parse(int argc,char **argv,FILE *logChannel) {
     if(argc > 1) {
@@ -121,6 +123,8 @@ void CliOptions::parse(int argc,char **argv,FILE *logChannel) {
     videoRawFramesFile = findFlagValueDefault(logChannel,u, argc, argv,"-videoRawFramesFile",videoRawFramesFile);
     videoResolutionWidth = static_cast<uint32_t>(findFlagValueDefaultInt(logChannel, u, argc, argv, "-videoResolutionWidth", "1920"));
     videoResolutionHeight = static_cast<uint32_t>(findFlagValueDefaultInt(logChannel, u, argc, argv, "-videoResolutionHeight", "1080"));
+    videoExitAfterNFrames = static_cast<uint32_t>(findFlagValueDefaultInt(logChannel, u, argc, argv, "-videoExitAfterNFrames", "0"));
+    videoRawOutputFormat = findFlagValueDefault(logChannel, u, argc, argv, "-videoRawOutputFormat", "qoi");
 
     if(std::popcount(u) != (argc-1)) {
         for(int i=1;i<argc;i++) {

@@ -561,6 +561,7 @@ let skiaVideo = \(asan : Bool) ->
 	, sources = [
 		, "${dir}/video/main.cpp"
 		, "${dir}/video/app.cpp"
+		, "${dir}/video/bmpEncoder.cpp"
 
 		, "${dir}/paragraph.cpp"
 		, "${dir}/cliOptions.cpp"

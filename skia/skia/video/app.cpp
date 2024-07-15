@@ -11,10 +11,10 @@
 #include "include/svg/SkSVGCanvas.h"
 #include "include/core/SkColorSpace.h"
 #include "include/encode/SkPngEncoder.h"
+#include "include/encode/SkJpegEncoder.h"
 #include "include/encode/SkWebpEncoder.h"
 #include "include/gpu/GrDirectContext.h"
-#include "include/gpu/gl/GrGLInterface.h"
-
+#include "bmpEncoder.h"
 
 #include "tracy/Tracy.hpp"
 
@@ -205,6 +205,46 @@ static void build_ImFontAtlas(ImFontAtlas& atlas, SkPaint& fontPaint) {
     atlas.TexID = &fontPaint;
 }
 
+static rawFrameOutputFormat resolveRawFrameOutputFormat(const char *name) {
+    if(strcmp(name, "qoi") == 0) {
+        fprintf(stderr, "using output format %s\n", name);
+        return kRawFrameOutputFormat_Qoi;
+    }
+    if(strcmp(name, "webp_lossless") == 0) {
+        fprintf(stderr, "using output format %s\n", name);
+        return kRawFrameOutputFormat_WebP_Lossless;
+    }
+    if(strcmp(name, "webp_lossy") == 0) {
+        fprintf(stderr, "using output format %s\n", name);
+        return kRawFrameOutputFormat_WebP_Lossy;
+    }
+    if(strcmp(name, "jpeg") == 0) {
+        fprintf(stderr, "using output format %s\n", name);
+        return kRawFrameOutputFormat_Jpeg;
+    }
+    if(strcmp(name, "bmp_bgra8888") == 0) {
+        fprintf(stderr, "using output format %s\n", name);
+        return kRawFrameOutputFormat_Bmp_Bgra8888;
+    }
+    if(strcmp(name, "flatbuffers") == 0) {
+        fprintf(stderr, "using output format %s\n", name);
+        return kRawFrameOutputFormat_Flatbuffers;
+    }
+    if(strcmp(name, "pam") == 0) {
+        fprintf(stderr, "using output format %s\n", name);
+        return kRawFrameOutputFormat_PAM;
+    }
+    if(strcmp(name, "jpeg") == 0) {
+        fprintf(stderr, "using output format %s\n", name);
+        return kRawFrameOutputFormat_Jpeg;
+    }
+    if(strcmp(name, "png") == 0) {
+        fprintf(stderr, "using output format %s\n", name);
+        return kRawFrameOutputFormat_Png;
+    }
+    return kRawFrameOutputFormat_None;
+}
+
 int App::Run(CliOptions &opts) {
     sk_sp<SkFontMgr> fontMgr = nullptr;
     sk_sp<SkTypeface> typeface = nullptr;
@@ -317,7 +357,19 @@ int App::Run(CliOptions &opts) {
     }
     build_ImFontAtlas(*io.Fonts,fFontPaint);
 
-    const auto c = SkColorInfo(kRGBA_8888_SkColorType, kPremul_SkAlphaType, SkColorSpace::MakeSRGB());
+    auto const outputFormat = resolveRawFrameOutputFormat(opts.videoRawOutputFormat);
+
+    SkColorType colorType;
+    SkAlphaType alphaType = kPremul_SkAlphaType;
+    sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
+    switch(outputFormat) {
+        case kRawFrameOutputFormat_Bmp_Bgra8888:
+            colorType = kBGRA_8888_SkColorType;
+            break;
+        default:
+            colorType = kRGBA_8888_SkColorType;
+    }
+    const auto c = SkColorInfo(colorType, alphaType, colorSpace);
     const auto rasterSurface = SkSurfaces::Raster(SkImageInfo::Make(SkISize::Make(w,h), c));
 
     { // rescale font
@@ -335,17 +387,12 @@ int App::Run(CliOptions &opts) {
 
     bool done = false;
     char pathBuffer[4096];
-    uint32_t frame = 0;
     auto clearColor = SkColorSetARGB(clearColorImVec4.w * 255.0f, clearColorImVec4.x * 255.0f, clearColorImVec4.y * 255.0f, clearColorImVec4.z * 255.0f);
-    SkWebpEncoder::Options options;
-    if(true) {
-        options.fCompression = SkWebpEncoder::Compression::kLossless;
-        options.fQuality = 0.0f;
-    } else {
-        options.fCompression = SkWebpEncoder::Compression::kLossy;
-        options.fQuality = 70.0f;
-    }
-    auto stream = SkFILEWStream(opts.videoRawFramesFile);
+
+    SkWebpEncoder::Options webPOptions;
+    SkJpegEncoder::Options jpegOptions;
+    SkPngEncoder::Options pngOptions;
+    const auto bmpEncoder = BmpBGRA8888Encoder(w,h);
     qoi_desc qd{
             static_cast<unsigned int>(w),
             static_cast<unsigned int>(h),
@@ -355,29 +402,69 @@ int App::Run(CliOptions &opts) {
     char pamHeader[4096];
     snprintf(pamHeader, sizeof(pamHeader), "P7\nWIDTH %d\nHEIGHT %d\nDEPTH 4\nMAXVAL 255\nTUPLTYPE RGB_ALPHA\nENDHDR\n", w, h);
     auto pamHeaderLen = strlen(pamHeader);
-    while(!done) {
+    switch(outputFormat) {
+        case kRawFrameOutputFormat_WebP_Lossy:
+            webPOptions.fCompression = SkWebpEncoder::Compression::kLossy;
+            webPOptions.fQuality = 70.0f;
+            break;
+        case kRawFrameOutputFormat_WebP_Lossless:
+            webPOptions.fCompression = SkWebpEncoder::Compression::kLossless;
+            webPOptions.fQuality = 0.0f;
+            break;
+        case kRawFrameOutputFormat_None:
+            break;
+        case kRawFrameOutputFormat_Jpeg:
+            jpegOptions.fQuality = 80;
+            break;
+        case kRawFrameOutputFormat_Png:
+            pngOptions.fZLibLevel = 6;
+            break;
+        case kRawFrameOutputFormat_Qoi:
+            break;
+        case kRawFrameOutputFormat_Bmp_Bgra8888:
+            break;
+        case kRawFrameOutputFormat_PAM:
+            break;
+        case kRawFrameOutputFormat_Flatbuffers:
+            break;
+    }
+    auto stream = SkFILEWStream(opts.videoRawFramesFile);
+    uint64_t frame = 0;
+    uint64_t maxFrame = opts.videoExitAfterNFrames;
+
+    {
+        ImGui::NewFrame();
+        ImGui::ShowMetricsWindow();
+        auto canvas = rasterSurface->getCanvas();
+        canvas->clear(clearColor);
+        Paint(rasterSurface.get(),w,h); // will call ImGui::Render();
+    }
+    while(maxFrame == 0 || frame < maxFrame) {
         ImGui::NewFrame();
 
         ImGui::ShowMetricsWindow();
 
-        sk_sp<SkImage> img(rasterSurface->makeImageSnapshot(SkIRect::MakeWH(w,h)));
         { ZoneScoped;
             auto canvas = rasterSurface->getCanvas();
             canvas->clear(clearColor);
             Paint(rasterSurface.get(),w,h); // will call ImGui::Render();
         }
-        switch(1) {
-            case 0:
+
+        sk_sp<SkImage> img(rasterSurface->makeImageSnapshot(SkIRect::MakeWH(w,h)));
+
+        switch(outputFormat) {
+            case kRawFrameOutputFormat_WebP_Lossless: // fallthrough
+            case kRawFrameOutputFormat_WebP_Lossy:
                 { ZoneScoped;
                     SkPixmap pixmap;
                     if(img->peekPixels(&pixmap)) {
-                        if (!SkWebpEncoder::Encode(static_cast<SkWStream *>(&stream), pixmap, options)) {
+                        if (!SkWebpEncoder::Encode(static_cast<SkWStream *>(&stream), pixmap, webPOptions)) {
                             fprintf(stderr,"unable to encode frame as image. Skipping.\n");
                         }
                     }
                 }
                 break;
-            case 1:
+            case kRawFrameOutputFormat_Qoi:
                 { ZoneScoped;
                     SkPixmap pixmap;
                     if (img->peekPixels(&pixmap)) {
@@ -388,7 +475,7 @@ int App::Run(CliOptions &opts) {
                     }
                 }
                 break;
-            case 2:
+            case kRawFrameOutputFormat_PAM:
                 { ZoneScoped;
                     SkPixmap pixmap;
                     if (img->peekPixels(&pixmap)) {
@@ -398,8 +485,8 @@ int App::Run(CliOptions &opts) {
                     }
                 }
                 break;
-            case 3:
-                { ZoneScoped;
+            case kRawFrameOutputFormat_Flatbuffers:
+                if(false){ ZoneScoped;
                     const ImDrawData* drawData = ImGui::GetDrawData();
                     fTotalVectorCmdSerializedSize = 0;
                     for (int i = 0; i < drawData->CmdListsCount; ++i) {
@@ -410,6 +497,38 @@ int App::Run(CliOptions &opts) {
                         stream.write(buf,sz);
                     }
                     stream.flush();
+                }
+                break;
+            case kRawFrameOutputFormat_None:
+                break;
+            case kRawFrameOutputFormat_Jpeg:
+                { ZoneScoped;
+                    SkPixmap pixmap;
+                    if(img->peekPixels(&pixmap)) {
+                        if (!SkJpegEncoder::Encode(static_cast<SkWStream *>(&stream), pixmap, jpegOptions)) {
+                            fprintf(stderr,"unable to encode frame as image. Skipping.\n");
+                        }
+                    }
+                }
+                break;
+            case kRawFrameOutputFormat_Bmp_Bgra8888:
+                { ZoneScoped;
+                    SkPixmap pixmap;
+                    if(img->peekPixels(&pixmap)) {
+                        if (!bmpEncoder.encode(static_cast<SkWStream *>(&stream), pixmap.addr32())) {
+                            fprintf(stderr,"unable to encode frame as image. Skipping.\n");
+                        }
+                    }
+                }
+                break;
+            case kRawFrameOutputFormat_Png:
+                { ZoneScoped;
+                    SkPixmap pixmap;
+                    if(img->peekPixels(&pixmap)) {
+                        if (!SkPngEncoder::Encode(static_cast<SkWStream *>(&stream), pixmap, pngOptions)) {
+                            fprintf(stderr,"unable to encode frame as image. Skipping.\n");
+                        }
+                    }
                 }
                 break;
         }

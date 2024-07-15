@@ -94,6 +94,7 @@ target_compile_options(imguiTextedit PUBLIC -Wno-unused-variable)
 
 add_library(skiaVideo OBJECT "${CMAKE_CURRENT_LIST_DIR}/./skia/video/main.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./skia/video/app.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./skia/video/bmpEncoder.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./skia/paragraph.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./skia/cliOptions.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./skia/setupUI.cpp"
