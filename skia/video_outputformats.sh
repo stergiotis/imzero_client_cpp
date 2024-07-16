@@ -1,4 +1,8 @@
 #!/bin/bash
+here=$(dirname "$(readlink -f "$BASH_SOURCE")")
+cd "$here"
+
+mkdir -p "test"
 function run() {
 	./imgui_skia_exe -fffiInterpreter off \
 		         -ttfFilePath ./SauceCodeProNerdFontPropo-Regular.ttf \
@@ -15,5 +19,7 @@ run "jpeg" ".jpeg"
 run "webp_lossy" ".webp"
 run "webp_lossless" ".webp"
 run "flatbuffers" ".flatbuffers"
-run "pam" ".pam"
 run "png" ".png"
+run "svg" ".svg"
+run "svg_textaspath" ".svg"
+run "skp" ".svg"

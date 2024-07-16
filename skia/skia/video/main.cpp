@@ -46,5 +46,5 @@ int main(int argc, char** argv) {
     opts.parse(argc, argv, stderr);
 
     App app{};
-    return app.Run(opts);
+    return app.run(opts);
 }

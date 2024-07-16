@@ -48,7 +48,7 @@ static inline void applyFlag(int &flag,T val,bool v) {
         flag &= ~(val);
     }
 }
-void App::DrawImGuiVectorCmdsFB(SkCanvas &canvas) { ZoneScoped;
+void App::drawImGuiVectorCmdsFB(SkCanvas &canvas) { ZoneScoped;
     const ImDrawData* drawData = ImGui::GetDrawData();
     fTotalVectorCmdSerializedSize = 0;
     for (int i = 0; i < drawData->CmdListsCount; ++i) {
@@ -62,9 +62,11 @@ void App::DrawImGuiVectorCmdsFB(SkCanvas &canvas) { ZoneScoped;
     }
 }
 
-void App::Paint(SkSurface* surface, int width, int height) { ZoneScoped;
-    ImGui::useVectorCmd = fUseVectorCmd && surface != nullptr;
-    auto renderMode = fVectorCmdSkiaRenderer.getRenderMode();
+void App::paint(SkCanvas* canvas, int width, int height) { ZoneScoped;
+    ImGui::NewFrame();
+    ImGui::ShowMetricsWindow();
+
+    ImGui::useVectorCmd = fUseVectorCmd;
     resetReceiveStat();
     resetSendStat();
     if(fFffiInterpreter) { ZoneScopedN("render fffi commands");
@@ -73,7 +75,7 @@ void App::Paint(SkSurface* surface, int width, int height) { ZoneScoped;
         ImGui::ShowDemoWindow();
     }
 
-    SaveFormatE saveFormat = SaveFormatE_None;
+    SaveFormatE saveFormat = SaveFormatE_Disabled;
     if(ImGui::Begin("ImZeroSkia Settings")) { ZoneScoped;
         fImZeroSkiaSetupUi.render(saveFormat, fVectorCmdSkiaRenderer, fUseVectorCmd,
                                   fTotalVectorCmdSerializedSize, totalSentBytes+totalReceivedBytes,
@@ -82,111 +84,14 @@ void App::Paint(SkSurface* surface, int width, int height) { ZoneScoped;
         );
     }
     ImGui::End();
-
     ImGui::Render();
 
-    if(surface == nullptr) {
-        return;
-    }
+    if(canvas != nullptr) { ZoneScoped;
+        canvas->clear(fBackgroundColor);
 
-    if(saveFormat != SaveFormatE_None) {
-        switch(saveFormat) {
-            case SaveFormatE_SKP: { ZoneScoped;
-                constexpr auto path = "/tmp/skiaBackend.skp";
-
-                SkPictureRecorder skiaRecorder;
-                auto skiaCanvas = skiaRecorder.beginRecording(SkIntToScalar(width),
-                                                              SkIntToScalar(height));
-
-                skiaCanvas->clear(fBackgroundColor);
-                skiaCanvas->save();
-                DrawImGuiVectorCmdsFB(*skiaCanvas);
-                skiaCanvas->restore();
-
-                sk_sp<SkPicture> picture = skiaRecorder.finishRecordingAsPicture();
-                SkFILEWStream skpStream(path);
-                picture->serialize(&skpStream);
-                fSkpBytesWritten = skpStream.bytesWritten();
-                break;
-            }
-            case SaveFormatE_SVG: // fallthrough
-            case SaveFormatE_SVGNoFont: { ZoneScoped;
-                SkRect bounds = SkRect::MakeIWH(width, height);
-                fVectorCmdSkiaRenderer.changeRenderMode(renderMode | RenderModeE_SVG);
-
-                switch(saveFormat) {
-                    case SaveFormatE_SVG:
-                    {
-                        constexpr auto path1 = "/tmp/skiaBackend.svg";
-                        constexpr int flags1 = SkSVGCanvas::kNoPrettyXML_Flag;
-                        SkFILEWStream svgStream(path1);
-                        { // svg canvas may buffer commands, extra scope to ensure flush by RAII
-                            auto skiaCanvas = SkSVGCanvas::Make(bounds, &svgStream, flags1);
-                            DrawImGuiVectorCmdsFB(*skiaCanvas);
-                        }
-                        fSvgBytesWritten = svgStream.bytesWritten();
-                    }
-                        break;
-                    case SaveFormatE_SVGNoFont:
-                    {
-                        constexpr auto path = "/tmp/skiaBackend.nofont.svg";
-                        constexpr int flags = SkSVGCanvas::kConvertTextToPaths_Flag | SkSVGCanvas::kNoPrettyXML_Flag;
-                        SkFILEWStream svgStream(path);
-                        { // svg canvas may buffer commands, extra scope to ensure flush by RAII
-                            auto skiaCanvas = SkSVGCanvas::Make(bounds, &svgStream, flags);
-                            DrawImGuiVectorCmdsFB(*skiaCanvas);
-                        }
-                        fSvgBytesWritten = svgStream.bytesWritten();
-                    }
-                        break;
-                    default:
-                        ;
-                }
-
-                fVectorCmdSkiaRenderer.changeRenderMode(renderMode);
-                break;
-            }
-            case SaveFormatE_PNG: { ZoneScoped;
-                constexpr auto path = "/tmp/skiaBackend.png";
-                const auto s = SkISize::Make(width, height);
-                const auto c = SkColorInfo(kRGBA_8888_SkColorType, kPremul_SkAlphaType, SkColorSpace::MakeSRGB());
-                sk_sp<SkSurface> rasterSurface = SkSurfaces::Raster(SkImageInfo::Make(s, c));
-                SkCanvas *rasterCanvas = rasterSurface->getCanvas();
-                DrawImGuiVectorCmdsFB(*rasterCanvas);
-                sk_sp<SkImage> img(rasterSurface->makeImageSnapshot());
-                SkFILEWStream pngStream(path);
-                SkPixmap pixmap;
-                fPngBytesWritten = 0;
-                if(img->peekPixels(&pixmap)) {
-                    if (SkPngEncoder::Encode(static_cast<SkWStream *>(&pngStream), pixmap, SkPngEncoder::Options{})) {
-                        fPngBytesWritten = pngStream.bytesWritten();
-                    }
-                }
-                break;
-            }
-            case SaveFormatE_VECTORCMD: { ZoneScoped;
-                constexpr auto path = "/tmp/skiaBackend.flatbuffers";
-                SkFILEWStream stream(path);
-
-                const ImDrawData* drawData = ImGui::GetDrawData();
-                fTotalVectorCmdSerializedSize = 0;
-                for (int i = 0; i < drawData->CmdListsCount; ++i) {
-                    ImDrawList* drawList = drawData->CmdLists[i];
-                    const uint8_t *buf;
-                    size_t sz;
-                    drawList->serializeFB(buf,sz);
-                    stream.write(buf,sz);
-                }
-                break;
-            }
-        }
-    } else { ZoneScoped;
-        auto skiaCanvas = surface->getCanvas();
-        skiaCanvas->clear(fBackgroundColor);
-
-        skiaCanvas->save();
-        DrawImGuiVectorCmdsFB(*skiaCanvas);
-        skiaCanvas->restore();
+        canvas->save();
+        drawImGuiVectorCmdsFB(*canvas);
+        canvas->restore();
     }
 
     FrameMark;
@@ -230,10 +135,6 @@ static rawFrameOutputFormat resolveRawFrameOutputFormat(const char *name) {
         fprintf(stderr, "using output format %s\n", name);
         return kRawFrameOutputFormat_Flatbuffers;
     }
-    if(strcmp(name, "pam") == 0) {
-        fprintf(stderr, "using output format %s\n", name);
-        return kRawFrameOutputFormat_PAM;
-    }
     if(strcmp(name, "jpeg") == 0) {
         fprintf(stderr, "using output format %s\n", name);
         return kRawFrameOutputFormat_Jpeg;
@@ -242,10 +143,22 @@ static rawFrameOutputFormat resolveRawFrameOutputFormat(const char *name) {
         fprintf(stderr, "using output format %s\n", name);
         return kRawFrameOutputFormat_Png;
     }
+    if(strcmp(name, "skp") == 0) {
+        fprintf(stderr, "using output format %s\n", name);
+        return kRawFrameOutputFormat_Skp;
+    }
+    if(strcmp(name, "svg") == 0) {
+        fprintf(stderr, "using output format %s\n", name);
+        return kRawFrameOutputFormat_Svg;
+    }
+    if(strcmp(name, "svg_textaspath") == 0) {
+        fprintf(stderr, "using output format %s\n", name);
+        return kRawFrameOutputFormat_Svg_TextAsPath;
+    }
     return kRawFrameOutputFormat_None;
 }
 
-int App::Run(CliOptions &opts) {
+int App::run(CliOptions &opts) {
     sk_sp<SkFontMgr> fontMgr = nullptr;
     sk_sp<SkTypeface> typeface = nullptr;
     sk_sp<SkData> ttfData = nullptr;
@@ -312,9 +225,9 @@ int App::Run(CliOptions &opts) {
         fVectorCmdSkiaRenderer.changeRenderMode(mode);
     }
 
-    const int w = opts.videoResolutionWidth;
+    const int w = static_cast<int>(opts.videoResolutionWidth);
+    const int h = static_cast<int>(opts.videoResolutionHeight);
     const auto wf = static_cast<float>(w);
-    const int h = opts.videoResolutionHeight;
     const auto hf = static_cast<float>(h);
     if(w == 0 || h == 0) {
         fprintf(stderr, "invalid video resolution: %ux%u\n", w,h);
@@ -357,20 +270,7 @@ int App::Run(CliOptions &opts) {
     }
     build_ImFontAtlas(*io.Fonts,fFontPaint);
 
-    auto const outputFormat = resolveRawFrameOutputFormat(opts.videoRawOutputFormat);
-
-    SkColorType colorType;
-    SkAlphaType alphaType = kPremul_SkAlphaType;
-    sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
-    switch(outputFormat) {
-        case kRawFrameOutputFormat_Bmp_Bgra8888:
-            colorType = kBGRA_8888_SkColorType;
-            break;
-        default:
-            colorType = kRGBA_8888_SkColorType;
-    }
-    const auto c = SkColorInfo(colorType, alphaType, colorSpace);
-    const auto rasterSurface = SkSurfaces::Raster(SkImageInfo::Make(SkISize::Make(w,h), c));
+    fOutputFormat = resolveRawFrameOutputFormat(opts.videoRawOutputFormat);
 
     { // rescale font
         auto f = ImGui::GetIO().FontDefault;
@@ -383,166 +283,38 @@ int App::Run(CliOptions &opts) {
             build_ImFontAtlas(atlas, fFontPaint);
         }
     }
-    double previousTime = 0.0;
+    fBackgroundColor = SkColorSetARGB(clearColorImVec4.w * 255.0f, clearColorImVec4.x * 255.0f, clearColorImVec4.y * 255.0f, clearColorImVec4.z * 255.0f);
 
-    bool done = false;
-    char pathBuffer[4096];
-    auto clearColor = SkColorSetARGB(clearColorImVec4.w * 255.0f, clearColorImVec4.x * 255.0f, clearColorImVec4.y * 255.0f, clearColorImVec4.z * 255.0f);
-
-    SkWebpEncoder::Options webPOptions;
-    SkJpegEncoder::Options jpegOptions;
-    SkPngEncoder::Options pngOptions;
-    const auto bmpEncoder = BmpBGRA8888Encoder(w,h);
-    qoi_desc qd{
-            static_cast<unsigned int>(w),
-            static_cast<unsigned int>(h),
-            4,
-            QOI_SRGB
-    };
-    char pamHeader[4096];
-    snprintf(pamHeader, sizeof(pamHeader), "P7\nWIDTH %d\nHEIGHT %d\nDEPTH 4\nMAXVAL 255\nTUPLTYPE RGB_ALPHA\nENDHDR\n", w, h);
-    auto pamHeaderLen = strlen(pamHeader);
-    switch(outputFormat) {
-        case kRawFrameOutputFormat_WebP_Lossy:
-            webPOptions.fCompression = SkWebpEncoder::Compression::kLossy;
-            webPOptions.fQuality = 70.0f;
-            break;
-        case kRawFrameOutputFormat_WebP_Lossless:
-            webPOptions.fCompression = SkWebpEncoder::Compression::kLossless;
-            webPOptions.fQuality = 0.0f;
-            break;
+    switch(fOutputFormat) {
         case kRawFrameOutputFormat_None:
+            loopEmpty(opts);
+            break;
+        case kRawFrameOutputFormat_WebP_Lossless: // fallthrough
+        case kRawFrameOutputFormat_WebP_Lossy:
+            loopWebp(opts);
             break;
         case kRawFrameOutputFormat_Jpeg:
-            jpegOptions.fQuality = 80;
+            loopJpeg(opts);
             break;
         case kRawFrameOutputFormat_Png:
-            pngOptions.fZLibLevel = 6;
+            loopPng(opts);
             break;
         case kRawFrameOutputFormat_Qoi:
+            loopQoi(opts);
             break;
         case kRawFrameOutputFormat_Bmp_Bgra8888:
-            break;
-        case kRawFrameOutputFormat_PAM:
+            loopBmp(opts);
             break;
         case kRawFrameOutputFormat_Flatbuffers:
+            loopFlatbuffers(opts);
             break;
-    }
-    auto stream = SkFILEWStream(opts.videoRawFramesFile);
-    uint64_t frame = 0;
-    uint64_t maxFrame = opts.videoExitAfterNFrames;
-
-    {
-        ImGui::NewFrame();
-        ImGui::ShowMetricsWindow();
-        auto canvas = rasterSurface->getCanvas();
-        canvas->clear(clearColor);
-        Paint(rasterSurface.get(),w,h); // will call ImGui::Render();
-    }
-    while(maxFrame == 0 || frame < maxFrame) {
-        ImGui::NewFrame();
-
-        ImGui::ShowMetricsWindow();
-
-        { ZoneScoped;
-            auto canvas = rasterSurface->getCanvas();
-            canvas->clear(clearColor);
-            Paint(rasterSurface.get(),w,h); // will call ImGui::Render();
-        }
-
-        sk_sp<SkImage> img(rasterSurface->makeImageSnapshot(SkIRect::MakeWH(w,h)));
-
-        switch(outputFormat) {
-            case kRawFrameOutputFormat_WebP_Lossless: // fallthrough
-            case kRawFrameOutputFormat_WebP_Lossy:
-                { ZoneScoped;
-                    SkPixmap pixmap;
-                    if(img->peekPixels(&pixmap)) {
-                        if (!SkWebpEncoder::Encode(static_cast<SkWStream *>(&stream), pixmap, webPOptions)) {
-                            fprintf(stderr,"unable to encode frame as image. Skipping.\n");
-                        }
-                    }
-                }
-                break;
-            case kRawFrameOutputFormat_Qoi:
-                { ZoneScoped;
-                    SkPixmap pixmap;
-                    if (img->peekPixels(&pixmap)) {
-                        int imgLen;
-                        auto const imgMem = qoi_encode(pixmap.addr(), &qd, &imgLen);
-                        stream.write(imgMem, static_cast<size_t>(imgLen));
-                        stream.flush();
-                    }
-                }
-                break;
-            case kRawFrameOutputFormat_PAM:
-                { ZoneScoped;
-                    SkPixmap pixmap;
-                    if (img->peekPixels(&pixmap)) {
-                        stream.write(pamHeader, pamHeaderLen);
-                        stream.write(pixmap.addr(),pixmap.computeByteSize());
-                        stream.flush();
-                    }
-                }
-                break;
-            case kRawFrameOutputFormat_Flatbuffers:
-                if(false){ ZoneScoped;
-                    const ImDrawData* drawData = ImGui::GetDrawData();
-                    fTotalVectorCmdSerializedSize = 0;
-                    for (int i = 0; i < drawData->CmdListsCount; ++i) {
-                        ImDrawList* drawList = drawData->CmdLists[i];
-                        const uint8_t *buf;
-                        size_t sz;
-                        drawList->serializeFB(buf,sz);
-                        stream.write(buf,sz);
-                    }
-                    stream.flush();
-                }
-                break;
-            case kRawFrameOutputFormat_None:
-                break;
-            case kRawFrameOutputFormat_Jpeg:
-                { ZoneScoped;
-                    SkPixmap pixmap;
-                    if(img->peekPixels(&pixmap)) {
-                        if (!SkJpegEncoder::Encode(static_cast<SkWStream *>(&stream), pixmap, jpegOptions)) {
-                            fprintf(stderr,"unable to encode frame as image. Skipping.\n");
-                        }
-                    }
-                }
-                break;
-            case kRawFrameOutputFormat_Bmp_Bgra8888:
-                { ZoneScoped;
-                    SkPixmap pixmap;
-                    if(img->peekPixels(&pixmap)) {
-                        if (!bmpEncoder.encode(static_cast<SkWStream *>(&stream), pixmap.addr32())) {
-                            fprintf(stderr,"unable to encode frame as image. Skipping.\n");
-                        }
-                    }
-                }
-                break;
-            case kRawFrameOutputFormat_Png:
-                { ZoneScoped;
-                    SkPixmap pixmap;
-                    if(img->peekPixels(&pixmap)) {
-                        if (!SkPngEncoder::Encode(static_cast<SkWStream *>(&stream), pixmap, pngOptions)) {
-                            fprintf(stderr,"unable to encode frame as image. Skipping.\n");
-                        }
-                    }
-                }
-                break;
-        }
-
-        {
-            ImGuiIO& io = ImGui::GetIO();
-            double currentTime = SkTime::GetSecs();
-            io.DeltaTime = static_cast<float>(currentTime - previousTime);
-            previousTime = currentTime;
-            frame++;
-
-            const auto fps = io.Framerate;
-            //fprintf(stderr,"Application average %.3f ms/frame (%.1f FPS) delta=%.3f ms\n", 1000.0f / fps, fps, io.DeltaTime*1.0e3);
-        }
+        case kRawFrameOutputFormat_Svg: // fallthrough
+        case kRawFrameOutputFormat_Svg_TextAsPath:
+            loopSvg(opts);
+            break;
+        case kRawFrameOutputFormat_Skp:
+            loopSkp(opts);
+            break;
     }
 
     if(opts.fffiInterpreter) {
@@ -551,6 +323,16 @@ int App::Run(CliOptions &opts) {
     ImGui::DestroyContext();
 
     return 0;
+}
+void App::postPaint() {
+    ImGuiIO& io = ImGui::GetIO();
+    double currentTime = SkTime::GetSecs();
+    io.DeltaTime = static_cast<float>(currentTime - fPreviousTime);
+    fPreviousTime = currentTime;
+    fFrame++;
+
+    //const auto fps = io.Framerate;
+    //fprintf(stderr,"Application average %.3f ms/frame (%.1f FPS) delta=%.3f ms\n", 1000.0f / fps, fps, io.DeltaTime*1.0e3);
 }
 
 App::App() {
@@ -561,4 +343,287 @@ App::App() {
     fBackgroundColor = SK_ColorRED;
     fFffiInterpreter = false;
     fUseVectorCmd = false;
+    fFrame = 0;
+    fPreviousTime = 0.0;
+}
+
+void App::loopEmpty(const CliOptions &opts) {
+    const int w = static_cast<int>(opts.videoResolutionWidth);
+    const int h = static_cast<int>(opts.videoResolutionHeight);
+    uint64_t maxFrame = opts.videoExitAfterNFrames;
+
+    while(maxFrame == 0 || fFrame < maxFrame) {
+        paint(nullptr,w,h);
+        postPaint();
+    }
+}
+
+void App::loopWebp(const CliOptions &opts) {
+    const int w = static_cast<int>(opts.videoResolutionWidth);
+    const int h = static_cast<int>(opts.videoResolutionHeight);
+    SkWebpEncoder::Options webPOptions;
+
+    SkColorType colorType = kRGBA_8888_SkColorType;
+    SkAlphaType alphaType = kPremul_SkAlphaType;
+    sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
+    const auto c = SkColorInfo(colorType, alphaType, colorSpace);
+    const auto rasterSurface = SkSurfaces::Raster(SkImageInfo::Make(SkISize::Make(w,h), c));
+    auto canvas = rasterSurface->getCanvas();
+    auto stream = SkFILEWStream(opts.videoRawFramesFile);
+
+    switch(fOutputFormat) {
+        case kRawFrameOutputFormat_WebP_Lossy:
+            webPOptions.fCompression = SkWebpEncoder::Compression::kLossy;
+            webPOptions.fQuality = 70.0f;
+            break;
+        case kRawFrameOutputFormat_WebP_Lossless:
+            webPOptions.fCompression = SkWebpEncoder::Compression::kLossless;
+            webPOptions.fQuality = 0.0f;
+            break;
+    }
+    uint64_t maxFrame = opts.videoExitAfterNFrames;
+
+    paint(canvas,w,h);
+    postPaint();
+    fFrame = 0;
+    while(maxFrame == 0 || fFrame < maxFrame) {
+        paint(canvas,w,h);
+
+        { ZoneScoped;
+            SkPixmap pixmap;
+            sk_sp<SkImage> img(rasterSurface->makeImageSnapshot(SkIRect::MakeWH(w,h)));
+            if(img->peekPixels(&pixmap)) {
+                if (!SkWebpEncoder::Encode(static_cast<SkWStream *>(&stream), pixmap, webPOptions)) {
+                    fprintf(stderr,"unable to encode frame as image. Skipping.\n");
+                }
+            }
+        }
+        postPaint();
+    }
+}
+
+void App::loopJpeg(const CliOptions &opts) {
+    const int w = static_cast<int>(opts.videoResolutionWidth);
+    const int h = static_cast<int>(opts.videoResolutionHeight);
+    SkJpegEncoder::Options jpegOptions;
+
+    SkColorType colorType = kRGBA_8888_SkColorType;
+    SkAlphaType alphaType = kPremul_SkAlphaType;
+    sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
+    const auto c = SkColorInfo(colorType, alphaType, colorSpace);
+    const auto rasterSurface = SkSurfaces::Raster(SkImageInfo::Make(SkISize::Make(w,h), c));
+    auto canvas = rasterSurface->getCanvas();
+    auto stream = SkFILEWStream(opts.videoRawFramesFile);
+
+    jpegOptions.fQuality = 80;
+    uint64_t maxFrame = opts.videoExitAfterNFrames;
+
+    paint(canvas,w,h);
+    postPaint();
+    fFrame = 0;
+    while(maxFrame == 0 || fFrame < maxFrame) {
+        paint(canvas,w,h);
+
+        { ZoneScoped;
+            SkPixmap pixmap;
+            sk_sp<SkImage> img(rasterSurface->makeImageSnapshot(SkIRect::MakeWH(w,h)));
+            if(img->peekPixels(&pixmap)) {
+                if (!SkJpegEncoder::Encode(static_cast<SkWStream *>(&stream), pixmap, jpegOptions)) {
+                    fprintf(stderr,"unable to encode frame as image. Skipping.\n");
+                }
+            }
+        }
+        postPaint();
+    }
+}
+
+void App::loopPng(const CliOptions &opts) {
+    const int w = static_cast<int>(opts.videoResolutionWidth);
+    const int h = static_cast<int>(opts.videoResolutionHeight);
+    SkPngEncoder::Options pngOptions;
+
+    SkColorType colorType = kRGBA_8888_SkColorType;
+    SkAlphaType alphaType = kPremul_SkAlphaType;
+    sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
+    const auto c = SkColorInfo(colorType, alphaType, colorSpace);
+    const auto rasterSurface = SkSurfaces::Raster(SkImageInfo::Make(SkISize::Make(w,h), c));
+    auto canvas = rasterSurface->getCanvas();
+    auto stream = SkFILEWStream(opts.videoRawFramesFile);
+
+    pngOptions.fZLibLevel = 6;
+    uint64_t maxFrame = opts.videoExitAfterNFrames;
+
+    paint(canvas,w,h);
+    postPaint();
+    fFrame = 0;
+    while(maxFrame == 0 || fFrame < maxFrame) {
+        paint(canvas,w,h);
+
+        { ZoneScoped;
+            SkPixmap pixmap;
+            sk_sp<SkImage> img(rasterSurface->makeImageSnapshot(SkIRect::MakeWH(w,h)));
+            if(img->peekPixels(&pixmap)) {
+                if (!SkPngEncoder::Encode(static_cast<SkWStream *>(&stream), pixmap, pngOptions)) {
+                    fprintf(stderr,"unable to encode frame as image. Skipping.\n");
+                }
+            }
+        }
+        postPaint();
+    }
+}
+
+void App::loopQoi(const CliOptions &opts) {
+    const int w = static_cast<int>(opts.videoResolutionWidth);
+    const int h = static_cast<int>(opts.videoResolutionHeight);
+    qoi_desc qd{
+            static_cast<unsigned int>(w),
+            static_cast<unsigned int>(h),
+            4,
+            QOI_SRGB
+    };
+
+    SkColorType colorType = kRGBA_8888_SkColorType;
+    SkAlphaType alphaType = kPremul_SkAlphaType;
+    sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
+    const auto c = SkColorInfo(colorType, alphaType, colorSpace);
+    const auto rasterSurface = SkSurfaces::Raster(SkImageInfo::Make(SkISize::Make(w,h), c));
+    auto canvas = rasterSurface->getCanvas();
+    auto stream = SkFILEWStream(opts.videoRawFramesFile);
+    uint64_t maxFrame = opts.videoExitAfterNFrames;
+
+    paint(canvas,w,h);
+    postPaint();
+    fFrame = 0;
+    while(maxFrame == 0 || fFrame < maxFrame) {
+        paint(canvas,w,h);
+
+        { ZoneScoped;
+            SkPixmap pixmap;
+            sk_sp<SkImage> img(rasterSurface->makeImageSnapshot(SkIRect::MakeWH(w,h)));
+            if (img->peekPixels(&pixmap)) {
+                int imgLen;
+                auto const imgMem = qoi_encode(pixmap.addr(), &qd, &imgLen);
+                stream.write(imgMem, static_cast<size_t>(imgLen));
+                stream.flush();
+            }
+        }
+        postPaint();
+    }
+}
+
+void App::loopBmp(const CliOptions &opts) {
+    const int w = static_cast<int>(opts.videoResolutionWidth);
+    const int h = static_cast<int>(opts.videoResolutionHeight);
+    const auto bmpEncoder = BmpBGRA8888Encoder(w,h);
+
+    SkColorType colorType = kBGRA_8888_SkColorType;
+    SkAlphaType alphaType = kPremul_SkAlphaType;
+    sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
+    const auto c = SkColorInfo(colorType, alphaType, colorSpace);
+    const auto rasterSurface = SkSurfaces::Raster(SkImageInfo::Make(SkISize::Make(w,h), c));
+    auto canvas = rasterSurface->getCanvas();
+    auto stream = SkFILEWStream(opts.videoRawFramesFile);
+
+    uint64_t maxFrame = opts.videoExitAfterNFrames;
+
+    paint(canvas,w,h);
+    postPaint();
+    fFrame = 0;
+    while(maxFrame == 0 || fFrame < maxFrame) {
+        paint(canvas,w,h);
+
+        { ZoneScoped;
+            SkPixmap pixmap;
+            sk_sp<SkImage> img(rasterSurface->makeImageSnapshot(SkIRect::MakeWH(w,h)));
+            if(img->peekPixels(&pixmap)) {
+                if (!bmpEncoder.encode(static_cast<SkWStream *>(&stream), pixmap.addr32())) {
+                    fprintf(stderr,"unable to encode frame as image. Skipping.\n");
+                }
+            }
+        }
+        postPaint();
+    }
+}
+
+void App::loopFlatbuffers(const CliOptions &opts) {
+    const int w = static_cast<int>(opts.videoResolutionWidth);
+    const int h = static_cast<int>(opts.videoResolutionHeight);
+    auto stream = SkFILEWStream(opts.videoRawFramesFile);
+    uint64_t maxFrame = opts.videoExitAfterNFrames;
+    fFrame = 0;
+    while(maxFrame == 0 || fFrame < maxFrame) {
+        paint(nullptr,w,h);
+        { ZoneScoped;
+            const ImDrawData* drawData = ImGui::GetDrawData();
+            fTotalVectorCmdSerializedSize = 0;
+            for (int i = 0; i < drawData->CmdListsCount; ++i) {
+                ImDrawList* drawList = drawData->CmdLists[i];
+                const uint8_t *buf;
+                size_t sz;
+                drawList->serializeFB(buf,sz);
+                stream.write(buf,sz);
+                fprintf(stderr,"%s,sz=%d\n",drawList->_OwnerName, (int)sz);
+            }
+            stream.flush();
+        }
+        postPaint();
+    }
+}
+
+void App::loopSvg(const CliOptions &opts) {
+    const int w = static_cast<int>(opts.videoResolutionWidth);
+    const int h = static_cast<int>(opts.videoResolutionHeight);
+    int svgCanvasFlags = 0;
+
+    auto stream = SkFILEWStream(opts.videoRawFramesFile);
+    SkCanvas *canvas = nullptr;
+
+    switch(fOutputFormat) {
+        case kRawFrameOutputFormat_Svg:
+            svgCanvasFlags = SkSVGCanvas::kNoPrettyXML_Flag | SkSVGCanvas::kRelativePathEncoding_Flag;
+            fVectorCmdSkiaRenderer.changeRenderMode(fVectorCmdSkiaRenderer.getRenderMode() | RenderModeE_SVG);
+            canvas = SkSVGCanvas::Make(SkRect::MakeIWH(w,h), &stream, svgCanvasFlags).release();
+            break;
+        case kRawFrameOutputFormat_Svg_TextAsPath:
+            svgCanvasFlags = SkSVGCanvas::kNoPrettyXML_Flag | SkSVGCanvas::kRelativePathEncoding_Flag | SkSVGCanvas::kConvertTextToPaths_Flag;
+            fVectorCmdSkiaRenderer.changeRenderMode(fVectorCmdSkiaRenderer.getRenderMode() | RenderModeE_SVG);
+            canvas = SkSVGCanvas::Make(SkRect::MakeIWH(w,h), &stream, svgCanvasFlags).release();
+            break;
+    }
+    uint64_t maxFrame = opts.videoExitAfterNFrames;
+
+    paint(canvas,w,h);
+    postPaint();
+    fFrame = 0;
+    while(maxFrame == 0 || fFrame < maxFrame) {
+        paint(canvas,w,h);
+        postPaint();
+    }
+
+    // delete SkSvgCanvas to flush commands (no necessary for other canvas implementations)
+    delete canvas;
+}
+
+void App::loopSkp(const CliOptions &opts) {
+    const int w = static_cast<int>(opts.videoResolutionWidth);
+    const int h = static_cast<int>(opts.videoResolutionHeight);
+
+    SkPictureRecorder skiaRecorder;
+    auto stream = SkFILEWStream(opts.videoRawFramesFile);
+
+    auto canvas = skiaRecorder.beginRecording(SkIntToScalar(w), SkIntToScalar(h));
+    uint64_t maxFrame = opts.videoExitAfterNFrames;
+
+    paint(canvas,w,h);
+    postPaint();
+    fFrame = 0;
+    while(maxFrame == 0 || fFrame < maxFrame) {
+        paint(canvas,w,h);
+
+        { ZoneScoped;
+            sk_sp<SkPicture> picture = skiaRecorder.finishRecordingAsPicture();
+            picture->serialize(&stream);
+        }
+        postPaint();
+    }
 }

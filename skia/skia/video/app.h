@@ -14,19 +14,31 @@ enum rawFrameOutputFormat {
     kRawFrameOutputFormat_Png = 4,
     kRawFrameOutputFormat_Qoi = 5,
     kRawFrameOutputFormat_Bmp_Bgra8888 = 6,
-    kRawFrameOutputFormat_PAM = 7,
-    kRawFrameOutputFormat_Flatbuffers = 8,
+    kRawFrameOutputFormat_Flatbuffers = 7,
+    kRawFrameOutputFormat_Svg = 8,
+    kRawFrameOutputFormat_Svg_TextAsPath = 9,
+    kRawFrameOutputFormat_Skp = 10,
 };
 
 class App {
 public:
     App();
     ~App() = default;
-    int Run(CliOptions &opts);
+    int run(CliOptions &opts);
 private:
-    void Prepaint();
-    void Paint(SkSurface* surface, int width, int height);
-    void DrawImGuiVectorCmdsFB(SkCanvas &canvas);
+    void paint(SkCanvas* canvas, int width, int height);
+    void postPaint();
+    void drawImGuiVectorCmdsFB(SkCanvas &canvas);
+
+    void loopEmpty(CliOptions const &opts);
+    void loopWebp(CliOptions const &opts);
+    void loopJpeg(CliOptions const &opts);
+    void loopPng(CliOptions const &opts);
+    void loopQoi(CliOptions const &opts);
+    void loopBmp(CliOptions const &opts);
+    void loopFlatbuffers(CliOptions const &opts);
+    void loopSvg(CliOptions const &opts);
+    void loopSkp(CliOptions const &opts);
 
     SkPaint fFontPaint;
     VectorCmdSkiaRenderer fVectorCmdSkiaRenderer;
@@ -38,4 +50,7 @@ private:
     bool fFffiInterpreter;
     SkColor fBackgroundColor;
     bool fUseVectorCmd;
+    uint64_t fFrame;
+    double fPreviousTime;
+    rawFrameOutputFormat fOutputFormat;
 };
