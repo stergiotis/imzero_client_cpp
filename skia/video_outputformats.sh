@@ -12,7 +12,17 @@ function run() {
 			 -videoExitAfterNFrames 1 \
 			 -videoRawOutputFormat "$1" \
 			 -videoRawFramesFile "test/${1}${2}"
+	echo "$1"
+	{ /usr/bin/time -f "$1 %U" ./imgui_skia_exe -fffiInterpreter off \
+	         -ttfFilePath ./SauceCodeProNerdFontPropo-Regular.ttf \
+		 -backdropFilter off \
+		 -videoResolutionWidth 1920 \
+		 -videoResolutionHeight 1080 \
+		 -videoRawOutputFormat $1 \
+		 -videoExitAfterNFrames 1000 \
+		 -videoRawFramesFile /dev/null; } 2>&1 | tee -a "test/timings.csv"
 }
+rm -f "test/timings.csv"
 run "bmp_bgra8888" ".bmp"
 run "qoi" ".qoi"
 run "jpeg" ".jpeg"

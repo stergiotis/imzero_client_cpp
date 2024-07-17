@@ -112,49 +112,39 @@ static void build_ImFontAtlas(ImFontAtlas& atlas, SkPaint& fontPaint) {
 
 static rawFrameOutputFormat resolveRawFrameOutputFormat(const char *name) {
     if(strcmp(name, "qoi") == 0) {
-        fprintf(stderr, "using output format %s\n", name);
         return kRawFrameOutputFormat_Qoi;
     }
     if(strcmp(name, "webp_lossless") == 0) {
-        fprintf(stderr, "using output format %s\n", name);
         return kRawFrameOutputFormat_WebP_Lossless;
     }
     if(strcmp(name, "webp_lossy") == 0) {
-        fprintf(stderr, "using output format %s\n", name);
         return kRawFrameOutputFormat_WebP_Lossy;
     }
     if(strcmp(name, "jpeg") == 0) {
-        fprintf(stderr, "using output format %s\n", name);
         return kRawFrameOutputFormat_Jpeg;
     }
     if(strcmp(name, "bmp_bgra8888") == 0) {
-        fprintf(stderr, "using output format %s\n", name);
         return kRawFrameOutputFormat_Bmp_Bgra8888;
     }
     if(strcmp(name, "flatbuffers") == 0) {
-        fprintf(stderr, "using output format %s\n", name);
         return kRawFrameOutputFormat_Flatbuffers;
     }
     if(strcmp(name, "jpeg") == 0) {
-        fprintf(stderr, "using output format %s\n", name);
         return kRawFrameOutputFormat_Jpeg;
     }
     if(strcmp(name, "png") == 0) {
-        fprintf(stderr, "using output format %s\n", name);
         return kRawFrameOutputFormat_Png;
     }
     if(strcmp(name, "skp") == 0) {
-        fprintf(stderr, "using output format %s\n", name);
         return kRawFrameOutputFormat_Skp;
     }
     if(strcmp(name, "svg") == 0) {
-        fprintf(stderr, "using output format %s\n", name);
         return kRawFrameOutputFormat_Svg;
     }
     if(strcmp(name, "svg_textaspath") == 0) {
-        fprintf(stderr, "using output format %s\n", name);
         return kRawFrameOutputFormat_Svg_TextAsPath;
     }
+    fprintf(stderr, "unhandled output format %s. disabling output.\n", name);
     return kRawFrameOutputFormat_None;
 }
 
@@ -330,9 +320,6 @@ void App::postPaint() {
     io.DeltaTime = static_cast<float>(currentTime - fPreviousTime);
     fPreviousTime = currentTime;
     fFrame++;
-
-    //const auto fps = io.Framerate;
-    //fprintf(stderr,"Application average %.3f ms/frame (%.1f FPS) delta=%.3f ms\n", 1000.0f / fps, fps, io.DeltaTime*1.0e3);
 }
 
 App::App() {
@@ -551,7 +538,13 @@ void App::loopFlatbuffers(const CliOptions &opts) {
     auto stream = SkFILEWStream(opts.videoRawFramesFile);
     uint64_t maxFrame = opts.videoExitAfterNFrames;
     fFrame = 0;
+    fVectorCmdSkiaRenderer.changeRenderMode(RenderModeE_Normal);
+    fUseVectorCmd = true;
+    paint(nullptr,w,h);
+    postPaint();
+    fFrame = 0;
     while(maxFrame == 0 || fFrame < maxFrame) {
+        fUseVectorCmd = true;
         paint(nullptr,w,h);
         { ZoneScoped;
             const ImDrawData* drawData = ImGui::GetDrawData();
@@ -562,7 +555,6 @@ void App::loopFlatbuffers(const CliOptions &opts) {
                 size_t sz;
                 drawList->serializeFB(buf,sz);
                 stream.write(buf,sz);
-                fprintf(stderr,"%s,sz=%d\n",drawList->_OwnerName, (int)sz);
             }
             stream.flush();
         }
@@ -611,13 +603,13 @@ void App::loopSkp(const CliOptions &opts) {
     SkPictureRecorder skiaRecorder;
     auto stream = SkFILEWStream(opts.videoRawFramesFile);
 
-    auto canvas = skiaRecorder.beginRecording(SkIntToScalar(w), SkIntToScalar(h));
     uint64_t maxFrame = opts.videoExitAfterNFrames;
 
-    paint(canvas,w,h);
+    paint(nullptr,w,h);
     postPaint();
     fFrame = 0;
     while(maxFrame == 0 || fFrame < maxFrame) {
+        auto canvas = skiaRecorder.beginRecording(SkIntToScalar(w), SkIntToScalar(h));
         paint(canvas,w,h);
 
         { ZoneScoped;
