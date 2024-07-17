@@ -325,6 +325,27 @@ let render = let dir = "./src" in sourceTreePart::{
 		] : List Text
 	}
 }
+let sdl2mpv = let dir = "./sdl2_mpv" in sourceTreePart::{
+	, name = "render"
+	, dir = dir
+	, includeDirs = {
+		, local = [
+		] : List Text
+		, global = [] : List Text
+	}
+	, sources = [
+		, "${dir}/main.cpp"
+	]
+	, cxxflags = {
+		, global = [
+		] : List Text
+		, local = [] : List Text
+	}
+	, ldflags = {
+		, global = [
+		] : List Text
+	}
+}
 let binding = let dir = "./src/binding" in sourceTreePart::{
 	, name = "binding"
 	, dir = dir
@@ -715,7 +736,6 @@ let skiaSdl = \(asan : Bool) ->
 			, imgui.dir
 			, imguiImplot.dir
 			, render.dir
-			, "./contrib/sdl3/include"
 			]
 		, global = [
 			, "${contribDir}"
@@ -805,7 +825,6 @@ let skiaSdl = \(asan : Bool) ->
         , "${objDir}/../libskshaper.a"
         , "${objDir}/../libskunicode.a"
         , "${objDir}/../libwindow.a"
-		, "./contrib/sdl3/build/libSDL3.a"
 	] # static3rdPartyLibraries
 }
 let flatbuffers = let dir = "./contrib/flatbuffers" in
@@ -818,7 +837,7 @@ let flatbuffers = let dir = "./contrib/flatbuffers" in
 	}
 	, sources = [] : List Text
 }
-let sdl3 = let dir = "./contrib/sdl" in
+let sdl3 = let dir = "./contrib/sdl3" in
  sourceTreePart::{
 	, dir = dir
 	, name = "sdl3"
@@ -828,8 +847,24 @@ let sdl3 = let dir = "./contrib/sdl" in
 	}
 	, sources = [] : List Text
 	, nonSourceObjs = [
-	  , "build/libSDL3.a"
-	]
+	  -- , "build/libSDL3.a"
+	] : List Text
+}
+let mpv = 
+ sourceTreePart::{
+	, dir = ""
+	, name = "mpv"
+	, includeDirs = {
+		, local = [] : List Text
+		, global = [] : List Text
+	}
+	, sources = [] : List Text
+	, ldflags = {
+	   , global = [ "-lmpv" ] : List Text
+	}
+	, nonSourceObjs = [
+		, "./contrib/sdl3/build/libSDL3.a"
+	] : List Text
 }
 let imguiWithSkia = imgui // {
 	, name = "imguiWithSkia"
@@ -869,4 +904,6 @@ in
 	, tracyEnabled
 	, tracyDisabled
 	, sdl3
+	, sdl2mpv
+	, mpv
 }

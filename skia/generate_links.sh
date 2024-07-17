@@ -21,3 +21,4 @@ link ../common/contrib/imgui_ImGuiColorTextEdit/TextEditor.cpp ./imcolortextedit
 link ../common/contrib/imgui_ImGuiColorTextEdit/TextEditor.h ./imcolortextedit/TextEditor.h 
 link ../common/contrib/sdl3 contrib/sdl3
 link ../common/contrib/qoi contrib/qoi
+link ../common/contrib/tracy contrib/tracy
