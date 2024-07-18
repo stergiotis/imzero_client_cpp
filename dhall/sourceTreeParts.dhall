@@ -325,7 +325,7 @@ let render = let dir = "./src" in sourceTreePart::{
 		] : List Text
 	}
 }
-let sdl2mpv = let dir = "./sdl2_mpv" in sourceTreePart::{
+let sdl3mpv = let dir = "./sdl3_mpv" in sourceTreePart::{
 	, name = "render"
 	, dir = dir
 	, includeDirs = {
@@ -335,6 +335,8 @@ let sdl2mpv = let dir = "./sdl2_mpv" in sourceTreePart::{
 	}
 	, sources = [
 		, "${dir}/main.cpp"
+		, "${dir}/events.cpp"
+		, "${dir}/app.cpp"
 	]
 	, cxxflags = {
 		, global = [
@@ -904,6 +906,6 @@ in
 	, tracyEnabled
 	, tracyDisabled
 	, sdl3
-	, sdl2mpv
+	, sdl3mpv
 	, mpv
 }

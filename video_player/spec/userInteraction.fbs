@@ -1,0 +1,59 @@
+namespace UserInteractionFB;
+
+struct SingleVec2 {
+    x: float;
+    y: float;
+}
+struct SingleVec4 {
+    x: float;
+    y: float;
+    z: float;
+    w: float;
+}
+table ArrayOfVec2 {
+    xs: [float];
+    ys: [float];
+}
+table ArrayOfVec4 {
+    xs: [float];
+    ys: [float];
+    zs: [float];
+    ws: [float];
+}
+table EventMouseMotion {
+    pos: SingleVec2;
+    mouse_id: uint32;
+    is_touch: bool;
+}
+table EventMouseWheel {
+    pos: SingleVec2;
+    mouse_id: uint32;
+    is_touch: bool;
+}
+enum MouseButton:uint8 {
+    None = 0,
+    Left = 1,
+    Right = 2,
+    Middle = 3,
+    X1 = 4,
+    X2 = 5,
+}
+table EventMouseButton {
+    pos: SingleVec2;
+    mouse_id: uint32;
+    is_touch: bool;
+    button: MouseButton;
+}
+table EventTextInput {
+    text: string;
+}
+union UserInteraction {
+    EventMouseMotion,
+    EventMouseWheel,
+    EventMouseButton,
+}
+table Event {
+    event: UserInteraction;
+}
+
+root_type Event;

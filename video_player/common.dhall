@@ -5,8 +5,9 @@ let asan = False
 let sourceTreePartsRepo = ../dhall/sourceTreeParts.dhall
 let sourceTreeParts = [
 	, sourceTreePartsRepo.sdl3
-	, sourceTreePartsRepo.sdl2mpv
+	, sourceTreePartsRepo.sdl3mpv
 	, sourceTreePartsRepo.mpv
+	, sourceTreePartsRepo.flatbuffers
 ] # (if debug then [ , sourceTreePartsRepo.tracyEnabled ] else [ ,sourceTreePartsRepo.tracyDisabled ] : List lib.sourceTreePart.Type )
 --let cxx = "${clangdir}/bin/clang++"
 let cxx = "clang++"

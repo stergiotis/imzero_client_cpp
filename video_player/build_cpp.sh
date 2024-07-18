@@ -3,6 +3,11 @@ set -ev
 here=$(dirname "$(readlink -f "$BASH_SOURCE")")
 cd "$here"
 
+source env.sh
+
+flatc="../../contrib/flatbuffers/flatc"
+"$flatc" -o src --cpp spec/userInteraction.fbs
+
 ./cmakelists.dhall
 
 generate_buildinfo() {
