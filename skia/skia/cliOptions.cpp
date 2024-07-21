@@ -80,6 +80,7 @@ void CliOptions::usage(const char *name, FILE *file) const {
     fprintf(file, "string flags:\n");
     fprintf(file, "   -videoRawFramesFile [path:%s]\n", videoRawFramesFile);
     fprintf(file, "   -videoRawOutputFormat [format:%s]\n", videoRawOutputFormat);
+    fprintf(file, "   -videoUserInteractionEventsInFile [path:%s]\n", videoUserInteractionEventsInFile);
     fprintf(file, "integer flags:\n");
     fprintf(file, "   -videoResolutionWidth [int:%u]\n", videoResolutionWidth);
     fprintf(file, "   -videoResolutionHeight [int:%u]\n", videoResolutionHeight);
@@ -125,6 +126,7 @@ void CliOptions::parse(int argc,char **argv,FILE *logChannel) {
     videoResolutionHeight = static_cast<uint32_t>(findFlagValueDefaultInt(logChannel, u, argc, argv, "-videoResolutionHeight", "1080"));
     videoExitAfterNFrames = static_cast<uint32_t>(findFlagValueDefaultInt(logChannel, u, argc, argv, "-videoExitAfterNFrames", "0"));
     videoRawOutputFormat = findFlagValueDefault(logChannel, u, argc, argv, "-videoRawOutputFormat", "qoi");
+    videoUserInteractionEventsInFile = findFlagValueDefault(logChannel, u, argc, argv, "-videoUserInteractionEventsInFile", videoUserInteractionEventsInFile);
 
     if(std::popcount(u) != (argc-1)) {
         for(int i=1;i<argc;i++) {

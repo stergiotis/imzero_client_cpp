@@ -25,6 +25,7 @@ struct CliOptions {
     uint32_t videoResolutionHeight = 0;
     const char *videoRawOutputFormat = nullptr;
     uint32_t videoExitAfterNFrames = 0;
+    const char *videoUserInteractionEventsInFile = nullptr;
 
     CliOptions() = default;
     ~CliOptions() = default;

@@ -5,6 +5,7 @@
 #include "SkPaint.h"
 #include "vectorCmdSkiaRenderer.h"
 #include "setupUI.h"
+#include "userInteraction_generated.h"
 
 enum rawFrameOutputFormat {
     kRawFrameOutputFormat_None = 0,
@@ -23,7 +24,7 @@ enum rawFrameOutputFormat {
 class App {
 public:
     App();
-    ~App() = default;
+    ~App();
     int run(CliOptions &opts);
 private:
     void paint(SkCanvas* canvas, int width, int height);
@@ -39,6 +40,8 @@ private:
     void loopFlatbuffers(CliOptions const &opts);
     void loopSvg(CliOptions const &opts);
     void loopSkp(CliOptions const &opts);
+    void dispatchUserInteractionEvents();
+    void handleUserInteractionEvent(UserInteractionFB::Event const &ev);
 
     SkPaint fFontPaint;
     VectorCmdSkiaRenderer fVectorCmdSkiaRenderer;
@@ -53,4 +56,5 @@ private:
     uint64_t fFrame;
     double fPreviousTime;
     rawFrameOutputFormat fOutputFormat;
+    FILE *fUserInteractionFH = nullptr;
 };

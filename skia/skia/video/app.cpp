@@ -2,6 +2,7 @@
 
 #include <cstdio>
 #include <cstring>
+#include <fcntl.h>
 
 #include "imgui.h"
 
@@ -27,8 +28,8 @@
 #define QOI_IMPLEMENTATION
 #define QOI_NO_STDIO
 #define QOI_FREE static_assert(false && "free should never be called")
-#define QOI_MALLOC(sz) qoi_malloc(sz)
-static void *qoi_malloc(size_t sz) {
+#define QOI_MALLOC(sz) qoiMalloc(sz)
+static void *qoiMalloc(size_t sz) {
     static void *qoiBuffer = nullptr;
     static size_t lastSz = 0;
     if(qoiBuffer == nullptr) {
@@ -152,7 +153,6 @@ int App::run(CliOptions &opts) {
     sk_sp<SkFontMgr> fontMgr = nullptr;
     sk_sp<SkTypeface> typeface = nullptr;
     sk_sp<SkData> ttfData = nullptr;
-    SkMemoryStream *ttfStream = nullptr;
     { // setup skia/imgui shared objects
         if (opts.fffiInterpreter) {
             if (opts.fffiInFile != nullptr) {
@@ -305,6 +305,28 @@ int App::run(CliOptions &opts) {
         case kRawFrameOutputFormat_Skp:
             loopSkp(opts);
             break;
+    }
+    if(opts.videoUserInteractionEventsInFile != nullptr && opts.videoUserInteractionEventsInFile[0] != '\0') {
+        fUserInteractionFH = fopen(opts.videoUserInteractionEventsInFile, "rb");
+        if(fUserInteractionFH == nullptr) {
+            fprintf(stderr, "unable to open user interaction events in file %s: %s\n", opts.videoUserInteractionEventsInFile, strerror(errno));
+            return 1;
+        }
+
+        auto const fd = fileno(fUserInteractionFH);
+        auto const flags = fcntl(fd, F_GETFL);
+        if(flags < 0) {
+            fprintf(stderr, "unable to get file status flags for file %s: %s\n", opts.videoUserInteractionEventsInFile, strerror(errno));
+            return 1;
+        }
+        if(fcntl(fd, F_SETFL, flags | O_NONBLOCK) < 0) {
+            fprintf(stderr, "unable to set file status flag O_NONBLOCK file %s: %s\n", opts.videoUserInteractionEventsInFile, strerror(errno));
+            return 1;
+        }
+        if(setvbuf(fUserInteractionFH,nullptr,_IONBF,0) != 0) {
+            fprintf(stderr, "unable to set buffering for file %s: %s\n", opts.videoUserInteractionEventsInFile, strerror(errno));
+            return 1;
+        }
     }
 
     if(opts.fffiInterpreter) {
@@ -617,5 +639,87 @@ void App::loopSkp(const CliOptions &opts) {
             picture->serialize(&stream);
         }
         postPaint();
+    }
+}
+App::~App() {
+    if(fUserInteractionFH != nullptr) {
+        fclose(fUserInteractionFH);
+        fUserInteractionFH = nullptr;
+    }
+}
+
+void App::dispatchUserInteractionEvents() {
+    size_t memorySize = 1024 * 1024;
+    static uint8_t state = 0;
+    static uint8_t* mem = nullptr;
+    static uint8_t* p = nullptr;
+    static uint32_t bytesToRead = 0;
+
+    while(true) {
+        switch(state) {
+            case 0: // init
+                mem = static_cast<uint8_t *>(malloc(memorySize));
+                if(mem == nullptr) {
+                    fprintf(stderr,"unable to allocate memory\n");
+                    exit(2);
+                }
+                state = 1;
+                bytesToRead = 4;
+                p = mem;
+                break;
+            case 1: // read flatbuffers message length
+            {
+                auto r = fread(p,1,bytesToRead,fUserInteractionFH);
+                bytesToRead -= r;
+                p += r;
+                if(bytesToRead == 0) {
+                    // read length of message
+                    bytesToRead = flatbuffers::ReadScalar<uint32_t>(mem);
+                    if(bytesToRead > memorySize) {
+                        memorySize = (bytesToRead/4096+1)*4096;
+                        mem = static_cast<uint8_t *>(realloc(mem, memorySize));
+                        p = mem+4;
+                    }
+                    state = 2;
+                }
+            }
+            break;
+            case 2: // read flatbuffers message
+            {
+                auto r = fread(p,1,bytesToRead,fUserInteractionFH);
+                bytesToRead -= r;
+                p += r;
+                if(bytesToRead == 0) {
+                    auto const e = UserInteractionFB::GetSizePrefixedEvent(mem);
+                    handleUserInteractionEvent(*e);
+                    state = 1;
+                    p = mem;
+                    bytesToRead = 4;
+                }
+            }
+            break;
+        }
+    }
+}
+
+void App::handleUserInteractionEvent(UserInteractionFB::Event const &ev) {
+    switch(ev.event_type()) {
+        case UserInteractionFB::UserInteraction_NONE:
+            break;
+        case UserInteractionFB::UserInteraction_EventMouseMotion:
+        {
+            auto const e = ev.event_as_EventMouseMotion();
+        }
+        break;
+        case UserInteractionFB::UserInteraction_EventMouseWheel:
+        {
+            auto const e = ev.event_as_EventMouseMotion();
+        }
+        break;
+        case UserInteractionFB::UserInteraction_EventMouseButton:
+        {
+            auto const e = ev.event_as_EventMouseButton();
+        }
+        break;
     }
 }
