@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
         fprintf(stderr,"usage: %s <file>\n",argv[0]);
         return 1;
     }
-    handleErr(app.setup(argv[1]));
+    handleErr(app.setup(argv[1],stdout));
     bool quit = false;
     while(!quit) {
         handleErr(app.step(quit));

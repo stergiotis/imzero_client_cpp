@@ -22,3 +22,4 @@ link ../common/contrib/imgui_ImGuiColorTextEdit/TextEditor.h ./imcolortextedit/T
 link ../common/contrib/sdl3 contrib/sdl3
 link ../common/contrib/qoi contrib/qoi
 link ../common/contrib/tracy contrib/tracy
+link ../common/contrib/flatbuffers/include contrib/flatbuffers

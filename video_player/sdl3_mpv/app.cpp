@@ -4,35 +4,101 @@
 #define HANDLE_MPV_RETURN(errorCode) handleMpvRetr((errorCode),__func__,__FILE__,__LINE__)
 #define HANDLE_SDL_RETURN(errorCode) handleSdlRetr((errorCode),__func__,__FILE__,__LINE__)
 
-static void *get_proc_address_mpv(void *fn_ctx, const char *name) {
+static void *getProAddressMpv(void *fn_ctx, const char *name) {
     return reinterpret_cast<void *>(SDL_GL_GetProcAddress(name));
 }
 
-static void on_mpv_events(void *ctx) {
-    SDL_Event event = {.type = reinterpret_cast<App*>(ctx)->wakeup_on_mpv_events};
+static void onMpvEvent(void *ctx) {
+    SDL_Event event = {.type = reinterpret_cast<App*>(ctx)->fWakeupOnMpvEvents};
     SDL_PushEvent(&event);
 }
 
-static void on_mpv_render_update(void *ctx) {
-    SDL_Event event = {.type = reinterpret_cast<App*>(ctx)->wakeup_on_mpv_render_update};
+static void onMpvRenderUpdate(void *ctx) {
+    SDL_Event event = {.type = reinterpret_cast<App*>(ctx)->fWakeupOnMpvRenderUpdate};
     SDL_PushEvent(&event);
 }
 
 App::~App() {
-    if(fMpvRenderContext != nullptr) {
-        // Destroy the GL renderer and all the GL objects it allocated. If video
-        // is still running, the video track will be deselected.
-        mpv_render_context_free(fMpvRenderContext);
-    }
-
-    if(fMpvHandle != nullptr) {
-        mpv_destroy(fMpvHandle);
-    }
+    teardown();
+}
+void App::serializeUserInteractionEventFB(const uint8_t *&out,size_t &size, flatbuffers::Offset<void> e) {
+    fFlatBufferBuilder.FinishSizePrefixed(e);
+    size = fFlatBufferBuilder.GetSize();
+    out = fFlatBufferBuilder.GetBufferPointer();
+}
+void App::sendUserInteractionEvent(flatbuffers::Offset<void> e) {
+    const uint8_t *ptr = nullptr;
+    size_t sz = 0;
+    serializeUserInteractionEventFB(ptr,sz,e);
+    fprintf(stderr,"sz=%d,%.*s\n",(int)sz,(int)sz,ptr);
+    fwrite(ptr,1,sz,fUserInteractionOutput);
+    fflush(fUserInteractionOutput);
 }
 
-
 void App::handleSdlEvent(SDL_Event &event) {
-
+    fFlatBufferBuilder.Clear();
+    switch(event.type) {
+        case SDL_EVENT_MOUSE_MOTION:
+        {
+            auto const ev = event.motion;
+            auto const pos = UserInteractionFB::SingleVec2(ev.x,ev.y);
+            auto const e = UserInteractionFB::CreateEventMouseMotion(fFlatBufferBuilder,&pos,ev.which,ev.which == SDL_TOUCH_MOUSEID).Union();
+            sendUserInteractionEvent(e);
+        }
+        break;
+        case SDL_EVENT_MOUSE_WHEEL:
+        {
+            auto const ev = event.wheel;
+            auto const pos = UserInteractionFB::SingleVec2(ev.x,ev.y);
+            auto const e = UserInteractionFB::CreateEventMouseWheel(fFlatBufferBuilder, &pos, ev.which, ev.which == SDL_TOUCH_MOUSEID).Union();
+            sendUserInteractionEvent(e);
+        }
+        break;
+        case SDL_EVENT_MOUSE_BUTTON_DOWN:
+        case SDL_EVENT_MOUSE_BUTTON_UP:
+        {
+            auto const ev = event.button;
+            UserInteractionFB::MouseButton b = UserInteractionFB::MouseButton_None;
+            switch(ev.button) {
+                case SDL_BUTTON_LEFT:
+                    b = UserInteractionFB::MouseButton_Left;
+                    break;
+                case SDL_BUTTON_RIGHT:
+                    b = UserInteractionFB::MouseButton_Right;
+                    break;
+                case SDL_BUTTON_MIDDLE:
+                    b = UserInteractionFB::MouseButton_Middle;
+                    break;
+                case SDL_BUTTON_X1:
+                    b = UserInteractionFB::MouseButton_X1;
+                    break;
+                case SDL_BUTTON_X2:
+                    b = UserInteractionFB::MouseButton_X2;
+                    break;
+            }
+            auto const pos = UserInteractionFB::SingleVec2(ev.x,ev.y);
+            auto const e = UserInteractionFB::CreateEventMouseButton(fFlatBufferBuilder,&pos,ev.which,ev.which == SDL_TOUCH_MOUSEID,b).Union();
+            sendUserInteractionEvent(e);
+        }
+        break;
+        case SDL_EVENT_TEXT_INPUT:
+        {
+            auto const ev = event.text;
+            auto const t = fFlatBufferBuilder.CreateString(ev.text);
+            auto const e = UserInteractionFB::CreateEventTextInput(fFlatBufferBuilder,t).Union();
+            sendUserInteractionEvent(e);
+        }
+        break;
+        //case SDL_EVENT_KEY_DOWN:
+        //case SDL_EVENT_KEY_UP:
+        //{
+        //    ImGui_ImplSDL3_UpdateKeyModifiers((SDL_Keymod)event->key.keysym.mod);
+        //    ImGuiKey key = ImGui_ImplSDL3_KeycodeToImGuiKey(event->key.keysym.sym);
+        //    io.AddKeyEvent(key, (event->type == SDL_EVENT_KEY_DOWN));
+        //    io.SetKeyEventNativeData(key, event->key.keysym.sym, event->key.keysym.scancode, event->key.keysym.scancode); // To support legacy indexing (<1.87 user code). Legacy backend uses SDLK_*** as indices to IsKeyXXX() functions.
+        //    return true;
+        //}
+    }
 }
 
 const char *App::step(bool &quit) {
@@ -69,15 +135,16 @@ const char *App::step(bool &quit) {
         default:
             // Happens when there is new work for the render thread (such as
             // rendering a new video frame or redrawing it).
-            if (event.type == wakeup_on_mpv_render_update) {
+            if (event.type == fWakeupOnMpvRenderUpdate) {
                 uint64_t flags = mpv_render_context_update(fMpvRenderContext);
                 if (flags & MPV_RENDER_UPDATE_FRAME) {
                     redrawNeeded = 1;
                 }
-            }
-            // Happens when at least 1 new event is in the mpv event queue.
-            if (event.type == wakeup_on_mpv_events) {
+            } else if (event.type == fWakeupOnMpvEvents) {
+                // Happens when at least 1 new event is in the mpv event queue.
                 processMpvEvents();
+            } else {
+                handleSdlEvent(event);
             }
     }
     if(redrawNeeded) {
@@ -107,7 +174,10 @@ bool App::handleSdlRetr(int errorCode, const char *func, const char *filename, i
     return true;
 }
 
-const char *App::setup(const char *input_file) {
+// FIXME allow multiple calls to setup?
+const char *App::setup(const char *inputFile, FILE *userInteractionOutput) {
+    teardown();
+    fUserInteractionOutput = userInteractionOutput;
     fMpvHandle = mpv_create();
 
     if(fMpvHandle == nullptr) {
@@ -127,22 +197,26 @@ const char *App::setup(const char *input_file) {
 
     SDL_SetHint(SDL_HINT_NO_SIGNAL_HANDLERS, "1");
 
-    if(HANDLE_SDL_RETURN(SDL_Init(SDL_INIT_VIDEO))) {
+    if(HANDLE_SDL_RETURN(SDL_InitSubSystem(SDL_INIT_VIDEO))) {
         return "unable to initialize sdl";
     }
 
-    fSdlWindow = SDL_CreateWindow("imzero sdl2 mpv video player", 1920, 1080, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-    if(!fSdlWindow) {
-        return "unable to create sdl windo";
+    if(fSdlWindow == nullptr) {
+        fSdlWindow = SDL_CreateWindow("imzero sdl2 mpv video player", 1920, 1080, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+        if(!fSdlWindow) {
+            return "unable to create sdl window";
+        }
     }
 
-    fSdlGlContext = SDL_GL_CreateContext(fSdlWindow);
-    if(!fSdlGlContext) {
-        return "unable to create sdl gl context";
+    if(fSdlGlContext == nullptr) {
+        fSdlGlContext = SDL_GL_CreateContext(fSdlWindow);
+        if(!fSdlGlContext) {
+            return "unable to create sdl gl context";
+        }
     }
 
     mpv_opengl_init_params initParams{
-            .get_proc_address = get_proc_address_mpv
+            .get_proc_address = getProAddressMpv
     };
     int one = 1;
     mpv_render_param params[] = {
@@ -172,23 +246,23 @@ const char *App::setup(const char *input_file) {
     // work as possible, and merely wake up another thread to do actual work.
     // On SDL, waking up the mainloop is the ideal course of action. SDL's
     // SDL_PushEvent() is thread-safe, so we use that.
-    wakeup_on_mpv_render_update = SDL_RegisterEvents(1);
-    wakeup_on_mpv_events = SDL_RegisterEvents(1);
-    if(wakeup_on_mpv_render_update == static_cast<Uint32>(-1) ||
-       wakeup_on_mpv_events == static_cast<Uint32>(-1)) {
+    fWakeupOnMpvRenderUpdate = SDL_RegisterEvents(1);
+    fWakeupOnMpvEvents = SDL_RegisterEvents(1);
+    if(fWakeupOnMpvRenderUpdate == static_cast<Uint32>(-1) ||
+       fWakeupOnMpvEvents == static_cast<Uint32>(-1)) {
         return "unable to register events";
     }
 
     // When normal mpv events are available.
-    mpv_set_wakeup_callback(fMpvHandle, on_mpv_events, this);
+    mpv_set_wakeup_callback(fMpvHandle, onMpvEvent, this);
 
     // When there is a need to call mpv_render_context_update(), which can
     // request a new frame to be rendered.
     // (Separate from the normal event handling mechanism for the sake of
     //  users which run OpenGL on a different thread.)
-    mpv_render_context_set_update_callback(fMpvRenderContext, on_mpv_render_update, this);
+    mpv_render_context_set_update_callback(fMpvRenderContext, onMpvRenderUpdate, this);
 
-    if(!scheduleMpvCommandAsync2("loadfile", input_file)) {
+    if(!scheduleMpvCommandAsync2("loadfile", inputFile)) {
         return "unable to schedule loadfile command";
     }
 
@@ -240,4 +314,20 @@ void App::processMpvEvents() {
                 fprintf(stderr, "received mpv event %s\n", mpv_event_name(mp_event->event_id));
         }
     }
+}
+
+void App::teardown() {
+    if(fMpvRenderContext != nullptr) {
+        // Destroy the GL renderer and all the GL objects it allocated. If video
+        // is still running, the video track will be deselected.
+        mpv_render_context_free(fMpvRenderContext);
+        fMpvRenderContext = nullptr;
+    }
+
+    if(fMpvHandle != nullptr) {
+        mpv_destroy(fMpvHandle);
+        fMpvHandle = nullptr;
+    }
+
+    fUserInteractionOutput = nullptr;
 }

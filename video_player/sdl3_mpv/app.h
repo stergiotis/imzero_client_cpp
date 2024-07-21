@@ -3,6 +3,8 @@
 #include <mpv/client.h>
 #include <mpv/render_gl.h>
 #include <SDL3/SDL.h>
+#include "flatbuffers/flatbuffers.h"
+#include "../src/userInteraction_generated.h"
 
 class App {
 public:
@@ -10,16 +12,19 @@ public:
     ~App();
 
     // @return nullptr on success; error message on failure
-    const char *setup(const char *input_file);
+    const char *setup(const char *inputFile,FILE *userInteractionOutput);
     // @return nullptr on success; error message on failure
     const char *step(bool &quit);
 
 public: // needed in event handlers
-    Uint32 wakeup_on_mpv_render_update = 0;
-    Uint32 wakeup_on_mpv_events = 0;
+    Uint32 fWakeupOnMpvRenderUpdate = 0;
+    Uint32 fWakeupOnMpvEvents = 0;
 
 private:
+    void serializeUserInteractionEventFB(const uint8_t *&out,size_t &size, flatbuffers::Offset<void> e);
+    void sendUserInteractionEvent(flatbuffers::Offset<void> e);
     void redraw();
+    void teardown();
     void handleSdlEvent(SDL_Event &event);
     void processMpvEvents();
     // @return true on success
@@ -33,4 +38,6 @@ private:
     mpv_render_context *fMpvRenderContext = nullptr;
     SDL_GLContext fSdlGlContext = nullptr;
     SDL_Window *fSdlWindow = nullptr;
+    flatbuffers::FlatBufferBuilder fFlatBufferBuilder;
+    FILE *fUserInteractionOutput = nullptr;
 };
