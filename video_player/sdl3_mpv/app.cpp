@@ -82,7 +82,8 @@ void App::handleSdlEvent(SDL_Event &event) {
                     break;
             }
             auto const pos = UserInteractionFB::SingleVec2(ev.x,ev.y);
-            auto const e = UserInteractionFB::CreateEventMouseButton(fFlatBufferBuilder,&pos,ev.which,ev.which == SDL_TOUCH_MOUSEID,b);
+            UserInteractionFB::MouseButtonEventType t = event.type == SDL_EVENT_MOUSE_BUTTON_DOWN ? UserInteractionFB::MouseButtonEventType_Down : UserInteractionFB::MouseButtonEventType_Up;
+            auto const e = UserInteractionFB::CreateEventMouseButton(fFlatBufferBuilder,&pos,ev.which,ev.which == SDL_TOUCH_MOUSEID,b,t);
             sendUserInteractionEvent(UserInteractionFB::UserInteraction_EventMouseButton, e.Union());
         }
         break;
@@ -286,6 +287,30 @@ const char *App::setup(const char *inputFile, FILE *userInteractionOutput) {
         return "unable to schedule profile command";
     }
     */
+    {
+        const char *optionsString[] = {"profile", "low-latency",
+                                       "cache", "no",
+                                       "keep-open", "always",
+                                       "cursor-autohide", "no",
+                //                       "vo","x11",
+               // "vo","xv",
+                                       "idle","yes",
+                //                       "force-window","yes",
+                                       nullptr};
+        for(int i=0; optionsString[i] != nullptr; i+=2) {
+            if(HANDLE_MPV_RETURN(mpv_set_option_string(fMpvHandle, optionsString[i], optionsString[i + 1]))) {
+                return "unable to set option";
+            }
+        }
+        const char *optionsBool[] = {"untimed", "1",
+                                       nullptr};
+        for(int i=0; optionsBool[i] != nullptr; i+=2) {
+            int v = optionsBool[i + 1][0] == '1';
+            if(HANDLE_MPV_RETURN(mpv_set_option(fMpvHandle, optionsBool[i], MPV_FORMAT_FLAG, &v))) {
+                return "unable to set option";
+            }
+        }
+    }
 
     if(!scheduleMpvCommandAsync2("loadfile", inputFile)) {
         return "unable to schedule loadfile command";

@@ -278,7 +278,13 @@ int App::run(CliOptions &opts) {
     fBackgroundColor = SkColorSetARGB(clearColorImVec4.w * 255.0f, clearColorImVec4.x * 255.0f, clearColorImVec4.y * 255.0f, clearColorImVec4.z * 255.0f);
 
     if(opts.videoUserInteractionEventsInFile != nullptr && opts.videoUserInteractionEventsInFile[0] != '\0') {
-        fUserInteractionFH = fopen(opts.videoUserInteractionEventsInFile, "rb");
+        auto userInteractionFd = open(opts.videoUserInteractionEventsInFile, O_RDONLY | O_NONBLOCK);
+        if(userInteractionFd == -1) {
+            fprintf(stderr, "unable to open user interaction events in file %s: %s\n", opts.videoUserInteractionEventsInFile, strerror(errno));
+            return 1;
+        }
+        fUserInteractionFH = fdopen(userInteractionFd,"rb");
+        //fUserInteractionFH = fopen(opts.videoUserInteractionEventsInFile, "rb");
         if(fUserInteractionFH == nullptr) {
             fprintf(stderr, "unable to open user interaction events in file %s: %s\n", opts.videoUserInteractionEventsInFile, strerror(errno));
             return 1;
@@ -760,7 +766,7 @@ void App::handleUserInteractionEvent(UserInteractionFB::Event const &ev) {
                 case UserInteractionFB::MouseButton_X2: mb = 4; break;
             }
             if (mb >= 0) {
-                auto const d = e->type() == UserInteractionFB::MouseButtonEventType_Down;
+                const bool d = e->type() == UserInteractionFB::MouseButtonEventType_Down;
                 io.AddMouseSourceEvent(e->is_touch() ? ImGuiMouseSource_TouchScreen : ImGuiMouseSource_Mouse);
                 io.AddMouseButtonEvent(mb, d);
                 //bd->MouseButtonsDown = d ? (bd->MouseButtonsDown | (1 << mb)) : (bd->MouseButtonsDown & ~(1 << mb));
