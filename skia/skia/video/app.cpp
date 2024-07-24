@@ -25,6 +25,8 @@
 #include "marshalling/receive.h"
 #include "marshalling/send.h"
 
+#include "flatbuffers/minireflect.h"
+
 #define QOI_IMPLEMENTATION
 #define QOI_NO_STDIO
 #define QOI_FREE static_assert(false && "free should never be called")
@@ -275,6 +277,29 @@ int App::run(CliOptions &opts) {
     }
     fBackgroundColor = SkColorSetARGB(clearColorImVec4.w * 255.0f, clearColorImVec4.x * 255.0f, clearColorImVec4.y * 255.0f, clearColorImVec4.z * 255.0f);
 
+    if(opts.videoUserInteractionEventsInFile != nullptr && opts.videoUserInteractionEventsInFile[0] != '\0') {
+        fUserInteractionFH = fopen(opts.videoUserInteractionEventsInFile, "rb");
+        if(fUserInteractionFH == nullptr) {
+            fprintf(stderr, "unable to open user interaction events in file %s: %s\n", opts.videoUserInteractionEventsInFile, strerror(errno));
+            return 1;
+        }
+
+        auto const fd = fileno(fUserInteractionFH);
+        auto const flags = fcntl(fd, F_GETFL);
+        if(flags < 0) {
+            fprintf(stderr, "unable to get file status flags for file %s: %s\n", opts.videoUserInteractionEventsInFile, strerror(errno));
+            return 1;
+        }
+        if(fcntl(fd, F_SETFL, flags | O_NONBLOCK) < 0) {
+            fprintf(stderr, "unable to set file status flag O_NONBLOCK file %s: %s\n", opts.videoUserInteractionEventsInFile, strerror(errno));
+            return 1;
+        }
+        //if(setvbuf(fUserInteractionFH,nullptr,_IONBF,0) != 0) {
+        //    fprintf(stderr, "unable to set buffering for file %s: %s\n", opts.videoUserInteractionEventsInFile, strerror(errno));
+        //    return 1;
+        //}
+    }
+
     switch(fOutputFormat) {
         case kRawFrameOutputFormat_None:
             loopEmpty(opts);
@@ -306,28 +331,6 @@ int App::run(CliOptions &opts) {
             loopSkp(opts);
             break;
     }
-    if(opts.videoUserInteractionEventsInFile != nullptr && opts.videoUserInteractionEventsInFile[0] != '\0') {
-        fUserInteractionFH = fopen(opts.videoUserInteractionEventsInFile, "rb");
-        if(fUserInteractionFH == nullptr) {
-            fprintf(stderr, "unable to open user interaction events in file %s: %s\n", opts.videoUserInteractionEventsInFile, strerror(errno));
-            return 1;
-        }
-
-        auto const fd = fileno(fUserInteractionFH);
-        auto const flags = fcntl(fd, F_GETFL);
-        if(flags < 0) {
-            fprintf(stderr, "unable to get file status flags for file %s: %s\n", opts.videoUserInteractionEventsInFile, strerror(errno));
-            return 1;
-        }
-        if(fcntl(fd, F_SETFL, flags | O_NONBLOCK) < 0) {
-            fprintf(stderr, "unable to set file status flag O_NONBLOCK file %s: %s\n", opts.videoUserInteractionEventsInFile, strerror(errno));
-            return 1;
-        }
-        if(setvbuf(fUserInteractionFH,nullptr,_IONBF,0) != 0) {
-            fprintf(stderr, "unable to set buffering for file %s: %s\n", opts.videoUserInteractionEventsInFile, strerror(errno));
-            return 1;
-        }
-    }
 
     if(opts.fffiInterpreter) {
         render_cleanup();
@@ -342,6 +345,7 @@ void App::postPaint() {
     io.DeltaTime = static_cast<float>(currentTime - fPreviousTime);
     fPreviousTime = currentTime;
     fFrame++;
+    dispatchUserInteractionEvents();
 }
 
 App::App() {
@@ -649,11 +653,16 @@ App::~App() {
 }
 
 void App::dispatchUserInteractionEvents() {
-    size_t memorySize = 1024 * 1024;
+    static size_t memorySize = 1024 * 1024;
     static uint8_t state = 0;
     static uint8_t* mem = nullptr;
     static uint8_t* p = nullptr;
     static uint32_t bytesToRead = 0;
+    constexpr const int sizeOfLengthPrefix = 4;
+
+    if(fUserInteractionFH == nullptr) {
+        return;
+    }
 
     while(true) {
         switch(state) {
@@ -664,12 +673,15 @@ void App::dispatchUserInteractionEvents() {
                     exit(2);
                 }
                 state = 1;
-                bytesToRead = 4;
+                bytesToRead = sizeOfLengthPrefix;
                 p = mem;
                 break;
             case 1: // read flatbuffers message length
             {
                 auto r = fread(p,1,bytesToRead,fUserInteractionFH);
+                if(r <= 0) {
+                    return;
+                }
                 bytesToRead -= r;
                 p += r;
                 if(bytesToRead == 0) {
@@ -678,7 +690,7 @@ void App::dispatchUserInteractionEvents() {
                     if(bytesToRead > memorySize) {
                         memorySize = (bytesToRead/4096+1)*4096;
                         mem = static_cast<uint8_t *>(realloc(mem, memorySize));
-                        p = mem+4;
+                        p = mem+sizeOfLengthPrefix;
                     }
                     state = 2;
                 }
@@ -686,15 +698,25 @@ void App::dispatchUserInteractionEvents() {
             break;
             case 2: // read flatbuffers message
             {
+                //fprintf(stderr, "reading message of size %d\n", (int)bytesToRead);
                 auto r = fread(p,1,bytesToRead,fUserInteractionFH);
                 bytesToRead -= r;
                 p += r;
                 if(bytesToRead == 0) {
-                    auto const e = UserInteractionFB::GetSizePrefixedEvent(mem);
-                    handleUserInteractionEvent(*e);
-                    state = 1;
-                    p = mem;
-                    bytesToRead = 4;
+                    auto verifier = flatbuffers::Verifier(mem+sizeOfLengthPrefix,bytesToRead);
+                    if(!UserInteractionFB::VerifyEventBuffer(verifier)) {
+                        auto txt = flatbuffers::FlatBufferToString(mem+sizeOfLengthPrefix,UserInteractionFB::EventTypeTable());
+                        fprintf(stderr, "userInteractionEvent=%s\n", txt.c_str());
+
+                        auto const e = UserInteractionFB::GetSizePrefixedEvent(mem);
+                        handleUserInteractionEvent(*e);
+                        state = 1;
+                        p = mem;
+                        bytesToRead = sizeOfLengthPrefix;
+                    } else {
+                        fprintf(stderr, "received corrupt user interaction event!\n");
+                        exit(1);
+                    }
                 }
             }
             break;
@@ -703,22 +725,54 @@ void App::dispatchUserInteractionEvents() {
 }
 
 void App::handleUserInteractionEvent(UserInteractionFB::Event const &ev) {
+    ImGuiIO& io = ImGui::GetIO();
+    fprintf(stderr, "handling user interaction event %s\n",EnumNameUserInteraction(ev.event_type()));
     switch(ev.event_type()) {
         case UserInteractionFB::UserInteraction_NONE:
             break;
         case UserInteractionFB::UserInteraction_EventMouseMotion:
         {
             auto const e = ev.event_as_EventMouseMotion();
+            io.AddMouseSourceEvent(e->is_touch() ? ImGuiMouseSource_TouchScreen : ImGuiMouseSource_Mouse);
+            auto const p = e->pos();
+            io.AddMousePosEvent(p->x(), p->y());
         }
         break;
         case UserInteractionFB::UserInteraction_EventMouseWheel:
         {
             auto const e = ev.event_as_EventMouseMotion();
+            io.AddMouseSourceEvent(e->is_touch() ? ImGuiMouseSource_TouchScreen : ImGuiMouseSource_Mouse);
+            auto const p = e->pos();
+            io.AddMouseWheelEvent(-p->x(), p->y());
         }
         break;
         case UserInteractionFB::UserInteraction_EventMouseButton:
         {
             auto const e = ev.event_as_EventMouseButton();
+            int mb = -1;
+            auto const b = e->button();
+            switch(b) {
+                case UserInteractionFB::MouseButton_None: break;
+                case UserInteractionFB::MouseButton_Left: mb = 0; break;
+                case UserInteractionFB::MouseButton_Right: mb = 1; break;
+                case UserInteractionFB::MouseButton_Middle: mb = 2; break;
+                case UserInteractionFB::MouseButton_X1: mb = 3; break;
+                case UserInteractionFB::MouseButton_X2: mb = 4; break;
+            }
+            if (mb >= 0) {
+                auto const d = e->type() == UserInteractionFB::MouseButtonEventType_Down;
+                io.AddMouseSourceEvent(e->is_touch() ? ImGuiMouseSource_TouchScreen : ImGuiMouseSource_Mouse);
+                io.AddMouseButtonEvent(mb, d);
+                //bd->MouseButtonsDown = d ? (bd->MouseButtonsDown | (1 << mb)) : (bd->MouseButtonsDown & ~(1 << mb));
+            }
+        }
+        break;
+        case UserInteractionFB::UserInteraction_EventTextInput:
+        {
+            auto const e = ev.event_as_EventTextInput();
+            auto const t = e->text();
+
+            io.AddInputCharactersUTF8(e->text()->c_str());
         }
         break;
     }

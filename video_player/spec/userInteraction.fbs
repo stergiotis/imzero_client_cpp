@@ -38,11 +38,16 @@ enum MouseButton:uint8 {
     X1 = 4,
     X2 = 5,
 }
+enum MouseButtonEventType:uint8 {
+    Up = 0,
+    Down = 1,
+}
 table EventMouseButton {
     pos: SingleVec2;
     mouse_id: uint32;
     is_touch: bool;
     button: MouseButton;
+    type: MouseButtonEventType;
 }
 table EventTextInput {
     text: string;
@@ -51,6 +56,7 @@ union UserInteraction {
     EventMouseMotion,
     EventMouseWheel,
     EventMouseButton,
+    EventTextInput,
 }
 table Event {
     event: UserInteraction;

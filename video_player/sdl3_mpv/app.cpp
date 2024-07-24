@@ -1,5 +1,6 @@
 #include <cstdio>
 #include "app.h"
+#include "flatbuffers/minireflect.h"
 
 #define HANDLE_MPV_RETURN(errorCode) handleMpvRetr((errorCode),__func__,__FILE__,__LINE__)
 #define HANDLE_SDL_RETURN(errorCode) handleSdlRetr((errorCode),__func__,__FILE__,__LINE__)
@@ -21,16 +22,20 @@ static void onMpvRenderUpdate(void *ctx) {
 App::~App() {
     teardown();
 }
-void App::serializeUserInteractionEventFB(const uint8_t *&out,size_t &size, flatbuffers::Offset<void> e) {
+void App::serializeUserInteractionEventFB(const uint8_t *&out,size_t &size, flatbuffers::Offset<UserInteractionFB::Event> e) {
     fFlatBufferBuilder.FinishSizePrefixed(e);
     size = fFlatBufferBuilder.GetSize();
     out = fFlatBufferBuilder.GetBufferPointer();
+
+    {
+        auto txt = flatbuffers::FlatBufferToString(out+4,UserInteractionFB::EventTypeTable());
+        fprintf(stderr, "userInteractionEvent=%s\n", txt.c_str());
+    }
 }
-void App::sendUserInteractionEvent(flatbuffers::Offset<void> e) {
+void App::sendUserInteractionEvent(UserInteractionFB::UserInteraction eventType, flatbuffers::Offset<void> e) {
     const uint8_t *ptr = nullptr;
     size_t sz = 0;
-    serializeUserInteractionEventFB(ptr,sz,e);
-    fprintf(stderr,"sz=%d,%.*s\n",(int)sz,(int)sz,ptr);
+    serializeUserInteractionEventFB(ptr,sz,UserInteractionFB::CreateEvent(fFlatBufferBuilder, eventType, e));
     fwrite(ptr,1,sz,fUserInteractionOutput);
     fflush(fUserInteractionOutput);
 }
@@ -42,19 +47,19 @@ void App::handleSdlEvent(SDL_Event &event) {
         {
             auto const ev = event.motion;
             auto const pos = UserInteractionFB::SingleVec2(ev.x,ev.y);
-            auto const e = UserInteractionFB::CreateEventMouseMotion(fFlatBufferBuilder,&pos,ev.which,ev.which == SDL_TOUCH_MOUSEID).Union();
-            sendUserInteractionEvent(e);
+            auto const e = UserInteractionFB::CreateEventMouseMotion(fFlatBufferBuilder,&pos,ev.which,ev.which == SDL_TOUCH_MOUSEID);
+            sendUserInteractionEvent(UserInteractionFB::UserInteraction_EventMouseMotion, e.Union());
         }
         break;
         case SDL_EVENT_MOUSE_WHEEL:
         {
             auto const ev = event.wheel;
             auto const pos = UserInteractionFB::SingleVec2(ev.x,ev.y);
-            auto const e = UserInteractionFB::CreateEventMouseWheel(fFlatBufferBuilder, &pos, ev.which, ev.which == SDL_TOUCH_MOUSEID).Union();
-            sendUserInteractionEvent(e);
+            auto const e = UserInteractionFB::CreateEventMouseWheel(fFlatBufferBuilder, &pos, ev.which, ev.which == SDL_TOUCH_MOUSEID);
+            sendUserInteractionEvent(UserInteractionFB::UserInteraction_EventMouseWheel, e.Union());
         }
         break;
-        case SDL_EVENT_MOUSE_BUTTON_DOWN:
+        case SDL_EVENT_MOUSE_BUTTON_DOWN: // fallthrough
         case SDL_EVENT_MOUSE_BUTTON_UP:
         {
             auto const ev = event.button;
@@ -77,16 +82,16 @@ void App::handleSdlEvent(SDL_Event &event) {
                     break;
             }
             auto const pos = UserInteractionFB::SingleVec2(ev.x,ev.y);
-            auto const e = UserInteractionFB::CreateEventMouseButton(fFlatBufferBuilder,&pos,ev.which,ev.which == SDL_TOUCH_MOUSEID,b).Union();
-            sendUserInteractionEvent(e);
+            auto const e = UserInteractionFB::CreateEventMouseButton(fFlatBufferBuilder,&pos,ev.which,ev.which == SDL_TOUCH_MOUSEID,b);
+            sendUserInteractionEvent(UserInteractionFB::UserInteraction_EventMouseButton, e.Union());
         }
         break;
         case SDL_EVENT_TEXT_INPUT:
         {
             auto const ev = event.text;
             auto const t = fFlatBufferBuilder.CreateString(ev.text);
-            auto const e = UserInteractionFB::CreateEventTextInput(fFlatBufferBuilder,t).Union();
-            sendUserInteractionEvent(e);
+            auto const e = UserInteractionFB::CreateEventTextInput(fFlatBufferBuilder,t);
+            sendUserInteractionEvent(UserInteractionFB::UserInteraction_EventTextInput, e.Union());
         }
         break;
         //case SDL_EVENT_KEY_DOWN:
@@ -155,6 +160,14 @@ const char *App::step(bool &quit) {
 
 bool App::scheduleMpvCommandAsync2(const char *command, const char *arg1) {
     const char *cmd[] = {command, arg1, nullptr};
+    return !HANDLE_MPV_RETURN(mpv_command_async(fMpvHandle, 0, cmd));
+}
+bool App::scheduleMpvCommand2(const char *command, const char *arg1) {
+    const char *cmd[] = {command, arg1, nullptr};
+    return !HANDLE_MPV_RETURN(mpv_command(fMpvHandle, cmd));
+}
+bool App::scheduleMpvCommandAsync1(const char *command) {
+    const char *cmd[] = {command, nullptr};
     return !HANDLE_MPV_RETURN(mpv_command_async(fMpvHandle, 0, cmd));
 }
 
@@ -261,6 +274,18 @@ const char *App::setup(const char *inputFile, FILE *userInteractionOutput) {
     // (Separate from the normal event handling mechanism for the sake of
     //  users which run OpenGL on a different thread.)
     mpv_render_context_set_update_callback(fMpvRenderContext, onMpvRenderUpdate, this);
+
+    /*
+    if(!scheduleMpvCommandAsync1("keep-open")) {
+        return "unable to schedule command";
+    }
+    if(!scheduleMpvCommandAsync1("cursor-autohide-fs-only")) {
+        return "unable to schedule command";
+    }
+    if(!scheduleMpvCommand2("profile","low-latency")) {
+        return "unable to schedule profile command";
+    }
+    */
 
     if(!scheduleMpvCommandAsync2("loadfile", inputFile)) {
         return "unable to schedule loadfile command";

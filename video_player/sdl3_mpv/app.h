@@ -21,14 +21,18 @@ public: // needed in event handlers
     Uint32 fWakeupOnMpvEvents = 0;
 
 private:
-    void serializeUserInteractionEventFB(const uint8_t *&out,size_t &size, flatbuffers::Offset<void> e);
-    void sendUserInteractionEvent(flatbuffers::Offset<void> e);
+    void serializeUserInteractionEventFB(const uint8_t *&out,size_t &size, flatbuffers::Offset<UserInteractionFB::Event> e);
+    void sendUserInteractionEvent(UserInteractionFB::UserInteraction eventType, flatbuffers::Offset<void> e);
     void redraw();
     void teardown();
     void handleSdlEvent(SDL_Event &event);
     void processMpvEvents();
     // @return true on success
     bool scheduleMpvCommandAsync2(const char *command, const char *arg1);
+    // @return true on success
+    bool scheduleMpvCommand2(const char *command, const char *arg1);
+    // @return true on success
+    bool scheduleMpvCommandAsync1(const char *command);
     // @return true on failure
     static bool handleMpvRetr(int errorCode, const char *func, const char *filename, int line);
     // @return true on failure

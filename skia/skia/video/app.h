@@ -41,7 +41,7 @@ private:
     void loopSvg(CliOptions const &opts);
     void loopSkp(CliOptions const &opts);
     void dispatchUserInteractionEvents();
-    void handleUserInteractionEvent(UserInteractionFB::Event const &ev);
+    static void handleUserInteractionEvent(UserInteractionFB::Event const &ev);
 
     SkPaint fFontPaint;
     VectorCmdSkiaRenderer fVectorCmdSkiaRenderer;

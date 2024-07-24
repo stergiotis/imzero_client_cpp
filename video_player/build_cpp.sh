@@ -6,7 +6,7 @@ cd "$here"
 source env.sh
 
 flatc="../../contrib/flatbuffers/flatc"
-"$flatc" -o src --cpp spec/userInteraction.fbs
+"$flatc" -o src --cpp spec/userInteraction.fbs --reflect-types --reflect-names
 
 ./cmakelists.dhall
 
