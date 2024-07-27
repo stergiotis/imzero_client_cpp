@@ -338,7 +338,7 @@ if(l > 0) {
    auto font_ptr = (ImFont*)fontPtr;
    if(font_ptr == nullptr) {
       if(ImGui::GetIO().Fonts == nullptr) {
-	      return;
+          return;
       }
       font_ptr = ImGui::GetIO().Fonts->Fonts[0];
       if(font_ptr == nullptr) {
@@ -3080,7 +3080,8 @@ case 0x000000b8:
     bool r;
     bool p_open;
     {
-    auto r = ImGui::Begin(name, &p_open, flags);
+    p_open = true; /* see issue #5 */
+auto r = ImGui::Begin(name, &p_open, flags);
     sendEmptyString();
     sendValue<bool>(r);
     sendValue<bool>(p_open);
@@ -4870,7 +4871,8 @@ case 0x0000015c:
     bool r;
     bool p_open;
     {
-    auto r = ImGui::BeginPopupModal(name, &p_open, flags);
+    p_open = true; /* see issue #5 */
+auto r = ImGui::BeginPopupModal(name, &p_open, flags);
     sendEmptyString();
     sendValue<bool>(r);
     sendValue<bool>(p_open);
@@ -5487,7 +5489,8 @@ case 0x00000193:
     bool r;
     bool p_open;
     {
-    auto r = ImGui::BeginTabItem(label, &p_open, flags);
+    p_open = true; /* see issue #5 */
+auto r = ImGui::BeginTabItem(label, &p_open, flags);
     sendEmptyString();
     sendValue<bool>(r);
     sendValue<bool>(p_open);
