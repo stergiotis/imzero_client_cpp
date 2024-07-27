@@ -266,7 +266,7 @@ void ImGuiLayer::onPaint(SkSurface* surface) { ZoneScoped;
                 break;
             }
             case SaveFormatE_SVG: // fallthrough
-            case SaveFormatE_SVGNoFont: { ZoneScoped;
+            case SaveFormatE_SVG_TextAsPath: { ZoneScoped;
                 SkRect bounds = SkRect::MakeIWH(fWindow->width(), fWindow->height());
                 fVectorCmdSkiaRenderer.changeRenderMode(renderMode | RenderModeE_SVG);
 
@@ -283,9 +283,9 @@ void ImGuiLayer::onPaint(SkSurface* surface) { ZoneScoped;
                             fSvgBytesWritten = svgStream.bytesWritten();
                         }
                         break;
-                    case SaveFormatE_SVGNoFont:
+                    case SaveFormatE_SVG_TextAsPath:
                         {
-                            constexpr auto path = "/tmp/skiaBackend.nofont.svg";
+                            constexpr auto path = "/tmp/skiaBackend.textaspath.svg";
                             constexpr int flags = SkSVGCanvas::kConvertTextToPaths_Flag | SkSVGCanvas::kNoPrettyXML_Flag;
                             SkFILEWStream svgStream(path);
                             { // svg canvas may buffer commands, extra scope to ensure flush by RAII
