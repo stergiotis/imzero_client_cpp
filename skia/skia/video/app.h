@@ -56,5 +56,6 @@ private:
     uint64_t fFrame;
     double fPreviousTime;
     rawFrameOutputFormat fOutputFormat;
-    FILE *fUserInteractionFH = nullptr;
+    int fUserInteractionFd;
+    bool fDispatchInteractionEvents = false;
 };

@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <cstring>
 #include <fcntl.h>
+#include <csignal>
 
 #include "imgui.h"
 
@@ -152,6 +153,9 @@ static rawFrameOutputFormat resolveRawFrameOutputFormat(const char *name) {
 }
 
 int App::run(CliOptions &opts) {
+    // prevent SIGPIPE when writing frames or reading user interaction events
+    signal(SIGPIPE, SIG_IGN);
+
     sk_sp<SkFontMgr> fontMgr = nullptr;
     sk_sp<SkTypeface> typeface = nullptr;
     sk_sp<SkData> ttfData = nullptr;
@@ -255,6 +259,9 @@ int App::run(CliOptions &opts) {
 
         io.DisplaySize.x = wf;
         io.DisplaySize.y = hf;
+
+        io.WantCaptureKeyboard = true;
+        io.WantCaptureMouse = true;
     }
 
     if(opts.fffiInterpreter) {
@@ -278,32 +285,13 @@ int App::run(CliOptions &opts) {
     fBackgroundColor = SkColorSetARGB(clearColorImVec4.w * 255.0f, clearColorImVec4.x * 255.0f, clearColorImVec4.y * 255.0f, clearColorImVec4.z * 255.0f);
 
     if(opts.videoUserInteractionEventsInFile != nullptr && opts.videoUserInteractionEventsInFile[0] != '\0') {
-        auto userInteractionFd = open(opts.videoUserInteractionEventsInFile, O_RDONLY | O_NONBLOCK);
-        if(userInteractionFd == -1) {
+        // RDWR: having at least one writer will prevent SIG_PIPE
+        fUserInteractionFd = open(opts.videoUserInteractionEventsInFile, O_RDWR | O_NONBLOCK);
+        if(fUserInteractionFd == -1) {
             fprintf(stderr, "unable to open user interaction events in file %s: %s\n", opts.videoUserInteractionEventsInFile, strerror(errno));
             return 1;
         }
-        fUserInteractionFH = fdopen(userInteractionFd,"rb");
-        //fUserInteractionFH = fopen(opts.videoUserInteractionEventsInFile, "rb");
-        if(fUserInteractionFH == nullptr) {
-            fprintf(stderr, "unable to open user interaction events in file %s: %s\n", opts.videoUserInteractionEventsInFile, strerror(errno));
-            return 1;
-        }
-
-        auto const fd = fileno(fUserInteractionFH);
-        auto const flags = fcntl(fd, F_GETFL);
-        if(flags < 0) {
-            fprintf(stderr, "unable to get file status flags for file %s: %s\n", opts.videoUserInteractionEventsInFile, strerror(errno));
-            return 1;
-        }
-        if(fcntl(fd, F_SETFL, flags | O_NONBLOCK) < 0) {
-            fprintf(stderr, "unable to set file status flag O_NONBLOCK file %s: %s\n", opts.videoUserInteractionEventsInFile, strerror(errno));
-            return 1;
-        }
-        //if(setvbuf(fUserInteractionFH,nullptr,_IONBF,0) != 0) {
-        //    fprintf(stderr, "unable to set buffering for file %s: %s\n", opts.videoUserInteractionEventsInFile, strerror(errno));
-        //    return 1;
-        //}
+        fDispatchInteractionEvents = true;
     }
 
     switch(fOutputFormat) {
@@ -652,9 +640,9 @@ void App::loopSkp(const CliOptions &opts) {
     }
 }
 App::~App() {
-    if(fUserInteractionFH != nullptr) {
-        fclose(fUserInteractionFH);
-        fUserInteractionFH = nullptr;
+    if(fDispatchInteractionEvents) {
+        close(fUserInteractionFd);
+        fDispatchInteractionEvents = false;
     }
 }
 
@@ -666,10 +654,9 @@ void App::dispatchUserInteractionEvents() {
     static uint32_t bytesToRead = 0;
     constexpr const int sizeOfLengthPrefix = 4;
 
-    if(fUserInteractionFH == nullptr) {
+    if(!fDispatchInteractionEvents) {
         return;
     }
-
     while(true) {
         switch(state) {
             case 0: // init
@@ -684,7 +671,7 @@ void App::dispatchUserInteractionEvents() {
                 break;
             case 1: // read flatbuffers message length
             {
-                auto r = fread(p,1,bytesToRead,fUserInteractionFH);
+                auto r = read(fUserInteractionFd,p,bytesToRead);
                 if(r <= 0) {
                     return;
                 }
@@ -705,7 +692,7 @@ void App::dispatchUserInteractionEvents() {
             case 2: // read flatbuffers message
             {
                 //fprintf(stderr, "reading message of size %d\n", (int)bytesToRead);
-                auto r = fread(p,1,bytesToRead,fUserInteractionFH);
+                auto r = read(fUserInteractionFd,p,bytesToRead);
                 bytesToRead -= r;
                 p += r;
                 if(bytesToRead == 0) {
@@ -729,10 +716,255 @@ void App::dispatchUserInteractionEvents() {
         }
     }
 }
+static ImGuiKey keyCodeToImGuiKey(UserInteractionFB::KeyCode keyCode) {
+    switch(keyCode) {
+        case UserInteractionFB::KeyCode_Key_Tab:
+            return ImGuiKey_Tab;
+        case UserInteractionFB::KeyCode_Key_LeftArrow:
+            return ImGuiKey_LeftArrow;
+        case UserInteractionFB::KeyCode_Key_RightArrow:
+            return ImGuiKey_RightArrow;
+        case UserInteractionFB::KeyCode_Key_UpArrow:
+            return ImGuiKey_UpArrow;
+        case UserInteractionFB::KeyCode_Key_DownArrow:
+            return ImGuiKey_DownArrow;
+        case UserInteractionFB::KeyCode_Key_PageUp:
+            return ImGuiKey_PageUp;
+        case UserInteractionFB::KeyCode_Key_PageDown:
+            return ImGuiKey_PageDown;
+        case UserInteractionFB::KeyCode_Key_Home:
+            return ImGuiKey_Home;
+        case UserInteractionFB::KeyCode_Key_End:
+            return ImGuiKey_End;
+        case UserInteractionFB::KeyCode_Key_Insert:
+            return ImGuiKey_Insert;
+        case UserInteractionFB::KeyCode_Key_Delete:
+            return ImGuiKey_Delete;
+        case UserInteractionFB::KeyCode_Key_Backspace:
+            return ImGuiKey_Backspace;
+        case UserInteractionFB::KeyCode_Key_Space:
+            return ImGuiKey_Space;
+        case UserInteractionFB::KeyCode_Key_Enter:
+            return ImGuiKey_Enter;
+        case UserInteractionFB::KeyCode_Key_Escape:
+            return ImGuiKey_Escape;
+        case UserInteractionFB::KeyCode_Key_Apostrophe:
+            return ImGuiKey_Apostrophe;
+        case UserInteractionFB::KeyCode_Key_Comma:
+            return ImGuiKey_Comma;
+        case UserInteractionFB::KeyCode_Key_Minus:
+            return ImGuiKey_Minus;
+        case UserInteractionFB::KeyCode_Key_Period:
+            return ImGuiKey_Period;
+        case UserInteractionFB::KeyCode_Key_Slash:
+            return ImGuiKey_Slash;
+        case UserInteractionFB::KeyCode_Key_Semicolon:
+            return ImGuiKey_Semicolon;
+        case UserInteractionFB::KeyCode_Key_Equal:
+            return ImGuiKey_Equal;
+        case UserInteractionFB::KeyCode_Key_LeftBracket:
+            return ImGuiKey_LeftBracket;
+        case UserInteractionFB::KeyCode_Key_Backslash:
+            return ImGuiKey_Backslash;
+        case UserInteractionFB::KeyCode_Key_RightBracket:
+            return ImGuiKey_RightBracket;
+        case UserInteractionFB::KeyCode_Key_GraveAccent:
+            return ImGuiKey_GraveAccent;
+        case UserInteractionFB::KeyCode_Key_CapsLock:
+            return ImGuiKey_CapsLock;
+        case UserInteractionFB::KeyCode_Key_ScrollLock:
+            return ImGuiKey_ScrollLock;
+        case UserInteractionFB::KeyCode_Key_NumLock:
+            return ImGuiKey_NumLock;
+        case UserInteractionFB::KeyCode_Key_PrintScreen:
+            return ImGuiKey_PrintScreen;
+        case UserInteractionFB::KeyCode_Key_Pause:
+            return ImGuiKey_Pause;
+        case UserInteractionFB::KeyCode_Key_Keypad0:
+            return ImGuiKey_Keypad0;
+        case UserInteractionFB::KeyCode_Key_Keypad1:
+            return ImGuiKey_Keypad1;
+        case UserInteractionFB::KeyCode_Key_Keypad2:
+            return ImGuiKey_Keypad2;
+        case UserInteractionFB::KeyCode_Key_Keypad3:
+            return ImGuiKey_Keypad3;
+        case UserInteractionFB::KeyCode_Key_Keypad4:
+            return ImGuiKey_Keypad4;
+        case UserInteractionFB::KeyCode_Key_Keypad5:
+            return ImGuiKey_Keypad5;
+        case UserInteractionFB::KeyCode_Key_Keypad6:
+            return ImGuiKey_Keypad6;
+        case UserInteractionFB::KeyCode_Key_Keypad7:
+            return ImGuiKey_Keypad7;
+        case UserInteractionFB::KeyCode_Key_Keypad8:
+            return ImGuiKey_Keypad8;
+        case UserInteractionFB::KeyCode_Key_Keypad9:
+            return ImGuiKey_Keypad9;
+        case UserInteractionFB::KeyCode_Key_KeypadDecimal:
+            return ImGuiKey_KeypadDecimal;
+        case UserInteractionFB::KeyCode_Key_KeypadDivide:
+            return ImGuiKey_KeypadDivide;
+        case UserInteractionFB::KeyCode_Key_KeypadMultiply:
+            return ImGuiKey_KeypadMultiply;
+        case UserInteractionFB::KeyCode_Key_KeypadSubtract:
+            return ImGuiKey_KeypadSubtract;
+        case UserInteractionFB::KeyCode_Key_KeypadAdd:
+            return ImGuiKey_KeypadAdd;
+        case UserInteractionFB::KeyCode_Key_KeypadEnter:
+            return ImGuiKey_KeypadEnter;
+        case UserInteractionFB::KeyCode_Key_KeypadEqual:
+            return ImGuiKey_KeypadEqual;
+        case UserInteractionFB::KeyCode_Key_LeftCtrl:
+            return ImGuiKey_LeftCtrl;
+        case UserInteractionFB::KeyCode_Key_LeftShift:
+            return ImGuiKey_LeftShift;
+        case UserInteractionFB::KeyCode_Key_LeftAlt:
+            return ImGuiKey_LeftAlt;
+        case UserInteractionFB::KeyCode_Key_LeftSuper:
+            return ImGuiKey_LeftSuper;
+        case UserInteractionFB::KeyCode_Key_RightCtrl:
+            return ImGuiKey_RightCtrl;
+        case UserInteractionFB::KeyCode_Key_RightShift:
+            return ImGuiKey_RightShift;
+        case UserInteractionFB::KeyCode_Key_RightAlt:
+            return ImGuiKey_RightAlt;
+        case UserInteractionFB::KeyCode_Key_RightSuper:
+            return ImGuiKey_RightSuper;
+        case UserInteractionFB::KeyCode_Key_Menu:
+            return ImGuiKey_Menu;
+        case UserInteractionFB::KeyCode_Key_0:
+            return ImGuiKey_0;
+        case UserInteractionFB::KeyCode_Key_1:
+            return ImGuiKey_1;
+        case UserInteractionFB::KeyCode_Key_2:
+            return ImGuiKey_2;
+        case UserInteractionFB::KeyCode_Key_3:
+            return ImGuiKey_3;
+        case UserInteractionFB::KeyCode_Key_4:
+            return ImGuiKey_4;
+        case UserInteractionFB::KeyCode_Key_5:
+            return ImGuiKey_5;
+        case UserInteractionFB::KeyCode_Key_6:
+            return ImGuiKey_6;
+        case UserInteractionFB::KeyCode_Key_7:
+            return ImGuiKey_7;
+        case UserInteractionFB::KeyCode_Key_8:
+            return ImGuiKey_8;
+        case UserInteractionFB::KeyCode_Key_9:
+            return ImGuiKey_9;
+        case UserInteractionFB::KeyCode_Key_A:
+            return ImGuiKey_A;
+        case UserInteractionFB::KeyCode_Key_B:
+            return ImGuiKey_B;
+        case UserInteractionFB::KeyCode_Key_C:
+            return ImGuiKey_C;
+        case UserInteractionFB::KeyCode_Key_D:
+            return ImGuiKey_D;
+        case UserInteractionFB::KeyCode_Key_E:
+            return ImGuiKey_E;
+        case UserInteractionFB::KeyCode_Key_F:
+            return ImGuiKey_F;
+        case UserInteractionFB::KeyCode_Key_G:
+            return ImGuiKey_G;
+        case UserInteractionFB::KeyCode_Key_H:
+            return ImGuiKey_H;
+        case UserInteractionFB::KeyCode_Key_I:
+            return ImGuiKey_I;
+        case UserInteractionFB::KeyCode_Key_J:
+            return ImGuiKey_J;
+        case UserInteractionFB::KeyCode_Key_K:
+            return ImGuiKey_K;
+        case UserInteractionFB::KeyCode_Key_L:
+            return ImGuiKey_L;
+        case UserInteractionFB::KeyCode_Key_M:
+            return ImGuiKey_M;
+        case UserInteractionFB::KeyCode_Key_N:
+            return ImGuiKey_N;
+        case UserInteractionFB::KeyCode_Key_O:
+            return ImGuiKey_O;
+        case UserInteractionFB::KeyCode_Key_P:
+            return ImGuiKey_P;
+        case UserInteractionFB::KeyCode_Key_Q:
+            return ImGuiKey_Q;
+        case UserInteractionFB::KeyCode_Key_R:
+            return ImGuiKey_R;
+        case UserInteractionFB::KeyCode_Key_S:
+            return ImGuiKey_S;
+        case UserInteractionFB::KeyCode_Key_T:
+            return ImGuiKey_T;
+        case UserInteractionFB::KeyCode_Key_U:
+            return ImGuiKey_U;
+        case UserInteractionFB::KeyCode_Key_V:
+            return ImGuiKey_V;
+        case UserInteractionFB::KeyCode_Key_W:
+            return ImGuiKey_W;
+        case UserInteractionFB::KeyCode_Key_X:
+            return ImGuiKey_X;
+        case UserInteractionFB::KeyCode_Key_Y:
+            return ImGuiKey_Y;
+        case UserInteractionFB::KeyCode_Key_Z:
+            return ImGuiKey_Z;
+        case UserInteractionFB::KeyCode_Key_F1:
+            return ImGuiKey_F1;
+        case UserInteractionFB::KeyCode_Key_F2:
+            return ImGuiKey_F2;
+        case UserInteractionFB::KeyCode_Key_F3:
+            return ImGuiKey_F3;
+        case UserInteractionFB::KeyCode_Key_F4:
+            return ImGuiKey_F4;
+        case UserInteractionFB::KeyCode_Key_F5:
+            return ImGuiKey_F5;
+        case UserInteractionFB::KeyCode_Key_F6:
+            return ImGuiKey_F6;
+        case UserInteractionFB::KeyCode_Key_F7:
+            return ImGuiKey_F7;
+        case UserInteractionFB::KeyCode_Key_F8:
+            return ImGuiKey_F8;
+        case UserInteractionFB::KeyCode_Key_F9:
+            return ImGuiKey_F9;
+        case UserInteractionFB::KeyCode_Key_F10:
+            return ImGuiKey_F10;
+        case UserInteractionFB::KeyCode_Key_F11:
+            return ImGuiKey_F11;
+        case UserInteractionFB::KeyCode_Key_F12:
+            return ImGuiKey_F12;
+        case UserInteractionFB::KeyCode_Key_F13:
+            return ImGuiKey_F13;
+        case UserInteractionFB::KeyCode_Key_F14:
+            return ImGuiKey_F14;
+        case UserInteractionFB::KeyCode_Key_F15:
+            return ImGuiKey_F15;
+        case UserInteractionFB::KeyCode_Key_F16:
+            return ImGuiKey_F16;
+        case UserInteractionFB::KeyCode_Key_F17:
+            return ImGuiKey_F17;
+        case UserInteractionFB::KeyCode_Key_F18:
+            return ImGuiKey_F18;
+        case UserInteractionFB::KeyCode_Key_F19:
+            return ImGuiKey_F19;
+        case UserInteractionFB::KeyCode_Key_F20:
+            return ImGuiKey_F20;
+        case UserInteractionFB::KeyCode_Key_F21:
+            return ImGuiKey_F21;
+        case UserInteractionFB::KeyCode_Key_F22:
+            return ImGuiKey_F22;
+        case UserInteractionFB::KeyCode_Key_F23:
+            return ImGuiKey_F23;
+        case UserInteractionFB::KeyCode_Key_F24:
+            return ImGuiKey_F24;
+        case UserInteractionFB::KeyCode_Key_AppBack:
+            return ImGuiKey_AppBack;
+        case UserInteractionFB::KeyCode_Key_AppForward:
+            return ImGuiKey_AppForward;
+        case UserInteractionFB::KeyCode_Key_None: // fallthrough
+        default:
+            return ImGuiKey_None;
+    }
+}
 
 void App::handleUserInteractionEvent(UserInteractionFB::Event const &ev) {
     ImGuiIO& io = ImGui::GetIO();
-    fprintf(stderr, "handling user interaction event %s\n",EnumNameUserInteraction(ev.event_type()));
+    //fprintf(stderr, "handling user interaction event %s\n",EnumNameUserInteraction(ev.event_type()));
     switch(ev.event_type()) {
         case UserInteractionFB::UserInteraction_NONE:
             break;
@@ -771,6 +1003,19 @@ void App::handleUserInteractionEvent(UserInteractionFB::Event const &ev) {
                 io.AddMouseButtonEvent(mb, d);
                 //bd->MouseButtonsDown = d ? (bd->MouseButtonsDown | (1 << mb)) : (bd->MouseButtonsDown & ~(1 << mb));
             }
+        }
+        break;
+        case UserInteractionFB::UserInteraction_EventKeyboard:
+        {
+           auto const e = ev.event_as_EventKeyboard();
+           auto const keyMod = e->modifiers();
+           auto const key= keyCodeToImGuiKey(e->code());
+           io.AddKeyEvent(ImGuiMod_Ctrl, (keyMod & UserInteractionFB::KeyModifiers_Ctrl) != 0);
+           io.AddKeyEvent(ImGuiMod_Shift, (keyMod & UserInteractionFB::KeyModifiers_Shift) != 0);
+           io.AddKeyEvent(ImGuiMod_Alt, (keyMod & UserInteractionFB::KeyModifiers_Alt) != 0);
+           io.AddKeyEvent(ImGuiMod_Super, (keyMod & UserInteractionFB::KeyModifiers_Super) != 0);
+           io.AddKeyEvent(key, e->is_down());
+           io.SetKeyEventNativeData(key,static_cast<int>(e->native_sym()),static_cast<int>(e->scancode()));
         }
         break;
         case UserInteractionFB::UserInteraction_EventTextInput:

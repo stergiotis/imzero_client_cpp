@@ -5,6 +5,251 @@
 #define HANDLE_MPV_RETURN(errorCode) handleMpvRetr((errorCode),__func__,__FILE__,__LINE__)
 #define HANDLE_SDL_RETURN(errorCode) handleSdlRetr((errorCode),__func__,__FILE__,__LINE__)
 
+static UserInteractionFB::KeyCode keycodeFromSdl3Code(SDL_Keycode keycode) {
+    switch(keycode) {
+        case SDLK_TAB:
+            return UserInteractionFB::KeyCode_Key_Tab;
+        case SDLK_LEFT:
+            return UserInteractionFB::KeyCode_Key_LeftArrow;
+        case SDLK_RIGHT:
+            return UserInteractionFB::KeyCode_Key_RightArrow;
+        case SDLK_UP:
+            return UserInteractionFB::KeyCode_Key_UpArrow;
+        case SDLK_DOWN:
+            return UserInteractionFB::KeyCode_Key_DownArrow;
+        case SDLK_PAGEUP:
+            return UserInteractionFB::KeyCode_Key_PageUp;
+        case SDLK_PAGEDOWN:
+            return UserInteractionFB::KeyCode_Key_PageDown;
+        case SDLK_HOME:
+            return UserInteractionFB::KeyCode_Key_Home;
+        case SDLK_END:
+            return UserInteractionFB::KeyCode_Key_End;
+        case SDLK_INSERT:
+            return UserInteractionFB::KeyCode_Key_Insert;
+        case SDLK_DELETE:
+            return UserInteractionFB::KeyCode_Key_Delete;
+        case SDLK_BACKSPACE:
+            return UserInteractionFB::KeyCode_Key_Backspace;
+        case SDLK_SPACE:
+            return UserInteractionFB::KeyCode_Key_Space;
+        case SDLK_RETURN:
+            return UserInteractionFB::KeyCode_Key_Enter;
+        case SDLK_ESCAPE:
+            return UserInteractionFB::KeyCode_Key_Escape;
+        case SDLK_APOSTROPHE:
+            return UserInteractionFB::KeyCode_Key_Apostrophe;
+        case SDLK_COMMA:
+            return UserInteractionFB::KeyCode_Key_Comma;
+        case SDLK_MINUS:
+            return UserInteractionFB::KeyCode_Key_Minus;
+        case SDLK_PERIOD:
+            return UserInteractionFB::KeyCode_Key_Period;
+        case SDLK_SLASH:
+            return UserInteractionFB::KeyCode_Key_Slash;
+        case SDLK_SEMICOLON:
+            return UserInteractionFB::KeyCode_Key_Semicolon;
+        case SDLK_EQUALS:
+            return UserInteractionFB::KeyCode_Key_Equal;
+        case SDLK_LEFTBRACKET:
+            return UserInteractionFB::KeyCode_Key_LeftBracket;
+        case SDLK_BACKSLASH:
+            return UserInteractionFB::KeyCode_Key_Backslash;
+        case SDLK_RIGHTBRACKET:
+            return UserInteractionFB::KeyCode_Key_RightBracket;
+        case SDLK_GRAVE:
+            return UserInteractionFB::KeyCode_Key_GraveAccent;
+        case SDLK_CAPSLOCK:
+            return UserInteractionFB::KeyCode_Key_CapsLock;
+        case SDLK_SCROLLLOCK:
+            return UserInteractionFB::KeyCode_Key_ScrollLock;
+        case SDLK_NUMLOCKCLEAR:
+            return UserInteractionFB::KeyCode_Key_NumLock;
+        case SDLK_PRINTSCREEN:
+            return UserInteractionFB::KeyCode_Key_PrintScreen;
+        case SDLK_PAUSE:
+            return UserInteractionFB::KeyCode_Key_Pause;
+        case SDLK_KP_0:
+            return UserInteractionFB::KeyCode_Key_Keypad0;
+        case SDLK_KP_1:
+            return UserInteractionFB::KeyCode_Key_Keypad1;
+        case SDLK_KP_2:
+            return UserInteractionFB::KeyCode_Key_Keypad2;
+        case SDLK_KP_3:
+            return UserInteractionFB::KeyCode_Key_Keypad3;
+        case SDLK_KP_4:
+            return UserInteractionFB::KeyCode_Key_Keypad4;
+        case SDLK_KP_5:
+            return UserInteractionFB::KeyCode_Key_Keypad5;
+        case SDLK_KP_6:
+            return UserInteractionFB::KeyCode_Key_Keypad6;
+        case SDLK_KP_7:
+            return UserInteractionFB::KeyCode_Key_Keypad7;
+        case SDLK_KP_8:
+            return UserInteractionFB::KeyCode_Key_Keypad8;
+        case SDLK_KP_9:
+            return UserInteractionFB::KeyCode_Key_Keypad9;
+        case SDLK_KP_PERIOD:
+            return UserInteractionFB::KeyCode_Key_KeypadDecimal;
+        case SDLK_KP_DIVIDE:
+            return UserInteractionFB::KeyCode_Key_KeypadDivide;
+        case SDLK_KP_MULTIPLY:
+            return UserInteractionFB::KeyCode_Key_KeypadMultiply;
+        case SDLK_KP_MINUS:
+            return UserInteractionFB::KeyCode_Key_KeypadSubtract;
+        case SDLK_KP_PLUS:
+            return UserInteractionFB::KeyCode_Key_KeypadAdd;
+        case SDLK_KP_ENTER:
+            return UserInteractionFB::KeyCode_Key_KeypadEnter;
+        case SDLK_KP_EQUALS:
+            return UserInteractionFB::KeyCode_Key_KeypadEqual;
+        case SDLK_LCTRL:
+            return UserInteractionFB::KeyCode_Key_LeftCtrl;
+        case SDLK_LSHIFT:
+            return UserInteractionFB::KeyCode_Key_LeftShift;
+        case SDLK_LALT:
+            return UserInteractionFB::KeyCode_Key_LeftAlt;
+        case SDLK_LGUI:
+            return UserInteractionFB::KeyCode_Key_LeftSuper;
+        case SDLK_RCTRL:
+            return UserInteractionFB::KeyCode_Key_RightCtrl;
+        case SDLK_RSHIFT:
+            return UserInteractionFB::KeyCode_Key_RightShift;
+        case SDLK_RALT:
+            return UserInteractionFB::KeyCode_Key_RightAlt;
+        case SDLK_RGUI:
+            return UserInteractionFB::KeyCode_Key_RightSuper;
+        case SDLK_APPLICATION:
+            return UserInteractionFB::KeyCode_Key_Menu;
+        case SDLK_0:
+            return UserInteractionFB::KeyCode_Key_0;
+        case SDLK_1:
+            return UserInteractionFB::KeyCode_Key_1;
+        case SDLK_2:
+            return UserInteractionFB::KeyCode_Key_2;
+        case SDLK_3:
+            return UserInteractionFB::KeyCode_Key_3;
+        case SDLK_4:
+            return UserInteractionFB::KeyCode_Key_4;
+        case SDLK_5:
+            return UserInteractionFB::KeyCode_Key_5;
+        case SDLK_6:
+            return UserInteractionFB::KeyCode_Key_6;
+        case SDLK_7:
+            return UserInteractionFB::KeyCode_Key_7;
+        case SDLK_8:
+            return UserInteractionFB::KeyCode_Key_8;
+        case SDLK_9:
+            return UserInteractionFB::KeyCode_Key_9;
+        case SDLK_a:
+            return UserInteractionFB::KeyCode_Key_A;
+        case SDLK_b:
+            return UserInteractionFB::KeyCode_Key_B;
+        case SDLK_c:
+            return UserInteractionFB::KeyCode_Key_C;
+        case SDLK_d:
+            return UserInteractionFB::KeyCode_Key_D;
+        case SDLK_e:
+            return UserInteractionFB::KeyCode_Key_E;
+        case SDLK_f:
+            return UserInteractionFB::KeyCode_Key_F;
+        case SDLK_g:
+            return UserInteractionFB::KeyCode_Key_G;
+        case SDLK_h:
+            return UserInteractionFB::KeyCode_Key_H;
+        case SDLK_i:
+            return UserInteractionFB::KeyCode_Key_I;
+        case SDLK_j:
+            return UserInteractionFB::KeyCode_Key_J;
+        case SDLK_k:
+            return UserInteractionFB::KeyCode_Key_K;
+        case SDLK_l:
+            return UserInteractionFB::KeyCode_Key_L;
+        case SDLK_m:
+            return UserInteractionFB::KeyCode_Key_M;
+        case SDLK_n:
+            return UserInteractionFB::KeyCode_Key_N;
+        case SDLK_o:
+            return UserInteractionFB::KeyCode_Key_O;
+        case SDLK_p:
+            return UserInteractionFB::KeyCode_Key_P;
+        case SDLK_q:
+            return UserInteractionFB::KeyCode_Key_Q;
+        case SDLK_r:
+            return UserInteractionFB::KeyCode_Key_R;
+        case SDLK_s:
+            return UserInteractionFB::KeyCode_Key_S;
+        case SDLK_t:
+            return UserInteractionFB::KeyCode_Key_T;
+        case SDLK_u:
+            return UserInteractionFB::KeyCode_Key_U;
+        case SDLK_v:
+            return UserInteractionFB::KeyCode_Key_V;
+        case SDLK_w:
+            return UserInteractionFB::KeyCode_Key_W;
+        case SDLK_x:
+            return UserInteractionFB::KeyCode_Key_X;
+        case SDLK_y:
+            return UserInteractionFB::KeyCode_Key_Y;
+        case SDLK_z:
+            return UserInteractionFB::KeyCode_Key_Z;
+        case SDLK_F1:
+            return UserInteractionFB::KeyCode_Key_F1;
+        case SDLK_F2:
+            return UserInteractionFB::KeyCode_Key_F2;
+        case SDLK_F3:
+            return UserInteractionFB::KeyCode_Key_F3;
+        case SDLK_F4:
+            return UserInteractionFB::KeyCode_Key_F4;
+        case SDLK_F5:
+            return UserInteractionFB::KeyCode_Key_F5;
+        case SDLK_F6:
+            return UserInteractionFB::KeyCode_Key_F6;
+        case SDLK_F7:
+            return UserInteractionFB::KeyCode_Key_F7;
+        case SDLK_F8:
+            return UserInteractionFB::KeyCode_Key_F8;
+        case SDLK_F9:
+            return UserInteractionFB::KeyCode_Key_F9;
+        case SDLK_F10:
+            return UserInteractionFB::KeyCode_Key_F10;
+        case SDLK_F11:
+            return UserInteractionFB::KeyCode_Key_F11;
+        case SDLK_F12:
+            return UserInteractionFB::KeyCode_Key_F12;
+        case SDLK_F13:
+            return UserInteractionFB::KeyCode_Key_F13;
+        case SDLK_F14:
+            return UserInteractionFB::KeyCode_Key_F14;
+        case SDLK_F15:
+            return UserInteractionFB::KeyCode_Key_F15;
+        case SDLK_F16:
+            return UserInteractionFB::KeyCode_Key_F16;
+        case SDLK_F17:
+            return UserInteractionFB::KeyCode_Key_F17;
+        case SDLK_F18:
+            return UserInteractionFB::KeyCode_Key_F18;
+        case SDLK_F19:
+            return UserInteractionFB::KeyCode_Key_F19;
+        case SDLK_F20:
+            return UserInteractionFB::KeyCode_Key_F20;
+        case SDLK_F21:
+            return UserInteractionFB::KeyCode_Key_F21;
+        case SDLK_F22:
+            return UserInteractionFB::KeyCode_Key_F22;
+        case SDLK_F23:
+            return UserInteractionFB::KeyCode_Key_F23;
+        case SDLK_F24:
+            return UserInteractionFB::KeyCode_Key_F24;
+        case SDLK_AC_BACK:
+            return UserInteractionFB::KeyCode_Key_AppBack;
+        case SDLK_AC_FORWARD:
+            return UserInteractionFB::KeyCode_Key_AppForward;
+        default:
+            return UserInteractionFB::KeyCode_Key_None;
+    }
+}
+
 static void *getProAddressMpv(void *fn_ctx, const char *name) {
     return reinterpret_cast<void *>(SDL_GL_GetProcAddress(name));
 }
@@ -95,6 +340,20 @@ void App::handleSdlEvent(SDL_Event &event) {
             sendUserInteractionEvent(UserInteractionFB::UserInteraction_EventTextInput, e.Union());
         }
         break;
+        case SDL_EVENT_KEY_DOWN: // fallthrough
+        case SDL_EVENT_KEY_UP:
+        {
+            auto const ev = event.key;
+            auto const keyModSdl = ev.keysym.mod;
+            auto mod = UserInteractionFB::KeyModifiers_None;
+            mod = static_cast<UserInteractionFB::KeyModifiers>(static_cast<uint8_t>(mod) | static_cast<uint8_t>((keyModSdl & SDL_KMOD_CTRL) ? UserInteractionFB::KeyModifiers_Ctrl : UserInteractionFB::KeyModifiers_None));
+            mod = static_cast<UserInteractionFB::KeyModifiers>(static_cast<uint8_t>(mod) | static_cast<uint8_t>((keyModSdl & SDL_KMOD_SHIFT) ? UserInteractionFB::KeyModifiers_Shift : UserInteractionFB::KeyModifiers_None));
+            mod = static_cast<UserInteractionFB::KeyModifiers>(static_cast<uint8_t>(mod) | static_cast<uint8_t>((keyModSdl & SDL_KMOD_ALT) ? UserInteractionFB::KeyModifiers_Alt : UserInteractionFB::KeyModifiers_None));
+            mod = static_cast<UserInteractionFB::KeyModifiers>(static_cast<uint8_t>(mod) | static_cast<uint8_t>((keyModSdl & SDL_KMOD_GUI) ? UserInteractionFB::KeyModifiers_Super : UserInteractionFB::KeyModifiers_None));
+            auto const e = UserInteractionFB::CreateEventKeyboard(fFlatBufferBuilder, mod, keycodeFromSdl3Code(ev.keysym.sym), event.type == SDL_EVENT_KEY_DOWN,ev.keysym.sym,ev.keysym.scancode);
+            sendUserInteractionEvent(UserInteractionFB::UserInteraction_EventKeyboard,e.Union());
+        }
+        break;
         //case SDL_EVENT_KEY_DOWN:
         //case SDL_EVENT_KEY_UP:
         //{
@@ -137,6 +396,7 @@ const char *App::step(bool &quit) {
                 printf("attempting to save screenshot to %s\n", cmd_scr[1]);
                 mpv_command_async(fMpvHandle, 0, cmd_scr);
             }
+            handleSdlEvent(event);
             break;
         default:
             // Happens when there is new work for the render thread (such as
@@ -295,6 +555,7 @@ const char *App::setup(const char *inputFile, FILE *userInteractionOutput) {
                 //                       "vo","x11",
                // "vo","xv",
                                        "idle","yes",
+                                       //"fs","yes",
                 //                       "force-window","yes",
                                        nullptr};
         for(int i=0; optionsString[i] != nullptr; i+=2) {

@@ -37,6 +37,9 @@ struct EventMouseButtonBuilder;
 struct EventTextInput;
 struct EventTextInputBuilder;
 
+struct EventKeyboard;
+struct EventKeyboardBuilder;
+
 struct Event;
 struct EventBuilder;
 
@@ -55,6 +58,8 @@ inline const ::flatbuffers::TypeTable *EventMouseWheelTypeTable();
 inline const ::flatbuffers::TypeTable *EventMouseButtonTypeTable();
 
 inline const ::flatbuffers::TypeTable *EventTextInputTypeTable();
+
+inline const ::flatbuffers::TypeTable *EventKeyboardTypeTable();
 
 inline const ::flatbuffers::TypeTable *EventTypeTable();
 
@@ -130,41 +135,471 @@ inline const char *EnumNameMouseButtonEventType(MouseButtonEventType e) {
   return EnumNamesMouseButtonEventType()[index];
 }
 
+enum KeyModifiers : uint8_t {
+  KeyModifiers_None = 0,
+  KeyModifiers_Ctrl = 1,
+  KeyModifiers_Shift = 2,
+  KeyModifiers_Alt = 4,
+  KeyModifiers_Super = 8,
+  KeyModifiers_MIN = KeyModifiers_None,
+  KeyModifiers_MAX = KeyModifiers_Super
+};
+
+inline const KeyModifiers (&EnumValuesKeyModifiers())[5] {
+  static const KeyModifiers values[] = {
+    KeyModifiers_None,
+    KeyModifiers_Ctrl,
+    KeyModifiers_Shift,
+    KeyModifiers_Alt,
+    KeyModifiers_Super
+  };
+  return values;
+}
+
+inline const char * const *EnumNamesKeyModifiers() {
+  static const char * const names[10] = {
+    "None",
+    "Ctrl",
+    "Shift",
+    "",
+    "Alt",
+    "",
+    "",
+    "",
+    "Super",
+    nullptr
+  };
+  return names;
+}
+
+inline const char *EnumNameKeyModifiers(KeyModifiers e) {
+  if (::flatbuffers::IsOutRange(e, KeyModifiers_None, KeyModifiers_Super)) return "";
+  const size_t index = static_cast<size_t>(e);
+  return EnumNamesKeyModifiers()[index];
+}
+
+enum KeyCode : uint32_t {
+  KeyCode_Key_None = 0,
+  KeyCode_Key_Tab = 1,
+  KeyCode_Key_LeftArrow = 2,
+  KeyCode_Key_RightArrow = 3,
+  KeyCode_Key_UpArrow = 4,
+  KeyCode_Key_DownArrow = 5,
+  KeyCode_Key_PageUp = 6,
+  KeyCode_Key_PageDown = 7,
+  KeyCode_Key_Home = 8,
+  KeyCode_Key_End = 9,
+  KeyCode_Key_Insert = 10,
+  KeyCode_Key_Delete = 11,
+  KeyCode_Key_Backspace = 12,
+  KeyCode_Key_Space = 13,
+  KeyCode_Key_Enter = 14,
+  KeyCode_Key_Escape = 15,
+  KeyCode_Key_Apostrophe = 16,
+  KeyCode_Key_Comma = 17,
+  KeyCode_Key_Minus = 18,
+  KeyCode_Key_Period = 19,
+  KeyCode_Key_Slash = 20,
+  KeyCode_Key_Semicolon = 21,
+  KeyCode_Key_Equal = 22,
+  KeyCode_Key_LeftBracket = 23,
+  KeyCode_Key_Backslash = 24,
+  KeyCode_Key_RightBracket = 25,
+  KeyCode_Key_GraveAccent = 26,
+  KeyCode_Key_CapsLock = 27,
+  KeyCode_Key_ScrollLock = 28,
+  KeyCode_Key_NumLock = 29,
+  KeyCode_Key_PrintScreen = 30,
+  KeyCode_Key_Pause = 31,
+  KeyCode_Key_Keypad0 = 32,
+  KeyCode_Key_Keypad1 = 33,
+  KeyCode_Key_Keypad2 = 34,
+  KeyCode_Key_Keypad3 = 35,
+  KeyCode_Key_Keypad4 = 36,
+  KeyCode_Key_Keypad5 = 37,
+  KeyCode_Key_Keypad6 = 38,
+  KeyCode_Key_Keypad7 = 39,
+  KeyCode_Key_Keypad8 = 40,
+  KeyCode_Key_Keypad9 = 41,
+  KeyCode_Key_KeypadDecimal = 42,
+  KeyCode_Key_KeypadDivide = 43,
+  KeyCode_Key_KeypadMultiply = 44,
+  KeyCode_Key_KeypadSubtract = 45,
+  KeyCode_Key_KeypadAdd = 46,
+  KeyCode_Key_KeypadEnter = 47,
+  KeyCode_Key_KeypadEqual = 48,
+  KeyCode_Key_LeftCtrl = 49,
+  KeyCode_Key_LeftShift = 50,
+  KeyCode_Key_LeftAlt = 51,
+  KeyCode_Key_LeftSuper = 52,
+  KeyCode_Key_RightCtrl = 53,
+  KeyCode_Key_RightShift = 54,
+  KeyCode_Key_RightAlt = 55,
+  KeyCode_Key_RightSuper = 56,
+  KeyCode_Key_Menu = 57,
+  KeyCode_Key_0 = 58,
+  KeyCode_Key_1 = 59,
+  KeyCode_Key_2 = 60,
+  KeyCode_Key_3 = 61,
+  KeyCode_Key_4 = 62,
+  KeyCode_Key_5 = 63,
+  KeyCode_Key_6 = 64,
+  KeyCode_Key_7 = 65,
+  KeyCode_Key_8 = 66,
+  KeyCode_Key_9 = 67,
+  KeyCode_Key_A = 68,
+  KeyCode_Key_B = 69,
+  KeyCode_Key_C = 70,
+  KeyCode_Key_D = 71,
+  KeyCode_Key_E = 72,
+  KeyCode_Key_F = 73,
+  KeyCode_Key_G = 74,
+  KeyCode_Key_H = 75,
+  KeyCode_Key_I = 76,
+  KeyCode_Key_J = 77,
+  KeyCode_Key_K = 78,
+  KeyCode_Key_L = 79,
+  KeyCode_Key_M = 80,
+  KeyCode_Key_N = 81,
+  KeyCode_Key_O = 82,
+  KeyCode_Key_P = 83,
+  KeyCode_Key_Q = 84,
+  KeyCode_Key_R = 85,
+  KeyCode_Key_S = 86,
+  KeyCode_Key_T = 87,
+  KeyCode_Key_U = 88,
+  KeyCode_Key_V = 89,
+  KeyCode_Key_W = 90,
+  KeyCode_Key_X = 91,
+  KeyCode_Key_Y = 92,
+  KeyCode_Key_Z = 93,
+  KeyCode_Key_F1 = 94,
+  KeyCode_Key_F2 = 95,
+  KeyCode_Key_F3 = 96,
+  KeyCode_Key_F4 = 97,
+  KeyCode_Key_F5 = 98,
+  KeyCode_Key_F6 = 99,
+  KeyCode_Key_F7 = 100,
+  KeyCode_Key_F8 = 101,
+  KeyCode_Key_F9 = 102,
+  KeyCode_Key_F10 = 103,
+  KeyCode_Key_F11 = 104,
+  KeyCode_Key_F12 = 105,
+  KeyCode_Key_F13 = 106,
+  KeyCode_Key_F14 = 107,
+  KeyCode_Key_F15 = 108,
+  KeyCode_Key_F16 = 109,
+  KeyCode_Key_F17 = 110,
+  KeyCode_Key_F18 = 111,
+  KeyCode_Key_F19 = 112,
+  KeyCode_Key_F20 = 113,
+  KeyCode_Key_F21 = 114,
+  KeyCode_Key_F22 = 115,
+  KeyCode_Key_F23 = 116,
+  KeyCode_Key_F24 = 117,
+  KeyCode_Key_AppBack = 118,
+  KeyCode_Key_AppForward = 119,
+  KeyCode_MIN = KeyCode_Key_None,
+  KeyCode_MAX = KeyCode_Key_AppForward
+};
+
+inline const KeyCode (&EnumValuesKeyCode())[120] {
+  static const KeyCode values[] = {
+    KeyCode_Key_None,
+    KeyCode_Key_Tab,
+    KeyCode_Key_LeftArrow,
+    KeyCode_Key_RightArrow,
+    KeyCode_Key_UpArrow,
+    KeyCode_Key_DownArrow,
+    KeyCode_Key_PageUp,
+    KeyCode_Key_PageDown,
+    KeyCode_Key_Home,
+    KeyCode_Key_End,
+    KeyCode_Key_Insert,
+    KeyCode_Key_Delete,
+    KeyCode_Key_Backspace,
+    KeyCode_Key_Space,
+    KeyCode_Key_Enter,
+    KeyCode_Key_Escape,
+    KeyCode_Key_Apostrophe,
+    KeyCode_Key_Comma,
+    KeyCode_Key_Minus,
+    KeyCode_Key_Period,
+    KeyCode_Key_Slash,
+    KeyCode_Key_Semicolon,
+    KeyCode_Key_Equal,
+    KeyCode_Key_LeftBracket,
+    KeyCode_Key_Backslash,
+    KeyCode_Key_RightBracket,
+    KeyCode_Key_GraveAccent,
+    KeyCode_Key_CapsLock,
+    KeyCode_Key_ScrollLock,
+    KeyCode_Key_NumLock,
+    KeyCode_Key_PrintScreen,
+    KeyCode_Key_Pause,
+    KeyCode_Key_Keypad0,
+    KeyCode_Key_Keypad1,
+    KeyCode_Key_Keypad2,
+    KeyCode_Key_Keypad3,
+    KeyCode_Key_Keypad4,
+    KeyCode_Key_Keypad5,
+    KeyCode_Key_Keypad6,
+    KeyCode_Key_Keypad7,
+    KeyCode_Key_Keypad8,
+    KeyCode_Key_Keypad9,
+    KeyCode_Key_KeypadDecimal,
+    KeyCode_Key_KeypadDivide,
+    KeyCode_Key_KeypadMultiply,
+    KeyCode_Key_KeypadSubtract,
+    KeyCode_Key_KeypadAdd,
+    KeyCode_Key_KeypadEnter,
+    KeyCode_Key_KeypadEqual,
+    KeyCode_Key_LeftCtrl,
+    KeyCode_Key_LeftShift,
+    KeyCode_Key_LeftAlt,
+    KeyCode_Key_LeftSuper,
+    KeyCode_Key_RightCtrl,
+    KeyCode_Key_RightShift,
+    KeyCode_Key_RightAlt,
+    KeyCode_Key_RightSuper,
+    KeyCode_Key_Menu,
+    KeyCode_Key_0,
+    KeyCode_Key_1,
+    KeyCode_Key_2,
+    KeyCode_Key_3,
+    KeyCode_Key_4,
+    KeyCode_Key_5,
+    KeyCode_Key_6,
+    KeyCode_Key_7,
+    KeyCode_Key_8,
+    KeyCode_Key_9,
+    KeyCode_Key_A,
+    KeyCode_Key_B,
+    KeyCode_Key_C,
+    KeyCode_Key_D,
+    KeyCode_Key_E,
+    KeyCode_Key_F,
+    KeyCode_Key_G,
+    KeyCode_Key_H,
+    KeyCode_Key_I,
+    KeyCode_Key_J,
+    KeyCode_Key_K,
+    KeyCode_Key_L,
+    KeyCode_Key_M,
+    KeyCode_Key_N,
+    KeyCode_Key_O,
+    KeyCode_Key_P,
+    KeyCode_Key_Q,
+    KeyCode_Key_R,
+    KeyCode_Key_S,
+    KeyCode_Key_T,
+    KeyCode_Key_U,
+    KeyCode_Key_V,
+    KeyCode_Key_W,
+    KeyCode_Key_X,
+    KeyCode_Key_Y,
+    KeyCode_Key_Z,
+    KeyCode_Key_F1,
+    KeyCode_Key_F2,
+    KeyCode_Key_F3,
+    KeyCode_Key_F4,
+    KeyCode_Key_F5,
+    KeyCode_Key_F6,
+    KeyCode_Key_F7,
+    KeyCode_Key_F8,
+    KeyCode_Key_F9,
+    KeyCode_Key_F10,
+    KeyCode_Key_F11,
+    KeyCode_Key_F12,
+    KeyCode_Key_F13,
+    KeyCode_Key_F14,
+    KeyCode_Key_F15,
+    KeyCode_Key_F16,
+    KeyCode_Key_F17,
+    KeyCode_Key_F18,
+    KeyCode_Key_F19,
+    KeyCode_Key_F20,
+    KeyCode_Key_F21,
+    KeyCode_Key_F22,
+    KeyCode_Key_F23,
+    KeyCode_Key_F24,
+    KeyCode_Key_AppBack,
+    KeyCode_Key_AppForward
+  };
+  return values;
+}
+
+inline const char * const *EnumNamesKeyCode() {
+  static const char * const names[121] = {
+    "Key_None",
+    "Key_Tab",
+    "Key_LeftArrow",
+    "Key_RightArrow",
+    "Key_UpArrow",
+    "Key_DownArrow",
+    "Key_PageUp",
+    "Key_PageDown",
+    "Key_Home",
+    "Key_End",
+    "Key_Insert",
+    "Key_Delete",
+    "Key_Backspace",
+    "Key_Space",
+    "Key_Enter",
+    "Key_Escape",
+    "Key_Apostrophe",
+    "Key_Comma",
+    "Key_Minus",
+    "Key_Period",
+    "Key_Slash",
+    "Key_Semicolon",
+    "Key_Equal",
+    "Key_LeftBracket",
+    "Key_Backslash",
+    "Key_RightBracket",
+    "Key_GraveAccent",
+    "Key_CapsLock",
+    "Key_ScrollLock",
+    "Key_NumLock",
+    "Key_PrintScreen",
+    "Key_Pause",
+    "Key_Keypad0",
+    "Key_Keypad1",
+    "Key_Keypad2",
+    "Key_Keypad3",
+    "Key_Keypad4",
+    "Key_Keypad5",
+    "Key_Keypad6",
+    "Key_Keypad7",
+    "Key_Keypad8",
+    "Key_Keypad9",
+    "Key_KeypadDecimal",
+    "Key_KeypadDivide",
+    "Key_KeypadMultiply",
+    "Key_KeypadSubtract",
+    "Key_KeypadAdd",
+    "Key_KeypadEnter",
+    "Key_KeypadEqual",
+    "Key_LeftCtrl",
+    "Key_LeftShift",
+    "Key_LeftAlt",
+    "Key_LeftSuper",
+    "Key_RightCtrl",
+    "Key_RightShift",
+    "Key_RightAlt",
+    "Key_RightSuper",
+    "Key_Menu",
+    "Key_0",
+    "Key_1",
+    "Key_2",
+    "Key_3",
+    "Key_4",
+    "Key_5",
+    "Key_6",
+    "Key_7",
+    "Key_8",
+    "Key_9",
+    "Key_A",
+    "Key_B",
+    "Key_C",
+    "Key_D",
+    "Key_E",
+    "Key_F",
+    "Key_G",
+    "Key_H",
+    "Key_I",
+    "Key_J",
+    "Key_K",
+    "Key_L",
+    "Key_M",
+    "Key_N",
+    "Key_O",
+    "Key_P",
+    "Key_Q",
+    "Key_R",
+    "Key_S",
+    "Key_T",
+    "Key_U",
+    "Key_V",
+    "Key_W",
+    "Key_X",
+    "Key_Y",
+    "Key_Z",
+    "Key_F1",
+    "Key_F2",
+    "Key_F3",
+    "Key_F4",
+    "Key_F5",
+    "Key_F6",
+    "Key_F7",
+    "Key_F8",
+    "Key_F9",
+    "Key_F10",
+    "Key_F11",
+    "Key_F12",
+    "Key_F13",
+    "Key_F14",
+    "Key_F15",
+    "Key_F16",
+    "Key_F17",
+    "Key_F18",
+    "Key_F19",
+    "Key_F20",
+    "Key_F21",
+    "Key_F22",
+    "Key_F23",
+    "Key_F24",
+    "Key_AppBack",
+    "Key_AppForward",
+    nullptr
+  };
+  return names;
+}
+
+inline const char *EnumNameKeyCode(KeyCode e) {
+  if (::flatbuffers::IsOutRange(e, KeyCode_Key_None, KeyCode_Key_AppForward)) return "";
+  const size_t index = static_cast<size_t>(e);
+  return EnumNamesKeyCode()[index];
+}
+
 enum UserInteraction : uint8_t {
   UserInteraction_NONE = 0,
   UserInteraction_EventMouseMotion = 1,
   UserInteraction_EventMouseWheel = 2,
   UserInteraction_EventMouseButton = 3,
   UserInteraction_EventTextInput = 4,
+  UserInteraction_EventKeyboard = 5,
   UserInteraction_MIN = UserInteraction_NONE,
-  UserInteraction_MAX = UserInteraction_EventTextInput
+  UserInteraction_MAX = UserInteraction_EventKeyboard
 };
 
-inline const UserInteraction (&EnumValuesUserInteraction())[5] {
+inline const UserInteraction (&EnumValuesUserInteraction())[6] {
   static const UserInteraction values[] = {
     UserInteraction_NONE,
     UserInteraction_EventMouseMotion,
     UserInteraction_EventMouseWheel,
     UserInteraction_EventMouseButton,
-    UserInteraction_EventTextInput
+    UserInteraction_EventTextInput,
+    UserInteraction_EventKeyboard
   };
   return values;
 }
 
 inline const char * const *EnumNamesUserInteraction() {
-  static const char * const names[6] = {
+  static const char * const names[7] = {
     "NONE",
     "EventMouseMotion",
     "EventMouseWheel",
     "EventMouseButton",
     "EventTextInput",
+    "EventKeyboard",
     nullptr
   };
   return names;
 }
 
 inline const char *EnumNameUserInteraction(UserInteraction e) {
-  if (::flatbuffers::IsOutRange(e, UserInteraction_NONE, UserInteraction_EventTextInput)) return "";
+  if (::flatbuffers::IsOutRange(e, UserInteraction_NONE, UserInteraction_EventKeyboard)) return "";
   const size_t index = static_cast<size_t>(e);
   return EnumNamesUserInteraction()[index];
 }
@@ -187,6 +622,10 @@ template<> struct UserInteractionTraits<UserInteractionFB::EventMouseButton> {
 
 template<> struct UserInteractionTraits<UserInteractionFB::EventTextInput> {
   static const UserInteraction enum_value = UserInteraction_EventTextInput;
+};
+
+template<> struct UserInteractionTraits<UserInteractionFB::EventKeyboard> {
+  static const UserInteraction enum_value = UserInteraction_EventKeyboard;
 };
 
 bool VerifyUserInteraction(::flatbuffers::Verifier &verifier, const void *obj, UserInteraction type);
@@ -686,6 +1125,90 @@ inline ::flatbuffers::Offset<EventTextInput> CreateEventTextInputDirect(
       text__);
 }
 
+struct EventKeyboard FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef EventKeyboardBuilder Builder;
+  static const ::flatbuffers::TypeTable *MiniReflectTypeTable() {
+    return EventKeyboardTypeTable();
+  }
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_MODIFIERS = 4,
+    VT_CODE = 6,
+    VT_IS_DOWN = 8,
+    VT_NATIVE_SYM = 10,
+    VT_SCANCODE = 12
+  };
+  UserInteractionFB::KeyModifiers modifiers() const {
+    return static_cast<UserInteractionFB::KeyModifiers>(GetField<uint8_t>(VT_MODIFIERS, 0));
+  }
+  UserInteractionFB::KeyCode code() const {
+    return static_cast<UserInteractionFB::KeyCode>(GetField<uint32_t>(VT_CODE, 0));
+  }
+  bool is_down() const {
+    return GetField<uint8_t>(VT_IS_DOWN, 0) != 0;
+  }
+  uint32_t native_sym() const {
+    return GetField<uint32_t>(VT_NATIVE_SYM, 0);
+  }
+  uint32_t scancode() const {
+    return GetField<uint32_t>(VT_SCANCODE, 0);
+  }
+  bool Verify(::flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<uint8_t>(verifier, VT_MODIFIERS, 1) &&
+           VerifyField<uint32_t>(verifier, VT_CODE, 4) &&
+           VerifyField<uint8_t>(verifier, VT_IS_DOWN, 1) &&
+           VerifyField<uint32_t>(verifier, VT_NATIVE_SYM, 4) &&
+           VerifyField<uint32_t>(verifier, VT_SCANCODE, 4) &&
+           verifier.EndTable();
+  }
+};
+
+struct EventKeyboardBuilder {
+  typedef EventKeyboard Table;
+  ::flatbuffers::FlatBufferBuilder &fbb_;
+  ::flatbuffers::uoffset_t start_;
+  void add_modifiers(UserInteractionFB::KeyModifiers modifiers) {
+    fbb_.AddElement<uint8_t>(EventKeyboard::VT_MODIFIERS, static_cast<uint8_t>(modifiers), 0);
+  }
+  void add_code(UserInteractionFB::KeyCode code) {
+    fbb_.AddElement<uint32_t>(EventKeyboard::VT_CODE, static_cast<uint32_t>(code), 0);
+  }
+  void add_is_down(bool is_down) {
+    fbb_.AddElement<uint8_t>(EventKeyboard::VT_IS_DOWN, static_cast<uint8_t>(is_down), 0);
+  }
+  void add_native_sym(uint32_t native_sym) {
+    fbb_.AddElement<uint32_t>(EventKeyboard::VT_NATIVE_SYM, native_sym, 0);
+  }
+  void add_scancode(uint32_t scancode) {
+    fbb_.AddElement<uint32_t>(EventKeyboard::VT_SCANCODE, scancode, 0);
+  }
+  explicit EventKeyboardBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ::flatbuffers::Offset<EventKeyboard> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = ::flatbuffers::Offset<EventKeyboard>(end);
+    return o;
+  }
+};
+
+inline ::flatbuffers::Offset<EventKeyboard> CreateEventKeyboard(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    UserInteractionFB::KeyModifiers modifiers = UserInteractionFB::KeyModifiers_None,
+    UserInteractionFB::KeyCode code = UserInteractionFB::KeyCode_Key_None,
+    bool is_down = false,
+    uint32_t native_sym = 0,
+    uint32_t scancode = 0) {
+  EventKeyboardBuilder builder_(_fbb);
+  builder_.add_scancode(scancode);
+  builder_.add_native_sym(native_sym);
+  builder_.add_code(code);
+  builder_.add_is_down(is_down);
+  builder_.add_modifiers(modifiers);
+  return builder_.Finish();
+}
+
 struct Event FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
   typedef EventBuilder Builder;
   static const ::flatbuffers::TypeTable *MiniReflectTypeTable() {
@@ -714,6 +1237,9 @@ struct Event FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
   const UserInteractionFB::EventTextInput *event_as_EventTextInput() const {
     return event_type() == UserInteractionFB::UserInteraction_EventTextInput ? static_cast<const UserInteractionFB::EventTextInput *>(event()) : nullptr;
   }
+  const UserInteractionFB::EventKeyboard *event_as_EventKeyboard() const {
+    return event_type() == UserInteractionFB::UserInteraction_EventKeyboard ? static_cast<const UserInteractionFB::EventKeyboard *>(event()) : nullptr;
+  }
   bool Verify(::flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<uint8_t>(verifier, VT_EVENT_TYPE, 1) &&
@@ -737,6 +1263,10 @@ template<> inline const UserInteractionFB::EventMouseButton *Event::event_as<Use
 
 template<> inline const UserInteractionFB::EventTextInput *Event::event_as<UserInteractionFB::EventTextInput>() const {
   return event_as_EventTextInput();
+}
+
+template<> inline const UserInteractionFB::EventKeyboard *Event::event_as<UserInteractionFB::EventKeyboard>() const {
+  return event_as_EventKeyboard();
 }
 
 struct EventBuilder {
@@ -789,6 +1319,10 @@ inline bool VerifyUserInteraction(::flatbuffers::Verifier &verifier, const void 
     }
     case UserInteraction_EventTextInput: {
       auto ptr = reinterpret_cast<const UserInteractionFB::EventTextInput *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case UserInteraction_EventKeyboard: {
+      auto ptr = reinterpret_cast<const UserInteractionFB::EventKeyboard *>(obj);
       return verifier.VerifyTable(ptr);
     }
     default: return true;
@@ -851,29 +1385,311 @@ inline const ::flatbuffers::TypeTable *MouseButtonEventTypeTypeTable() {
   return &tt;
 }
 
+inline const ::flatbuffers::TypeTable *KeyModifiersTypeTable() {
+  static const ::flatbuffers::TypeCode type_codes[] = {
+    { ::flatbuffers::ET_UCHAR, 0, 0 },
+    { ::flatbuffers::ET_UCHAR, 0, 0 },
+    { ::flatbuffers::ET_UCHAR, 0, 0 },
+    { ::flatbuffers::ET_UCHAR, 0, 0 },
+    { ::flatbuffers::ET_UCHAR, 0, 0 }
+  };
+  static const ::flatbuffers::TypeFunction type_refs[] = {
+    UserInteractionFB::KeyModifiersTypeTable
+  };
+  static const int64_t values[] = { 0, 1, 2, 4, 8 };
+  static const char * const names[] = {
+    "None",
+    "Ctrl",
+    "Shift",
+    "Alt",
+    "Super"
+  };
+  static const ::flatbuffers::TypeTable tt = {
+    ::flatbuffers::ST_ENUM, 5, type_codes, type_refs, nullptr, values, names
+  };
+  return &tt;
+}
+
+inline const ::flatbuffers::TypeTable *KeyCodeTypeTable() {
+  static const ::flatbuffers::TypeCode type_codes[] = {
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 0 }
+  };
+  static const ::flatbuffers::TypeFunction type_refs[] = {
+    UserInteractionFB::KeyCodeTypeTable
+  };
+  static const char * const names[] = {
+    "Key_None",
+    "Key_Tab",
+    "Key_LeftArrow",
+    "Key_RightArrow",
+    "Key_UpArrow",
+    "Key_DownArrow",
+    "Key_PageUp",
+    "Key_PageDown",
+    "Key_Home",
+    "Key_End",
+    "Key_Insert",
+    "Key_Delete",
+    "Key_Backspace",
+    "Key_Space",
+    "Key_Enter",
+    "Key_Escape",
+    "Key_Apostrophe",
+    "Key_Comma",
+    "Key_Minus",
+    "Key_Period",
+    "Key_Slash",
+    "Key_Semicolon",
+    "Key_Equal",
+    "Key_LeftBracket",
+    "Key_Backslash",
+    "Key_RightBracket",
+    "Key_GraveAccent",
+    "Key_CapsLock",
+    "Key_ScrollLock",
+    "Key_NumLock",
+    "Key_PrintScreen",
+    "Key_Pause",
+    "Key_Keypad0",
+    "Key_Keypad1",
+    "Key_Keypad2",
+    "Key_Keypad3",
+    "Key_Keypad4",
+    "Key_Keypad5",
+    "Key_Keypad6",
+    "Key_Keypad7",
+    "Key_Keypad8",
+    "Key_Keypad9",
+    "Key_KeypadDecimal",
+    "Key_KeypadDivide",
+    "Key_KeypadMultiply",
+    "Key_KeypadSubtract",
+    "Key_KeypadAdd",
+    "Key_KeypadEnter",
+    "Key_KeypadEqual",
+    "Key_LeftCtrl",
+    "Key_LeftShift",
+    "Key_LeftAlt",
+    "Key_LeftSuper",
+    "Key_RightCtrl",
+    "Key_RightShift",
+    "Key_RightAlt",
+    "Key_RightSuper",
+    "Key_Menu",
+    "Key_0",
+    "Key_1",
+    "Key_2",
+    "Key_3",
+    "Key_4",
+    "Key_5",
+    "Key_6",
+    "Key_7",
+    "Key_8",
+    "Key_9",
+    "Key_A",
+    "Key_B",
+    "Key_C",
+    "Key_D",
+    "Key_E",
+    "Key_F",
+    "Key_G",
+    "Key_H",
+    "Key_I",
+    "Key_J",
+    "Key_K",
+    "Key_L",
+    "Key_M",
+    "Key_N",
+    "Key_O",
+    "Key_P",
+    "Key_Q",
+    "Key_R",
+    "Key_S",
+    "Key_T",
+    "Key_U",
+    "Key_V",
+    "Key_W",
+    "Key_X",
+    "Key_Y",
+    "Key_Z",
+    "Key_F1",
+    "Key_F2",
+    "Key_F3",
+    "Key_F4",
+    "Key_F5",
+    "Key_F6",
+    "Key_F7",
+    "Key_F8",
+    "Key_F9",
+    "Key_F10",
+    "Key_F11",
+    "Key_F12",
+    "Key_F13",
+    "Key_F14",
+    "Key_F15",
+    "Key_F16",
+    "Key_F17",
+    "Key_F18",
+    "Key_F19",
+    "Key_F20",
+    "Key_F21",
+    "Key_F22",
+    "Key_F23",
+    "Key_F24",
+    "Key_AppBack",
+    "Key_AppForward"
+  };
+  static const ::flatbuffers::TypeTable tt = {
+    ::flatbuffers::ST_ENUM, 120, type_codes, type_refs, nullptr, nullptr, names
+  };
+  return &tt;
+}
+
 inline const ::flatbuffers::TypeTable *UserInteractionTypeTable() {
   static const ::flatbuffers::TypeCode type_codes[] = {
     { ::flatbuffers::ET_SEQUENCE, 0, -1 },
     { ::flatbuffers::ET_SEQUENCE, 0, 0 },
     { ::flatbuffers::ET_SEQUENCE, 0, 1 },
     { ::flatbuffers::ET_SEQUENCE, 0, 2 },
-    { ::flatbuffers::ET_SEQUENCE, 0, 3 }
+    { ::flatbuffers::ET_SEQUENCE, 0, 3 },
+    { ::flatbuffers::ET_SEQUENCE, 0, 4 }
   };
   static const ::flatbuffers::TypeFunction type_refs[] = {
     UserInteractionFB::EventMouseMotionTypeTable,
     UserInteractionFB::EventMouseWheelTypeTable,
     UserInteractionFB::EventMouseButtonTypeTable,
-    UserInteractionFB::EventTextInputTypeTable
+    UserInteractionFB::EventTextInputTypeTable,
+    UserInteractionFB::EventKeyboardTypeTable
   };
   static const char * const names[] = {
     "NONE",
     "EventMouseMotion",
     "EventMouseWheel",
     "EventMouseButton",
-    "EventTextInput"
+    "EventTextInput",
+    "EventKeyboard"
   };
   static const ::flatbuffers::TypeTable tt = {
-    ::flatbuffers::ST_UNION, 5, type_codes, type_refs, nullptr, nullptr, names
+    ::flatbuffers::ST_UNION, 6, type_codes, type_refs, nullptr, nullptr, names
   };
   return &tt;
 }
@@ -1023,6 +1839,31 @@ inline const ::flatbuffers::TypeTable *EventTextInputTypeTable() {
   };
   static const ::flatbuffers::TypeTable tt = {
     ::flatbuffers::ST_TABLE, 1, type_codes, nullptr, nullptr, nullptr, names
+  };
+  return &tt;
+}
+
+inline const ::flatbuffers::TypeTable *EventKeyboardTypeTable() {
+  static const ::flatbuffers::TypeCode type_codes[] = {
+    { ::flatbuffers::ET_UCHAR, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, 1 },
+    { ::flatbuffers::ET_BOOL, 0, -1 },
+    { ::flatbuffers::ET_UINT, 0, -1 },
+    { ::flatbuffers::ET_UINT, 0, -1 }
+  };
+  static const ::flatbuffers::TypeFunction type_refs[] = {
+    UserInteractionFB::KeyModifiersTypeTable,
+    UserInteractionFB::KeyCodeTypeTable
+  };
+  static const char * const names[] = {
+    "modifiers",
+    "code",
+    "is_down",
+    "native_sym",
+    "scancode"
+  };
+  static const ::flatbuffers::TypeTable tt = {
+    ::flatbuffers::ST_TABLE, 5, type_codes, type_refs, nullptr, nullptr, names
   };
   return &tt;
 }
