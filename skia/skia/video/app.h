@@ -42,6 +42,7 @@ private:
     void loopSkp(CliOptions const &opts);
     void dispatchUserInteractionEvents();
     static void handleUserInteractionEvent(UserInteractionFB::Event const &ev);
+    void ensureRawFrameFileOpened(const CliOptions &opts);
 
     SkPaint fFontPaint;
     VectorCmdSkiaRenderer fVectorCmdSkiaRenderer;
@@ -58,4 +59,6 @@ private:
     rawFrameOutputFormat fOutputFormat;
     int fUserInteractionFd;
     bool fDispatchInteractionEvents = false;
+    bool fRawFrameFileOpened = true;
+    std::unique_ptr<SkFILEWStream> fRawFrameFileStream = nullptr;
 };

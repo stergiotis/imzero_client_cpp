@@ -294,6 +294,7 @@ int App::run(CliOptions &opts) {
         }
         fDispatchInteractionEvents = true;
     }
+    fRawFrameFileOpened = false;
 
     switch(fOutputFormat) {
         case kRawFrameOutputFormat_None:
@@ -377,7 +378,6 @@ void App::loopWebp(const CliOptions &opts) {
     const auto c = SkColorInfo(colorType, alphaType, colorSpace);
     const auto rasterSurface = SkSurfaces::Raster(SkImageInfo::Make(SkISize::Make(w,h), c));
     auto canvas = rasterSurface->getCanvas();
-    auto stream = SkFILEWStream(opts.videoRawFramesFile);
 
     switch(fOutputFormat) {
         case kRawFrameOutputFormat_WebP_Lossy:
@@ -401,8 +401,10 @@ void App::loopWebp(const CliOptions &opts) {
             SkPixmap pixmap;
             sk_sp<SkImage> img(rasterSurface->makeImageSnapshot(SkIRect::MakeWH(w,h)));
             if(img->peekPixels(&pixmap)) {
-                if (!SkWebpEncoder::Encode(static_cast<SkWStream *>(&stream), pixmap, webPOptions)) {
+                ensureRawFrameFileOpened(opts);
+                if (!SkWebpEncoder::Encode(static_cast<SkWStream *>(fRawFrameFileStream.get()), pixmap, webPOptions)) {
                     fprintf(stderr,"unable to encode frame as image. Skipping.\n");
+                    fRawFrameFileOpened = false;
                 }
             }
         }
@@ -421,7 +423,6 @@ void App::loopJpeg(const CliOptions &opts) {
     const auto c = SkColorInfo(colorType, alphaType, colorSpace);
     const auto rasterSurface = SkSurfaces::Raster(SkImageInfo::Make(SkISize::Make(w,h), c));
     auto canvas = rasterSurface->getCanvas();
-    auto stream = SkFILEWStream(opts.videoRawFramesFile);
 
     jpegOptions.fQuality = 80;
     uint64_t maxFrame = opts.videoExitAfterNFrames;
@@ -436,8 +437,10 @@ void App::loopJpeg(const CliOptions &opts) {
             SkPixmap pixmap;
             sk_sp<SkImage> img(rasterSurface->makeImageSnapshot(SkIRect::MakeWH(w,h)));
             if(img->peekPixels(&pixmap)) {
-                if (!SkJpegEncoder::Encode(static_cast<SkWStream *>(&stream), pixmap, jpegOptions)) {
+                ensureRawFrameFileOpened(opts);
+                if (!SkJpegEncoder::Encode(static_cast<SkWStream *>(fRawFrameFileStream.get()), pixmap, jpegOptions)) {
                     fprintf(stderr,"unable to encode frame as image. Skipping.\n");
+                    fRawFrameFileOpened = false;
                 }
             }
         }
@@ -456,7 +459,6 @@ void App::loopPng(const CliOptions &opts) {
     const auto c = SkColorInfo(colorType, alphaType, colorSpace);
     const auto rasterSurface = SkSurfaces::Raster(SkImageInfo::Make(SkISize::Make(w,h), c));
     auto canvas = rasterSurface->getCanvas();
-    auto stream = SkFILEWStream(opts.videoRawFramesFile);
 
     pngOptions.fZLibLevel = 6;
     uint64_t maxFrame = opts.videoExitAfterNFrames;
@@ -471,8 +473,10 @@ void App::loopPng(const CliOptions &opts) {
             SkPixmap pixmap;
             sk_sp<SkImage> img(rasterSurface->makeImageSnapshot(SkIRect::MakeWH(w,h)));
             if(img->peekPixels(&pixmap)) {
-                if (!SkPngEncoder::Encode(static_cast<SkWStream *>(&stream), pixmap, pngOptions)) {
+                ensureRawFrameFileOpened(opts);
+                if (!SkPngEncoder::Encode(static_cast<SkWStream *>(fRawFrameFileStream.get()), pixmap, pngOptions)) {
                     fprintf(stderr,"unable to encode frame as image. Skipping.\n");
+                    fRawFrameFileOpened = false;
                 }
             }
         }
@@ -530,7 +534,6 @@ void App::loopBmp(const CliOptions &opts) {
     const auto c = SkColorInfo(colorType, alphaType, colorSpace);
     const auto rasterSurface = SkSurfaces::Raster(SkImageInfo::Make(SkISize::Make(w,h), c));
     auto canvas = rasterSurface->getCanvas();
-    auto stream = SkFILEWStream(opts.videoRawFramesFile);
 
     uint64_t maxFrame = opts.videoExitAfterNFrames;
 
@@ -544,8 +547,10 @@ void App::loopBmp(const CliOptions &opts) {
             SkPixmap pixmap;
             sk_sp<SkImage> img(rasterSurface->makeImageSnapshot(SkIRect::MakeWH(w,h)));
             if(img->peekPixels(&pixmap)) {
-                if (!bmpEncoder.encode(static_cast<SkWStream *>(&stream), pixmap.addr32())) {
+                ensureRawFrameFileOpened(opts);
+                if (!bmpEncoder.encode(static_cast<SkWStream *>(fRawFrameFileStream.get()), pixmap.addr32())) {
                     fprintf(stderr,"unable to encode frame as image. Skipping.\n");
+                    fRawFrameFileOpened = false;
                 }
             }
         }
@@ -1027,5 +1032,20 @@ void App::handleUserInteractionEvent(UserInteractionFB::Event const &ev) {
             io.AddInputCharactersUTF8(e->text()->c_str());
         }
         break;
+    }
+}
+
+void App::ensureRawFrameFileOpened(const CliOptions &opts) {
+    if(!fRawFrameFileOpened || fRawFrameFileStream == nullptr) {
+        if(fRawFrameFileStream != nullptr) {
+            fprintf(stderr,"re-opening raw frames file\n");
+            fRawFrameFileStream.reset();
+        }
+        fRawFrameFileStream = std::make_unique<SkFILEWStream>(opts.videoRawFramesFile);
+        if(!fRawFrameFileStream->isValid()) {
+            fprintf(stderr,"unable to open video raw frame file %s\n",opts.videoRawFramesFile);
+            exit(1);
+        }
+        fRawFrameFileOpened = true;
     }
 }
