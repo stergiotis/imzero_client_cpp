@@ -550,6 +550,8 @@ const char *App::setup(const char *inputFile, FILE *userInteractionOutput) {
     {
         const char *optionsString[] = {"profile", "low-latency",
                                        "cache", "no",
+                                       "demuxer-thread", "no",
+                                       "correct-pts", "no",
                                        "keep-open", "always",
                                        "cursor-autohide", "no",
                 //                       "vo","x11",

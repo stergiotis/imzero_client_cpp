@@ -260,8 +260,9 @@ int App::run(CliOptions &opts) {
         io.DisplaySize.x = wf;
         io.DisplaySize.y = hf;
 
-        io.WantCaptureKeyboard = true;
-        io.WantCaptureMouse = true;
+        io.ConfigInputTrickleEventQueue = true;
+        io.ConfigWindowsMoveFromTitleBarOnly = false; // make config option
+        io.MouseDrawCursor = true;
     }
 
     if(opts.fffiInterpreter) {

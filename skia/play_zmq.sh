@@ -1,4 +1,5 @@
 #!/bin/bash
+set -ev
 resW=1920
 resH=1024
 #ffmpeg -hide_banner \
@@ -49,20 +50,16 @@ resH=1024
 #       -f nut "pipe:1" | \
 #../video_player/imzero_video_play - > transferUserInteractionEvents
 ffmpeg -hide_banner \
-       -re -fflags +genpts  \
+       -probesize 1024 -analyzeduration 1000 \
+       -re \
        -f image2pipe -vcodec bmp -i transferRawFrames \
-       -flags +global_header -r 30000/1001 \
        -an \
-       -vcodec ffv1 \
-       -f nut "pipe:1" | \
-
-#mplayer -benchmark -
-#../video_player/imzero_video_play - > transferUserInteractionEvents
-ffplay -hide_banner \
-       -threads 1 -filter_threads 1 \
-       -probesize 32 -sync ext \
-       -fpsprobesize 0 -framedrop -fast -infbuf \
-       -f nut -fflags '+nobuffer' -flags2 '+fast' -i "pipe:0" \
-       -vf "drawtext=text='%{localtime\:%S-%6N}':fontsize=144:box=1:boxcolor=black:fontcolor=red:y=(main_h/2)+text_h"
-#../video_player/imzero_video_play - > transferUserInteractionEvents
-#~/repo/contrib/sdl/build2/test/testffmpeg /dev/fd/0
+       -pixel_format yuv444p -vcodec mjpeg -pix_fmt yuv444p -q:v 1 \
+       -f matroska zmq:tcp://127.0.0.1:5555
+#ffmpeg -hide_banner \
+#       -probesize 1024 -analyzeduration 1000 \
+#       -re \
+#       -f image2pipe -vcodec bmp -i transferRawFrames \
+#       -an \
+#       -pixel_format yuv444p -vcodec ffv1 \
+#       -f nut zmq:tcp://127.0.0.1:5555
