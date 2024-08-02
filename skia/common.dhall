@@ -1,6 +1,6 @@
 let lib = ../dhall/lib.dhall
-let debug = False
-let asan = False
+let debug = True
+let asan = True
 --let clangdir = env:CLANGDIR as Text -- FIXME sync with ./build_skia_asan.sh
 let sourceTreePartsRepo = ../dhall/sourceTreeParts.dhall
 let sourceTreeParts = [
@@ -16,8 +16,14 @@ let sourceTreeParts = [
 	, sourceTreePartsRepo.imguiFlamegraph
 	, sourceTreePartsRepo.imguiTextedit
 	, sourceTreePartsRepo.binding
-	--, sourceTreePartsRepo.skia
-	, sourceTreePartsRepo.skiaVideo asan
+
+	-- , sourceTreePartsRepo.skia
+
+	--, sourceTreePartsRepo.skiaVideo asan
+
+	, sourceTreePartsRepo.sdl3
+	, sourceTreePartsRepo.skiaSdl asan
+
 	, sourceTreePartsRepo.flatbuffers
 ] # (if debug then [ , sourceTreePartsRepo.tracyEnabled ] else [ ,sourceTreePartsRepo.tracyDisabled ] : List lib.sourceTreePart.Type )
 --let cxx = "${clangdir}/bin/clang++"

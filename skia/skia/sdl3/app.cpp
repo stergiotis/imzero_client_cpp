@@ -116,7 +116,7 @@ void App::Paint(SkSurface* surface, int width, int height) { ZoneScoped;
                 break;
             }
             case SaveFormatE_SVG: // fallthrough
-            case SaveFormatE_SVGNoFont: { ZoneScoped;
+            case SaveFormatE_SVG_TextAsPath: { ZoneScoped;
                 SkRect bounds = SkRect::MakeIWH(width, height);
                 fVectorCmdSkiaRenderer.changeRenderMode(renderMode | RenderModeE_SVG);
 
@@ -133,7 +133,7 @@ void App::Paint(SkSurface* surface, int width, int height) { ZoneScoped;
                         fSvgBytesWritten = svgStream.bytesWritten();
                     }
                         break;
-                    case SaveFormatE_SVGNoFont:
+                    case SaveFormatE_SVG_TextAsPath:
                     {
                         constexpr auto path = "/tmp/skiaBackend.nofont.svg";
                         constexpr int flags = SkSVGCanvas::kConvertTextToPaths_Flag | SkSVGCanvas::kNoPrettyXML_Flag;
@@ -197,13 +197,24 @@ void App::Paint(SkSurface* surface, int width, int height) { ZoneScoped;
 
     FrameMark;
 }
+static void build_ImFontAtlas(ImFontAtlas& atlas, SkPaint& fontPaint) {
+    int w, h;
+    unsigned char* pixels;
+    atlas.GetTexDataAsAlpha8(&pixels, &w, &h);
+    SkImageInfo info = SkImageInfo::MakeA8(w, h);
+    SkPixmap pmap(info, pixels, info.minRowBytes());
+    SkMatrix localMatrix = SkMatrix::Scale(1.0f / static_cast<float>(w), 1.0f / static_cast<float>(h));
+    auto fontImage = SkImages::RasterFromPixmap(pmap, nullptr, nullptr);
+    auto fontShader = fontImage->makeShader(SkSamplingOptions(SkFilterMode::kLinear), localMatrix);
+    fontPaint.setShader(fontShader);
+    fontPaint.setColor(SK_ColorWHITE);
+    atlas.TexID = &fontPaint;
+}
 
 int App::Run(CliOptions &opts) {
-    VectorCmdSkiaRenderer vectorCmdSkiaRenderer{};
     sk_sp<SkFontMgr> fontMgr = nullptr;
     sk_sp<SkTypeface> typeface = nullptr;
     sk_sp<SkData> ttfData = nullptr;
-    SkMemoryStream *ttfStream = nullptr;
     { // setup skia/imgui shared objects
         if (opts.fffiInterpreter) {
             if (opts.fffiInFile != nullptr) {
@@ -255,8 +266,8 @@ int App::Run(CliOptions &opts) {
         ImGui::skiaFont = SkFont(typeface);
 
 
-        vectorCmdSkiaRenderer.setVertexDrawPaint(&fFontPaint);
-        vectorCmdSkiaRenderer.setParagraphHandler(ImGui::paragraph);
+        fVectorCmdSkiaRenderer.setVertexDrawPaint(&fFontPaint);
+        fVectorCmdSkiaRenderer.setParagraphHandler(ImGui::paragraph);
         RenderModeE mode = 0;
         if(opts.backdropFilter) {
             mode |= RenderModeE_BackdropBlur;
@@ -264,7 +275,7 @@ int App::Run(CliOptions &opts) {
         if(opts.sketchFilter) {
             mode |= RenderModeE_Sketch;
         }
-        vectorCmdSkiaRenderer.changeRenderMode(mode);
+        fVectorCmdSkiaRenderer.changeRenderMode(mode);
     }
 
     SDL_Window *window = nullptr;
@@ -442,6 +453,7 @@ int App::Run(CliOptions &opts) {
                                                   SkColorSpace::MakeSRGB(),
                                                   &props);
 
+    build_ImFontAtlas(*io.Fonts,fFontPaint);
 
     // Main loop
     bool done = false;
