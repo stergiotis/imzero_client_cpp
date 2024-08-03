@@ -1,11 +1,10 @@
 # generated using cmakelists.dhall
 cmake_minimum_required(VERSION 3.24)
 project(imgui_skia_exe)
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_LINKER clang++)
-set(CMAKE_CXX_COMPILER clang++)
+set(CMAKE_LINKER /home/spx/repo/contrib/clang/bin/clang++)
+set(CMAKE_CXX_COMPILER /home/spx/repo/contrib/clang/bin/clang++)
 
-add_compile_definitions(TRACY_ENABLE)
+add_compile_definitions()
 include_directories("${CMAKE_CURRENT_LIST_DIR}/./imgui"
 "${CMAKE_CURRENT_LIST_DIR}/./src/arena/simple"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/sdl3/include"
@@ -23,22 +22,15 @@ include_directories("${CMAKE_CURRENT_LIST_DIR}/./imgui"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/include/core"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/flatbuffers"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public")
-set(COMPILE_OPTIONS -std=c++20
+add_compile_options(-std=c++20
 -fno-exceptions
--g
--gdwarf-4
--Wall
--Wformat
--Wextra
 -O1
--fsanitize=address
--fsanitize=undefined
 -fno-omit-frame-pointer
--DIMZERO_DEBUG_BUILD)
-link_libraries(-fsanitize=address
--fsanitize=undefined
+-ffp-contract=off
+-fstrict-aliasing
+-fPIC)
+link_libraries(-DNDEBUG
 -fuse-ld=lld
--v
 -ldl
 -lpthread
 -lfreetype
@@ -154,27 +146,27 @@ target_include_directories(skiaSdl PUBLIC "${CMAKE_CURRENT_LIST_DIR}/./skia"
 "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_implot"
 "${CMAKE_CURRENT_LIST_DIR}/./src")
 add_library(skiaSdl_imported OBJECT IMPORTED)
-set_property(TARGET skiaSdl_imported PROPERTY IMPORTED_OBJECTS "${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/asan/obj/../libskparagraph.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/asan/obj/../libsvg.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/asan/obj/../libskia.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/asan/obj/../libskshaper.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/asan/obj/../libskunicode.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/asan/obj/../libwindow.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/asan/obj/../libcompression_utils_portable.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/asan/obj/../libdng_sdk.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/asan/obj/../libexpat.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/asan/obj/../libharfbuzz.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/asan/obj/../libicu.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/asan/obj/../libicu_bidi.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/asan/obj/../libjpeg.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/asan/obj/../libmicrohttpd.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/asan/obj/../libpathkit.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/asan/obj/../libperfetto.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/asan/obj/../libpiex.a"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/asan/obj/../libpng.a")
+set_property(TARGET skiaSdl_imported PROPERTY IMPORTED_OBJECTS "${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libskparagraph.a"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libsvg.a"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libskia.a"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libskshaper.a"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libskunicode.a"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libwindow.a"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libcompression_utils_portable.a"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libdng_sdk.a"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libexpat.a"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libharfbuzz.a"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libicu.a"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libicu_bidi.a"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libjpeg.a"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libmicrohttpd.a"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libpathkit.a"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libperfetto.a"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libpiex.a"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia/out/Static/obj/../libpng.a")
 
 
-add_library(tracyEnabled OBJECT "${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public/TracyClient.cpp")
+add_library(tracyDisabled OBJECT "${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public/TracyClient.cpp")
 add_executable(imgui_skia_exe $<TARGET_OBJECTS:imguiWithSkia>
 $<TARGET_OBJECTS:render>
 $<TARGET_OBJECTS:marshalling>
@@ -189,5 +181,5 @@ $<TARGET_OBJECTS:imguiTextedit>
 $<TARGET_OBJECTS:sdl3_imported>
 $<TARGET_OBJECTS:skiaSdl>
 $<TARGET_OBJECTS:skiaSdl_imported>
-$<TARGET_OBJECTS:tracyEnabled>)
+$<TARGET_OBJECTS:tracyDisabled>)
 

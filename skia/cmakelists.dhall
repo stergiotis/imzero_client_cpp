@@ -13,4 +13,5 @@ cmake.cmakelistsToText cmake.cmakelists::{
 	, cxxflags = ["-std=c++${Natural/show common.cppstd}" ] # common.cxxflags # common.stdlibFlags
 	, ldflags = common.ldflags # common.stdlibFlags
 	, sourceTreeParts = common.sourceTreeParts
+	, cxxStandard = common.cppstd
 }

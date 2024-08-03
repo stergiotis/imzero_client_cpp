@@ -3,6 +3,18 @@ here=$(dirname "$(readlink -f "$BASH_SOURCE")")
 set -ev
 cd ../../contrib/skia
 python3 tools/git-sync-deps
+
+clangdir="$here/../../contrib/clang"
+mkdir -p $clangdir
+#CC= CXX= infra/bots/assets/clang_linux/create.py -t "$clangdir"
+
+mkdir -p out/Static
+cat > out/Static/args.gn <<- EOF
+    cc = "${clangdir}/bin/clang"
+    cxx = "${clangdir}/bin/clang++"
+    extra_ldflags = [ "-fuse-ld=lld", "-Wl,-rpath,${clangdir}/lib/x86_64-unknown-linux-gnu" ]
+EOF
+
 ./bin/fetch-ninja
 #ninja -t clean
 #bin/gn args out/Static --list

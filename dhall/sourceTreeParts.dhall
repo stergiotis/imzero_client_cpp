@@ -849,7 +849,7 @@ let sdl3 = let dir = "./contrib/sdl3" in
 	}
 	, sources = [] : List Text
 	, nonSourceObjs = [
-	   , "${dir}/build/libSDL3.a"
+	   , "./contrib/sdl3/build/libSDL3.a"
 	] : List Text
 }
 let mpv = 
