@@ -200,8 +200,7 @@ target_compile_options(imguiTextedit PUBLIC -Wno-unused-variable)
 # skiaShared
 
 # mainSkiaSdl3
-add_library(mainSkiaSdl3 OBJECT "${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/imgui_impl_opengl3.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/imgui_impl_sdl3.cpp"
+add_library(mainSkiaSdl3 OBJECT "${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/imgui_impl_sdl3.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/main.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/app.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/../paragraph.cpp"

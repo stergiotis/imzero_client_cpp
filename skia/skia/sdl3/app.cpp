@@ -339,7 +339,7 @@ int App::Run(CliOptions &opts) {
         SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
         glContext = SDL_GL_CreateContext(window);
         SDL_GL_MakeCurrent(window, glContext);
-        SDL_GL_SetSwapInterval(1); // Enable vsync
+        SDL_GL_SetSwapInterval(opts.vsync ? 1 : 0); // Enable vsync //SDL_SetWindowSurfaceVSync()
         // SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
         SDL_ShowWindow(window);
         windowFormat = SDL_GetWindowPixelFormat(window);
@@ -470,7 +470,6 @@ int App::Run(CliOptions &opts) {
         }
 
         // Start the Dear ImGui frame
-        //ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
 
@@ -478,26 +477,10 @@ int App::Run(CliOptions &opts) {
             auto const width = static_cast<int>(io.DisplaySize.x);
             auto const height = static_cast<int>(io.DisplaySize.y);
 
-#if 1
             ImGui::ShowMetricsWindow();
-            //auto const s = SkISize::Make(width, height);
-            //auto const c = SkColorInfo(kRGBA_8888_SkColorType, kPremul_SkAlphaType, SkColorSpace::MakeSRGB());
-            //auto const im = SkImageInfo::Make(s,c);
-            //sk_sp<SkSurface> rasterSurface = SkSurfaces::Raster(im);
-
             Paint(surface.get(),width,height); // will call ImGui::Render();
             context->flush();
 
-#else
-            if(ImGui::Begin("Hello, world!")) {
-                ImGui::TextUnformatted("uh, it works!");
-            }
-            ImGui::End();
-
-            ImGui::Render();
-#endif
-
-            //ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
             // Update and Render additional Platform Windows
             // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
@@ -513,6 +496,7 @@ int App::Run(CliOptions &opts) {
 
             SDL_GL_SwapWindow(window);
         }
+
     }
 
     // Cleanup

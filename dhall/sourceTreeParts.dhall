@@ -436,7 +436,6 @@ let mainSkiaSdl3 =
 	, name = "mainSkiaSdl3"
 	, dir = dir
 	, sources = [
-		, "${dir}/imgui_impl_opengl3.cpp"
 		, "${dir}/imgui_impl_sdl3.cpp"
 		, "${dir}/main.cpp"
 		, "${dir}/app.cpp"
@@ -528,7 +527,7 @@ let mpvShared =
 let imguiWithSkia = imgui // {
 	, name = "imguiWithSkia"
 	, includeDirs = {
-		, local = imgui.includeDirs.local --# skia.includeDirs.local
+		, local = imgui.includeDirs.local
 		, global = imgui.includeDirs.global
 	}
 	, sources = [
