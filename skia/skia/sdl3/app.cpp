@@ -7,7 +7,7 @@
 #include "imgui_impl_sdl3.h"
 //#include "imgui_impl_opengl3.h"
 
-#include <SDL3/SDL.h>
+#include "SDL3/SDL.h"
 #include <SDL3/SDL_main.h>
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <SDL3/SDL_opengles2.h>
@@ -25,17 +25,13 @@
 #include "include/gpu/gl/GrGLInterface.h"
 #if defined(__linux__)
 #include "include/gpu/gl/glx/GrGLMakeGLXInterface.h"
-#include <X11/Xlib.h>
-#include <GL/glx.h>
-#include <GL/gl.h>
 #endif
 
-#include "gpu/ganesh/gl/GrGLDirectContext.h"
-#include "gpu/ganesh/SkSurfaceGanesh.h"
-#include "gpu/ganesh/gl/GrGLBackendSurface.h"
+#include "include/gpu/ganesh/gl/GrGLDirectContext.h"
+#include "include/gpu/ganesh/SkSurfaceGanesh.h"
+#include "include/gpu/ganesh/gl/GrGLBackendSurface.h"
 #include "src/gpu/ganesh/gl/GrGLDefines.h"
 #include "src/gpu/ganesh/gl/GrGLUtil.h"
-#include "SkFontMgr_custom.h"
 //#include "SkBitmap.h"
 
 #include "tracy/Tracy.hpp"
@@ -280,7 +276,6 @@ int App::Run(CliOptions &opts) {
 
     SDL_Window *window = nullptr;
     SDL_GLContext glContext = nullptr;
-    const char *glsl_version = nullptr;
     uint32_t windowFormat = 0;
     int contextType;
     constexpr int msaaSampleCount = 0; //4;
@@ -309,7 +304,6 @@ int App::Run(CliOptions &opts) {
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 #else
         // GL 3.0 + GLSL 130
-        glsl_version = "#version 130";
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -398,7 +392,7 @@ int App::Run(CliOptions &opts) {
     glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     auto nativeInterface=  GrGLInterfaces::MakeGLX();
-    nativeInterface->checkAndResetOOMed();
+    //nativeInterface->checkAndResetOOMed();
     if(nativeInterface == nullptr || !nativeInterface->validate()) {
         fprintf(stderr,"unable to create skia GrGLInterface (GLX): nativeInterface=%p (%s)\n",
                 nativeInterface.get(),
@@ -412,7 +406,7 @@ int App::Run(CliOptions &opts) {
     }
 
     // Wrap the frame buffer object attached to the screen in a Skia render target so Skia can render to it
-    GrGLint buffer;
+    GrGLint buffer = 0;
     GR_GL_GetIntegerv(nativeInterface.get(), GR_GL_FRAMEBUFFER_BINDING, &buffer);
     GrGLFramebufferInfo info;
     info.fFBOID = (GrGLuint) buffer;

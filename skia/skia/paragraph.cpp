@@ -11,13 +11,13 @@ Paragraph::Paragraph(sk_sp<SkFontMgr> fontMgr,sk_sp<SkTypeface> defaultTypeface)
     fTlFontCollection->setDefaultFontManager(fontMgr);
 
     paraStyle.setTextAlign(skia::textlayout::TextAlign::kLeft);
-    fParaBuilderLeft = skia::textlayout::ParagraphBuilderImpl::make(paraStyle, fTlFontCollection);
+    fParaBuilderLeft = skia::textlayout::ParagraphBuilder::make(paraStyle, fTlFontCollection);
     paraStyle.setTextAlign(skia::textlayout::TextAlign::kRight);
-    fParaBuilderRight = skia::textlayout::ParagraphBuilderImpl::make(paraStyle, fTlFontCollection);
+    fParaBuilderRight = skia::textlayout::ParagraphBuilder::make(paraStyle, fTlFontCollection);
     paraStyle.setTextAlign(skia::textlayout::TextAlign::kCenter);
-    fParaBuilderCenter = skia::textlayout::ParagraphBuilderImpl::make(paraStyle, fTlFontCollection);
+    fParaBuilderCenter = skia::textlayout::ParagraphBuilder::make(paraStyle, fTlFontCollection);
     paraStyle.setTextAlign(skia::textlayout::TextAlign::kJustify);
-    fParaBuilderJustify = skia::textlayout::ParagraphBuilderImpl::make(paraStyle, fTlFontCollection);
+    fParaBuilderJustify = skia::textlayout::ParagraphBuilder::make(paraStyle, fTlFontCollection);
     fParaBuilder = fParaBuilderLeft.get();
 
     fDefaultTypeface = defaultTypeface;
@@ -115,6 +115,7 @@ int Paragraph::getNumberOfLines() {
 bool Paragraph::hasLine(int lineNumber) {
     return fPara->getLineMetricsAt(lineNumber, nullptr);
 }
+#if 0
 void Paragraph::triangulate(int lineNumber,const SkRect &clipBounds,const float *&vertices,size_t &numVertices, int &unrenderedGlyphs) {
     if(!hasLine(lineNumber)) {
         return;
@@ -135,3 +136,4 @@ void Paragraph::triangulate(int lineNumber,const SkRect &clipBounds,const float 
         numVertices = 0;
     }
 }
+#endif

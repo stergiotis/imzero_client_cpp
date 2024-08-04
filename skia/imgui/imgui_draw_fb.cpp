@@ -178,9 +178,9 @@ using namespace IMGUI_STB_NAMESPACE;
 //-----------------------------------------------------------------------------
 #include "include/core/SkCanvas.h"
 #include "include/core/SkStream.h"
-#include "include/utils/SkParsePath.h"
 #include "modules/skparagraph/src/ParagraphImpl.h"
 #include "vectorCmd_generated.h"
+
 namespace ImGui {
     SkFont skiaFont;
     bool useVectorCmd = false;
@@ -2298,12 +2298,12 @@ void ImDrawListSplitter::Merge(ImDrawList* draw_list)
         new_cmd_buffer_count += ch._CmdBuffer.Size;
         new_idx_buffer_count += ch._IdxBuffer.Size;
 #ifdef SKIA_DRAW_BACKEND
-        new_fb_cmds_count += _ChannelsFbCmds[i]->size();
+        new_fb_cmds_count += static_cast<int>(_ChannelsFbCmds[i]->size());
 #endif
         for (int cmd_n = 0; cmd_n < ch._CmdBuffer.Size; cmd_n++)
         {
             ch._CmdBuffer.Data[cmd_n].IdxOffset = idx_offset;
-            idx_offset += ch._CmdBuffer.Data[cmd_n].ElemCount;
+            idx_offset += static_cast<int>(ch._CmdBuffer.Data[cmd_n].ElemCount);
         }
     }
     draw_list->CmdBuffer.resize(draw_list->CmdBuffer.Size + new_cmd_buffer_count);
@@ -4193,7 +4193,7 @@ SKIA_DRAW_BACKEND_BEGIN
 
     if(isPasswordFont(*this)) {
         initHiddenPwBuffer(*this);
-        auto const len = text_end-text_begin;
+        auto const len = static_cast<size_t>(text_end-text_begin);
         if(len > hiddenPwBufferNChars) { ZoneScopedN("slow path password text allocation");
             text_begin = static_cast<char *>(IM_ALLOC(len*hiddenPwBufferNBytesPerChar));
             // slow path, very long or high codepoints password

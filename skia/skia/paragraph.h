@@ -2,14 +2,14 @@
 
 #include "modules/skparagraph/include/Paragraph.h"
 #include "src/gpu/ganesh/GrEagerVertexAllocator.h"
-#include "modules/skparagraph/src/ParagraphBuilderImpl.h"
-#include "core/SkFontMgr.h"
-#include "core/SkTypeface.h"
+#include "include/core/SkFontMgr.h"
+#include "include/core/SkTypeface.h"
 
 #include "src/gpu/ganesh/GrEagerVertexAllocator.h"
 #include "src/gpu/ganesh/geometry/GrPathUtils.h"
 #include "src/gpu/ganesh/geometry/GrTriangulator.h"
-#include "core/SkSpan.h"
+#include "include/core/SkSpan.h"
+#include "modules/skparagraph/include/ParagraphBuilder.h"
 
 class Paragraph {
     public:
@@ -23,7 +23,10 @@ class Paragraph {
         int getPath(int lineNumber, SkPath &dest);
         int getNumberOfLines();
         bool hasLine(int lineNumber);
+
+#if 0
         void triangulate(int lineNumber,const SkRect &clipBounds,const float *&vertices,size_t &numVertices,int &unrenderedGlyphs);
+#endif
         SkRect boundingRect(int lineNumber, bool &found);
 
         void paint(SkCanvas &canvas, SkScalar x, SkScalar y);
@@ -48,5 +51,7 @@ class Paragraph {
         std::unique_ptr<skia::textlayout::ParagraphBuilder> fParaBuilderCenter;
         std::unique_ptr<skia::textlayout::ParagraphBuilder> fParaBuilderJustify;
         std::unique_ptr<skia::textlayout::Paragraph> fPara;
+#if 0
         GrCpuVertexAllocator vertexAllocator;
+#endif
 };

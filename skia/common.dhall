@@ -1,9 +1,9 @@
 let lib = ../dhall/lib.dhall
-let debug = True
-let asan = True
---let clangdir = env:CLANGDIR as Text -- FIXME sync with ./build_skia_asan.sh
+let debug = False
+let asan = False
 let sourceTreePartsRepo = ../dhall/sourceTreeParts.dhall
 let sourceTreeParts = [
+	, sourceTreePartsRepo.flatbuffers
 	, sourceTreePartsRepo.imguiWithSkia
 	, sourceTreePartsRepo.render
 	, sourceTreePartsRepo.marshalling
@@ -16,20 +16,16 @@ let sourceTreeParts = [
 	, sourceTreePartsRepo.imguiFlamegraph
 	, sourceTreePartsRepo.imguiTextedit
 	, sourceTreePartsRepo.binding
-
-	-- , sourceTreePartsRepo.skia
-
-	--, sourceTreePartsRepo.skiaVideo asan
-
-	, sourceTreePartsRepo.sdl3
-	, sourceTreePartsRepo.skiaSdl asan
-
-	, sourceTreePartsRepo.flatbuffers
+	, sourceTreePartsRepo.sdl3Shared
+	, sourceTreePartsRepo.skiaShared
+	, sourceTreePartsRepo.mainSkiaSdl3
 ] # (if debug then [ , sourceTreePartsRepo.tracyEnabled ] else [ ,sourceTreePartsRepo.tracyDisabled ] : List lib.sourceTreePart.Type )
---let cxx = "${clangdir}/bin/clang++"
-let cxx = "clang++"
+let clangdir = (env:HOME as Text) ++ "/Downloads/clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04"
+let cxx = "${clangdir}/bin/clang++"
 let cppstd = 20
-let cxxflags = ["-fno-exceptions"]
+let cxxflags = [
+	, "-fno-omit-frame-pointer" -- increases debuggability with little to no performance impact
+	]
 let cxxflagsDebug = [
 	, "-g"
 	, "-gdwarf-4"
@@ -38,21 +34,27 @@ let cxxflagsDebug = [
 	, "-Wextra"
 	, "-O1"
 	] # (if asan then [ "-fsanitize=address", "-fsanitize=undefined" ] else [] : List Text) #
-	[, "-fno-omit-frame-pointer"
+	[
 	, "-DIMZERO_DEBUG_BUILD"
 	--, "-fno-optimize-sibling-calls" -- no tail calls for better stacktraces
 ]
 let cxxflagsRelease = [
 	, "-O3"
 ]
+let linker = "-fuse-ld=lld"
 let ldflagsDebug = if asan then [ 
 	, "-fsanitize=address"
 	, "-fsanitize=undefined"
-	, "-fuse-ld=lld"
-	, "-v"
---	, "-Wl,-rpath,${clangdir}/lib/x86_64-unknown-linux-gnu"
-	] else [] : List Text
-let ldflagsRelease = ["-DNDEBUG"] : List Text
+--  , "-Wl,--verbose"
+--	, linker
+	] else [
+--	, linker
+	] : List Text
+let ldflagsRelease = [
+        , "-DNDEBUG"
+--  , "-Wl,--verbose"
+--	, linker
+	] : List Text
 --let stdlibFlags = ["-stdlib=libc++"] : List Text
 let stdlibFlags = [] : List Text
 let linker = cxx

@@ -1,10 +1,9 @@
 #pragma once
 
-#include "cliOptions.h"
-#include "SkSurface.h"
-#include "SkPaint.h"
-#include "vectorCmdSkiaRenderer.h"
-#include "setupUI.h"
+#include "include/core/SkSurface.h"
+#include "../cliOptions.h"
+#include "../vectorCmdSkiaRenderer.h"
+#include "../setupUI.h"
 
 class App {
 public:
