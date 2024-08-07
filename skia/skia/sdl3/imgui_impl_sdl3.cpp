@@ -120,6 +120,9 @@ static void ImGui_ImplSDL3_SetPlatformImeData(ImGuiViewport* viewport, ImGuiPlat
         r.w = 1;
         r.h = (int)data->InputLineHeight;
         SDL_SetTextInputRect(&r);
+        SDL_StartTextInput();
+    } else {
+        SDL_StopTextInput();
     }
 }
 
