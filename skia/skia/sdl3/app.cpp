@@ -359,8 +359,6 @@ int App::Run(CliOptions &opts) {
 
         io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset; // FIXME remove ?
         if(false) {
-            // FIXME remove?
-            io.BackendFlags &= ~(ImGuiBackendFlags_PlatformHasViewports | ImGuiBackendFlags_RendererHasViewports);
             io.ConfigFlags &= ~ImGuiConfigFlags_ViewportsEnable;
         } else {
             io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
@@ -453,12 +451,14 @@ int App::Run(CliOptions &opts) {
                                                   &props);
 
     build_ImFontAtlas(*io.Fonts,fFontPaint);
-    ImGuiContext& g = *GImGui;
-    g.DebugLogFlags |= ImGuiDebugLogFlags_EventIO;
+    if(false) {
+        // TODO: dialog to activate/deactivate?
+        ImGuiContext& g = *GImGui;
+        g.DebugLogFlags |= ImGuiDebugLogFlags_EventIO;
+    }
 
     // Main loop
     bool done = false;
-    char buf[128] = {0};
     while (!done) {
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
@@ -486,23 +486,13 @@ int App::Run(CliOptions &opts) {
             auto const height = static_cast<int>(io.DisplaySize.y);
 
             ImGui::ShowMetricsWindow();
-            {
-                if(ImGui::Begin("aa")) {
-                    ImGui::Text("wantTextInput=%d",io.WantTextInput);
-                    ImGui::InputText("hello",buf,sizeof(buf));
-                }
-                ImGui::End();
-            }
-
             Paint(surface.get(),width,height); // will call ImGui::Render();
             context->flush();
-
 
             // Update and Render additional Platform Windows
             // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
             //  For this specific demo app we could also call SDL_GL_MakeCurrent(window, gl_context) directly)
-            if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-            {
+            if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
                 SDL_Window* backup_current_window = SDL_GL_GetCurrentWindow();
                 SDL_GLContext backup_current_context = SDL_GL_GetCurrentContext();
                 ImGui::UpdatePlatformWindows();
@@ -516,7 +506,6 @@ int App::Run(CliOptions &opts) {
     }
 
     // Cleanup
-    //ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL3_Shutdown();
     if(opts.fffiInterpreter) {
         render_cleanup();

@@ -536,7 +536,7 @@ let imguiWithSkia = imgui // {
 		, "${imgui.dir}/imgui_draw.cpp"
 		, "${imgui.dir}/imgui_tables.cpp"
 		, "${imgui.dir}/imgui_widgets.cpp"
-		, "${imgui.dir}/flatbufferHelpers.cpp" ]
+		]
 	}
 in
 {

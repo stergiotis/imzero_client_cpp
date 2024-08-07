@@ -213,16 +213,13 @@ static inline void initHiddenPwBuffer(const ImFont &font) {
         }
     }
 }
-#ifndef IMGUI_USE_BGRA_PACKED_COLOR
-//#error "skia uses BGRA packed colors, enable IMGUI_USE_BGRA_PACKED_COLOR in imconfig.h"
-#endif
-#else
-#define IMZERO_DRAWLIST_BEGIN if(false) {
-#define IMZERO_DRAWLIST_END }
-#endif
-
-#ifdef IMZERO_DRAWLIST
-#include "flatbufferHelpers.h"
+static void fbAddPointsToVector(
+        flatbuffers::Offset<flatbuffers::Vector<float>> &xs, flatbuffers::Offset<flatbuffers::Vector<float>> &ys,
+        flatbuffers::FlatBufferBuilder &builder, const ImVec2 *points, const int points_count) {
+    // FIXME use fbBuilder.StartVector and EndVector to eliminate the lambda
+    xs = builder.CreateVector<float>(size_t(points_count),[&points](size_t i) -> float { return points[i].x; });
+    ys = builder.CreateVector<float>(size_t(points_count),[&points](size_t i) -> float { return points[i].y; });
+}
 static constexpr bool enableVectorCmdFBVertexDraw = true;
 bool ImDrawList::addVerticesAsVectorCmd() {
     auto sz = CmdBuffer.Size;
@@ -237,10 +234,10 @@ bool ImDrawList::addVerticesAsVectorCmd() {
         }
         auto cr = ImZeroFB::SingleVec4(cur.ClipRect.x,cur.ClipRect.y,cur.ClipRect.z,cur.ClipRect.w);
         auto cmd = ImZeroFB::CreateCmdVertexDraw(*fbBuilder,
-                                                    &cr,
-                                                    cur.ElemCount,
-                                                    _FbProcessedDrawCmdIndexOffset,
-                                                    cur.VtxOffset);
+                                                 &cr,
+                                                 cur.ElemCount,
+                                                 _FbProcessedDrawCmdIndexOffset,
+                                                 cur.VtxOffset);
         _FbCmds->push_back(ImZeroFB::CreateSingleVectorCmdDto(*fbBuilder,ImZeroFB::VectorCmdArg_CmdVertexDraw,cmd.Union()));
         _FbProcessedDrawCmdIndexOffset += cur.ElemCount;
         added = true;
@@ -259,16 +256,16 @@ void ImDrawList::addVectorCmdFB(ImZeroFB::VectorCmdArg arg_type, flatbuffers::Of
 }
 template<typename T,typename U, typename V>
 static T copyFlag(V val, U flag1,T flag2) {
-   return (static_cast<U>(val) & flag1) != static_cast<U>(0) ? flag2 : static_cast<T>(0);
+    return (static_cast<U>(val) & flag1) != static_cast<U>(0) ? flag2 : static_cast<T>(0);
 }
 static ImZeroFB::DrawListFlags getVectorCmdFBFlags(const ImDrawList &drawList) {
     return static_cast<ImZeroFB::DrawListFlags>(
-             copyFlag(drawList.Flags, ImDrawListFlags_AntiAliasedLines, ImZeroFB::DrawListFlags_AntiAliasedLines) |
-             copyFlag(drawList.Flags, ImDrawListFlags_AntiAliasedFill, ImZeroFB::DrawListFlags_AntiAliasedFill));
+            copyFlag(drawList.Flags, ImDrawListFlags_AntiAliasedLines, ImZeroFB::DrawListFlags_AntiAliasedLines) |
+            copyFlag(drawList.Flags, ImDrawListFlags_AntiAliasedFill, ImZeroFB::DrawListFlags_AntiAliasedFill));
 }
 static flatbuffers::Offset<ImZeroFB::DrawList> createVectorCmdFBDrawList(ImDrawList &drawList,bool inner,
-    std::vector<flatbuffers::Offset<ImZeroFB::SingleVectorCmdDto>> &fbCmds,
-    flatbuffers::FlatBufferBuilder &fbBuilder) { ZoneScoped;
+                                                                         std::vector<flatbuffers::Offset<ImZeroFB::SingleVectorCmdDto>> &fbCmds,
+                                                                         flatbuffers::FlatBufferBuilder &fbBuilder) { ZoneScoped;
     auto cmds = fbBuilder.CreateVector(fbCmds);
     flatbuffers::Offset<flatbuffers::String> name;
     if(inner) {
@@ -312,6 +309,12 @@ void ImDrawList::serializeFB(const uint8_t *&out,size_t &size) { ZoneScoped;
 static inline bool isPasswordFont(const ImFont &font) {
     return font.Glyphs.empty();
 }
+#ifndef IMGUI_USE_BGRA_PACKED_COLOR
+//#error "skia uses BGRA packed colors, enable IMGUI_USE_BGRA_PACKED_COLOR in imconfig.h"
+#endif
+#else
+#define IMZERO_DRAWLIST_BEGIN if(false) {
+#define IMZERO_DRAWLIST_END }
 #endif
 
 //-----------------------------------------------------------------------------
