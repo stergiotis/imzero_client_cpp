@@ -3,8 +3,7 @@ set -ev
 here=$(dirname "$(readlink -f "$BASH_SOURCE")")
 cd "$here"
 flatc="../../contrib/flatbuffers/flatc"
-"$flatc" -o imgui --cpp imgui/vectorCmd.fbs
-"$flatc" -o skia/video --cpp ../video_player/spec/userInteraction.fbs --reflect-types --reflect-names
+"$flatc" -o imgui --cpp imgui/ImZeroFB.fbs --reflect-types --reflect-names --filename-suffix .out
 
 ./cmakelists.dhall
 

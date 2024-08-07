@@ -169,17 +169,16 @@ namespace IMGUI_STB_NAMESPACE
 using namespace IMGUI_STB_NAMESPACE;
 #endif
 
-#ifdef SKIA_DRAW_BACKEND
 #include "tracy/Tracy.hpp"
-#define SKIA_DRAW_BACKEND_BEGIN if(ImGui::useVectorCmd) { ZoneScoped;
-#define SKIA_DRAW_BACKEND_END }
+#ifdef IMZERO_DRAWLIST
+#define IMZERO_DRAWLIST_BEGIN if(ImGui::useVectorCmd) { ZoneScoped;
+#define IMZERO_DRAWLIST_END }
 //-----------------------------------------------------------------------------
 // [SECTION] Skia
 //-----------------------------------------------------------------------------
 #include "include/core/SkCanvas.h"
 #include "include/core/SkStream.h"
 #include "modules/skparagraph/src/ParagraphImpl.h"
-#include "vectorCmd_generated.h"
 
 namespace ImGui {
     SkFont skiaFont;
@@ -218,11 +217,11 @@ static inline void initHiddenPwBuffer(const ImFont &font) {
 //#error "skia uses BGRA packed colors, enable IMGUI_USE_BGRA_PACKED_COLOR in imconfig.h"
 #endif
 #else
-#define SKIA_DRAW_BACKEND_BEGIN if(false) {
-#define SKIA_DRAW_BACKEND_END }
+#define IMZERO_DRAWLIST_BEGIN if(false) {
+#define IMZERO_DRAWLIST_END }
 #endif
 
-#ifdef SKIA_DRAW_BACKEND
+#ifdef IMZERO_DRAWLIST
 #include "flatbufferHelpers.h"
 static constexpr bool enableVectorCmdFBVertexDraw = true;
 bool ImDrawList::addVerticesAsVectorCmd() {
@@ -236,39 +235,39 @@ bool ImDrawList::addVerticesAsVectorCmd() {
         if(cur.ElemCount == 0 || cur.UserCallback != nullptr) {
             continue;
         }
-        auto cr = VectorCmdFB::SingleVec4(cur.ClipRect.x,cur.ClipRect.y,cur.ClipRect.z,cur.ClipRect.w);
-        auto cmd = VectorCmdFB::CreateCmdVertexDraw(*fbBuilder,
+        auto cr = ImZeroFB::SingleVec4(cur.ClipRect.x,cur.ClipRect.y,cur.ClipRect.z,cur.ClipRect.w);
+        auto cmd = ImZeroFB::CreateCmdVertexDraw(*fbBuilder,
                                                     &cr,
                                                     cur.ElemCount,
                                                     _FbProcessedDrawCmdIndexOffset,
                                                     cur.VtxOffset);
-        _FbCmds->push_back(VectorCmdFB::CreateSingleVectorCmdDto(*fbBuilder,VectorCmdFB::VectorCmdArg_CmdVertexDraw,cmd.Union()));
+        _FbCmds->push_back(ImZeroFB::CreateSingleVectorCmdDto(*fbBuilder,ImZeroFB::VectorCmdArg_CmdVertexDraw,cmd.Union()));
         _FbProcessedDrawCmdIndexOffset += cur.ElemCount;
         added = true;
     }
     return added;
 }
-void ImDrawList::addVectorCmdFB(VectorCmdFB::VectorCmdArg arg_type, flatbuffers::Offset<void> arg) {
+void ImDrawList::addVectorCmdFB(ImZeroFB::VectorCmdArg arg_type, flatbuffers::Offset<void> arg) {
     if(enableVectorCmdFBVertexDraw && ImGui::useVectorCmd) {
         if(addVerticesAsVectorCmd()) {
             CmdBuffer.clear();
             AddDrawCmd();
         }
     }
-    //fprintf(stderr,"%s: adding %s\n", _OwnerName, VectorCmdFB::EnumNameVectorCmdArg(arg_type));
-    _FbCmds->push_back(VectorCmdFB::CreateSingleVectorCmdDto(*fbBuilder,arg_type,arg));
+    //fprintf(stderr,"%s: adding %s\n", _OwnerName, ImZeroFB::EnumNameVectorCmdArg(arg_type));
+    _FbCmds->push_back(ImZeroFB::CreateSingleVectorCmdDto(*fbBuilder,arg_type,arg));
 }
 template<typename T,typename U, typename V>
 static T copyFlag(V val, U flag1,T flag2) {
-   return (static_cast<U>(val) & flag1) != static_cast<U>(0) ? flag2 : static_cast<T>(0); 
+   return (static_cast<U>(val) & flag1) != static_cast<U>(0) ? flag2 : static_cast<T>(0);
 }
-static VectorCmdFB::DrawListFlags getVectorCmdFBFlags(const ImDrawList &drawList) {
-    return static_cast<VectorCmdFB::DrawListFlags>(
-             copyFlag(drawList.Flags, ImDrawListFlags_AntiAliasedLines, VectorCmdFB::DrawListFlags_AntiAliasedLines) |
-             copyFlag(drawList.Flags, ImDrawListFlags_AntiAliasedFill, VectorCmdFB::DrawListFlags_AntiAliasedFill));
+static ImZeroFB::DrawListFlags getVectorCmdFBFlags(const ImDrawList &drawList) {
+    return static_cast<ImZeroFB::DrawListFlags>(
+             copyFlag(drawList.Flags, ImDrawListFlags_AntiAliasedLines, ImZeroFB::DrawListFlags_AntiAliasedLines) |
+             copyFlag(drawList.Flags, ImDrawListFlags_AntiAliasedFill, ImZeroFB::DrawListFlags_AntiAliasedFill));
 }
-static flatbuffers::Offset<VectorCmdFB::DrawList> createVectorCmdFBDrawList(ImDrawList &drawList,bool inner,
-    std::vector<flatbuffers::Offset<VectorCmdFB::SingleVectorCmdDto>> &fbCmds,
+static flatbuffers::Offset<ImZeroFB::DrawList> createVectorCmdFBDrawList(ImDrawList &drawList,bool inner,
+    std::vector<flatbuffers::Offset<ImZeroFB::SingleVectorCmdDto>> &fbCmds,
     flatbuffers::FlatBufferBuilder &fbBuilder) { ZoneScoped;
     auto cmds = fbBuilder.CreateVector(fbCmds);
     flatbuffers::Offset<flatbuffers::String> name;
@@ -279,7 +278,7 @@ static flatbuffers::Offset<VectorCmdFB::DrawList> createVectorCmdFBDrawList(ImDr
     }
     auto f = getVectorCmdFBFlags(drawList);
 
-    flatbuffers::Offset<VectorCmdFB::VertexData> vertices = 0;
+    flatbuffers::Offset<ImZeroFB::VertexData> vertices = 0;
     if(enableVectorCmdFBVertexDraw || !ImGui::useVectorCmd) { ZoneScopedN("de-interleaving vertices");
         flatbuffers::Offset<flatbuffers::Vector<float>> posXYs,texUVs;
         flatbuffers::Offset<flatbuffers::Vector<uint32_t>> cols;
@@ -293,11 +292,11 @@ static flatbuffers::Offset<VectorCmdFB::DrawList> createVectorCmdFBDrawList(ImDr
         cols = fbBuilder.CreateVector<uint32_t>(static_cast<size_t>(n),[&vtxBuffer](size_t i) -> uint32_t { return vtxBuffer[i].col; });
         auto &idxBuffer = drawList.IdxBuffer;
         indices = fbBuilder.CreateVector<uint16_t>(static_cast<size_t>(idxBuffer.size()),[&idxBuffer](size_t i) -> float { return idxBuffer[i]; });
-        vertices = VectorCmdFB::CreateVertexData(fbBuilder,posXYs,texUVs,cols,indices);
+        vertices = ImZeroFB::CreateVertexData(fbBuilder,posXYs,texUVs,cols,indices);
     } else {
         vertices = 0;
     }
-    return VectorCmdFB::CreateDrawList(fbBuilder,f,name,vertices,cmds);
+    return ImZeroFB::CreateDrawList(fbBuilder,f,name,vertices,cmds);
 }
 void ImDrawList::serializeFB(const uint8_t *&out,size_t &size) { ZoneScoped;
     if(!ImGui::useVectorCmd) {
@@ -546,7 +545,7 @@ void ImDrawList::_ResetForNewFrame()
         _Splitter.Merge(this);
 
     CmdBuffer.resize(0);
-#ifdef SKIA_DRAW_BACKEND
+#ifdef IMZERO_DRAWLIST
     _FbProcessedDrawCmdIndexOffset = 0;
     if(fbBuilder == nullptr) {
         fbBuilder = new flatbuffers::FlatBufferBuilder();
@@ -554,7 +553,7 @@ void ImDrawList::_ResetForNewFrame()
         fbBuilder->Clear();
     }
     if(_FbCmds == nullptr) {
-        _FbCmds = new std::vector<flatbuffers::Offset<VectorCmdFB::SingleVectorCmdDto>>();
+        _FbCmds = new std::vector<flatbuffers::Offset<ImZeroFB::SingleVectorCmdDto>>();
     } else {
         _FbCmds->resize(0);
     }
@@ -579,7 +578,7 @@ void ImDrawList::_ClearFreeMemory()
     CmdBuffer.clear();
     IdxBuffer.clear();
     VtxBuffer.clear();
-#ifdef SKIA_DRAW_BACKEND
+#ifdef IMZERO_DRAWLIST
     if(fbBuilder != nullptr) {
         fbBuilder->Reset();
         delete fbBuilder;
@@ -590,7 +589,7 @@ void ImDrawList::_ClearFreeMemory()
         delete _FbCmds;
         _FbCmds = nullptr;
     }
-#ifdef SKIA_DRAW_BACKEND_PARAGRAPH_AS_PATH
+#ifdef IMZERO_DRAWLIST_PARAGRAPH_AS_PATH
     fPathVerbBuffer.clear();
     fPathPointBuffer.clear();
     fPathWeightBuffer.clear();
@@ -613,10 +612,10 @@ ImDrawList* ImDrawList::CloneOutput() const
     dst->IdxBuffer = IdxBuffer;
     dst->VtxBuffer = VtxBuffer;
     dst->Flags = Flags;
-#ifdef SKIA_DRAW_BACKEND
+#ifdef IMZERO_DRAWLIST
     dst->fbBuilder = fbBuilder;
     dst->_FbCmds = _FbCmds;
-#ifdef SKIA_DRAW_BACKEND_PARAGRAPH_AS_PATH
+#ifdef IMZERO_DRAWLIST_PARAGRAPH_AS_PATH
     dst->fPathVerbBuffer = fPathVerbBuffer;
     dst->fPathPointBuffer = fPathPointBuffer;
     dst->fPathWeightBuffer = fPathWeightBuffer;
@@ -778,11 +777,11 @@ void ImDrawList::PushClipRect(const ImVec2& cr_min, const ImVec2& cr_max, bool i
     _CmdHeader.ClipRect = cr;
     _OnChangedClipRect();
 
-SKIA_DRAW_BACKEND_BEGIN
-    auto rect = VectorCmdFB::SingleVec4(cr.x,cr.y,cr.z,cr.w); // NOTE: use of intersected rectangle is mandatory
-    auto arg = VectorCmdFB::CreateCmdPushClipRect(*fbBuilder,&rect,intersect_with_current_clip_rect);
-    addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdPushClipRect,arg.Union());
-SKIA_DRAW_BACKEND_END
+IMZERO_DRAWLIST_BEGIN
+    auto rect = ImZeroFB::SingleVec4(cr.x,cr.y,cr.z,cr.w); // NOTE: use of intersected rectangle is mandatory
+    auto arg = ImZeroFB::CreateCmdPushClipRect(*fbBuilder,&rect,intersect_with_current_clip_rect);
+    addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdPushClipRect,arg.Union());
+IMZERO_DRAWLIST_END
 }
 
 void ImDrawList::PushClipRectFullScreen()
@@ -796,12 +795,12 @@ void ImDrawList::PopClipRect()
     _CmdHeader.ClipRect = (_ClipRectStack.Size == 0) ? _Data->ClipRectFullscreen : _ClipRectStack.Data[_ClipRectStack.Size - 1];
     _OnChangedClipRect();
 
-SKIA_DRAW_BACKEND_BEGIN
+IMZERO_DRAWLIST_BEGIN
     if(fbBuilder != nullptr) {
-        auto arg = VectorCmdFB::CreateCmdPopClipRect(*fbBuilder);
-        addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdPopClipRect,arg.Union());
+        auto arg = ImZeroFB::CreateCmdPopClipRect(*fbBuilder);
+        addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdPopClipRect,arg.Union());
     }
-SKIA_DRAW_BACKEND_END
+IMZERO_DRAWLIST_END
 }
 
 void ImDrawList::PushTextureID(ImTextureID texture_id)
@@ -916,16 +915,16 @@ void ImDrawList::AddPolyline(const ImVec2* points, const int points_count, ImU32
     if (points_count < 2 || (col & IM_COL32_A_MASK) == 0)
         return;
 
-SKIA_DRAW_BACKEND_BEGIN
+IMZERO_DRAWLIST_BEGIN
     {
         flatbuffers::Offset<flatbuffers::Vector<float>> xs, ys;
         fbAddPointsToVector(xs,ys,*fbBuilder,points,points_count);
-        auto p = VectorCmdFB::CreateArrayOfVec2(*fbBuilder,xs,ys);
-        auto arg = VectorCmdFB::CreateCmdPolyline(*fbBuilder,p,col,flags,thickness);
-        addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdPolyline,arg.Union());
+        auto p = ImZeroFB::CreateArrayOfVec2(*fbBuilder,xs,ys);
+        auto arg = ImZeroFB::CreateCmdPolyline(*fbBuilder,p,col,flags,thickness);
+        addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdPolyline,arg.Union());
         return;
     }
-SKIA_DRAW_BACKEND_END
+IMZERO_DRAWLIST_END
 
     const bool closed = (flags & ImDrawFlags_Closed) != 0;
     const ImVec2 opaque_uv = _Data->TexUvWhitePixel;
@@ -1185,16 +1184,16 @@ void ImDrawList::AddConvexPolyFilled(const ImVec2* points, const int points_coun
     if (points_count < 3 || (col & IM_COL32_A_MASK) == 0)
         return;
 
-SKIA_DRAW_BACKEND_BEGIN
+IMZERO_DRAWLIST_BEGIN
     {
         flatbuffers::Offset<flatbuffers::Vector<float>> xs, ys;
         fbAddPointsToVector(xs,ys,*fbBuilder,points,points_count);
-        auto p = VectorCmdFB::CreateArrayOfVec2(*fbBuilder,xs,ys);
-        auto arg = VectorCmdFB::CreateCmdConvexPolyFilled(*fbBuilder,p,col);
-        addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdConvexPolyFilled,arg.Union());
+        auto p = ImZeroFB::CreateArrayOfVec2(*fbBuilder,xs,ys);
+        auto arg = ImZeroFB::CreateCmdConvexPolyFilled(*fbBuilder,p,col);
+        addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdConvexPolyFilled,arg.Union());
         return;
     }
-SKIA_DRAW_BACKEND_END
+IMZERO_DRAWLIST_END
 
     const ImVec2 uv = _Data->TexUvWhitePixel;
 
@@ -1618,15 +1617,15 @@ void ImDrawList::AddLine(const ImVec2& p1, const ImVec2& p2, ImU32 col, float th
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 
-SKIA_DRAW_BACKEND_BEGIN
+IMZERO_DRAWLIST_BEGIN
     {
-        auto p1Fb = VectorCmdFB::SingleVec2(p1.x,p1.y);
-        auto p2Fb = VectorCmdFB::SingleVec2(p2.x,p2.y);
-        auto arg = VectorCmdFB::CreateCmdLine(*fbBuilder,&p1Fb,&p2Fb,col,thickness);
-        addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdLine,arg.Union());
+        auto p1Fb = ImZeroFB::SingleVec2(p1.x,p1.y);
+        auto p2Fb = ImZeroFB::SingleVec2(p2.x,p2.y);
+        auto arg = ImZeroFB::CreateCmdLine(*fbBuilder,&p1Fb,&p2Fb,col,thickness);
+        addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdLine,arg.Union());
         return;
     }
-SKIA_DRAW_BACKEND_END
+IMZERO_DRAWLIST_END
 
     PathLineTo(p1 + ImVec2(0.5f, 0.5f));
     PathLineTo(p2 + ImVec2(0.5f, 0.5f));
@@ -1640,10 +1639,10 @@ void ImDrawList::AddRect(const ImVec2& p_min, const ImVec2& p_max, ImU32 col, fl
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 
-SKIA_DRAW_BACKEND_BEGIN
+IMZERO_DRAWLIST_BEGIN
     {
-        auto pMinFb = VectorCmdFB::SingleVec2(p_min.x,p_min.y);
-        auto pMaxFb = VectorCmdFB::SingleVec2(p_max.x,p_max.y);
+        auto pMinFb = ImZeroFB::SingleVec2(p_min.x,p_min.y);
+        auto pMaxFb = ImZeroFB::SingleVec2(p_max.x,p_max.y);
         if (rounding >= 0.5f) {
             flags = FixRectCornerFlags(flags);
             rounding = ImMin(rounding, ImFabs(p_max.x - p_min.x) * (((flags & ImDrawFlags_RoundCornersTop) == ImDrawFlags_RoundCornersTop) || ((flags & ImDrawFlags_RoundCornersBottom) == ImDrawFlags_RoundCornersBottom) ? 0.5f : 1.0f) - 1.0f);
@@ -1654,20 +1653,20 @@ SKIA_DRAW_BACKEND_BEGIN
         }
 
         if(rounding == 0.0f || (flags & ImDrawFlags_RoundCornersMask_) == ImDrawFlags_RoundCornersAll) {
-            auto arg = VectorCmdFB::CreateCmdRectRounded(*fbBuilder,&pMinFb,&pMaxFb,col,rounding,thickness);
-            addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdRectRounded,arg.Union());
+            auto arg = ImZeroFB::CreateCmdRectRounded(*fbBuilder,&pMinFb,&pMaxFb,col,rounding,thickness);
+            addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdRectRounded,arg.Union());
         } else {
             const float rounding_tl = (flags & ImDrawFlags_RoundCornersTopLeft)     ? rounding : 0.0f;
             const float rounding_tr = (flags & ImDrawFlags_RoundCornersTopRight)    ? rounding : 0.0f;
             const float rounding_br = (flags & ImDrawFlags_RoundCornersBottomRight) ? rounding : 0.0f;
             const float rounding_bl = (flags & ImDrawFlags_RoundCornersBottomLeft)  ? rounding : 0.0f;
-            auto arg = VectorCmdFB::CreateCmdRectRoundedCorners(*fbBuilder,&pMinFb,&pMaxFb,col,rounding_tl,rounding_tr,rounding_br,rounding_bl,thickness);
-            addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdRectRoundedCorners,arg.Union());
+            auto arg = ImZeroFB::CreateCmdRectRoundedCorners(*fbBuilder,&pMinFb,&pMaxFb,col,rounding_tl,rounding_tr,rounding_br,rounding_bl,thickness);
+            addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdRectRoundedCorners,arg.Union());
         }
-        
+
         return;
     }
-SKIA_DRAW_BACKEND_END
+IMZERO_DRAWLIST_END
 
     if (Flags & ImDrawListFlags_AntiAliasedLines)
         PathRect(p_min + ImVec2(0.50f, 0.50f), p_max - ImVec2(0.50f, 0.50f), rounding, flags);
@@ -1681,10 +1680,10 @@ void ImDrawList::AddRectFilled(const ImVec2& p_min, const ImVec2& p_max, ImU32 c
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 
-SKIA_DRAW_BACKEND_BEGIN
+IMZERO_DRAWLIST_BEGIN
     {
-        auto pMinFb = VectorCmdFB::SingleVec2(p_min.x,p_min.y);
-        auto pMaxFb = VectorCmdFB::SingleVec2(p_max.x,p_max.y);
+        auto pMinFb = ImZeroFB::SingleVec2(p_min.x,p_min.y);
+        auto pMaxFb = ImZeroFB::SingleVec2(p_max.x,p_max.y);
         if (rounding >= 0.5f) {
             flags = FixRectCornerFlags(flags);
             rounding = ImMin(rounding, ImFabs(p_max.x - p_min.x) * (((flags & ImDrawFlags_RoundCornersTop) == ImDrawFlags_RoundCornersTop) || ((flags & ImDrawFlags_RoundCornersBottom) == ImDrawFlags_RoundCornersBottom) ? 0.5f : 1.0f) - 1.0f);
@@ -1696,20 +1695,20 @@ SKIA_DRAW_BACKEND_BEGIN
         }
 
         if(rounding == 0.0f || (flags & ImDrawFlags_RoundCornersMask_) == ImDrawFlags_RoundCornersAll) {
-            auto arg = VectorCmdFB::CreateCmdRectRoundedFilled(*fbBuilder,&pMinFb,&pMaxFb,col,rounding);
-            addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdRectRoundedFilled,arg.Union());
+            auto arg = ImZeroFB::CreateCmdRectRoundedFilled(*fbBuilder,&pMinFb,&pMaxFb,col,rounding);
+            addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdRectRoundedFilled,arg.Union());
         } else {
             const float rounding_tl = (flags & ImDrawFlags_RoundCornersTopLeft)     ? rounding : 0.0f;
             const float rounding_tr = (flags & ImDrawFlags_RoundCornersTopRight)    ? rounding : 0.0f;
             const float rounding_br = (flags & ImDrawFlags_RoundCornersBottomRight) ? rounding : 0.0f;
             const float rounding_bl = (flags & ImDrawFlags_RoundCornersBottomLeft)  ? rounding : 0.0f;
-            auto arg = VectorCmdFB::CreateCmdRectRoundedCornersFilled(*fbBuilder,&pMinFb,&pMaxFb,col,rounding_tl,rounding_tr,rounding_br,rounding_bl);
-            addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdRectRoundedCornersFilled,arg.Union());
+            auto arg = ImZeroFB::CreateCmdRectRoundedCornersFilled(*fbBuilder,&pMinFb,&pMaxFb,col,rounding_tl,rounding_tr,rounding_br,rounding_bl);
+            addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdRectRoundedCornersFilled,arg.Union());
         }
-        
+
         return;
     }
-SKIA_DRAW_BACKEND_END
+IMZERO_DRAWLIST_END
 
     if (rounding < 0.5f || (flags & ImDrawFlags_RoundCornersMask_) == ImDrawFlags_RoundCornersNone)
     {
@@ -1728,15 +1727,15 @@ void ImDrawList::AddRectFilledMultiColor(const ImVec2& p_min, const ImVec2& p_ma
 { ZoneScoped;
     if (((col_upr_left | col_upr_right | col_bot_right | col_bot_left) & IM_COL32_A_MASK) == 0)
         return;
-SKIA_DRAW_BACKEND_BEGIN
+IMZERO_DRAWLIST_BEGIN
     if(false){ // FIXME
-        auto pMinFb = VectorCmdFB::SingleVec2(p_min.x,p_min.y);
-        auto pMaxFb = VectorCmdFB::SingleVec2(p_max.x,p_max.y);
-        auto arg = VectorCmdFB::CreateCmdRectFilledMultiColor(*fbBuilder,&pMinFb,&pMaxFb,col_upr_left,col_upr_right,col_bot_right,col_bot_left);
-        addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdRectFilledMultiColor,arg.Union());
+        auto pMinFb = ImZeroFB::SingleVec2(p_min.x,p_min.y);
+        auto pMaxFb = ImZeroFB::SingleVec2(p_max.x,p_max.y);
+        auto arg = ImZeroFB::CreateCmdRectFilledMultiColor(*fbBuilder,&pMinFb,&pMaxFb,col_upr_left,col_upr_right,col_bot_right,col_bot_left);
+        addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdRectFilledMultiColor,arg.Union());
         return;
     }
-SKIA_DRAW_BACKEND_END
+IMZERO_DRAWLIST_END
 
     const ImVec2 uv = _Data->TexUvWhitePixel;
     PrimReserve(6, 4);
@@ -1753,17 +1752,17 @@ void ImDrawList::AddQuad(const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, c
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 
-SKIA_DRAW_BACKEND_BEGIN
+IMZERO_DRAWLIST_BEGIN
     {
-        auto p1Fb = VectorCmdFB::SingleVec2(p1.x,p1.y);
-        auto p2Fb = VectorCmdFB::SingleVec2(p2.x,p2.y);
-        auto p3Fb = VectorCmdFB::SingleVec2(p3.x,p3.y);
-        auto p4Fb = VectorCmdFB::SingleVec2(p4.x,p4.y);
-        auto arg = VectorCmdFB::CreateCmdQuad(*fbBuilder,&p1Fb,&p2Fb,&p3Fb,&p4Fb,col,thickness);
-        addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdQuad,arg.Union());
+        auto p1Fb = ImZeroFB::SingleVec2(p1.x,p1.y);
+        auto p2Fb = ImZeroFB::SingleVec2(p2.x,p2.y);
+        auto p3Fb = ImZeroFB::SingleVec2(p3.x,p3.y);
+        auto p4Fb = ImZeroFB::SingleVec2(p4.x,p4.y);
+        auto arg = ImZeroFB::CreateCmdQuad(*fbBuilder,&p1Fb,&p2Fb,&p3Fb,&p4Fb,col,thickness);
+        addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdQuad,arg.Union());
         return;
     }
-SKIA_DRAW_BACKEND_END
+IMZERO_DRAWLIST_END
 
     PathLineTo(p1);
     PathLineTo(p2);
@@ -1777,17 +1776,17 @@ void ImDrawList::AddQuadFilled(const ImVec2& p1, const ImVec2& p2, const ImVec2&
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 
-SKIA_DRAW_BACKEND_BEGIN
+IMZERO_DRAWLIST_BEGIN
     {
-        auto p1Fb = VectorCmdFB::SingleVec2(p1.x,p1.y);
-        auto p2Fb = VectorCmdFB::SingleVec2(p2.x,p2.y);
-        auto p3Fb = VectorCmdFB::SingleVec2(p3.x,p3.y);
-        auto p4Fb = VectorCmdFB::SingleVec2(p4.x,p4.y);
-        auto arg = VectorCmdFB::CreateCmdQuadFilled(*fbBuilder,&p1Fb,&p2Fb,&p3Fb,&p4Fb,col);
-        addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdQuadFilled,arg.Union());
+        auto p1Fb = ImZeroFB::SingleVec2(p1.x,p1.y);
+        auto p2Fb = ImZeroFB::SingleVec2(p2.x,p2.y);
+        auto p3Fb = ImZeroFB::SingleVec2(p3.x,p3.y);
+        auto p4Fb = ImZeroFB::SingleVec2(p4.x,p4.y);
+        auto arg = ImZeroFB::CreateCmdQuadFilled(*fbBuilder,&p1Fb,&p2Fb,&p3Fb,&p4Fb,col);
+        addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdQuadFilled,arg.Union());
         return;
     }
-SKIA_DRAW_BACKEND_END
+IMZERO_DRAWLIST_END
 
     PathLineTo(p1);
     PathLineTo(p2);
@@ -1801,16 +1800,16 @@ void ImDrawList::AddTriangle(const ImVec2& p1, const ImVec2& p2, const ImVec2& p
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 
-SKIA_DRAW_BACKEND_BEGIN
+IMZERO_DRAWLIST_BEGIN
     {
-        auto p1Fb = VectorCmdFB::SingleVec2(p1.x,p1.y);
-        auto p2Fb = VectorCmdFB::SingleVec2(p2.x,p2.y);
-        auto p3Fb = VectorCmdFB::SingleVec2(p3.x,p3.y);
-        auto arg = VectorCmdFB::CreateCmdTriangle(*fbBuilder,&p1Fb,&p2Fb,&p3Fb,col);
-        addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdTriangle,arg.Union());
+        auto p1Fb = ImZeroFB::SingleVec2(p1.x,p1.y);
+        auto p2Fb = ImZeroFB::SingleVec2(p2.x,p2.y);
+        auto p3Fb = ImZeroFB::SingleVec2(p3.x,p3.y);
+        auto arg = ImZeroFB::CreateCmdTriangle(*fbBuilder,&p1Fb,&p2Fb,&p3Fb,col);
+        addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdTriangle,arg.Union());
         return;
     }
-SKIA_DRAW_BACKEND_END
+IMZERO_DRAWLIST_END
 
     PathLineTo(p1);
     PathLineTo(p2);
@@ -1823,16 +1822,16 @@ void ImDrawList::AddTriangleFilled(const ImVec2& p1, const ImVec2& p2, const ImV
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 
-SKIA_DRAW_BACKEND_BEGIN
+IMZERO_DRAWLIST_BEGIN
     {
-        auto p1Fb = VectorCmdFB::SingleVec2(p1.x,p1.y);
-        auto p2Fb = VectorCmdFB::SingleVec2(p2.x,p2.y);
-        auto p3Fb = VectorCmdFB::SingleVec2(p3.x,p3.y);
-        auto arg = VectorCmdFB::CreateCmdTriangleFilled(*fbBuilder,&p1Fb,&p2Fb,&p3Fb,col);
-        addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdTriangleFilled,arg.Union());
+        auto p1Fb = ImZeroFB::SingleVec2(p1.x,p1.y);
+        auto p2Fb = ImZeroFB::SingleVec2(p2.x,p2.y);
+        auto p3Fb = ImZeroFB::SingleVec2(p3.x,p3.y);
+        auto arg = ImZeroFB::CreateCmdTriangleFilled(*fbBuilder,&p1Fb,&p2Fb,&p3Fb,col);
+        addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdTriangleFilled,arg.Union());
         return;
     }
-SKIA_DRAW_BACKEND_END
+IMZERO_DRAWLIST_END
 
     PathLineTo(p1);
     PathLineTo(p2);
@@ -1845,14 +1844,14 @@ void ImDrawList::AddCircle(const ImVec2& center, float radius, ImU32 col, int nu
     if ((col & IM_COL32_A_MASK) == 0 || radius < 0.5f)
         return;
 
-SKIA_DRAW_BACKEND_BEGIN
+IMZERO_DRAWLIST_BEGIN
     {
-        auto centerFb = VectorCmdFB::SingleVec2(center.x,center.y);
-        auto arg = VectorCmdFB::CreateCmdCircle(*fbBuilder,&centerFb,radius,col,num_segments,thickness);
-        addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdCircle,arg.Union());
+        auto centerFb = ImZeroFB::SingleVec2(center.x,center.y);
+        auto arg = ImZeroFB::CreateCmdCircle(*fbBuilder,&centerFb,radius,col,num_segments,thickness);
+        addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdCircle,arg.Union());
         return;
     }
-SKIA_DRAW_BACKEND_END
+IMZERO_DRAWLIST_END
 
     if (num_segments <= 0)
     {
@@ -1878,14 +1877,14 @@ void ImDrawList::AddCircleFilled(const ImVec2& center, float radius, ImU32 col, 
     if ((col & IM_COL32_A_MASK) == 0 || radius < 0.5f)
         return;
 
-SKIA_DRAW_BACKEND_BEGIN
+IMZERO_DRAWLIST_BEGIN
     {
-        auto centerFb = VectorCmdFB::SingleVec2(center.x,center.y);
-        auto arg = VectorCmdFB::CreateCmdCircleFilled(*fbBuilder,&centerFb,radius,col);
-        addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdCircleFilled,arg.Union());
+        auto centerFb = ImZeroFB::SingleVec2(center.x,center.y);
+        auto arg = ImZeroFB::CreateCmdCircleFilled(*fbBuilder,&centerFb,radius,col);
+        addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdCircleFilled,arg.Union());
         return;
     }
-SKIA_DRAW_BACKEND_END
+IMZERO_DRAWLIST_END
 
     if (num_segments <= 0)
     {
@@ -1912,14 +1911,14 @@ void ImDrawList::AddNgon(const ImVec2& center, float radius, ImU32 col, int num_
     if ((col & IM_COL32_A_MASK) == 0 || num_segments <= 2)
         return;
 
-SKIA_DRAW_BACKEND_BEGIN
+IMZERO_DRAWLIST_BEGIN
     {
-        auto centerFb = VectorCmdFB::SingleVec2(center.x,center.y);
-        auto arg = VectorCmdFB::CreateCmdNgon(*fbBuilder,&centerFb,radius,col,num_segments,thickness);
-        addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdNgon,arg.Union());
+        auto centerFb = ImZeroFB::SingleVec2(center.x,center.y);
+        auto arg = ImZeroFB::CreateCmdNgon(*fbBuilder,&centerFb,radius,col,num_segments,thickness);
+        addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdNgon,arg.Union());
         return;
     }
-SKIA_DRAW_BACKEND_END
+IMZERO_DRAWLIST_END
 
 
     // Because we are filling a closed shape we remove 1 from the count of segments/points
@@ -1934,14 +1933,14 @@ void ImDrawList::AddNgonFilled(const ImVec2& center, float radius, ImU32 col, in
     if ((col & IM_COL32_A_MASK) == 0 || num_segments <= 2)
         return;
 
-SKIA_DRAW_BACKEND_BEGIN
+IMZERO_DRAWLIST_BEGIN
     {
-        auto centerFb = VectorCmdFB::SingleVec2(center.x,center.y);
-        auto arg = VectorCmdFB::CreateCmdNgonFilled(*fbBuilder,&centerFb,radius,col,num_segments);
-        addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdNgonFilled,arg.Union());
+        auto centerFb = ImZeroFB::SingleVec2(center.x,center.y);
+        auto arg = ImZeroFB::CreateCmdNgonFilled(*fbBuilder,&centerFb,radius,col,num_segments);
+        addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdNgonFilled,arg.Union());
         return;
     }
-SKIA_DRAW_BACKEND_END
+IMZERO_DRAWLIST_END
 
     // Because we are filling a closed shape we remove 1 from the count of segments/points
     const float a_max = (IM_PI * 2.0f) * ((float)num_segments - 1.0f) / (float)num_segments;
@@ -1955,14 +1954,14 @@ void ImDrawList::AddEllipse(const ImVec2& center, float radius_x, float radius_y
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 
-SKIA_DRAW_BACKEND_BEGIN
+IMZERO_DRAWLIST_BEGIN
     {
-        auto centerFb = VectorCmdFB::SingleVec2(center.x,center.y);
-        auto arg = VectorCmdFB::CreateCmdEllipse(*fbBuilder,&centerFb,radius_x,radius_y,col,rot,num_segments,thickness);
-        addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdEllipse,arg.Union());
+        auto centerFb = ImZeroFB::SingleVec2(center.x,center.y);
+        auto arg = ImZeroFB::CreateCmdEllipse(*fbBuilder,&centerFb,radius_x,radius_y,col,rot,num_segments,thickness);
+        addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdEllipse,arg.Union());
         return;
     }
-SKIA_DRAW_BACKEND_END
+IMZERO_DRAWLIST_END
 
     if (num_segments <= 0)
         num_segments = _CalcCircleAutoSegmentCount(ImMax(radius_x, radius_y)); // A bit pessimistic, maybe there's a better computation to do here.
@@ -1978,14 +1977,14 @@ void ImDrawList::AddEllipseFilled(const ImVec2& center, float radius_x, float ra
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 
-SKIA_DRAW_BACKEND_BEGIN
+IMZERO_DRAWLIST_BEGIN
     {
-        auto centerFb = VectorCmdFB::SingleVec2(center.x,center.y);
-        auto arg = VectorCmdFB::CreateCmdEllipseFilled(*fbBuilder,&centerFb,radius_x,radius_y,col,rot,num_segments);
-        addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdEllipseFilled,arg.Union());
+        auto centerFb = ImZeroFB::SingleVec2(center.x,center.y);
+        auto arg = ImZeroFB::CreateCmdEllipseFilled(*fbBuilder,&centerFb,radius_x,radius_y,col,rot,num_segments);
+        addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdEllipseFilled,arg.Union());
         return;
     }
-SKIA_DRAW_BACKEND_END
+IMZERO_DRAWLIST_END
 
     if (num_segments <= 0)
         num_segments = _CalcCircleAutoSegmentCount(ImMax(radius_x, radius_y)); // A bit pessimistic, maybe there's a better computation to do here.
@@ -2001,17 +2000,17 @@ void ImDrawList::AddBezierCubic(const ImVec2& p1, const ImVec2& p2, const ImVec2
 { ZoneScoped;
     if ((col & IM_COL32_A_MASK) == 0)
         return;
-SKIA_DRAW_BACKEND_BEGIN
+IMZERO_DRAWLIST_BEGIN
     {
-        auto p1Fb = VectorCmdFB::SingleVec2(p1.x,p1.y);
-        auto p2Fb = VectorCmdFB::SingleVec2(p2.x,p2.y);
-        auto p3Fb = VectorCmdFB::SingleVec2(p3.x,p3.y);
-        auto p4Fb = VectorCmdFB::SingleVec2(p4.x,p4.y);
-        auto arg = VectorCmdFB::CreateCmdBezierCubic(*fbBuilder,&p1Fb,&p2Fb,&p3Fb,&p4Fb,col,thickness,num_segments);
-        addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdBezierCubic,arg.Union());
+        auto p1Fb = ImZeroFB::SingleVec2(p1.x,p1.y);
+        auto p2Fb = ImZeroFB::SingleVec2(p2.x,p2.y);
+        auto p3Fb = ImZeroFB::SingleVec2(p3.x,p3.y);
+        auto p4Fb = ImZeroFB::SingleVec2(p4.x,p4.y);
+        auto arg = ImZeroFB::CreateCmdBezierCubic(*fbBuilder,&p1Fb,&p2Fb,&p3Fb,&p4Fb,col,thickness,num_segments);
+        addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdBezierCubic,arg.Union());
         return;
     }
-SKIA_DRAW_BACKEND_END
+IMZERO_DRAWLIST_END
 
     PathLineTo(p1);
     PathBezierCubicCurveTo(p2, p3, p4, num_segments);
@@ -2023,16 +2022,16 @@ void ImDrawList::AddBezierQuadratic(const ImVec2& p1, const ImVec2& p2, const Im
 { ZoneScoped;
     if ((col & IM_COL32_A_MASK) == 0)
         return;
-SKIA_DRAW_BACKEND_BEGIN
+IMZERO_DRAWLIST_BEGIN
     {
-        auto p1Fb = VectorCmdFB::SingleVec2(p1.x,p1.y);
-        auto p2Fb = VectorCmdFB::SingleVec2(p2.x,p2.y);
-        auto p3Fb = VectorCmdFB::SingleVec2(p3.x,p3.y);
-        auto arg = VectorCmdFB::CreateCmdBezierQuadratic(*fbBuilder,&p1Fb,&p2Fb,&p3Fb,col,thickness,num_segments);
-        addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdBezierQuadratic,arg.Union());
+        auto p1Fb = ImZeroFB::SingleVec2(p1.x,p1.y);
+        auto p2Fb = ImZeroFB::SingleVec2(p2.x,p2.y);
+        auto p3Fb = ImZeroFB::SingleVec2(p3.x,p3.y);
+        auto arg = ImZeroFB::CreateCmdBezierQuadratic(*fbBuilder,&p1Fb,&p2Fb,&p3Fb,col,thickness,num_segments);
+        addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdBezierQuadratic,arg.Union());
         return;
     }
-SKIA_DRAW_BACKEND_END
+IMZERO_DRAWLIST_END
 
     PathLineTo(p1);
     PathBezierQuadraticCurveTo(p2, p3, num_segments);
@@ -2079,17 +2078,17 @@ void ImDrawList::AddImage(ImTextureID user_texture_id, const ImVec2& p_min, cons
 { ZoneScoped;
     if ((col & IM_COL32_A_MASK) == 0)
         return;
-SKIA_DRAW_BACKEND_BEGIN
+IMZERO_DRAWLIST_BEGIN
     {
-        auto pMinFb = VectorCmdFB::SingleVec2(p_min.x,p_min.y);
-        auto pMaxFb = VectorCmdFB::SingleVec2(p_max.x,p_max.y);
-        auto uvMinFb = VectorCmdFB::SingleVec2(uv_min.x,uv_min.y);
-        auto uvMaxFb = VectorCmdFB::SingleVec2(uv_max.x,uv_max.y);
-        auto arg = VectorCmdFB::CreateCmdImage(*fbBuilder,reinterpret_cast<uint64_t>(user_texture_id),&pMinFb,&pMaxFb,&uvMinFb,&uvMaxFb,col);
-        addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdImage,arg.Union());
+        auto pMinFb = ImZeroFB::SingleVec2(p_min.x,p_min.y);
+        auto pMaxFb = ImZeroFB::SingleVec2(p_max.x,p_max.y);
+        auto uvMinFb = ImZeroFB::SingleVec2(uv_min.x,uv_min.y);
+        auto uvMaxFb = ImZeroFB::SingleVec2(uv_max.x,uv_max.y);
+        auto arg = ImZeroFB::CreateCmdImage(*fbBuilder,reinterpret_cast<uint64_t>(user_texture_id),&pMinFb,&pMaxFb,&uvMinFb,&uvMaxFb,col);
+        addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdImage,arg.Union());
         return;
     }
-SKIA_DRAW_BACKEND_END
+IMZERO_DRAWLIST_END
 
     const bool push_texture_id = user_texture_id != _CmdHeader.TextureId;
     if (push_texture_id)
@@ -2107,21 +2106,21 @@ void ImDrawList::AddImageQuad(ImTextureID user_texture_id, const ImVec2& p1, con
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 
-SKIA_DRAW_BACKEND_BEGIN
+IMZERO_DRAWLIST_BEGIN
     {
-        auto p1Fb = VectorCmdFB::SingleVec2(p1.x,p1.y);
-        auto p2Fb = VectorCmdFB::SingleVec2(p2.x,p2.y);
-        auto p3Fb = VectorCmdFB::SingleVec2(p3.x,p3.y);
-        auto p4Fb = VectorCmdFB::SingleVec2(p4.x,p4.y);
-        auto uv1Fb = VectorCmdFB::SingleVec2(uv1.x,uv1.y);
-        auto uv2Fb = VectorCmdFB::SingleVec2(uv2.x,uv2.y);
-        auto uv3Fb = VectorCmdFB::SingleVec2(uv3.x,uv3.y);
-        auto uv4Fb = VectorCmdFB::SingleVec2(uv4.x,uv4.y);
-        auto arg = VectorCmdFB::CreateCmdImageQuad(*fbBuilder,reinterpret_cast<uint64_t>(user_texture_id),&p1Fb,&p2Fb,&p3Fb,&p4Fb,&uv1Fb,&uv2Fb,&uv3Fb,&uv4Fb,col);
-        addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdImageQuad,arg.Union());
+        auto p1Fb = ImZeroFB::SingleVec2(p1.x,p1.y);
+        auto p2Fb = ImZeroFB::SingleVec2(p2.x,p2.y);
+        auto p3Fb = ImZeroFB::SingleVec2(p3.x,p3.y);
+        auto p4Fb = ImZeroFB::SingleVec2(p4.x,p4.y);
+        auto uv1Fb = ImZeroFB::SingleVec2(uv1.x,uv1.y);
+        auto uv2Fb = ImZeroFB::SingleVec2(uv2.x,uv2.y);
+        auto uv3Fb = ImZeroFB::SingleVec2(uv3.x,uv3.y);
+        auto uv4Fb = ImZeroFB::SingleVec2(uv4.x,uv4.y);
+        auto arg = ImZeroFB::CreateCmdImageQuad(*fbBuilder,reinterpret_cast<uint64_t>(user_texture_id),&p1Fb,&p2Fb,&p3Fb,&p4Fb,&uv1Fb,&uv2Fb,&uv3Fb,&uv4Fb,col);
+        addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdImageQuad,arg.Union());
         return;
     }
-SKIA_DRAW_BACKEND_END
+IMZERO_DRAWLIST_END
 
     const bool push_texture_id = user_texture_id != _CmdHeader.TextureId;
     if (push_texture_id)
@@ -2139,17 +2138,17 @@ void ImDrawList::AddImageRounded(ImTextureID user_texture_id, const ImVec2& p_mi
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 
-SKIA_DRAW_BACKEND_BEGIN
+IMZERO_DRAWLIST_BEGIN
     {
-        auto pMinFb = VectorCmdFB::SingleVec2(p_min.x,p_min.y);
-        auto pMaxFb = VectorCmdFB::SingleVec2(p_max.x,p_max.y);
-        auto uvMinFb = VectorCmdFB::SingleVec2(uv_min.x,uv_max.y);
-        auto uvMaxFb = VectorCmdFB::SingleVec2(uv_min.x,uv_max.y);
-        auto arg = VectorCmdFB::CreateCmdImageRounded(*fbBuilder,reinterpret_cast<uint64_t>(user_texture_id),&pMinFb,&pMaxFb,&uvMinFb,&uvMaxFb,col,rounding,flags);
-        addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdImageRounded,arg.Union());
+        auto pMinFb = ImZeroFB::SingleVec2(p_min.x,p_min.y);
+        auto pMaxFb = ImZeroFB::SingleVec2(p_max.x,p_max.y);
+        auto uvMinFb = ImZeroFB::SingleVec2(uv_min.x,uv_max.y);
+        auto uvMaxFb = ImZeroFB::SingleVec2(uv_min.x,uv_max.y);
+        auto arg = ImZeroFB::CreateCmdImageRounded(*fbBuilder,reinterpret_cast<uint64_t>(user_texture_id),&pMinFb,&pMaxFb,&uvMinFb,&uvMaxFb,col,rounding,flags);
+        addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdImageRounded,arg.Union());
         return;
     }
-SKIA_DRAW_BACKEND_END
+IMZERO_DRAWLIST_END
 
     flags = FixRectCornerFlags(flags);
     if (rounding < 0.5f || (flags & ImDrawFlags_RoundCornersMask_) == ImDrawFlags_RoundCornersNone)
@@ -2189,7 +2188,7 @@ void ImDrawListSplitter::ClearFreeMemory()
         _Channels[i]._CmdBuffer.clear();
         _Channels[i]._IdxBuffer.clear();
     }
-#ifdef SKIA_DRAW_BACKEND
+#ifdef IMZERO_DRAWLIST
     for (int i = 0; i < _ChannelsFbCmds.Size; i++)
     {
         if (i == _Current) {
@@ -2219,7 +2218,7 @@ void ImDrawListSplitter::Split(ImDrawList* draw_list, int channels_count)
     {
         _Channels.reserve(channels_count); // Avoid over reserving since this is likely to stay stable
         _Channels.resize(channels_count);
-#ifdef SKIA_DRAW_BACKEND
+#ifdef IMZERO_DRAWLIST
         _ChannelsFbCmds.reserve(channels_count);
         _ChannelsFbCmds.resize(channels_count);
         _ChannelsFbBuilders.reserve(channels_count);
@@ -2237,8 +2236,8 @@ void ImDrawListSplitter::Split(ImDrawList* draw_list, int channels_count)
         if (i >= old_channels_count)
         {
             IM_PLACEMENT_NEW(&_Channels[i]) ImDrawChannel();
-#ifdef SKIA_DRAW_BACKEND
-            _ChannelsFbCmds[i] = new std::vector<flatbuffers::Offset<VectorCmdFB::SingleVectorCmdDto>>();
+#ifdef IMZERO_DRAWLIST
+            _ChannelsFbCmds[i] = new std::vector<flatbuffers::Offset<ImZeroFB::SingleVectorCmdDto>>();
             _ChannelsFbBuilders[i] = new flatbuffers::FlatBufferBuilder();
 #endif
         }
@@ -2246,7 +2245,7 @@ void ImDrawListSplitter::Split(ImDrawList* draw_list, int channels_count)
         {
             _Channels[i]._CmdBuffer.resize(0);
             _Channels[i]._IdxBuffer.resize(0);
-#ifdef SKIA_DRAW_BACKEND
+#ifdef IMZERO_DRAWLIST
             _ChannelsFbCmds[i]->resize(0);
             _ChannelsFbBuilders[i]->Clear();
 #endif
@@ -2267,7 +2266,7 @@ void ImDrawListSplitter::Merge(ImDrawList* draw_list)
     // Calculate our final buffer sizes. Also fix the incorrect IdxOffset values in each command.
     int new_cmd_buffer_count = 0;
     int new_idx_buffer_count = 0;
-#ifdef SKIA_DRAW_BACKEND
+#ifdef IMZERO_DRAWLIST
     IM_ASSERT_PARANOID(draw_list->fbBuilder == _ChannelsFbBuilders[0] && "lowest channel is active channel");
     IM_ASSERT_PARANOID(draw_list->_FbCmds == _ChannelsFbCmds[0] && "lowest channel is active channel");
     int new_fb_cmds_count = 0;
@@ -2297,7 +2296,7 @@ void ImDrawListSplitter::Merge(ImDrawList* draw_list)
             last_cmd = &ch._CmdBuffer.back();
         new_cmd_buffer_count += ch._CmdBuffer.Size;
         new_idx_buffer_count += ch._IdxBuffer.Size;
-#ifdef SKIA_DRAW_BACKEND
+#ifdef IMZERO_DRAWLIST
         new_fb_cmds_count += static_cast<int>(_ChannelsFbCmds[i]->size());
 #endif
         for (int cmd_n = 0; cmd_n < ch._CmdBuffer.Size; cmd_n++)
@@ -2308,7 +2307,7 @@ void ImDrawListSplitter::Merge(ImDrawList* draw_list)
     }
     draw_list->CmdBuffer.resize(draw_list->CmdBuffer.Size + new_cmd_buffer_count);
     draw_list->IdxBuffer.resize(draw_list->IdxBuffer.Size + new_idx_buffer_count);
-#ifdef SKIA_DRAW_BACKEND
+#ifdef IMZERO_DRAWLIST
     draw_list->_FbCmds->reserve(draw_list->_FbCmds->size() + new_fb_cmds_count);
 #endif
 
@@ -2320,7 +2319,7 @@ void ImDrawListSplitter::Merge(ImDrawList* draw_list)
         ImDrawChannel& ch = _Channels[i];
         if (int sz = ch._CmdBuffer.Size) { memcpy(cmd_write, ch._CmdBuffer.Data, sz * sizeof(ImDrawCmd)); cmd_write += sz; }
         if (int sz = ch._IdxBuffer.Size) { memcpy(idx_write, ch._IdxBuffer.Data, sz * sizeof(ImDrawIdx)); idx_write += sz; }
-#ifdef SKIA_DRAW_BACKEND
+#ifdef IMZERO_DRAWLIST
         { ZoneScopedN("serialize and add split drawlist");
             // build command
             auto builder = _ChannelsFbBuilders[i];
@@ -2330,11 +2329,11 @@ void ImDrawListSplitter::Merge(ImDrawList* draw_list)
             // serialize
             auto const buf = builder->GetBufferPointer();
             auto const bufSize = builder->GetSize();
-            
+
             // append to drawlist
             auto const bufVec = draw_list->fbBuilder->CreateVector<uint8_t>(buf,bufSize);
-            auto const cmd = VectorCmdFB::CreateCmdWrappedDrawList(*draw_list->fbBuilder,bufVec);
-            draw_list->addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdWrappedDrawList,cmd.Union());
+            auto const cmd = ImZeroFB::CreateCmdWrappedDrawList(*draw_list->fbBuilder,bufVec);
+            draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdWrappedDrawList,cmd.Union());
 
             builder->Clear();
         }
@@ -2362,7 +2361,7 @@ void ImDrawListSplitter::SetCurrentChannel(ImDrawList* draw_list, int idx)
 { ZoneScoped;
     IM_ASSERT(idx >= 0 && idx < _Count);
 
-#ifdef SKIA_DRAW_BACKEND
+#ifdef IMZERO_DRAWLIST
     // _Current is zero when ImDrawListSplitter gets initialized but _Channels.Data[0] is not properly
     // initialized. Why does the regular ImGui code get aways with the check below?
     if(_ChannelsFbCmds.size() < idx) { ZoneScopedN("initialize additional channels");
@@ -2373,7 +2372,7 @@ void ImDrawListSplitter::SetCurrentChannel(ImDrawList* draw_list, int idx)
         _ChannelsFbBuilders.resize(idx);
         IM_ASSERT(b > 0 && "first slot is reserved for drawlist's objects");
         for(auto i=b;i<idx;i++) {
-           _ChannelsFbCmds[i] = new std::vector<flatbuffers::Offset<VectorCmdFB::SingleVectorCmdDto>>();
+           _ChannelsFbCmds[i] = new std::vector<flatbuffers::Offset<ImZeroFB::SingleVectorCmdDto>>();
            _ChannelsFbBuilders[i] = new flatbuffers::FlatBufferBuilder();
         }
     }
@@ -2387,7 +2386,7 @@ void ImDrawListSplitter::SetCurrentChannel(ImDrawList* draw_list, int idx)
     // Overwrite ImVector (12/16 bytes), four times. This is merely a silly optimization instead of doing .swap()
     memcpy(&_Channels.Data[_Current]._CmdBuffer, &draw_list->CmdBuffer, sizeof(draw_list->CmdBuffer));
     memcpy(&_Channels.Data[_Current]._IdxBuffer, &draw_list->IdxBuffer, sizeof(draw_list->IdxBuffer));
-#ifdef SKIA_DRAW_BACKEND
+#ifdef IMZERO_DRAWLIST
     IM_ASSERT(_ChannelsFbCmds[idx] != nullptr && "uninitialized channel fb");
     _ChannelsFbCmds[_Current] = draw_list->_FbCmds;
     _ChannelsFbBuilders[_Current] = draw_list->fbBuilder;
@@ -2396,7 +2395,7 @@ void ImDrawListSplitter::SetCurrentChannel(ImDrawList* draw_list, int idx)
     memcpy(&draw_list->CmdBuffer, &_Channels.Data[idx]._CmdBuffer, sizeof(draw_list->CmdBuffer));
     memcpy(&draw_list->IdxBuffer, &_Channels.Data[idx]._IdxBuffer, sizeof(draw_list->IdxBuffer));
     draw_list->_IdxWritePtr = draw_list->IdxBuffer.Data + draw_list->IdxBuffer.Size;
-#ifdef SKIA_DRAW_BACKEND
+#ifdef IMZERO_DRAWLIST
     IM_ASSERT(_ChannelsFbCmds[idx] != nullptr && "uninitialized channel fb");
     draw_list->_FbCmds = _ChannelsFbCmds[idx];
     draw_list->fbBuilder = _ChannelsFbBuilders[idx];
@@ -2429,7 +2428,7 @@ void ImDrawData::Clear()
 // as long at it is expected that the result will be later merged into draw_data->CmdLists[].
 void ImGui::AddDrawListToDrawDataEx(ImDrawData* draw_data, ImVector<ImDrawList*>* out_list, ImDrawList* draw_list)
 { ZoneScoped;
-#ifdef SKIA_DRAW_BACKEND
+#ifdef IMZERO_DRAWLIST
     if(ImGui::useVectorCmd) {
         if(draw_list->_FbCmds->size() == 0) {
             // skip empty drawlist
@@ -2441,7 +2440,7 @@ void ImGui::AddDrawListToDrawDataEx(ImDrawData* draw_data, ImVector<ImDrawList*>
         return;
     if (draw_list->CmdBuffer.Size == 1 && draw_list->CmdBuffer[0].ElemCount == 0 && draw_list->CmdBuffer[0].UserCallback == NULL)
         return;
-#ifdef SKIA_DRAW_BACKEND
+#ifdef IMZERO_DRAWLIST
     }
 #endif
 
@@ -3843,7 +3842,7 @@ ImFont::ImFont()
 
 ImFont::~ImFont()
 { ZoneScoped;
-#ifdef SKIA_DRAW_BACKEND
+#ifdef IMZERO_DRAWLIST
 #endif
     ClearOutputData();
 }
@@ -4174,7 +4173,7 @@ const char* ImFont::CalcWordWrapPositionA(float scale, const char* text, const c
         return s + 1;
     return s;
 }
-#ifdef SKIA_DRAW_BACKEND
+#ifdef IMZERO_DRAWLIST
 static inline bool isParagraphText(const char *text_begin, const char *text_end) {
     return (memchr(text_begin,'\n',text_end-text_begin) != nullptr);
 }
@@ -4184,7 +4183,7 @@ ImVec2 ImFont::CalcTextSizeA(float size, float max_width, float wrap_width, cons
     if (!text_end)
         text_end = text_begin + strlen(text_begin); // FIXME-OPT: Need to avoid this.
 
-SKIA_DRAW_BACKEND_BEGIN
+IMZERO_DRAWLIST_BEGIN
     if(remaining != nullptr) {
         *remaining = nullptr;
     }
@@ -4230,7 +4229,7 @@ SKIA_DRAW_BACKEND_BEGIN
     if(freeAllocatedText) {
         IM_FREE(const_cast<char*>(text_begin));
     }
-SKIA_DRAW_BACKEND_END
+IMZERO_DRAWLIST_END
 
     const float line_height = size;
     const float scale = size / FontSize;
@@ -4308,7 +4307,7 @@ SKIA_DRAW_BACKEND_END
 // Note: as with every ImDrawList drawing function, this expects that the font atlas texture is bound.
 void ImFont::RenderChar(ImDrawList* draw_list, float size, const ImVec2& pos, ImU32 col, ImWchar c) const
 { ZoneScoped;
-SKIA_DRAW_BACKEND_BEGIN
+IMZERO_DRAWLIST_BEGIN
 #if 0
     // TODO: this may be inefficient --> add VectorCmdRenderChar dto, looks like it is currently only used to render ellipsis char?
     constexpr int max_utf8_codepoint_len_in_bytes = 6;
@@ -4316,20 +4315,20 @@ SKIA_DRAW_BACKEND_BEGIN
     ImTextCharToUtf8(text_begin, (unsigned int)c);
     size_t len = strlen(text_begin);
 
-    auto posFb = VectorCmdFB::SingleVec2(pos.x,pos.y);
-    auto clipRectFb = VectorCmdFB::SingleVec4(0.0,0.0,0.0,0.0);
+    auto posFb = ImZeroFB::SingleVec2(pos.x,pos.y);
+    auto clipRectFb = ImZeroFB::SingleVec4(0.0,0.0,0.0,0.0);
     auto textFb = draw_list->fbBuilder->CreateString(text_begin,len);
-    auto arg = VectorCmdFB::CreateCmdRenderText(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(this),size,&posFb,col,&clipRectFb,textFb);
-    draw_list->addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdRenderText,arg.Union());
+    auto arg = ImZeroFB::CreateCmdRenderText(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(this),size,&posFb,col,&clipRectFb,textFb);
+    draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdRenderText,arg.Union());
     return;
 #else
-    auto posFb = VectorCmdFB::SingleVec2(pos.x,pos.y);
-    auto clipRectFb = VectorCmdFB::SingleVec4(0.0,0.0,0.0,0.0);
-    auto arg = VectorCmdFB::CreateCmdRenderUnicodeCodepoint(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(this),size,&posFb,col,&clipRectFb,static_cast<uint32_t>(c));
-    draw_list->addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdRenderUnicodeCodepoint,arg.Union());
+    auto posFb = ImZeroFB::SingleVec2(pos.x,pos.y);
+    auto clipRectFb = ImZeroFB::SingleVec4(0.0,0.0,0.0,0.0);
+    auto arg = ImZeroFB::CreateCmdRenderUnicodeCodepoint(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(this),size,&posFb,col,&clipRectFb,static_cast<uint32_t>(c));
+    draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdRenderUnicodeCodepoint,arg.Union());
     return;
 #endif
-SKIA_DRAW_BACKEND_END
+IMZERO_DRAWLIST_END
 
     const ImFontGlyph* glyph = FindGlyph(c);
     if (!glyph || !glyph->Visible)
@@ -4350,14 +4349,14 @@ void ImFont::RenderText(ImDrawList* draw_list, float size, const ImVec2& pos, Im
     if (!text_end)
         text_end = text_begin + strlen(text_begin); // ImGui:: functions generally already provides a valid text_end, so this is merely to handle direct calls.
 
-SKIA_DRAW_BACKEND_BEGIN
+IMZERO_DRAWLIST_BEGIN
     auto const len = static_cast<size_t>(text_end-text_begin);
     if(pos.y > clip_rect.w) {
         return;
     }
 
-    auto posFb = VectorCmdFB::SingleVec2(pos.x,pos.y);
-    auto clipRectFb = VectorCmdFB::SingleVec4(clip_rect.x,clip_rect.y,clip_rect.z,clip_rect.w);
+    auto posFb = ImZeroFB::SingleVec2(pos.x,pos.y);
+    auto clipRectFb = ImZeroFB::SingleVec4(clip_rect.x,clip_rect.y,clip_rect.z,clip_rect.w);
     flatbuffers::Offset<flatbuffers::String> textFb;
     if(isPasswordFont(*this)) {
         initHiddenPwBuffer(*this);
@@ -4395,8 +4394,8 @@ SKIA_DRAW_BACKEND_BEGIN
             textFb = draw_list->fbBuilder->CreateString(hiddenPwBuffer, len*hiddenPwBufferNBytesPerChar);
         }
 
-        auto const arg = VectorCmdFB::CreateCmdRenderText(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(this),size,&posFb,col,&clipRectFb,textFb);
-        draw_list->addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdRenderText,arg.Union());
+        auto const arg = ImZeroFB::CreateCmdRenderText(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(this),size,&posFb,col,&clipRectFb,textFb);
+        draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdRenderText,arg.Union());
     } else {
         textFb = draw_list->fbBuilder->CreateString(text_begin,len);
         auto isParagraph = wrap_width > 0.0f || isParagraphText(text_begin,text_end);
@@ -4408,17 +4407,17 @@ SKIA_DRAW_BACKEND_BEGIN
             }
         }
         if(isParagraph) {
-//#define SKIA_DRAW_BACKEND_PARAGRAPH_AS_PATH
-#ifdef SKIA_DRAW_BACKEND_PARAGRAPH_AS_PATH
-            const bool renderAsParagraph = SKIA_DRAW_BACKEND_PARAGRAPH_AS_PATH;
+//#define IMZERO_DRAWLIST_PARAGRAPH_AS_PATH
+#ifdef IMZERO_DRAWLIST_PARAGRAPH_AS_PATH
+            const bool renderAsParagraph = IMZERO_DRAWLIST_PARAGRAPH_AS_PATH;
 #else
             constexpr bool renderAsParagraph = true;
 #endif
             if(renderAsParagraph) {
-                auto const arg = VectorCmdFB::CreateCmdRenderParagraph(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(this),size,&posFb,col,&clipRectFb,textFb,wrap_width,0.0f,VectorCmdFB::TextAlignFlags_left);
-                draw_list->addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdRenderParagraph,arg.Union());
+                auto const arg = ImZeroFB::CreateCmdRenderParagraph(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(this),size,&posFb,col,&clipRectFb,textFb,wrap_width,0.0f,ImZeroFB::TextAlignFlags_left);
+                draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdRenderParagraph,arg.Union());
             } else { ZoneScopedN("paragraphAsPath");
-#ifdef SKIA_DRAW_BACKEND_PARAGRAPH_AS_PATH
+#ifdef IMZERO_DRAWLIST_PARAGRAPH_AS_PATH
                 auto const clipRectSkia = SkRect::MakeLTRB(SkScalar(clip_rect.x),SkScalar(clip_rect.y),SkScalar(clip_rect.z),SkScalar(clip_rect.w));
                 auto const clipRectSkiaTrans = clipRectSkia.makeOffset(-pos.x,-pos.y);
 
@@ -4466,21 +4465,21 @@ SKIA_DRAW_BACKEND_BEGIN
                     p.offset(SkScalar(pos.x),SkScalar(pos.y));
                 auto svg = SkParsePath::ToSVGString(p);
                 auto svgFb = draw_list->fbBuilder->CreateString(svg.data(),svg.size());
-                auto arg = VectorCmdFB::CreateCmdSvgPathSubset(*draw_list->fbBuilder,svgFb,col,true);
-                draw_list->addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdSvgPathSubset,arg.Union());
+                auto arg = ImZeroFB::CreateCmdSvgPathSubset(*draw_list->fbBuilder,svgFb,col,true);
+                draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdSvgPathSubset,arg.Union());
 #else
-                    static_assert(static_cast<int64_t>(VectorCmdFB::PathFillType_evenOdd) == static_cast<int64_t>(SkPathFillType::kEvenOdd));
-                    static_assert(static_cast<int64_t>(VectorCmdFB::PathFillType_winding) == static_cast<int64_t>(SkPathFillType::kWinding));
-                    static_assert(static_cast<int64_t>(VectorCmdFB::PathFillType_inverseEvenOdd) == static_cast<int64_t>(SkPathFillType::kInverseEvenOdd));
-                    static_assert(static_cast<int64_t>(VectorCmdFB::PathFillType_inverseWinding) == static_cast<int64_t>(SkPathFillType::kInverseWinding));
-                    static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_move) == static_cast<int64_t>( SkPath::Verb::kMove_Verb));
-                    static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_line) == static_cast<int64_t>( SkPath::Verb::kLine_Verb));
-                    static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_quad) == static_cast<int64_t>( SkPath::Verb::kQuad_Verb));
-                    static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_conic) == static_cast<int64_t>( SkPath::Verb::kConic_Verb));
-                    static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_cubic) == static_cast<int64_t>( SkPath::Verb::kCubic_Verb));
-                    static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_close) == static_cast<int64_t>( SkPath::Verb::kClose_Verb));
-                    static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_done) == static_cast<int64_t>( SkPath::Verb::kDone_Verb));
-                    static_assert(sizeof(VectorCmdFB::PathVerb) == 1);
+                    static_assert(static_cast<int64_t>(ImZeroFB::PathFillType_evenOdd) == static_cast<int64_t>(SkPathFillType::kEvenOdd));
+                    static_assert(static_cast<int64_t>(ImZeroFB::PathFillType_winding) == static_cast<int64_t>(SkPathFillType::kWinding));
+                    static_assert(static_cast<int64_t>(ImZeroFB::PathFillType_inverseEvenOdd) == static_cast<int64_t>(SkPathFillType::kInverseEvenOdd));
+                    static_assert(static_cast<int64_t>(ImZeroFB::PathFillType_inverseWinding) == static_cast<int64_t>(SkPathFillType::kInverseWinding));
+                    static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_move) == static_cast<int64_t>( SkPath::Verb::kMove_Verb));
+                    static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_line) == static_cast<int64_t>( SkPath::Verb::kLine_Verb));
+                    static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_quad) == static_cast<int64_t>( SkPath::Verb::kQuad_Verb));
+                    static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_conic) == static_cast<int64_t>( SkPath::Verb::kConic_Verb));
+                    static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_cubic) == static_cast<int64_t>( SkPath::Verb::kCubic_Verb));
+                    static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_close) == static_cast<int64_t>( SkPath::Verb::kClose_Verb));
+                    static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_done) == static_cast<int64_t>( SkPath::Verb::kDone_Verb));
+                    static_assert(sizeof(ImZeroFB::PathVerb) == 1);
 
                     auto const nVerbs = p.countVerbs();
                     draw_list->fPathVerbBuffer.resize(0);
@@ -4495,13 +4494,13 @@ SKIA_DRAW_BACKEND_BEGIN
                     SkPath::Iter iter(p, false);
                     SkPoint pts[4];
                     SkPath::Verb verb;
-                    static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_move) == 0);
-                    static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_line) == 1);
-                    static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_quad) == 2);
-                    static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_conic) == 3);
-                    static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_cubic) == 4);
-                    static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_close) == 5);
-                    static_assert(static_cast<int64_t>(VectorCmdFB::PathVerb_done) == 6);
+                    static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_move) == 0);
+                    static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_line) == 1);
+                    static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_quad) == 2);
+                    static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_conic) == 3);
+                    static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_cubic) == 4);
+                    static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_close) == 5);
+                    static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_done) == 6);
                     constexpr int nPointsLU[SkPath::kDone_Verb+1] = {1, /* move */
                                                                      1, /* line */
                                                                      2, /* quad */
@@ -4535,7 +4534,7 @@ SKIA_DRAW_BACKEND_BEGIN
                     auto const verbs = draw_list->fbBuilder->CreateVector<uint8_t>(draw_list->fPathVerbBuffer.Data,nVerbs);
                     auto const weights = draw_list->fbBuilder->CreateVector<float>(draw_list->fPathWeightBuffer.Data,draw_list->fPathWeightBuffer.Size);
 
-                    auto arg = VectorCmdFB::CreateCmdPath(*draw_list->fbBuilder,
+                    auto arg = ImZeroFB::CreateCmdPath(*draw_list->fbBuilder,
                                                           &posFb,
                                                           verbs,
                                                           pointXYs,
@@ -4543,20 +4542,20 @@ SKIA_DRAW_BACKEND_BEGIN
                                                           col,
                                                           false,
                                                           true,
-                                                          static_cast<VectorCmdFB::PathFillType>(p.getFillType()));
-                    draw_list->addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdPath,arg.Union());
+                                                          static_cast<ImZeroFB::PathFillType>(p.getFillType()));
+                    draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdPath,arg.Union());
 #endif
 
                 }
 #endif
             }
         } else {
-            auto const arg = VectorCmdFB::CreateCmdRenderText(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(this),size,&posFb,col,&clipRectFb,textFb);
-            draw_list->addVectorCmdFB(VectorCmdFB::VectorCmdArg_CmdRenderText,arg.Union());
+            auto const arg = ImZeroFB::CreateCmdRenderText(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(this),size,&posFb,col,&clipRectFb,textFb);
+            draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdRenderText,arg.Union());
         }
     }
     return;
-SKIA_DRAW_BACKEND_END
+IMZERO_DRAWLIST_END
 
     // Align to be pixel perfect
     float x = IM_TRUNC(pos.x);

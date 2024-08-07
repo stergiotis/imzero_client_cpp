@@ -5,6 +5,7 @@
 
 #include "imgui.h"
 #include "imgui_impl_sdl3.h"
+#include "imgui_internal.h"
 //#include "imgui_impl_opengl3.h"
 
 #include "SDL3/SDL.h"
@@ -357,10 +358,15 @@ int App::Run(CliOptions &opts) {
         applyFlag(io.ConfigFlags, ImGuiConfigFlags_DockingEnable, opts.imguiDocking);
 
         io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset; // FIXME remove ?
-
-        //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
-        //io.ConfigViewportsNoAutoMerge = true;
-        //io.ConfigViewportsNoTaskBarIcon = true;
+        if(false) {
+            // FIXME remove?
+            io.BackendFlags &= ~(ImGuiBackendFlags_PlatformHasViewports | ImGuiBackendFlags_RendererHasViewports);
+            io.ConfigFlags &= ~ImGuiConfigFlags_ViewportsEnable;
+        } else {
+            io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
+            io.ConfigViewportsNoAutoMerge = true;
+            io.ConfigViewportsNoTaskBarIcon = true;
+        }
 
         ImGui::StyleColorsDark();
         //ImGui::StyleColorsLight();
@@ -374,7 +380,6 @@ int App::Run(CliOptions &opts) {
 
         // Setup Platform/Renderer backends
         ImGui_ImplSDL3_InitForOpenGL(window, glContext);
-        //ImGui_ImplOpenGL3_Init(glsl_version);
 
         clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     }
@@ -448,9 +453,12 @@ int App::Run(CliOptions &opts) {
                                                   &props);
 
     build_ImFontAtlas(*io.Fonts,fFontPaint);
+    ImGuiContext& g = *GImGui;
+    g.DebugLogFlags |= ImGuiDebugLogFlags_EventIO;
 
     // Main loop
     bool done = false;
+    char buf[128] = {0};
     while (!done) {
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
@@ -478,6 +486,14 @@ int App::Run(CliOptions &opts) {
             auto const height = static_cast<int>(io.DisplaySize.y);
 
             ImGui::ShowMetricsWindow();
+            {
+                if(ImGui::Begin("aa")) {
+                    ImGui::Text("wantTextInput=%d",io.WantTextInput);
+                    ImGui::InputText("hello",buf,sizeof(buf));
+                }
+                ImGui::End();
+            }
+
             Paint(surface.get(),width,height); // will call ImGui::Render();
             context->flush();
 
