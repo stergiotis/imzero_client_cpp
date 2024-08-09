@@ -137,6 +137,10 @@ link_libraries(-DNDEBUG
 add_library(imguiWithSkia OBJECT "${CMAKE_CURRENT_LIST_DIR}/./imgui/imgui.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui/imgui_demo.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui/imgui_draw.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./imgui/imzero_draw_list.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./imgui/imzero_draw_utils.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./imgui/imzero_draw_splitter.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./imgui/imzero_draw_font.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui/imgui_tables.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui/imgui_widgets.cpp")
 

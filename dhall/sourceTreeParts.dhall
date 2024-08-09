@@ -534,6 +534,10 @@ let imguiWithSkia = imgui // {
 		, "${imgui.dir}/imgui.cpp"
 		, "${imgui.dir}/imgui_demo.cpp"
 		, "${imgui.dir}/imgui_draw.cpp"
+		, "${imgui.dir}/imzero_draw_list.cpp"
+		, "${imgui.dir}/imzero_draw_utils.cpp"
+		, "${imgui.dir}/imzero_draw_splitter.cpp"
+		, "${imgui.dir}/imzero_draw_font.cpp"
 		, "${imgui.dir}/imgui_tables.cpp"
 		, "${imgui.dir}/imgui_widgets.cpp"
 		]
