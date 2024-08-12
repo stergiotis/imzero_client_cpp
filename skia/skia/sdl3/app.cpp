@@ -242,6 +242,7 @@ int App::Run(CliOptions &opts) {
         }
 
         fUseVectorCmd = opts.vectorCmd;
+        fFffiInterpreter = opts.fffiInterpreter;
 
         {
             ttfData = SkData::MakeFromFileName(opts.ttfFilePath);
