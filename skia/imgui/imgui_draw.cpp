@@ -2364,6 +2364,10 @@ void ImDrawListSplitter::SetCurrentChannel(ImDrawList* draw_list, int idx)
 { ZoneScoped;
     IM_ASSERT(idx >= 0 && idx < _Count);
 
+    // NOTE: this function needs to be idempotent
+    if (_Current == idx)
+        return;
+
 #ifdef IMZERO_DRAWLIST
     // _Current is zero when ImDrawListSplitter gets initialized but _Channels.Data[0] is not properly
     // initialized. Why does the regular ImGui code get aways with the check below?
@@ -2375,16 +2379,11 @@ void ImDrawListSplitter::SetCurrentChannel(ImDrawList* draw_list, int idx)
         _ChannelsFbBuilders.resize(idx);
         IM_ASSERT(b > 0 && "first slot is reserved for drawlist's objects");
         for(auto i=b;i<idx;i++) {
-           _ChannelsFbCmds[i] = new std::vector<flatbuffers::Offset<ImZeroFB::SingleVectorCmdDto>>();
-           _ChannelsFbBuilders[i] = new flatbuffers::FlatBufferBuilder();
+            _ChannelsFbCmds[i] = new std::vector<flatbuffers::Offset<ImZeroFB::SingleVectorCmdDto>>();
+            _ChannelsFbBuilders[i] = new flatbuffers::FlatBufferBuilder();
         }
     }
 #endif
-
-    // NOTE: this function needs to be idempotent
-    if (_Current == idx)
-        return;
-
 
     // Overwrite ImVector (12/16 bytes), four times. This is merely a silly optimization instead of doing .swap()
     memcpy(&_Channels.Data[_Current]._CmdBuffer, &draw_list->CmdBuffer, sizeof(draw_list->CmdBuffer));
