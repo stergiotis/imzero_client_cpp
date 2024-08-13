@@ -10,6 +10,7 @@ here=$(dirname "$(readlink -f "$BASH_SOURCE")")
 #   - https://groups.google.com/a/skia.org/g/bugs/c/4GuY7jjfCzY
 # * missing SK_API declarations for defitions in SkParagraph:
 #   - https://skia-review.googlesource.com/c/skia/+/878977
+# * missing include https://skia-review.googlesource.com/c/skia/+/878977
 "$here/patch_skia_m124.sh"
 
 cd ../../contrib/skia

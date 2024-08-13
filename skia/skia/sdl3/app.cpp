@@ -18,6 +18,12 @@
 
 #include "include/core/SkGraphics.h"
 #include "include/ports/SkFontMgr_data.h"
+#if defined(SK_FONTMGR_FONTCONFIG_AVAILABLE)
+#include "include/ports/SkFontMgr_fontconfig.h"
+#endif
+#if defined(SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE)
+#include "include/ports/SkFontMgr_directory.h"
+#endif
 #include "include/core/SkSpan.h"
 #include "include/svg/SkSVGCanvas.h"
 #include "include/core/SkColorSpace.h"
@@ -251,7 +257,28 @@ int App::Run(CliOptions &opts) {
                 exit(1);
             }
         }
-        fontMgr = SkFontMgr_New_Custom_Data(SkSpan(&ttfData,1));
+        {
+            fontMgr = nullptr;
+
+            if(opts.fontManager != nullptr && strcmp(opts.fontManager,"fontconfig") == 0) {
+#if defined(SK_FONTMGR_FONTCONFIG_AVAILABLE)
+                fontMgr = SkFontMgr_New_FontConfig(nullptr);
+#else
+                fprintf(stderr,"SK_FONTMGR_FONTCONFIG_AVAILABLE is not defined, font manager %s not supported\n",opts.fontManager);
+#endif
+            }
+            if(opts.fontManager != nullptr && strcmp(opts.fontManager,"directory") == 0) {
+#if defined(SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE)
+                fontMgr = SkFontMgr_New_Custom_Directory(opts.fontManagerArg);
+#else
+                fprintf(stderr,"SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE is not defined, font manager %s not supported\n",opts.fontManager);
+#endif
+            }
+            if(fontMgr == nullptr) {
+                // fallback
+                fontMgr = SkFontMgr_New_Custom_Data(SkSpan(&ttfData,1));
+            }
+        }
         typeface = fontMgr->makeFromData(ttfData);
         ////auto const typeface = fontMgr->matchFamilyStyle(nullptr,SkFontStyle());
         if(typeface == nullptr || fontMgr->countFamilies() <= 0) {

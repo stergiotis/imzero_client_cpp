@@ -75,6 +75,8 @@ void CliOptions::usage(const char *name, FILE *file) const {
     fprintf(file,"    -imguiNavGamepad [bool:%s]\n", imguiNavGamepad ? "on" : "off");
     fprintf(file,"    -imguiDocking [bool:%s]\n", imguiDocking ? "on" : "off");
     fprintf(file,"    -vectorCmd [bool:%s]   on: intercept ImGui DrawList draw commands and replay them on client (e.g. skia)\n", vectorCmd ? "on" : "off");
+    fprintf(file,"    -fontManager [name:%s]\n", fontManager);
+    fprintf(file,"    -fontManagerArg [arg:%s]\n", fontManagerArg);
 
     fprintf(file, "video mode flags:\n");
     fprintf(file, "string flags:\n");
@@ -105,6 +107,8 @@ void CliOptions::parse(int argc,char **argv,FILE *logChannel) {
         fprintf(logChannel,"backgroundColorRGBA is not a valid rgba hex color: %s\n", backgroundColorRGBA);
         exit(1);
     }
+    fontManager = findFlagValueDefault(logChannel,u, argc, argv, "-fontManager", fontManager);
+    fontManager = findFlagValueDefault(logChannel,u, argc, argv, "-fontManagerArg", fontManagerArg);
 
     fontDyFudge = findFlagValueDefaultFloat(logChannel,u, argc, argv, "-fontDyFudge", "0.0");
     if(std::isnan(fontDyFudge) || fontDyFudge < -10000.0f || fontDyFudge > 10000.0f) {
