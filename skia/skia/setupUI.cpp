@@ -474,10 +474,37 @@ void ImZeroSkiaSetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &v
             ImGui::TreePop();
         }
 
+        if(ImGui::TreeNode("German")) {
+            for(int i=ImZeroFB::TextAlignFlags_MIN;i<=ImZeroFB::TextAlignFlags_MAX;i++) {
+                auto const f = static_cast<ImZeroFB::TextAlignFlags>(i);
+                if(ImGui::RadioButton(ImZeroFB::EnumNameTextAlignFlags(f),fTextAlign == f)) {
+                    fTextAlign = f;
+                }
+                ImGui::SameLine();
+            }
+            ImGui::NewLine();
+
+            ImGui::PushParagraphTextLayout(fTextAlign,ImZeroFB::TextDirection_ltr);
+            ImGui::PushIsParagraphText(1);
+            ImGui::TextUnformatted("Das Kölner Dombaufest 1848 fand vom 14. bis 16. August 1848 anlässlich des 600. Jahrestages der Grundsteinlegung des Kölner Doms 1248 und der Weihe des provisorisch fertiggestellten Innenraums der Kathedrale statt. Sechs Jahre nach der „zweiten“ Grundsteinlegung zum Weiterbau 1842 war die Grundfläche des Doms zu einem zusammenhängenden, teils noch provisorisch mit einer Holzkonstruktion überdachten Kirchenraum verbunden worden.\n"
+                                   "Das von etwa 29.000 Teilnehmern besuchte Fest war als religiöse Feier geplant worden, erhielt durch die Revolutionsereignisse von 1848 aber auch große politische Bedeutung. Sowohl der preußische König Friedrich Wilhelm IV. als auch Reichsverweser Erzherzog Johann von Österreich als höchster Vertreter einer Provisorischen Zentralgewalt der ersten gesamtdeutschen Regierung sowie etwa 300 Abgeordnete der Frankfurter Nationalversammlung, darunter auch deren Präsident Heinrich von Gagern, waren bei den Feierlichkeiten anwesend. Es war damit das einzige größere Zusammentreffen von Repräsentanten der bürgerlichen Revolution und Vertretern der alten Herrschaftsmacht in den deutschen Ländern überhaupt und führte „erst- und letztmalig alle um Einfluss ringenden Parteien an einem Ort zusammen“.");
+            ImGui::PopIsParagraphText();
+            ImGui::PopParagraphTextLayout();
+            ImGui::TreePop();
+        }
+
         if(ImGui::TreeNode("Emoji")) {
             ImGui::TextUnformatted("Source: https://perchance.org/emoji");
             ImGui::PushIsParagraphText(1);
             ImGui::TextUnformatted(reinterpret_cast<const char*>(u8"🔖 🐶 ⬇️ 📱 🙍 🔵 🛀 ✔️ *⃣ 📤 🐚 🦂 📓 ❌ ⚖ 🎋 📌 🙄 🎳 🈵 🕵 🏯 🐔 📐 🔞 👧 🎊 🐾 💨 🌶 🕕 ✒️ 😰 🏌 🙈 🤘 🔪 ↘️ 🏝 🌌 ⚓️ ♈️ 💾 🖕 😬 💔 🐓 🔟 🔮 🕸 👬 🚆 🎾 🐲 😆 🏥 🍇 🐽 ♏️ 🎷 🍶 🔦 🌄 😿 🌃 🏂 🚈 🙋 🙅 📺 🔠 🎽 👃 💪 💃 💐 ✍ ⛺️ 🏡 📈 🐿 🏊 👱 🍻 ⚡️ 🌴 🐸 📼 🏵 🚁 🔓 🌔 🕖 📷 📕 🕥 👕 🤓 🏖 💒"));
+            ImGui::PopIsParagraphText();
+            ImGui::TreePop();
+        }
+
+        if(ImGui::TreeNode("Greek")) {
+            ImGui::TextUnformatted("Source: https://lipsum.com");
+            ImGui::PushIsParagraphText(1);
+            ImGui::TextUnformatted(reinterpret_cast<const char*>("Το Lorem Ipsum είναι απλά ένα κείμενο χωρίς νόημα για τους επαγγελματίες της τυπογραφίας και στοιχειοθεσίας. Το Lorem Ipsum είναι το επαγγελματικό πρότυπο όσον αφορά το κείμενο χωρίς νόημα, από τον 15ο αιώνα, όταν ένας ανώνυμος τυπογράφος πήρε ένα δοκίμιο και ανακάτεψε τις λέξεις για να δημιουργήσει ένα δείγμα βιβλίου. Όχι μόνο επιβίωσε πέντε αιώνες, αλλά κυριάρχησε στην ηλεκτρονική στοιχειοθεσία, παραμένοντας με κάθε τρόπο αναλλοίωτο. Έγινε δημοφιλές τη δεκαετία του '60 με την έκδοση των δειγμάτων της Letraset όπου περιελάμβαναν αποσπάσματα του Lorem Ipsum, και πιο πρόσφατα με το λογισμικό ηλεκτρονικής σελιδοποίησης όπως το Aldus PageMaker που περιείχαν εκδοχές του Lorem Ipsum."));
             ImGui::PopIsParagraphText();
             ImGui::TreePop();
         }
