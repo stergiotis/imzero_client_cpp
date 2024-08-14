@@ -4,6 +4,7 @@
 #include <cstring>
 #include <fcntl.h>
 #include <csignal>
+#include <SDL3/SDL.h>
 
 #include "imgui.h"
 
@@ -17,6 +18,12 @@
 #include "include/encode/SkWebpEncoder.h"
 #include "include/gpu/GrDirectContext.h"
 #include "bmpEncoder.h"
+#if defined(SK_FONTMGR_FONTCONFIG_AVAILABLE)
+#include "include/ports/SkFontMgr_fontconfig.h"
+#endif
+#if defined(SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE)
+#include "include/ports/SkFontMgr_directory.h"
+#endif
 
 #include "tracy/Tracy.hpp"
 
@@ -26,6 +33,7 @@
 #include "marshalling/receive.h"
 #include "marshalling/send.h"
 
+#include "ImZeroFB.out.h"
 #include "flatbuffers/minireflect.h"
 
 #define QOI_IMPLEMENTATION
@@ -42,7 +50,7 @@ static void *qoiMalloc(size_t sz) {
     assert(lastSz == sz && "assuming constant width, height and depth of qoi images");
     return qoiBuffer;
 }
-#include "qoi.h"
+#include "../contrib/qoi/qoi.h"
 
 template <typename T>
 static inline void applyFlag(int &flag,T val,bool v) {
@@ -156,7 +164,6 @@ int App::run(CliOptions &opts) {
     // prevent SIGPIPE when writing frames or reading user interaction events
     signal(SIGPIPE, SIG_IGN);
 
-    sk_sp<SkFontMgr> fontMgr = nullptr;
     sk_sp<SkTypeface> typeface = nullptr;
     sk_sp<SkData> ttfData = nullptr;
     { // setup skia/imgui shared objects
@@ -197,16 +204,38 @@ int App::run(CliOptions &opts) {
                 exit(1);
             }
         }
-        fontMgr = SkFontMgr_New_Custom_Data(SkSpan(&ttfData,1));
-        typeface = fontMgr->makeFromData(ttfData);
+        {
+            fFontMgr = nullptr;
+
+            if(opts.fontManager != nullptr && strcmp(opts.fontManager,"fontconfig") == 0) {
+#if defined(SK_FONTMGR_FONTCONFIG_AVAILABLE)
+                fFontMgr = SkFontMgr_New_FontConfig(nullptr);
+#else
+                fprintf(stderr,"SK_FONTMGR_FONTCONFIG_AVAILABLE is not defined, font manager %s not supported\n",opts.fontManager);
+#endif
+            }
+            if(opts.fontManager != nullptr && strcmp(opts.fontManager,"directory") == 0) {
+#if defined(SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE)
+                fFontMgr = SkFontMgr_New_Custom_Directory(opts.fontManagerArg);
+#else
+                fprintf(stderr,"SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE is not defined, font manager %s not supported\n",opts.fontManager);
+#endif
+            }
+            if(fFontMgr == nullptr) {
+                // fallback
+                fprintf(stderr,"using fallback font manager (opt=%s,arg=%s)\n",opts.fontManager,opts.fontManagerArg);
+                fFontMgr = SkFontMgr_New_Custom_Data(SkSpan(&ttfData, 1));
+            }
+        }
+        typeface = fFontMgr->makeFromData(ttfData);
         ////auto const typeface = fontMgr->matchFamilyStyle(nullptr,SkFontStyle());
-        if(typeface == nullptr || fontMgr->countFamilies() <= 0) {
+        if(typeface == nullptr || fFontMgr->countFamilies() <= 0) {
             fprintf(stderr, "unable to initialize font manager with supplied ttf font file %s\n",opts.ttfFilePath);
             return(1);
         }
 
         ImGui::skiaFontDyFudge = opts.fontDyFudge;
-        ImGui::paragraph = std::make_shared<Paragraph>(fontMgr, typeface);
+        ImGui::paragraph = std::make_shared<Paragraph>(fFontMgr, typeface);
         ImGui::skiaFont = SkFont(typeface);
 
         fVectorCmdSkiaRenderer.setVertexDrawPaint(&fFontPaint);
@@ -337,9 +366,15 @@ int App::run(CliOptions &opts) {
 }
 void App::postPaint() {
     ImGuiIO& io = ImGui::GetIO();
-    double currentTime = SkTime::GetSecs();
-    io.DeltaTime = static_cast<float>(currentTime - fPreviousTime);
-    fPreviousTime = currentTime;
+
+    static uint64_t frequency = SDL_GetPerformanceFrequency();
+    uint64_t current_time = SDL_GetPerformanceCounter();
+    if(current_time <= fTime) {
+        current_time = fTime + 1;
+    }
+    io.DeltaTime = fTime > 0 ? (float)((double)(current_time - fTime) / static_cast<double>(frequency)) : (float)(1.0f / 60.0f);
+    fTime = current_time;
+
     fFrame++;
     dispatchUserInteractionEvents();
 }
@@ -703,11 +738,11 @@ void App::dispatchUserInteractionEvents() {
                 p += r;
                 if(bytesToRead == 0) {
                     auto verifier = flatbuffers::Verifier(mem+sizeOfLengthPrefix,bytesToRead);
-                    if(!UserInteractionFB::VerifyEventBuffer(verifier)) {
-                        auto txt = flatbuffers::FlatBufferToString(mem+sizeOfLengthPrefix,UserInteractionFB::EventTypeTable());
+                    if(!verifier.VerifyBuffer<ImZeroFB::InputEvent>()) {
+                        auto txt = flatbuffers::FlatBufferToString(mem+sizeOfLengthPrefix,ImZeroFB::InputEventTypeTable());
                         fprintf(stderr, "userInteractionEvent=%s\n", txt.c_str());
 
-                        auto const e = UserInteractionFB::GetSizePrefixedEvent(mem);
+                        auto const e = flatbuffers::GetSizePrefixedRoot<ImZeroFB::InputEvent>(mem);
                         handleUserInteractionEvent(*e);
                         state = 1;
                         p = mem;
@@ -722,259 +757,259 @@ void App::dispatchUserInteractionEvents() {
         }
     }
 }
-static ImGuiKey keyCodeToImGuiKey(UserInteractionFB::KeyCode keyCode) {
+static ImGuiKey keyCodeToImGuiKey(ImZeroFB::KeyCode keyCode) {
     switch(keyCode) {
-        case UserInteractionFB::KeyCode_Key_Tab:
+        case ImZeroFB::KeyCode_Key_Tab:
             return ImGuiKey_Tab;
-        case UserInteractionFB::KeyCode_Key_LeftArrow:
+        case ImZeroFB::KeyCode_Key_LeftArrow:
             return ImGuiKey_LeftArrow;
-        case UserInteractionFB::KeyCode_Key_RightArrow:
+        case ImZeroFB::KeyCode_Key_RightArrow:
             return ImGuiKey_RightArrow;
-        case UserInteractionFB::KeyCode_Key_UpArrow:
+        case ImZeroFB::KeyCode_Key_UpArrow:
             return ImGuiKey_UpArrow;
-        case UserInteractionFB::KeyCode_Key_DownArrow:
+        case ImZeroFB::KeyCode_Key_DownArrow:
             return ImGuiKey_DownArrow;
-        case UserInteractionFB::KeyCode_Key_PageUp:
+        case ImZeroFB::KeyCode_Key_PageUp:
             return ImGuiKey_PageUp;
-        case UserInteractionFB::KeyCode_Key_PageDown:
+        case ImZeroFB::KeyCode_Key_PageDown:
             return ImGuiKey_PageDown;
-        case UserInteractionFB::KeyCode_Key_Home:
+        case ImZeroFB::KeyCode_Key_Home:
             return ImGuiKey_Home;
-        case UserInteractionFB::KeyCode_Key_End:
+        case ImZeroFB::KeyCode_Key_End:
             return ImGuiKey_End;
-        case UserInteractionFB::KeyCode_Key_Insert:
+        case ImZeroFB::KeyCode_Key_Insert:
             return ImGuiKey_Insert;
-        case UserInteractionFB::KeyCode_Key_Delete:
+        case ImZeroFB::KeyCode_Key_Delete:
             return ImGuiKey_Delete;
-        case UserInteractionFB::KeyCode_Key_Backspace:
+        case ImZeroFB::KeyCode_Key_Backspace:
             return ImGuiKey_Backspace;
-        case UserInteractionFB::KeyCode_Key_Space:
+        case ImZeroFB::KeyCode_Key_Space:
             return ImGuiKey_Space;
-        case UserInteractionFB::KeyCode_Key_Enter:
+        case ImZeroFB::KeyCode_Key_Enter:
             return ImGuiKey_Enter;
-        case UserInteractionFB::KeyCode_Key_Escape:
+        case ImZeroFB::KeyCode_Key_Escape:
             return ImGuiKey_Escape;
-        case UserInteractionFB::KeyCode_Key_Apostrophe:
+        case ImZeroFB::KeyCode_Key_Apostrophe:
             return ImGuiKey_Apostrophe;
-        case UserInteractionFB::KeyCode_Key_Comma:
+        case ImZeroFB::KeyCode_Key_Comma:
             return ImGuiKey_Comma;
-        case UserInteractionFB::KeyCode_Key_Minus:
+        case ImZeroFB::KeyCode_Key_Minus:
             return ImGuiKey_Minus;
-        case UserInteractionFB::KeyCode_Key_Period:
+        case ImZeroFB::KeyCode_Key_Period:
             return ImGuiKey_Period;
-        case UserInteractionFB::KeyCode_Key_Slash:
+        case ImZeroFB::KeyCode_Key_Slash:
             return ImGuiKey_Slash;
-        case UserInteractionFB::KeyCode_Key_Semicolon:
+        case ImZeroFB::KeyCode_Key_Semicolon:
             return ImGuiKey_Semicolon;
-        case UserInteractionFB::KeyCode_Key_Equal:
+        case ImZeroFB::KeyCode_Key_Equal:
             return ImGuiKey_Equal;
-        case UserInteractionFB::KeyCode_Key_LeftBracket:
+        case ImZeroFB::KeyCode_Key_LeftBracket:
             return ImGuiKey_LeftBracket;
-        case UserInteractionFB::KeyCode_Key_Backslash:
+        case ImZeroFB::KeyCode_Key_Backslash:
             return ImGuiKey_Backslash;
-        case UserInteractionFB::KeyCode_Key_RightBracket:
+        case ImZeroFB::KeyCode_Key_RightBracket:
             return ImGuiKey_RightBracket;
-        case UserInteractionFB::KeyCode_Key_GraveAccent:
+        case ImZeroFB::KeyCode_Key_GraveAccent:
             return ImGuiKey_GraveAccent;
-        case UserInteractionFB::KeyCode_Key_CapsLock:
+        case ImZeroFB::KeyCode_Key_CapsLock:
             return ImGuiKey_CapsLock;
-        case UserInteractionFB::KeyCode_Key_ScrollLock:
+        case ImZeroFB::KeyCode_Key_ScrollLock:
             return ImGuiKey_ScrollLock;
-        case UserInteractionFB::KeyCode_Key_NumLock:
+        case ImZeroFB::KeyCode_Key_NumLock:
             return ImGuiKey_NumLock;
-        case UserInteractionFB::KeyCode_Key_PrintScreen:
+        case ImZeroFB::KeyCode_Key_PrintScreen:
             return ImGuiKey_PrintScreen;
-        case UserInteractionFB::KeyCode_Key_Pause:
+        case ImZeroFB::KeyCode_Key_Pause:
             return ImGuiKey_Pause;
-        case UserInteractionFB::KeyCode_Key_Keypad0:
+        case ImZeroFB::KeyCode_Key_Keypad0:
             return ImGuiKey_Keypad0;
-        case UserInteractionFB::KeyCode_Key_Keypad1:
+        case ImZeroFB::KeyCode_Key_Keypad1:
             return ImGuiKey_Keypad1;
-        case UserInteractionFB::KeyCode_Key_Keypad2:
+        case ImZeroFB::KeyCode_Key_Keypad2:
             return ImGuiKey_Keypad2;
-        case UserInteractionFB::KeyCode_Key_Keypad3:
+        case ImZeroFB::KeyCode_Key_Keypad3:
             return ImGuiKey_Keypad3;
-        case UserInteractionFB::KeyCode_Key_Keypad4:
+        case ImZeroFB::KeyCode_Key_Keypad4:
             return ImGuiKey_Keypad4;
-        case UserInteractionFB::KeyCode_Key_Keypad5:
+        case ImZeroFB::KeyCode_Key_Keypad5:
             return ImGuiKey_Keypad5;
-        case UserInteractionFB::KeyCode_Key_Keypad6:
+        case ImZeroFB::KeyCode_Key_Keypad6:
             return ImGuiKey_Keypad6;
-        case UserInteractionFB::KeyCode_Key_Keypad7:
+        case ImZeroFB::KeyCode_Key_Keypad7:
             return ImGuiKey_Keypad7;
-        case UserInteractionFB::KeyCode_Key_Keypad8:
+        case ImZeroFB::KeyCode_Key_Keypad8:
             return ImGuiKey_Keypad8;
-        case UserInteractionFB::KeyCode_Key_Keypad9:
+        case ImZeroFB::KeyCode_Key_Keypad9:
             return ImGuiKey_Keypad9;
-        case UserInteractionFB::KeyCode_Key_KeypadDecimal:
+        case ImZeroFB::KeyCode_Key_KeypadDecimal:
             return ImGuiKey_KeypadDecimal;
-        case UserInteractionFB::KeyCode_Key_KeypadDivide:
+        case ImZeroFB::KeyCode_Key_KeypadDivide:
             return ImGuiKey_KeypadDivide;
-        case UserInteractionFB::KeyCode_Key_KeypadMultiply:
+        case ImZeroFB::KeyCode_Key_KeypadMultiply:
             return ImGuiKey_KeypadMultiply;
-        case UserInteractionFB::KeyCode_Key_KeypadSubtract:
+        case ImZeroFB::KeyCode_Key_KeypadSubtract:
             return ImGuiKey_KeypadSubtract;
-        case UserInteractionFB::KeyCode_Key_KeypadAdd:
+        case ImZeroFB::KeyCode_Key_KeypadAdd:
             return ImGuiKey_KeypadAdd;
-        case UserInteractionFB::KeyCode_Key_KeypadEnter:
+        case ImZeroFB::KeyCode_Key_KeypadEnter:
             return ImGuiKey_KeypadEnter;
-        case UserInteractionFB::KeyCode_Key_KeypadEqual:
+        case ImZeroFB::KeyCode_Key_KeypadEqual:
             return ImGuiKey_KeypadEqual;
-        case UserInteractionFB::KeyCode_Key_LeftCtrl:
+        case ImZeroFB::KeyCode_Key_LeftCtrl:
             return ImGuiKey_LeftCtrl;
-        case UserInteractionFB::KeyCode_Key_LeftShift:
+        case ImZeroFB::KeyCode_Key_LeftShift:
             return ImGuiKey_LeftShift;
-        case UserInteractionFB::KeyCode_Key_LeftAlt:
+        case ImZeroFB::KeyCode_Key_LeftAlt:
             return ImGuiKey_LeftAlt;
-        case UserInteractionFB::KeyCode_Key_LeftSuper:
+        case ImZeroFB::KeyCode_Key_LeftSuper:
             return ImGuiKey_LeftSuper;
-        case UserInteractionFB::KeyCode_Key_RightCtrl:
+        case ImZeroFB::KeyCode_Key_RightCtrl:
             return ImGuiKey_RightCtrl;
-        case UserInteractionFB::KeyCode_Key_RightShift:
+        case ImZeroFB::KeyCode_Key_RightShift:
             return ImGuiKey_RightShift;
-        case UserInteractionFB::KeyCode_Key_RightAlt:
+        case ImZeroFB::KeyCode_Key_RightAlt:
             return ImGuiKey_RightAlt;
-        case UserInteractionFB::KeyCode_Key_RightSuper:
+        case ImZeroFB::KeyCode_Key_RightSuper:
             return ImGuiKey_RightSuper;
-        case UserInteractionFB::KeyCode_Key_Menu:
+        case ImZeroFB::KeyCode_Key_Menu:
             return ImGuiKey_Menu;
-        case UserInteractionFB::KeyCode_Key_0:
+        case ImZeroFB::KeyCode_Key_0:
             return ImGuiKey_0;
-        case UserInteractionFB::KeyCode_Key_1:
+        case ImZeroFB::KeyCode_Key_1:
             return ImGuiKey_1;
-        case UserInteractionFB::KeyCode_Key_2:
+        case ImZeroFB::KeyCode_Key_2:
             return ImGuiKey_2;
-        case UserInteractionFB::KeyCode_Key_3:
+        case ImZeroFB::KeyCode_Key_3:
             return ImGuiKey_3;
-        case UserInteractionFB::KeyCode_Key_4:
+        case ImZeroFB::KeyCode_Key_4:
             return ImGuiKey_4;
-        case UserInteractionFB::KeyCode_Key_5:
+        case ImZeroFB::KeyCode_Key_5:
             return ImGuiKey_5;
-        case UserInteractionFB::KeyCode_Key_6:
+        case ImZeroFB::KeyCode_Key_6:
             return ImGuiKey_6;
-        case UserInteractionFB::KeyCode_Key_7:
+        case ImZeroFB::KeyCode_Key_7:
             return ImGuiKey_7;
-        case UserInteractionFB::KeyCode_Key_8:
+        case ImZeroFB::KeyCode_Key_8:
             return ImGuiKey_8;
-        case UserInteractionFB::KeyCode_Key_9:
+        case ImZeroFB::KeyCode_Key_9:
             return ImGuiKey_9;
-        case UserInteractionFB::KeyCode_Key_A:
+        case ImZeroFB::KeyCode_Key_A:
             return ImGuiKey_A;
-        case UserInteractionFB::KeyCode_Key_B:
+        case ImZeroFB::KeyCode_Key_B:
             return ImGuiKey_B;
-        case UserInteractionFB::KeyCode_Key_C:
+        case ImZeroFB::KeyCode_Key_C:
             return ImGuiKey_C;
-        case UserInteractionFB::KeyCode_Key_D:
+        case ImZeroFB::KeyCode_Key_D:
             return ImGuiKey_D;
-        case UserInteractionFB::KeyCode_Key_E:
+        case ImZeroFB::KeyCode_Key_E:
             return ImGuiKey_E;
-        case UserInteractionFB::KeyCode_Key_F:
+        case ImZeroFB::KeyCode_Key_F:
             return ImGuiKey_F;
-        case UserInteractionFB::KeyCode_Key_G:
+        case ImZeroFB::KeyCode_Key_G:
             return ImGuiKey_G;
-        case UserInteractionFB::KeyCode_Key_H:
+        case ImZeroFB::KeyCode_Key_H:
             return ImGuiKey_H;
-        case UserInteractionFB::KeyCode_Key_I:
+        case ImZeroFB::KeyCode_Key_I:
             return ImGuiKey_I;
-        case UserInteractionFB::KeyCode_Key_J:
+        case ImZeroFB::KeyCode_Key_J:
             return ImGuiKey_J;
-        case UserInteractionFB::KeyCode_Key_K:
+        case ImZeroFB::KeyCode_Key_K:
             return ImGuiKey_K;
-        case UserInteractionFB::KeyCode_Key_L:
+        case ImZeroFB::KeyCode_Key_L:
             return ImGuiKey_L;
-        case UserInteractionFB::KeyCode_Key_M:
+        case ImZeroFB::KeyCode_Key_M:
             return ImGuiKey_M;
-        case UserInteractionFB::KeyCode_Key_N:
+        case ImZeroFB::KeyCode_Key_N:
             return ImGuiKey_N;
-        case UserInteractionFB::KeyCode_Key_O:
+        case ImZeroFB::KeyCode_Key_O:
             return ImGuiKey_O;
-        case UserInteractionFB::KeyCode_Key_P:
+        case ImZeroFB::KeyCode_Key_P:
             return ImGuiKey_P;
-        case UserInteractionFB::KeyCode_Key_Q:
+        case ImZeroFB::KeyCode_Key_Q:
             return ImGuiKey_Q;
-        case UserInteractionFB::KeyCode_Key_R:
+        case ImZeroFB::KeyCode_Key_R:
             return ImGuiKey_R;
-        case UserInteractionFB::KeyCode_Key_S:
+        case ImZeroFB::KeyCode_Key_S:
             return ImGuiKey_S;
-        case UserInteractionFB::KeyCode_Key_T:
+        case ImZeroFB::KeyCode_Key_T:
             return ImGuiKey_T;
-        case UserInteractionFB::KeyCode_Key_U:
+        case ImZeroFB::KeyCode_Key_U:
             return ImGuiKey_U;
-        case UserInteractionFB::KeyCode_Key_V:
+        case ImZeroFB::KeyCode_Key_V:
             return ImGuiKey_V;
-        case UserInteractionFB::KeyCode_Key_W:
+        case ImZeroFB::KeyCode_Key_W:
             return ImGuiKey_W;
-        case UserInteractionFB::KeyCode_Key_X:
+        case ImZeroFB::KeyCode_Key_X:
             return ImGuiKey_X;
-        case UserInteractionFB::KeyCode_Key_Y:
+        case ImZeroFB::KeyCode_Key_Y:
             return ImGuiKey_Y;
-        case UserInteractionFB::KeyCode_Key_Z:
+        case ImZeroFB::KeyCode_Key_Z:
             return ImGuiKey_Z;
-        case UserInteractionFB::KeyCode_Key_F1:
+        case ImZeroFB::KeyCode_Key_F1:
             return ImGuiKey_F1;
-        case UserInteractionFB::KeyCode_Key_F2:
+        case ImZeroFB::KeyCode_Key_F2:
             return ImGuiKey_F2;
-        case UserInteractionFB::KeyCode_Key_F3:
+        case ImZeroFB::KeyCode_Key_F3:
             return ImGuiKey_F3;
-        case UserInteractionFB::KeyCode_Key_F4:
+        case ImZeroFB::KeyCode_Key_F4:
             return ImGuiKey_F4;
-        case UserInteractionFB::KeyCode_Key_F5:
+        case ImZeroFB::KeyCode_Key_F5:
             return ImGuiKey_F5;
-        case UserInteractionFB::KeyCode_Key_F6:
+        case ImZeroFB::KeyCode_Key_F6:
             return ImGuiKey_F6;
-        case UserInteractionFB::KeyCode_Key_F7:
+        case ImZeroFB::KeyCode_Key_F7:
             return ImGuiKey_F7;
-        case UserInteractionFB::KeyCode_Key_F8:
+        case ImZeroFB::KeyCode_Key_F8:
             return ImGuiKey_F8;
-        case UserInteractionFB::KeyCode_Key_F9:
+        case ImZeroFB::KeyCode_Key_F9:
             return ImGuiKey_F9;
-        case UserInteractionFB::KeyCode_Key_F10:
+        case ImZeroFB::KeyCode_Key_F10:
             return ImGuiKey_F10;
-        case UserInteractionFB::KeyCode_Key_F11:
+        case ImZeroFB::KeyCode_Key_F11:
             return ImGuiKey_F11;
-        case UserInteractionFB::KeyCode_Key_F12:
+        case ImZeroFB::KeyCode_Key_F12:
             return ImGuiKey_F12;
-        case UserInteractionFB::KeyCode_Key_F13:
+        case ImZeroFB::KeyCode_Key_F13:
             return ImGuiKey_F13;
-        case UserInteractionFB::KeyCode_Key_F14:
+        case ImZeroFB::KeyCode_Key_F14:
             return ImGuiKey_F14;
-        case UserInteractionFB::KeyCode_Key_F15:
+        case ImZeroFB::KeyCode_Key_F15:
             return ImGuiKey_F15;
-        case UserInteractionFB::KeyCode_Key_F16:
+        case ImZeroFB::KeyCode_Key_F16:
             return ImGuiKey_F16;
-        case UserInteractionFB::KeyCode_Key_F17:
+        case ImZeroFB::KeyCode_Key_F17:
             return ImGuiKey_F17;
-        case UserInteractionFB::KeyCode_Key_F18:
+        case ImZeroFB::KeyCode_Key_F18:
             return ImGuiKey_F18;
-        case UserInteractionFB::KeyCode_Key_F19:
+        case ImZeroFB::KeyCode_Key_F19:
             return ImGuiKey_F19;
-        case UserInteractionFB::KeyCode_Key_F20:
+        case ImZeroFB::KeyCode_Key_F20:
             return ImGuiKey_F20;
-        case UserInteractionFB::KeyCode_Key_F21:
+        case ImZeroFB::KeyCode_Key_F21:
             return ImGuiKey_F21;
-        case UserInteractionFB::KeyCode_Key_F22:
+        case ImZeroFB::KeyCode_Key_F22:
             return ImGuiKey_F22;
-        case UserInteractionFB::KeyCode_Key_F23:
+        case ImZeroFB::KeyCode_Key_F23:
             return ImGuiKey_F23;
-        case UserInteractionFB::KeyCode_Key_F24:
+        case ImZeroFB::KeyCode_Key_F24:
             return ImGuiKey_F24;
-        case UserInteractionFB::KeyCode_Key_AppBack:
+        case ImZeroFB::KeyCode_Key_AppBack:
             return ImGuiKey_AppBack;
-        case UserInteractionFB::KeyCode_Key_AppForward:
+        case ImZeroFB::KeyCode_Key_AppForward:
             return ImGuiKey_AppForward;
-        case UserInteractionFB::KeyCode_Key_None: // fallthrough
+        case ImZeroFB::KeyCode_Key_None: // fallthrough
         default:
             return ImGuiKey_None;
     }
 }
 
-void App::handleUserInteractionEvent(UserInteractionFB::Event const &ev) {
+void App::handleUserInteractionEvent(ImZeroFB::InputEvent const &ev) {
     ImGuiIO& io = ImGui::GetIO();
     //fprintf(stderr, "handling user interaction event %s\n",EnumNameUserInteraction(ev.event_type()));
     switch(ev.event_type()) {
-        case UserInteractionFB::UserInteraction_NONE:
+        case ImZeroFB::UserInteraction_NONE:
             break;
-        case UserInteractionFB::UserInteraction_EventMouseMotion:
+        case ImZeroFB::UserInteraction_EventMouseMotion:
         {
             auto const e = ev.event_as_EventMouseMotion();
             io.AddMouseSourceEvent(e->is_touch() ? ImGuiMouseSource_TouchScreen : ImGuiMouseSource_Mouse);
@@ -982,7 +1017,7 @@ void App::handleUserInteractionEvent(UserInteractionFB::Event const &ev) {
             io.AddMousePosEvent(p->x(), p->y());
         }
         break;
-        case UserInteractionFB::UserInteraction_EventMouseWheel:
+        case ImZeroFB::UserInteraction_EventMouseWheel:
         {
             auto const e = ev.event_as_EventMouseMotion();
             io.AddMouseSourceEvent(e->is_touch() ? ImGuiMouseSource_TouchScreen : ImGuiMouseSource_Mouse);
@@ -990,41 +1025,41 @@ void App::handleUserInteractionEvent(UserInteractionFB::Event const &ev) {
             io.AddMouseWheelEvent(-p->x(), p->y());
         }
         break;
-        case UserInteractionFB::UserInteraction_EventMouseButton:
+        case ImZeroFB::UserInteraction_EventMouseButton:
         {
             auto const e = ev.event_as_EventMouseButton();
             int mb = -1;
             auto const b = e->button();
             switch(b) {
-                case UserInteractionFB::MouseButton_None: break;
-                case UserInteractionFB::MouseButton_Left: mb = 0; break;
-                case UserInteractionFB::MouseButton_Right: mb = 1; break;
-                case UserInteractionFB::MouseButton_Middle: mb = 2; break;
-                case UserInteractionFB::MouseButton_X1: mb = 3; break;
-                case UserInteractionFB::MouseButton_X2: mb = 4; break;
+                case ImZeroFB::MouseButton_None: break;
+                case ImZeroFB::MouseButton_Left: mb = 0; break;
+                case ImZeroFB::MouseButton_Right: mb = 1; break;
+                case ImZeroFB::MouseButton_Middle: mb = 2; break;
+                case ImZeroFB::MouseButton_X1: mb = 3; break;
+                case ImZeroFB::MouseButton_X2: mb = 4; break;
             }
             if (mb >= 0) {
-                const bool d = e->type() == UserInteractionFB::MouseButtonEventType_Down;
+                const bool d = e->type() == ImZeroFB::MouseButtonEventType_Down;
                 io.AddMouseSourceEvent(e->is_touch() ? ImGuiMouseSource_TouchScreen : ImGuiMouseSource_Mouse);
                 io.AddMouseButtonEvent(mb, d);
                 //bd->MouseButtonsDown = d ? (bd->MouseButtonsDown | (1 << mb)) : (bd->MouseButtonsDown & ~(1 << mb));
             }
         }
         break;
-        case UserInteractionFB::UserInteraction_EventKeyboard:
+        case ImZeroFB::UserInteraction_EventKeyboard:
         {
            auto const e = ev.event_as_EventKeyboard();
            auto const keyMod = e->modifiers();
            auto const key= keyCodeToImGuiKey(e->code());
-           io.AddKeyEvent(ImGuiMod_Ctrl, (keyMod & UserInteractionFB::KeyModifiers_Ctrl) != 0);
-           io.AddKeyEvent(ImGuiMod_Shift, (keyMod & UserInteractionFB::KeyModifiers_Shift) != 0);
-           io.AddKeyEvent(ImGuiMod_Alt, (keyMod & UserInteractionFB::KeyModifiers_Alt) != 0);
-           io.AddKeyEvent(ImGuiMod_Super, (keyMod & UserInteractionFB::KeyModifiers_Super) != 0);
+           io.AddKeyEvent(ImGuiMod_Ctrl, (keyMod & ImZeroFB::KeyModifiers_Ctrl) != 0);
+           io.AddKeyEvent(ImGuiMod_Shift, (keyMod & ImZeroFB::KeyModifiers_Shift) != 0);
+           io.AddKeyEvent(ImGuiMod_Alt, (keyMod & ImZeroFB::KeyModifiers_Alt) != 0);
+           io.AddKeyEvent(ImGuiMod_Super, (keyMod & ImZeroFB::KeyModifiers_Super) != 0);
            io.AddKeyEvent(key, e->is_down());
            io.SetKeyEventNativeData(key,static_cast<int>(e->native_sym()),static_cast<int>(e->scancode()));
         }
         break;
-        case UserInteractionFB::UserInteraction_EventTextInput:
+        case ImZeroFB::UserInteraction_EventTextInput:
         {
             auto const e = ev.event_as_EventTextInput();
             auto const t = e->text();

@@ -1,11 +1,9 @@
 #pragma once
 
-#include "cliOptions.h"
-#include "SkSurface.h"
-#include "SkPaint.h"
-#include "vectorCmdSkiaRenderer.h"
-#include "setupUI.h"
-#include "userInteraction_generated.h"
+#include "include/core/SkCanvas.h"
+#include "../cliOptions.h"
+#include "../vectorCmdSkiaRenderer.h"
+#include "../setupUI.h"
 
 enum rawFrameOutputFormat {
     kRawFrameOutputFormat_None = 0,
@@ -41,9 +39,10 @@ private:
     void loopSvg(CliOptions const &opts);
     void loopSkp(CliOptions const &opts);
     void dispatchUserInteractionEvents();
-    static void handleUserInteractionEvent(UserInteractionFB::Event const &ev);
+    static void handleUserInteractionEvent(ImZeroFB::InputEvent const &ev);
     void ensureRawFrameFileOpened(const CliOptions &opts);
 
+    sk_sp<SkFontMgr> fFontMgr;
     SkPaint fFontPaint;
     VectorCmdSkiaRenderer fVectorCmdSkiaRenderer;
     size_t fTotalVectorCmdSerializedSize;
@@ -61,4 +60,5 @@ private:
     bool fDispatchInteractionEvents = false;
     bool fRawFrameFileOpened = true;
     std::unique_ptr<SkFILEWStream> fRawFrameFileStream = nullptr;
+    uint64_t fTime = 0;
 };

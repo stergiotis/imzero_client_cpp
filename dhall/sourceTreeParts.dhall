@@ -472,7 +472,6 @@ let mainSkiaSdl3 =
 			, "-lpthread"
 			, "-lfreetype"
 			, "-lz"
-			, "-lglfw"
 			, "-lfontconfig"
 			, "-lwebpmux"
 			, "-lwebpdemux"
@@ -481,6 +480,51 @@ let mainSkiaSdl3 =
 			, "-lGL"
 			--, "-Wl,--verbose"
 		] : List Text
+	}
+	, nonSourceObjs = [ ] : List Text
+}
+let mainSkiaSdl3Video = 
+    let dir = "./skia/video"
+    in mainSkiaSdl3 // {
+	, name = "mainSkiaSdl3Video"
+	, dir = dir
+	, sources = [
+		, "${dir}/app.cpp"
+		, "${dir}/bmpEncoder.cpp"
+		, "${dir}/main.cpp"
+
+		, "${dir}/../paragraph.cpp"
+		, "${dir}/../cliOptions.cpp"
+		, "${dir}/../setupUI.cpp"
+		, "${dir}/../vectorCmdSkiaRenderer.cpp"
+		, "${dir}/../skiaTracyTracer.cpp"
+	]
+}
+let mainVideoPlayerSdl3Mpv = 
+    let dir = "./sdl3_mpv"
+    in sourceTreePart::{
+	, name = "mainVideoPlayerSdl3Mpv"
+	, dir = dir
+	, sources = [
+		, "${dir}/main.cpp"
+		, "${dir}/events.cpp"
+		, "${dir}/app.cpp"
+	]
+	, includeDirs = {
+		, local = [] : List Text
+		, global = [] : List Text
+	}
+	, defines = {, local = [] : List Text, global = [
+	] : List Text}
+	, cxxflags = {
+		, global = [
+		] : List Text
+		, local = [
+		, "-Wno-unused-parameter"
+		] : List Text
+	}
+	, ldflags = {
+		, global = [ ] : List Text
 	}
 	, nonSourceObjs = [ ] : List Text
 }
@@ -563,9 +607,11 @@ in
 	, imguiTextedit
 	, binding
 	, mainSkiaSdl3
+	, mainSkiaSdl3Video
 	, tracyEnabled
 	, tracyDisabled
 	, sdl3Shared
 	, mpvShared
 	, skiaShared
+	, mainVideoPlayerSdl3Mpv
 }

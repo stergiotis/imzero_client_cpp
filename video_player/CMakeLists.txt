@@ -1,15 +1,15 @@
 # generated using cmakelists.dhall
 cmake_minimum_required(VERSION 3.24)
 project(mzero_video_play)
-set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_LINKER clang++)
 set(CMAKE_CXX_COMPILER clang++)
 
-add_compile_definitions(TRACY_ENABLE)
-include_directories("${CMAKE_CURRENT_LIST_DIR}/./contrib/sdl3/include"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/flatbuffers"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public")
-set(COMPILE_OPTIONS -std=c++20
+add_compile_definitions(TRACY_ENABLE
+)
+include_directories("${CMAKE_CURRENT_LIST_DIR}/./contrib/flatbuffers"
+"${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public"
+)
+add_compile_options(-std=c++20
 -fno-exceptions
 -g
 -gdwarf-4
@@ -20,23 +20,39 @@ set(COMPILE_OPTIONS -std=c++20
 -fsanitize=address
 -fsanitize=undefined
 -fno-omit-frame-pointer
--DIMZERO_DEBUG_BUILD)
+-DIMZERO_DEBUG_BUILD
+# sdl3Shared
+-I/data/repo/contrib/sdl/include
+)
 link_libraries(-fsanitize=address
 -fsanitize=undefined
 -v
--lmpv)
+# sdl3Shared
+-L/data/repo/contrib/sdl/build
+# sdl3Shared
+-Wl,-rpath,/data/repo/contrib/sdl/build
+# sdl3Shared
+-Wl,--enable-new-dtags
+# sdl3Shared
+-lSDL3
+# mpvShared
+-lmpv
+)
 
+# sdl3Shared
 
-add_library(render OBJECT "${CMAKE_CURRENT_LIST_DIR}/./sdl3_mpv/main.cpp"
+# mpvShared
+
+# flatbuffers
+
+# mainVideoPlayerSdl3Mpv
+add_library(mainVideoPlayerSdl3Mpv OBJECT "${CMAKE_CURRENT_LIST_DIR}/./sdl3_mpv/main.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./sdl3_mpv/events.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./sdl3_mpv/app.cpp")
+target_compile_options(mainVideoPlayerSdl3Mpv PUBLIC -Wno-unused-parameter)
 
-add_library(mpv_imported OBJECT IMPORTED)
-set_property(TARGET mpv_imported PROPERTY IMPORTED_OBJECTS "${CMAKE_CURRENT_LIST_DIR}/./contrib/sdl3/build/libSDL3.a")
-
-
+# tracyEnabled
 add_library(tracyEnabled OBJECT "${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public/TracyClient.cpp")
-add_executable(imzero_video_play $<TARGET_OBJECTS:render>
-$<TARGET_OBJECTS:mpv_imported>
+add_executable(imzero_video_play $<TARGET_OBJECTS:mainVideoPlayerSdl3Mpv>
 $<TARGET_OBJECTS:tracyEnabled>)
 

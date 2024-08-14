@@ -4,10 +4,10 @@ let asan = True
 --let clangdir = env:CLANGDIR as Text -- FIXME sync with ./build_skia_asan.sh
 let sourceTreePartsRepo = ../dhall/sourceTreeParts.dhall
 let sourceTreeParts = [
-	, sourceTreePartsRepo.sdl3
-	, sourceTreePartsRepo.sdl3mpv
-	, sourceTreePartsRepo.mpv
+	, sourceTreePartsRepo.sdl3Shared
+	, sourceTreePartsRepo.mpvShared
 	, sourceTreePartsRepo.flatbuffers
+	, sourceTreePartsRepo.mainVideoPlayerSdl3Mpv
 ] # (if debug then [ , sourceTreePartsRepo.tracyEnabled ] else [ ,sourceTreePartsRepo.tracyDisabled ] : List lib.sourceTreePart.Type )
 --let cxx = "${clangdir}/bin/clang++"
 let cxx = "clang++"

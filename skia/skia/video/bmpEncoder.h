@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <cstdlib>
-#include "SkStream.h"
+#include "include/core/SkStream.h"
 
 class BmpBGRA8888Encoder {
 public:

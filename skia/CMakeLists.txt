@@ -109,27 +109,25 @@ link_libraries(-DNDEBUG
 -lbentleyottmann
 # skiaShared
 -lskshaper
-# mainSkiaSdl3
+# mainSkiaSdl3Video
 -ldl
-# mainSkiaSdl3
+# mainSkiaSdl3Video
 -lpthread
-# mainSkiaSdl3
+# mainSkiaSdl3Video
 -lfreetype
-# mainSkiaSdl3
+# mainSkiaSdl3Video
 -lz
-# mainSkiaSdl3
--lglfw
-# mainSkiaSdl3
+# mainSkiaSdl3Video
 -lfontconfig
-# mainSkiaSdl3
+# mainSkiaSdl3Video
 -lwebpmux
-# mainSkiaSdl3
+# mainSkiaSdl3Video
 -lwebpdemux
-# mainSkiaSdl3
+# mainSkiaSdl3Video
 -lX11
-# mainSkiaSdl3
+# mainSkiaSdl3Video
 -lGLU
-# mainSkiaSdl3
+# mainSkiaSdl3Video
 -lGL
 )
 
@@ -200,17 +198,17 @@ target_compile_options(imguiTextedit PUBLIC -Wno-unused-variable)
 
 # skiaShared
 
-# mainSkiaSdl3
-add_library(mainSkiaSdl3 OBJECT "${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/imgui_impl_sdl3.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/main.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/app.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/../paragraph.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/../cliOptions.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/../setupUI.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/../vectorCmdSkiaRenderer.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/../skiaTracyTracer.cpp")
-target_compile_options(mainSkiaSdl3 PUBLIC -Wno-unused-parameter)
-target_include_directories(mainSkiaSdl3 PUBLIC "${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3"
+# mainSkiaSdl3Video
+add_library(mainSkiaSdl3Video OBJECT "${CMAKE_CURRENT_LIST_DIR}/./skia/video/app.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./skia/video/bmpEncoder.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./skia/video/main.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./skia/video/../paragraph.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./skia/video/../cliOptions.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./skia/video/../setupUI.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./skia/video/../vectorCmdSkiaRenderer.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./skia/video/../skiaTracyTracer.cpp")
+target_compile_options(mainSkiaSdl3Video PUBLIC -Wno-unused-parameter)
+target_include_directories(mainSkiaSdl3Video PUBLIC "${CMAKE_CURRENT_LIST_DIR}/./skia/video"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui"
 "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_implot"
 "${CMAKE_CURRENT_LIST_DIR}/./src")
@@ -228,6 +226,6 @@ $<TARGET_OBJECTS:imguiKnobs>
 $<TARGET_OBJECTS:imguiCoolbar>
 $<TARGET_OBJECTS:imguiFlamegraph>
 $<TARGET_OBJECTS:imguiTextedit>
-$<TARGET_OBJECTS:mainSkiaSdl3>
+$<TARGET_OBJECTS:mainSkiaSdl3Video>
 $<TARGET_OBJECTS:tracyDisabled>)
 

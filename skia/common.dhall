@@ -18,7 +18,7 @@ let sourceTreeParts = [
 	, sourceTreePartsRepo.binding
 	, sourceTreePartsRepo.sdl3Shared
 	, sourceTreePartsRepo.skiaShared
-	, sourceTreePartsRepo.mainSkiaSdl3
+	, sourceTreePartsRepo.mainSkiaSdl3Video
 ] # (if debug then [ , sourceTreePartsRepo.tracyEnabled ] else [ ,sourceTreePartsRepo.tracyDisabled ] : List lib.sourceTreePart.Type )
 let clangdir = (env:HOME as Text) ++ "/Downloads/clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04"
 let cxx = "${clangdir}/bin/clang++"
