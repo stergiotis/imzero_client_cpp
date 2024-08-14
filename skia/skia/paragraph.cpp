@@ -9,6 +9,7 @@ Paragraph::Paragraph(sk_sp<SkFontMgr> fontMgr,sk_sp<SkTypeface> defaultTypeface)
     paraStyle.setMaxLines(1000); // FIXME
     paraStyle.setTextStyle(fTlTextStyle);
     fTlFontCollection->setDefaultFontManager(fontMgr);
+    fTlFontCollection->enableFontFallback();
 
     paraStyle.setTextAlign(skia::textlayout::TextAlign::kLeft);
     fParaBuilderLeft = skia::textlayout::ParagraphBuilder::make(paraStyle, fTlFontCollection);

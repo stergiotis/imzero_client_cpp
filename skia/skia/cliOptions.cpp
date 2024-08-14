@@ -108,7 +108,7 @@ void CliOptions::parse(int argc,char **argv,FILE *logChannel) {
         exit(1);
     }
     fontManager = findFlagValueDefault(logChannel,u, argc, argv, "-fontManager", fontManager);
-    fontManager = findFlagValueDefault(logChannel,u, argc, argv, "-fontManagerArg", fontManagerArg);
+    fontManagerArg = findFlagValueDefault(logChannel,u, argc, argv, "-fontManagerArg", fontManagerArg);
 
     fontDyFudge = findFlagValueDefaultFloat(logChannel,u, argc, argv, "-fontDyFudge", "0.0");
     if(std::isnan(fontDyFudge) || fontDyFudge < -10000.0f || fontDyFudge > 10000.0f) {

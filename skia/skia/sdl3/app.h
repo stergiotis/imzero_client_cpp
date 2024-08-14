@@ -14,6 +14,7 @@ private:
     void Paint(SkSurface* surface, int width, int height);
     void DrawImGuiVectorCmdsFB(SkCanvas &canvas);
 
+    sk_sp<SkFontMgr> fFontMgr;
     SkPaint fFontPaint;
     VectorCmdSkiaRenderer fVectorCmdSkiaRenderer;
     size_t fTotalVectorCmdSerializedSize;

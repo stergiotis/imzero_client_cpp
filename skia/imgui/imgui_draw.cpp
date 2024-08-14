@@ -185,6 +185,7 @@ namespace ImGui {
     bool useVectorCmd = false;
     float skiaFontDyFudge = 0.0f;
     std::shared_ptr<Paragraph> paragraph = nullptr;
+    std::vector<uint8_t> isParagraphTextStack{};
 }
 static char hiddenPwBuffer[512];
 static size_t hiddenPwBufferNChars = 0;
@@ -4176,7 +4177,22 @@ const char* ImFont::CalcWordWrapPositionA(float scale, const char* text, const c
     return s;
 }
 #ifdef IMZERO_DRAWLIST
+void ImGui::PushIsParagraphText(uint8_t isParagraph) {
+    ImGui::isParagraphTextStack.push_back(isParagraph);
+}
+uint8_t ImGui::PopIsParagraphText() {
+    IM_ASSERT(!ImGui::isParagraphTextStack.empty() && "unbalanced PushIsParagraphText() and PopIsParagraphText()");
+    auto v = ImGui::isParagraphTextStack.back();
+    ImGui::isParagraphTextStack.pop_back();
+    return v;
+}
 static inline bool isParagraphText(const char *text_begin, const char *text_end) {
+    if(!ImGui::isParagraphTextStack.empty()) {
+        switch(ImGui::isParagraphTextStack.back()) {
+            case 0: return false;
+            case 1: return true;
+        }
+    }
     return (memchr(text_begin,'\n',text_end-text_begin) != nullptr);
 }
 #endif

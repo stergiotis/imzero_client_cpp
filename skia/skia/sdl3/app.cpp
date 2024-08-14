@@ -87,7 +87,7 @@ void App::Paint(SkSurface* surface, int width, int height) { ZoneScoped;
         fImZeroSkiaSetupUi.render(saveFormat, fVectorCmdSkiaRenderer, fUseVectorCmd,
                                   fTotalVectorCmdSerializedSize, totalSentBytes+totalReceivedBytes,
                                   fSkpBytesWritten, fSvgBytesWritten, fPngBytesWritten,
-                                  width, height
+                                  width, height, fFontMgr.get()
         );
     }
     ImGui::End();
@@ -215,7 +215,6 @@ static void build_ImFontAtlas(ImFontAtlas& atlas, SkPaint& fontPaint) {
 }
 
 int App::Run(CliOptions &opts) {
-    sk_sp<SkFontMgr> fontMgr = nullptr;
     sk_sp<SkTypeface> typeface = nullptr;
     sk_sp<SkData> ttfData = nullptr;
     { // setup skia/imgui shared objects
@@ -258,38 +257,38 @@ int App::Run(CliOptions &opts) {
             }
         }
         {
-            fontMgr = nullptr;
+            fFontMgr = nullptr;
 
             if(opts.fontManager != nullptr && strcmp(opts.fontManager,"fontconfig") == 0) {
 #if defined(SK_FONTMGR_FONTCONFIG_AVAILABLE)
-                fontMgr = SkFontMgr_New_FontConfig(nullptr);
+                fFontMgr = SkFontMgr_New_FontConfig(nullptr);
 #else
                 fprintf(stderr,"SK_FONTMGR_FONTCONFIG_AVAILABLE is not defined, font manager %s not supported\n",opts.fontManager);
 #endif
             }
             if(opts.fontManager != nullptr && strcmp(opts.fontManager,"directory") == 0) {
 #if defined(SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE)
-                fontMgr = SkFontMgr_New_Custom_Directory(opts.fontManagerArg);
+                fFontMgr = SkFontMgr_New_Custom_Directory(opts.fontManagerArg);
 #else
                 fprintf(stderr,"SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE is not defined, font manager %s not supported\n",opts.fontManager);
 #endif
             }
-            if(fontMgr == nullptr) {
+            if(fFontMgr == nullptr) {
                 // fallback
-                fontMgr = SkFontMgr_New_Custom_Data(SkSpan(&ttfData,1));
+                fprintf(stderr,"using fallback font manager (opt=%s,arg=%s)\n",opts.fontManager,opts.fontManagerArg);
+                fFontMgr = SkFontMgr_New_Custom_Data(SkSpan(&ttfData, 1));
             }
         }
-        typeface = fontMgr->makeFromData(ttfData);
+        typeface = fFontMgr->makeFromData(ttfData);
         ////auto const typeface = fontMgr->matchFamilyStyle(nullptr,SkFontStyle());
-        if(typeface == nullptr || fontMgr->countFamilies() <= 0) {
+        if(typeface == nullptr || fFontMgr->countFamilies() <= 0) {
             fprintf(stderr, "unable to initialize font manager with supplied ttf font file %s\n",opts.ttfFilePath);
             return(1);
         }
 
         ImGui::skiaFontDyFudge = opts.fontDyFudge;
-        ImGui::paragraph = std::make_shared<Paragraph>(fontMgr, typeface);
+        ImGui::paragraph = std::make_shared<Paragraph>(fFontMgr, typeface);
         ImGui::skiaFont = SkFont(typeface);
-
 
         fVectorCmdSkiaRenderer.setVertexDrawPaint(&fFontPaint);
         fVectorCmdSkiaRenderer.setParagraphHandler(ImGui::paragraph);
@@ -554,4 +553,5 @@ App::App() {
     fBackgroundColor = SK_ColorRED;
     fFffiInterpreter = false;
     fUseVectorCmd = false;
+    fFontMgr = nullptr;
 }

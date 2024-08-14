@@ -22,7 +22,7 @@ public:
     void render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &vectorCmdSkiaRenderer,bool &useVectorCmd,
                 size_t totalVectorCmdSerializedSize, size_t fTotalFffiSz,
                 size_t skpBytes, size_t svgBytes, size_t pngBytes,
-                int windowW, int windowH);
+                int windowW, int windowH, SkFontMgr *fontMgr=nullptr);
 
 private:
     char fontMetricsText[128]{};

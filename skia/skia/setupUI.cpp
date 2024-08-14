@@ -50,7 +50,8 @@ static void helpMarker(const char* desc)
 }
 void ImZeroSkiaSetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &vectorCmdSkiaRenderer, bool &useVectorCmd,
                                size_t totalVectorCmdSerializedSz, size_t totalFffiSz,
-                               size_t skpBytes, size_t svgBytes, size_t pngBytes, int windowW, int windowH
+                               size_t skpBytes, size_t svgBytes, size_t pngBytes, int windowW, int windowH,
+                               SkFontMgr *fontMgr
                                ) { ZoneScoped;
     ImGui::Text("gitCommit=\"%s\",dirty=%s",buildinfo::gitCommit,buildinfo::gitDirty ? "yes" : "no");
     {
@@ -432,16 +433,22 @@ void ImZeroSkiaSetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &v
         ImGui::TextUnformatted("Multi-Line Text:");
         ImGui::TextUnformatted("this is a multiline\ntext with many words that will\nhopefully form a paragraph.");
         ImGui::TextUnformatted("Emoji:");
+        ImGui::PushIsParagraphText(1);
         ImGui::TextUnformatted("🫠👩🏼‍🤝‍👩🏻");
+        ImGui::PopIsParagraphText();
         ImGui::TextUnformatted("Arabic https://istizada.com/arabic-lorem-ipsum/:");
+        ImGui::PushIsParagraphText(1);
         ImGui::TextUnformatted(
                 reinterpret_cast<const char *>(u8"لكن لا بد أن أوضح لك أن كل هذه الأفكار المغلوطة حول استنكار  النشوة وتمجيد الألم نشأت بالفعل، وسأعرض لك التفاصيل لتكتشف حقيقة وأساس تلك السعادة البشرية، فلا أحد يرفض أو يكره أو يتجنب الشعور بالسعادة، ولكن بفضل هؤلاء الأشخاص الذين لا يدركون بأن السعادة لا بد أن نستشعرها بصورة أكثر عقلانية ومنطقية فيعرضهم هذا لمواجهة الظروف الأليمة، وأكرر بأنه لا يوجد من يرغب في الحب ونيل المنال ويتلذذ بالآلام، الألم هو الألم ولكن نتيجة لظروف ما قد تكمن السعاده فيما نتحمله من كد وأسي.\n"
                                           "\n"
                                           "و سأعرض مثال حي لهذا، من منا لم يتحمل جهد بدني شاق إلا من أجل الحصول على ميزة أو فائدة؟ ولكن من لديه الحق أن ينتقد شخص ما أراد أن يشعر بالسعادة التي لا تشوبها عواقب أليمة أو آخر أراد أن يتجنب الألم الذي ربما تنجم عنه بعض المتعة ؟ \n"
                                           "علي الجانب الآخر نشجب ونستنكر هؤلاء الرجال المفتونون بنشوة اللحظة الهائمون في رغباتهم فلا يدركون ما يعقبها من الألم والأسي المحتم، واللوم كذلك يشمل هؤلاء الذين أخفقوا في واجباتهم نتيجة لضعف إرادتهم فيتساوي مع هؤلاء الذين يتجنبون وينأون عن تحمل الكدح والألم .\n"
-                                          "\t       "));
+                                          "\t       \u061C"));
+        ImGui::PopIsParagraphText();
         ImGui::TextUnformatted("Chinese https://en.wikipedia.org/wiki/Thousand_Character_Classic:");
+        ImGui::PushIsParagraphText(1);
         ImGui::TextUnformatted(reinterpret_cast<const char*>(u8"天地玄黄。"));
+        ImGui::PopIsParagraphText();
     }
 
     if(ImGui::CollapsingHeader("Paragraph Cache")) {
@@ -456,6 +463,32 @@ void ImZeroSkiaSetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &v
         }
         if(ImGui::Button("off")) {
             ImGui::paragraph->setCacheEnable(false);
+        }
+    }
+
+    if(fontMgr != nullptr) {
+        if(ImGui::CollapsingHeader("Font Manager")) {
+            auto const nFamilies = fontMgr->countFamilies();
+            ImGui::TextUnformatted("Families:");
+            for(int i=0;i<nFamilies;i++) {
+                SkString familyName;
+                fontMgr->getFamilyName(i,&familyName);
+                if(ImGui::TreeNode(familyName.c_str())) {
+                    sk_sp<SkFontStyleSet> set(fontMgr->createStyleSet(i));
+                    auto const font = ImGui::skiaFont;
+                    for (int j = 0; j < set->count(); ++j) {
+                        SkString styleName;
+                        SkFontStyle fs;
+                        set->getStyle(j, &fs, &styleName);
+                        styleName.appendf("%s [%d %d %d]", familyName.c_str(), fs.weight(), fs.width(), fs.slant());
+                        ImGui::TextUnformatted(styleName.c_str(), styleName.c_str() + styleName.size());
+                        if(ImGui::SmallButton(styleName.c_str())) {
+                            ImGui::skiaFont.setTypeface(sk_sp<SkTypeface>(set->createTypeface(j)));
+                        }
+                    }
+                    ImGui::TreePop();
+                }
+            }
         }
     }
 }
