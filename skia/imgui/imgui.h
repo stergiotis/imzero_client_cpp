@@ -315,10 +315,11 @@ namespace ImGui
     extern float skiaFontDyFudge;
     extern std::shared_ptr<Paragraph> paragraph;
     constexpr unsigned int skiaPasswordDefaultCharacter = U'*'; // TODO make this configurable or runtime selectable
-    extern std::vector<uint8_t> isParagraphTextStack;
     // isParagraph: 0 = never, 1 = always, 2 = auto
     void PushIsParagraphText(uint8_t isParagraph);
+    void PushParagraphTextLayout(ImZeroFB::TextAlignFlags align,ImZeroFB::TextDirection dir);
     uint8_t PopIsParagraphText();
+    void PopParagraphTextLayout();
 #endif
 
     // Context creation and access

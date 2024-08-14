@@ -288,6 +288,7 @@ int App::Run(CliOptions &opts) {
 
         ImGui::skiaFontDyFudge = opts.fontDyFudge;
         ImGui::paragraph = std::make_shared<Paragraph>(fFontMgr, typeface);
+        ImGui::paragraph->enableFontFallback();
         ImGui::skiaFont = SkFont(typeface);
 
         fVectorCmdSkiaRenderer.setVertexDrawPaint(&fFontPaint);

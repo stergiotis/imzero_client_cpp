@@ -430,21 +430,65 @@ void ImZeroSkiaSetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &v
         }
     }
     if(ImGui::CollapsingHeader("Paragraph")) {
-        ImGui::TextUnformatted("Multi-Line Text:");
-        ImGui::TextUnformatted("this is a multiline\ntext with many words that will\nhopefully form a paragraph.");
+        ImGui::TextUnformatted("Latin:");
+        for(int i=ImZeroFB::TextAlignFlags_MIN;i<=ImZeroFB::TextAlignFlags_MAX;i++) {
+            auto const f = static_cast<ImZeroFB::TextAlignFlags>(i);
+            if(ImGui::RadioButton(ImZeroFB::EnumNameTextAlignFlags(f),fTextAlign == f)) {
+                fTextAlign = f;
+            }
+            ImGui::SameLine();
+        }
+        ImGui::NewLine();
+
+        ImGui::PushParagraphTextLayout(fTextAlign,ImZeroFB::TextDirection_ltr);
+        ImGui::PushIsParagraphText(1);
+        ImGui::TextUnformatted("That, poor contempt, or claim'd thou slept so faithful,\n"
+                               "I may contrive our father; and, in their defeated queen,\n"
+                               "Her flesh broke me and puttance of expedition house,\n"
+                               "And in that same that ever I lament this stomach,\n"
+                               "And he, nor Butly and my fury, knowing everything\n"
+                               "Grew daily ever, his great strength and thought\n"
+                               "The bright buds of mine own.\n"
+                               "\n"
+                               "BIONDELLO:\n"
+                               "Marry, that it may not pray their patience.'\n"
+                               "\n"
+                               "KING LEAR:\n"
+                               "The instant common maid, as we may less be\n"
+                               "a brave gentleman and joiner: he that finds us with wax\n"
+                               "And owe so full of presence and our fooder at our\n"
+                               "staves. It is remorsed the bridal's man his grace\n"
+                               "for every business in my tongue, but I was thinking\n"
+                               "that he contends, he hath respected thee.\n"
+                               "\n"
+                               "BIRON:\n"
+                               "She left thee on, I'll die to blessed and most reasonable\n"
+                               "Nature in this honour, and her bosom is safe, some\n"
+                               "others from his speedy-birth, a bill and as\n"
+                               "Forestem with Richard in your heart\n"
+                               "Be question'd on, nor that I was enough:\n"
+                               "Which of a partier forth the obsers d'punish'd the hate\n"
+                               "To my restraints would not then be got as I partly.");
+        ImGui::PopIsParagraphText();
+        ImGui::PopParagraphTextLayout();
+
         ImGui::TextUnformatted("Emoji:");
         ImGui::PushIsParagraphText(1);
         ImGui::TextUnformatted("🫠👩🏼‍🤝‍👩🏻");
         ImGui::PopIsParagraphText();
+
         ImGui::TextUnformatted("Arabic https://istizada.com/arabic-lorem-ipsum/:");
         ImGui::PushIsParagraphText(1);
+        ImGui::PushParagraphTextLayout(ImZeroFB::TextAlignFlags_right,ImZeroFB::TextDirection_rtl);
         ImGui::TextUnformatted(
                 reinterpret_cast<const char *>(u8"لكن لا بد أن أوضح لك أن كل هذه الأفكار المغلوطة حول استنكار  النشوة وتمجيد الألم نشأت بالفعل، وسأعرض لك التفاصيل لتكتشف حقيقة وأساس تلك السعادة البشرية، فلا أحد يرفض أو يكره أو يتجنب الشعور بالسعادة، ولكن بفضل هؤلاء الأشخاص الذين لا يدركون بأن السعادة لا بد أن نستشعرها بصورة أكثر عقلانية ومنطقية فيعرضهم هذا لمواجهة الظروف الأليمة، وأكرر بأنه لا يوجد من يرغب في الحب ونيل المنال ويتلذذ بالآلام، الألم هو الألم ولكن نتيجة لظروف ما قد تكمن السعاده فيما نتحمله من كد وأسي.\n"
                                           "\n"
                                           "و سأعرض مثال حي لهذا، من منا لم يتحمل جهد بدني شاق إلا من أجل الحصول على ميزة أو فائدة؟ ولكن من لديه الحق أن ينتقد شخص ما أراد أن يشعر بالسعادة التي لا تشوبها عواقب أليمة أو آخر أراد أن يتجنب الألم الذي ربما تنجم عنه بعض المتعة ؟ \n"
                                           "علي الجانب الآخر نشجب ونستنكر هؤلاء الرجال المفتونون بنشوة اللحظة الهائمون في رغباتهم فلا يدركون ما يعقبها من الألم والأسي المحتم، واللوم كذلك يشمل هؤلاء الذين أخفقوا في واجباتهم نتيجة لضعف إرادتهم فيتساوي مع هؤلاء الذين يتجنبون وينأون عن تحمل الكدح والألم .\n"
                                           "\t       \u061C"));
+        ImGui::PopParagraphTextLayout();
         ImGui::PopIsParagraphText();
+
         ImGui::TextUnformatted("Chinese https://en.wikipedia.org/wiki/Thousand_Character_Classic:");
         ImGui::PushIsParagraphText(1);
         ImGui::TextUnformatted(reinterpret_cast<const char*>(u8"天地玄黄。"));

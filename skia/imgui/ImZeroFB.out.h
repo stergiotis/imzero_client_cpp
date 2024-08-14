@@ -309,6 +309,36 @@ inline const char *EnumNameTextAlignFlags(TextAlignFlags e) {
   return EnumNamesTextAlignFlags()[index];
 }
 
+enum TextDirection : uint8_t {
+  TextDirection_ltr = 0,
+  TextDirection_rtl = 1,
+  TextDirection_MIN = TextDirection_ltr,
+  TextDirection_MAX = TextDirection_rtl
+};
+
+inline const TextDirection (&EnumValuesTextDirection())[2] {
+  static const TextDirection values[] = {
+    TextDirection_ltr,
+    TextDirection_rtl
+  };
+  return values;
+}
+
+inline const char * const *EnumNamesTextDirection() {
+  static const char * const names[3] = {
+    "ltr",
+    "rtl",
+    nullptr
+  };
+  return names;
+}
+
+inline const char *EnumNameTextDirection(TextDirection e) {
+  if (::flatbuffers::IsOutRange(e, TextDirection_ltr, TextDirection_rtl)) return "";
+  const size_t index = static_cast<size_t>(e);
+  return EnumNamesTextDirection()[index];
+}
+
 enum PathVerb : uint8_t {
   PathVerb_move = 0,
   PathVerb_line = 1,
@@ -3850,7 +3880,8 @@ struct CmdRenderParagraph FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table
     VT_TEXT = 14,
     VT_WRAP_WIDTH = 16,
     VT_LETTER_SPACING = 18,
-    VT_TEXT_ALIGN = 20
+    VT_TEXT_ALIGN = 20,
+    VT_TEXT_DIRECTION = 22
   };
   uint64_t imfont() const {
     return GetField<uint64_t>(VT_IMFONT, 0);
@@ -3879,6 +3910,9 @@ struct CmdRenderParagraph FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table
   ImZeroFB::TextAlignFlags text_align() const {
     return static_cast<ImZeroFB::TextAlignFlags>(GetField<uint8_t>(VT_TEXT_ALIGN, 0));
   }
+  ImZeroFB::TextDirection text_direction() const {
+    return static_cast<ImZeroFB::TextDirection>(GetField<uint8_t>(VT_TEXT_DIRECTION, 0));
+  }
   bool Verify(::flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<uint64_t>(verifier, VT_IMFONT, 8) &&
@@ -3891,6 +3925,7 @@ struct CmdRenderParagraph FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table
            VerifyField<float>(verifier, VT_WRAP_WIDTH, 4) &&
            VerifyField<float>(verifier, VT_LETTER_SPACING, 4) &&
            VerifyField<uint8_t>(verifier, VT_TEXT_ALIGN, 1) &&
+           VerifyField<uint8_t>(verifier, VT_TEXT_DIRECTION, 1) &&
            verifier.EndTable();
   }
 };
@@ -3926,6 +3961,9 @@ struct CmdRenderParagraphBuilder {
   void add_text_align(ImZeroFB::TextAlignFlags text_align) {
     fbb_.AddElement<uint8_t>(CmdRenderParagraph::VT_TEXT_ALIGN, static_cast<uint8_t>(text_align), 0);
   }
+  void add_text_direction(ImZeroFB::TextDirection text_direction) {
+    fbb_.AddElement<uint8_t>(CmdRenderParagraph::VT_TEXT_DIRECTION, static_cast<uint8_t>(text_direction), 0);
+  }
   explicit CmdRenderParagraphBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
@@ -3947,7 +3985,8 @@ inline ::flatbuffers::Offset<CmdRenderParagraph> CreateCmdRenderParagraph(
     ::flatbuffers::Offset<::flatbuffers::String> text = 0,
     float wrap_width = 0.0f,
     float letter_spacing = 0.0f,
-    ImZeroFB::TextAlignFlags text_align = ImZeroFB::TextAlignFlags_left) {
+    ImZeroFB::TextAlignFlags text_align = ImZeroFB::TextAlignFlags_left,
+    ImZeroFB::TextDirection text_direction = ImZeroFB::TextDirection_ltr) {
   CmdRenderParagraphBuilder builder_(_fbb);
   builder_.add_imfont(imfont);
   builder_.add_letter_spacing(letter_spacing);
@@ -3957,6 +3996,7 @@ inline ::flatbuffers::Offset<CmdRenderParagraph> CreateCmdRenderParagraph(
   builder_.add_col(col);
   builder_.add_pos(pos);
   builder_.add_size(size);
+  builder_.add_text_direction(text_direction);
   builder_.add_text_align(text_align);
   return builder_.Finish();
 }
@@ -3971,7 +4011,8 @@ inline ::flatbuffers::Offset<CmdRenderParagraph> CreateCmdRenderParagraphDirect(
     const char *text = nullptr,
     float wrap_width = 0.0f,
     float letter_spacing = 0.0f,
-    ImZeroFB::TextAlignFlags text_align = ImZeroFB::TextAlignFlags_left) {
+    ImZeroFB::TextAlignFlags text_align = ImZeroFB::TextAlignFlags_left,
+    ImZeroFB::TextDirection text_direction = ImZeroFB::TextDirection_ltr) {
   auto text__ = text ? _fbb.CreateString(text) : 0;
   return ImZeroFB::CreateCmdRenderParagraph(
       _fbb,
@@ -3983,7 +4024,8 @@ inline ::flatbuffers::Offset<CmdRenderParagraph> CreateCmdRenderParagraphDirect(
       text__,
       wrap_width,
       letter_spacing,
-      text_align);
+      text_align,
+      text_direction);
 }
 
 struct CmdRenderUnicodeCodepoint FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
@@ -5991,6 +6033,24 @@ inline const ::flatbuffers::TypeTable *TextAlignFlagsTypeTable() {
   return &tt;
 }
 
+inline const ::flatbuffers::TypeTable *TextDirectionTypeTable() {
+  static const ::flatbuffers::TypeCode type_codes[] = {
+    { ::flatbuffers::ET_UCHAR, 0, 0 },
+    { ::flatbuffers::ET_UCHAR, 0, 0 }
+  };
+  static const ::flatbuffers::TypeFunction type_refs[] = {
+    ImZeroFB::TextDirectionTypeTable
+  };
+  static const char * const names[] = {
+    "ltr",
+    "rtl"
+  };
+  static const ::flatbuffers::TypeTable tt = {
+    ::flatbuffers::ST_ENUM, 2, type_codes, type_refs, nullptr, nullptr, names
+  };
+  return &tt;
+}
+
 inline const ::flatbuffers::TypeTable *PathVerbTypeTable() {
   static const ::flatbuffers::TypeCode type_codes[] = {
     { ::flatbuffers::ET_UCHAR, 0, 0 },
@@ -7272,12 +7332,14 @@ inline const ::flatbuffers::TypeTable *CmdRenderParagraphTypeTable() {
     { ::flatbuffers::ET_STRING, 0, -1 },
     { ::flatbuffers::ET_FLOAT, 0, -1 },
     { ::flatbuffers::ET_FLOAT, 0, -1 },
-    { ::flatbuffers::ET_UCHAR, 0, 2 }
+    { ::flatbuffers::ET_UCHAR, 0, 2 },
+    { ::flatbuffers::ET_UCHAR, 0, 3 }
   };
   static const ::flatbuffers::TypeFunction type_refs[] = {
     ImZeroFB::SingleVec2TypeTable,
     ImZeroFB::SingleVec4TypeTable,
-    ImZeroFB::TextAlignFlagsTypeTable
+    ImZeroFB::TextAlignFlagsTypeTable,
+    ImZeroFB::TextDirectionTypeTable
   };
   static const char * const names[] = {
     "imfont",
@@ -7288,10 +7350,11 @@ inline const ::flatbuffers::TypeTable *CmdRenderParagraphTypeTable() {
     "text",
     "wrap_width",
     "letter_spacing",
-    "text_align"
+    "text_align",
+    "text_direction"
   };
   static const ::flatbuffers::TypeTable tt = {
-    ::flatbuffers::ST_TABLE, 9, type_codes, type_refs, nullptr, nullptr, names
+    ::flatbuffers::ST_TABLE, 10, type_codes, type_refs, nullptr, nullptr, names
   };
   return &tt;
 }

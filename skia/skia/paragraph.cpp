@@ -3,23 +3,40 @@
 
 Paragraph::Paragraph(sk_sp<SkFontMgr> fontMgr,sk_sp<SkTypeface> defaultTypeface) {
     fTlFontCollection = sk_make_sp<skia::textlayout::FontCollection>();
-    skia::textlayout::ParagraphStyle paraStyle;
-    paraStyle.setEllipsis(SkString("…"));
+    skia::textlayout::ParagraphStyle paraStyleLtr;
+    skia::textlayout::ParagraphStyle paraStyleRtl;
+    paraStyleLtr.setEllipsis(SkString("…"));
     //fTlParaStyle.setMaxLines(std::numeric_limits<size_t>::max()); // FIXME
-    paraStyle.setMaxLines(1000); // FIXME
-    paraStyle.setTextStyle(fTlTextStyle);
-    fTlFontCollection->setDefaultFontManager(fontMgr);
-    fTlFontCollection->enableFontFallback();
+    paraStyleLtr.setMaxLines(1000); // FIXME
+    paraStyleLtr.setTextStyle(fTlTextStyle);
 
-    paraStyle.setTextAlign(skia::textlayout::TextAlign::kLeft);
-    fParaBuilderLeft = skia::textlayout::ParagraphBuilder::make(paraStyle, fTlFontCollection);
-    paraStyle.setTextAlign(skia::textlayout::TextAlign::kRight);
-    fParaBuilderRight = skia::textlayout::ParagraphBuilder::make(paraStyle, fTlFontCollection);
-    paraStyle.setTextAlign(skia::textlayout::TextAlign::kCenter);
-    fParaBuilderCenter = skia::textlayout::ParagraphBuilder::make(paraStyle, fTlFontCollection);
-    paraStyle.setTextAlign(skia::textlayout::TextAlign::kJustify);
-    fParaBuilderJustify = skia::textlayout::ParagraphBuilder::make(paraStyle, fTlFontCollection);
-    fParaBuilder = fParaBuilderLeft.get();
+    paraStyleRtl.setMaxLines(paraStyleLtr.getMaxLines());
+    paraStyleLtr.setTextStyle(fTlTextStyle);
+
+    fTlFontCollection->setDefaultFontManager(fontMgr);
+    fTlFontCollection->disableFontFallback();
+
+    paraStyleLtr.setTextDirection(skia::textlayout::TextDirection::kRtl);
+    paraStyleLtr.setTextAlign(skia::textlayout::TextAlign::kLeft);
+    fParaBuilderLeftLTR = skia::textlayout::ParagraphBuilder::make(paraStyleLtr, fTlFontCollection);
+    paraStyleLtr.setTextAlign(skia::textlayout::TextAlign::kRight);
+    fParaBuilderRightLTR = skia::textlayout::ParagraphBuilder::make(paraStyleLtr, fTlFontCollection);
+    paraStyleLtr.setTextAlign(skia::textlayout::TextAlign::kCenter);
+    fParaBuilderCenterLTR = skia::textlayout::ParagraphBuilder::make(paraStyleLtr, fTlFontCollection);
+    paraStyleLtr.setTextAlign(skia::textlayout::TextAlign::kJustify);
+    fParaBuilderJustifyLTR = skia::textlayout::ParagraphBuilder::make(paraStyleLtr, fTlFontCollection);
+
+    paraStyleRtl.setTextDirection(skia::textlayout::TextDirection::kRtl);
+    paraStyleRtl.setTextAlign(skia::textlayout::TextAlign::kLeft);
+    fParaBuilderLeftRTL = skia::textlayout::ParagraphBuilder::make(paraStyleRtl, fTlFontCollection);
+    paraStyleRtl.setTextAlign(skia::textlayout::TextAlign::kRight);
+    fParaBuilderRightRTL = skia::textlayout::ParagraphBuilder::make(paraStyleRtl, fTlFontCollection);
+    paraStyleRtl.setTextAlign(skia::textlayout::TextAlign::kCenter);
+    fParaBuilderCenterRTL = skia::textlayout::ParagraphBuilder::make(paraStyleRtl, fTlFontCollection);
+    paraStyleRtl.setTextAlign(skia::textlayout::TextAlign::kJustify);
+    fParaBuilderJustifyRTL = skia::textlayout::ParagraphBuilder::make(paraStyleRtl, fTlFontCollection);
+
+    fParaBuilder = fParaBuilderLeftLTR.get();
 
     fDefaultTypeface = defaultTypeface;
 }
@@ -94,15 +111,28 @@ void Paragraph::setFontSize(SkScalar size) {
 void Paragraph::setLetterSpacing(SkScalar sp) {
     fTlTextStyle.setLetterSpacing(sp);
 }
-
-void Paragraph::setTextAlign(skia::textlayout::TextAlign align) {
-    switch(align) {
-        case skia::textlayout::TextAlign::kLeft: fParaBuilder = fParaBuilderLeft.get(); break;
-        case skia::textlayout::TextAlign::kRight: fParaBuilder = fParaBuilderRight.get(); break;
-        case skia::textlayout::TextAlign::kCenter: fParaBuilder = fParaBuilderCenter.get(); break;
-        case skia::textlayout::TextAlign::kJustify: fParaBuilder = fParaBuilderJustify.get(); break;
-        default:
-            assert("unhandled align enumeration value");
+void Paragraph::setTextLayout(skia::textlayout::TextAlign align,skia::textlayout::TextDirection dir) {
+    switch(dir) {
+        case skia::textlayout::TextDirection::kLtr:
+            switch(align) {
+                case skia::textlayout::TextAlign::kLeft: fParaBuilder = fParaBuilderLeftLTR.get(); break;
+                case skia::textlayout::TextAlign::kRight: fParaBuilder = fParaBuilderRightLTR.get(); break;
+                case skia::textlayout::TextAlign::kCenter: fParaBuilder = fParaBuilderCenterLTR.get(); break;
+                case skia::textlayout::TextAlign::kJustify: fParaBuilder = fParaBuilderJustifyLTR.get(); break;
+                default:
+                    assert("unhandled align enumeration value");
+            }
+            break;
+        case skia::textlayout::TextDirection::kRtl:
+            switch(align) {
+                case skia::textlayout::TextAlign::kLeft: fParaBuilder = fParaBuilderLeftRTL.get(); break;
+                case skia::textlayout::TextAlign::kRight: fParaBuilder = fParaBuilderRightRTL.get(); break;
+                case skia::textlayout::TextAlign::kCenter: fParaBuilder = fParaBuilderCenterRTL.get(); break;
+                case skia::textlayout::TextAlign::kJustify: fParaBuilder = fParaBuilderJustifyRTL.get(); break;
+                default:
+                    assert("unhandled align enumeration value");
+            }
+            break;
     }
 }
 
@@ -116,6 +146,15 @@ int Paragraph::getNumberOfLines() {
 bool Paragraph::hasLine(int lineNumber) {
     return fPara->getLineMetricsAt(lineNumber, nullptr);
 }
+
+void Paragraph::enableFontFallback() {
+    fTlFontCollection->enableFontFallback();
+}
+
+void Paragraph::disableFontFallback() {
+    fTlFontCollection->disableFontFallback();
+}
+
 #if 0
 void Paragraph::triangulate(int lineNumber,const SkRect &clipBounds,const float *&vertices,size_t &numVertices, int &unrenderedGlyphs) {
     if(!hasLine(lineNumber)) {

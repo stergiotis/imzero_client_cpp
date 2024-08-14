@@ -29,4 +29,6 @@ private:
     float fontMetricsSize;
     ImVec4 colSize,colAscent,colDescent,colLeading,colXHeight,colCapHeight;
     SkEventTracer *fEventTracer = nullptr;
+    ImZeroFB::TextDirection fTextDir = ImZeroFB::TextDirection_ltr;
+    ImZeroFB::TextAlignFlags fTextAlign = ImZeroFB::TextAlignFlags_left;
 };

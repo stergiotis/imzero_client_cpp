@@ -211,6 +211,10 @@ enum TextAlignFlags:uint8 {
     center = 2,
     justify = 3
 }
+enum TextDirection:uint8 {
+    ltr = 0,
+    rtl = 1,
+}
 table CmdRenderParagraph {
     imfont: uint64; // FIXME
     size: float;
@@ -221,6 +225,7 @@ table CmdRenderParagraph {
     wrap_width: float;
     letter_spacing: float;
     text_align: TextAlignFlags;
+    text_direction: TextDirection;
 }
 table CmdRenderUnicodeCodepoint {
     imfont: uint64; // FIXME

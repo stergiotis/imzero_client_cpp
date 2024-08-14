@@ -37,19 +37,25 @@ class Paragraph {
         void resetCache();
         void setFontSize(SkScalar size);
         void setLetterSpacing(SkScalar sp);
-        void setTextAlign(skia::textlayout::TextAlign align);
+        void setTextLayout(skia::textlayout::TextAlign align,skia::textlayout::TextDirection dir);
 
         sk_sp<SkTypeface> getDefaultTypeface();
+        void enableFontFallback();
+        void disableFontFallback();
 
     private:
         sk_sp<skia::textlayout::FontCollection> fTlFontCollection;
         sk_sp<SkTypeface> fDefaultTypeface;
         skia::textlayout::TextStyle fTlTextStyle;
         skia::textlayout::ParagraphBuilder *fParaBuilder;
-        std::unique_ptr<skia::textlayout::ParagraphBuilder> fParaBuilderLeft;
-        std::unique_ptr<skia::textlayout::ParagraphBuilder> fParaBuilderRight;
-        std::unique_ptr<skia::textlayout::ParagraphBuilder> fParaBuilderCenter;
-        std::unique_ptr<skia::textlayout::ParagraphBuilder> fParaBuilderJustify;
+        std::unique_ptr<skia::textlayout::ParagraphBuilder> fParaBuilderLeftLTR;
+        std::unique_ptr<skia::textlayout::ParagraphBuilder> fParaBuilderRightLTR;
+        std::unique_ptr<skia::textlayout::ParagraphBuilder> fParaBuilderCenterLTR;
+        std::unique_ptr<skia::textlayout::ParagraphBuilder> fParaBuilderJustifyLTR;
+        std::unique_ptr<skia::textlayout::ParagraphBuilder> fParaBuilderLeftRTL;
+        std::unique_ptr<skia::textlayout::ParagraphBuilder> fParaBuilderRightRTL;
+        std::unique_ptr<skia::textlayout::ParagraphBuilder> fParaBuilderCenterRTL;
+        std::unique_ptr<skia::textlayout::ParagraphBuilder> fParaBuilderJustifyRTL;
         std::unique_ptr<skia::textlayout::Paragraph> fPara;
 #if 0
         GrCpuVertexAllocator vertexAllocator;

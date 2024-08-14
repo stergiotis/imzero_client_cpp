@@ -185,7 +185,8 @@ namespace ImGui {
     bool useVectorCmd = false;
     float skiaFontDyFudge = 0.0f;
     std::shared_ptr<Paragraph> paragraph = nullptr;
-    std::vector<uint8_t> isParagraphTextStack{};
+    static std::vector<uint8_t> isParagraphTextStack{};
+    static std::vector<uint16_t> paragraphTextLayoutStack{};
 }
 static char hiddenPwBuffer[512];
 static size_t hiddenPwBufferNChars = 0;
@@ -4186,6 +4187,24 @@ uint8_t ImGui::PopIsParagraphText() {
     ImGui::isParagraphTextStack.pop_back();
     return v;
 }
+
+void ImGui::PushParagraphTextLayout(ImZeroFB::TextAlignFlags align,ImZeroFB::TextDirection dir) {
+   ImGui::paragraphTextLayoutStack.push_back((static_cast<uint16_t>(align) << 8) | (static_cast<uint16_t>(dir)));
+}
+void ImGui::PopParagraphTextLayout() {
+    IM_ASSERT(!ImGui::paragraphTextLayoutStack.empty() && "unbalanced PushParagraphTextLayout() and PopParagraphTextLayout()");
+    ImGui::paragraphTextLayoutStack.pop_back();
+}
+static void getParagraphTextLayout(ImZeroFB::TextAlignFlags &align,ImZeroFB::TextDirection &dir) {
+    if(ImGui::paragraphTextLayoutStack.empty()) {
+        align = ImZeroFB::TextAlignFlags_left;
+        dir = ImZeroFB::TextDirection_ltr;
+    } else {
+        auto const v = ImGui::paragraphTextLayoutStack.back();
+        align = static_cast<ImZeroFB::TextAlignFlags>(v >> 8);
+        dir = static_cast<ImZeroFB::TextDirection>(v & 0xff);
+    }
+}
 static inline bool isParagraphText(const char *text_begin, const char *text_end) {
     if(!ImGui::isParagraphTextStack.empty()) {
         switch(ImGui::isParagraphTextStack.back()) {
@@ -4432,7 +4451,10 @@ IMZERO_DRAWLIST_BEGIN
             constexpr bool renderAsParagraph = true;
 #endif
             if(renderAsParagraph) {
-                auto const arg = ImZeroFB::CreateCmdRenderParagraph(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(this),size,&posFb,col,&clipRectFb,textFb,wrap_width,0.0f,ImZeroFB::TextAlignFlags_left);
+                ImZeroFB::TextAlignFlags align;
+                ImZeroFB::TextDirection dir;
+                getParagraphTextLayout(align,dir);
+                auto const arg = ImZeroFB::CreateCmdRenderParagraph(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(this),size,&posFb,col,&clipRectFb,textFb,wrap_width,0.0f,align, dir);
                 draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdRenderParagraph,arg.Union());
             } else { ZoneScopedN("paragraphAsPath");
 #ifdef IMZERO_DRAWLIST_PARAGRAPH_AS_PATH

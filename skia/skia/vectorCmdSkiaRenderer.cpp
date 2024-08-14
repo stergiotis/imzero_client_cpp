@@ -885,7 +885,14 @@ void VectorCmdSkiaRenderer::drawCmdRenderParagraphFB(const ImZeroFB::CmdRenderPa
             default:
                 assert("unhandled text align option for paragraph");
         }
-        fParagraph->setTextAlign(a);
+        skia::textlayout::TextDirection d;
+        switch(cmd.text_direction()) {
+            case ImZeroFB::TextDirection_ltr: d = skia::textlayout::TextDirection::kLtr; break;
+            case ImZeroFB::TextDirection_rtl: d = skia::textlayout::TextDirection::kRtl; break;
+            default:
+                assert("unhandled text direction option for paragraph");
+        }
+        fParagraph->setTextLayout(a, d);
     }
     fParagraph->build(text->data(), text->size());
     const auto ww = cmd.wrap_width();
