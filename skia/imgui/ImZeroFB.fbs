@@ -214,6 +214,7 @@ enum TextAlignFlags:uint8 {
 enum TextDirection:uint8 {
     ltr = 0,
     rtl = 1,
+    //mixed = 2, // TODO
 }
 table CmdRenderParagraph {
     imfont: uint64; // FIXME

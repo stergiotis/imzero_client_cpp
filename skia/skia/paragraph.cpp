@@ -16,7 +16,7 @@ Paragraph::Paragraph(sk_sp<SkFontMgr> fontMgr,sk_sp<SkTypeface> defaultTypeface)
     fTlFontCollection->setDefaultFontManager(fontMgr);
     fTlFontCollection->disableFontFallback();
 
-    paraStyleLtr.setTextDirection(skia::textlayout::TextDirection::kRtl);
+    paraStyleLtr.setTextDirection(skia::textlayout::TextDirection::kLtr);
     paraStyleLtr.setTextAlign(skia::textlayout::TextAlign::kLeft);
     fParaBuilderLeftLTR = skia::textlayout::ParagraphBuilder::make(paraStyleLtr, fTlFontCollection);
     paraStyleLtr.setTextAlign(skia::textlayout::TextAlign::kRight);
