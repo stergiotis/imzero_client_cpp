@@ -72,6 +72,9 @@
 # ./build.sh
 ./run_pipe.sh
 ```
+```bash
+VSYNC=off ./run_pipe.sh
+```
 * Video local, h264, yuv422, hw accelerated (intel cpu)
 ```bash
 #IMZERO_BUILD_VIDEO=yes ./build.sh
