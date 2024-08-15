@@ -5,7 +5,11 @@ cd "$here"
 flatc="../../contrib/flatbuffers/flatc"
 "$flatc" -o imgui --cpp imgui/ImZeroFB.fbs --reflect-types --reflect-names --filename-suffix .out
 
-./cmakelists.dhall
+if [[ -z "${IMZERO_BUILD_VIDEO}" ]]; then
+  ./cmakelists.dhall
+else
+  ./cmakelists_video.dhall
+fi
 
 generate_buildinfo() {
    echo -en "#pragma once\nnamespace buildinfo {\n static const char *gitCommit=\""

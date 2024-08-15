@@ -1,6 +1,6 @@
 # generated using cmakelists.dhall
 cmake_minimum_required(VERSION 3.24)
-project(imgui_skia_exe)
+project(imgui_video_exe)
 set(CMAKE_LINKER /home/spx/Downloads/clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04/bin/clang++)
 set(CMAKE_CXX_COMPILER /home/spx/Downloads/clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04/bin/clang++)
 
@@ -33,6 +33,7 @@ SK_SHAPER_HARFBUZZ_AVAILABLE
 SK_SHAPER_UNICODE_AVAILABLE
 SK_ENABLE_SVG
 SK_BUILD_FOR_UNIX
+TRACY_ENABLE
 )
 include_directories("${CMAKE_CURRENT_LIST_DIR}/./contrib/flatbuffers"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui"
@@ -213,9 +214,9 @@ target_include_directories(mainSkiaSdl3Video PUBLIC "${CMAKE_CURRENT_LIST_DIR}/.
 "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_implot"
 "${CMAKE_CURRENT_LIST_DIR}/./src")
 
-# tracyDisabled
-add_library(tracyDisabled OBJECT "${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public/TracyClient.cpp")
-add_executable(imgui_skia_exe $<TARGET_OBJECTS:imguiWithSkia>
+# tracyEnabled
+add_library(tracyEnabled OBJECT "${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public/TracyClient.cpp")
+add_executable(imgui_video_exe $<TARGET_OBJECTS:imguiWithSkia>
 $<TARGET_OBJECTS:render>
 $<TARGET_OBJECTS:marshalling>
 $<TARGET_OBJECTS:arena>
@@ -227,5 +228,5 @@ $<TARGET_OBJECTS:imguiCoolbar>
 $<TARGET_OBJECTS:imguiFlamegraph>
 $<TARGET_OBJECTS:imguiTextedit>
 $<TARGET_OBJECTS:mainSkiaSdl3Video>
-$<TARGET_OBJECTS:tracyDisabled>)
+$<TARGET_OBJECTS:tracyEnabled>)
 
