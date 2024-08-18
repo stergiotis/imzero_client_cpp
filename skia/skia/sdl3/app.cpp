@@ -29,7 +29,6 @@
 #include "include/core/SkColorSpace.h"
 #include "include/encode/SkPngEncoder.h"
 #include "include/gpu/GrDirectContext.h"
-#include "include/gpu/gl/GrGLInterface.h"
 #if defined(__linux__)
 #include "include/gpu/gl/glx/GrGLMakeGLXInterface.h"
 #endif
@@ -57,6 +56,9 @@ static inline void applyFlag(int &flag,T val,bool v) {
         flag &= ~(val);
     }
 }
+constexpr int msaaSampleCount = 0; //4;
+constexpr int stencilBits = 8;  // Skia needs 8 stencil bits
+
 void App::DrawImGuiVectorCmdsFB(SkCanvas &canvas) { ZoneScoped;
     const ImDrawData* drawData = ImGui::GetDrawData();
     fTotalVectorCmdSerializedSize = 0;
@@ -303,12 +305,8 @@ int App::Run(CliOptions &opts) {
         fVectorCmdSkiaRenderer.changeRenderMode(mode);
     }
 
-    SDL_Window *window = nullptr;
     SDL_GLContext glContext = nullptr;
-    uint32_t windowFormat = 0;
-    int contextType;
-    constexpr int msaaSampleCount = 0; //4;
-    constexpr int stencilBits = 8;  // Skia needs 8 stencil bits
+    const SDL_DisplayMode *dm = nullptr;
     {
         // Setup SDL
         if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMEPAD) != 0) {
@@ -359,26 +357,24 @@ int App::Run(CliOptions &opts) {
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
         //SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
         Uint32 window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN;
-        auto const dm = SDL_GetDesktopDisplayMode(SDL_GetPrimaryDisplay());
-        window = SDL_CreateWindow(opts.appTitle, dm->w, dm->h, window_flags);
-        if (window == nullptr) {
+        dm = SDL_GetDesktopDisplayMode(SDL_GetPrimaryDisplay());
+        fWindow = SDL_CreateWindow(opts.appTitle, dm->w, dm->h, window_flags);
+        if (fWindow == nullptr) {
             fprintf(stderr, "Error: SDL_CreateWindow(): %s\n", SDL_GetError());
             exit(1);
         }
-        SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-        glContext = SDL_GL_CreateContext(window);
-        SDL_GL_MakeCurrent(window, glContext);
+        SDL_SetWindowPosition(fWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+        glContext = SDL_GL_CreateContext(fWindow);
+        SDL_GL_MakeCurrent(fWindow, glContext);
         SDL_GL_SetSwapInterval(opts.vsync ? 1 : 0); // Enable vsync //SDL_SetWindowSurfaceVSync()
         // SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
-        SDL_ShowWindow(window);
-        windowFormat = SDL_GetWindowPixelFormat(window);
-        SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &contextType);
+        SDL_ShowWindow(fWindow);
     }
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImVec4 clear_color;
+    ImVec4 clearColor;
     ImGuiIO &io = ImGui::GetIO();
     {
         applyFlag(io.ConfigFlags, ImGuiConfigFlags_NavEnableKeyboard, opts.imguiNavKeyboard);
@@ -386,7 +382,7 @@ int App::Run(CliOptions &opts) {
         applyFlag(io.ConfigFlags, ImGuiConfigFlags_DockingEnable, opts.imguiDocking);
 
         io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset; // FIXME remove ?
-        if(false) {
+        if(true) {
             io.ConfigFlags &= ~ImGuiConfigFlags_ViewportsEnable;
         } else {
             io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
@@ -405,78 +401,16 @@ int App::Run(CliOptions &opts) {
         }
 
         // Setup Platform/Renderer backends
-        ImGui_ImplSDL3_InitForOpenGL(window, glContext);
+        ImGui_ImplSDL3_InitForOpenGL(fWindow, glContext);
 
-        clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+        clearColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     }
 
     if(opts.fffiInterpreter) {
         render_init();
     }
 
-    int w, h;
-    SDL_GetWindowSizeInPixels(window, &w, &h);
-
-    glViewport(0, 0, w, h);
-    glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
-    glClearStencil(0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-    auto nativeInterface=  GrGLInterfaces::MakeGLX();
-    //nativeInterface->checkAndResetOOMed();
-    if(nativeInterface == nullptr || !nativeInterface->validate()) {
-        fprintf(stderr,"unable to create skia GrGLInterface (GLX): nativeInterface=%p (%s)\n",
-                nativeInterface.get(),
-                nativeInterface->validate() ? "valid" : "invalid");
-        exit(1);
-    }
-    auto context = GrDirectContexts::MakeGL(nativeInterface).release();
-    if(context == nullptr) {
-        fprintf(stderr,"unable to create skia GrDirectContext (GL)\n");
-        exit(1);
-    }
-
-    // Wrap the frame buffer object attached to the screen in a Skia render target so Skia can render to it
-    GrGLint buffer = 0;
-    GR_GL_GetIntegerv(nativeInterface.get(), GR_GL_FRAMEBUFFER_BINDING, &buffer);
-    GrGLFramebufferInfo info;
-    info.fFBOID = (GrGLuint) buffer;
-    SkColorType colorType;
-
-    //SkDebugf("%s", SDL_GetPixelFormatName(windowFormat));
-    // TODO: the windowFormat is never any of these?
-    if (windowFormat == SDL_PIXELFORMAT_RGBA8888) {
-        info.fFormat = GR_GL_RGBA8;
-        colorType = kRGBA_8888_SkColorType;
-    } else {
-        colorType = kBGRA_8888_SkColorType;
-        if (contextType == SDL_GL_CONTEXT_PROFILE_ES) {
-            info.fFormat = GR_GL_BGRA8;
-        } else {
-            // We assume the internal format is RGBA8 on desktop GL
-            info.fFormat = GR_GL_RGBA8;
-        }
-    }
-    constexpr bool createProtectedNativeBackend = false;
-    info.fProtected = skgpu::Protected(createProtectedNativeBackend);
-    auto target = GrBackendRenderTargets::MakeGL(w,
-                                                 h,
-                                                 msaaSampleCount,
-                                                 stencilBits,
-                                                 info);
-
-    // setup SkSurface
-    // To use distance field text, use commented out SkSurfaceProps instead
-    // SkSurfaceProps props(SkSurfaceProps::kUseDeviceIndependentFonts_Flag,
-    //                      SkSurfaceProps::kUnknown_SkPixelGeometry);
-    SkSurfaceProps props;
-    sk_sp<SkSurface> surface;
-    surface = SkSurfaces::WrapBackendRenderTarget(context,
-                                                  target,
-                                                  kBottomLeft_GrSurfaceOrigin,
-                                                  colorType,
-                                                  SkColorSpace::MakeSRGB(),
-                                                  &props);
+    createContext(clearColor,dm->w,dm->h);
 
     build_ImFontAtlas(*io.Fonts,fFontPaint);
     if(false) {
@@ -488,6 +422,9 @@ int App::Run(CliOptions &opts) {
     // Main loop
     bool done = false;
     while (!done) {
+        auto const width = static_cast<int>(io.DisplaySize.x);
+        auto const height = static_cast<int>(io.DisplaySize.y);
+
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
         // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
@@ -497,25 +434,35 @@ int App::Run(CliOptions &opts) {
         while (SDL_PollEvent(&event))
         {
             ImGui_ImplSDL3_ProcessEvent(&event);
-            if (event.type == SDL_EVENT_QUIT) {
-                done = true;
-            }
-            if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(window)) {
-                done = true;
+            switch(event.type) {
+                case SDL_EVENT_QUIT:
+                    done = true;
+                    break;
+                case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+                    // FIXME only necessary for multi-window setting?
+                    if(event.window.windowID == SDL_GetWindowID(fWindow)) {
+                        done = true;
+                    }
+                    break;
+                case SDL_EVENT_WINDOW_RESIZED:
+                    fprintf(stderr,"resizing w=%d,h=%d\n",width,height);
+                    destroyContext();
+                    createContext(clearColor,width,height);
+                    break;
             }
         }
+
+        auto const surface = getSurface();
 
         // Start the Dear ImGui frame
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
 
         {
-            auto const width = static_cast<int>(io.DisplaySize.x);
-            auto const height = static_cast<int>(io.DisplaySize.y);
 
             ImGui::ShowMetricsWindow();
             Paint(surface.get(),width,height); // will call ImGui::Render();
-            context->flush();
+            fContext->flush();
 
             // Update and Render additional Platform Windows
             // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
@@ -528,7 +475,7 @@ int App::Run(CliOptions &opts) {
                 SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
             }
 
-            SDL_GL_SwapWindow(window);
+            SDL_GL_SwapWindow(fWindow);
         }
 
     }
@@ -539,9 +486,10 @@ int App::Run(CliOptions &opts) {
         render_cleanup();
     }
     ImGui::DestroyContext();
+    destroyContext();
 
     SDL_GL_DeleteContext(glContext);
-    SDL_DestroyWindow(window);
+    SDL_DestroyWindow(fWindow);
     SDL_Quit();
     return 0;
 }
@@ -555,4 +503,88 @@ App::App() {
     fFffiInterpreter = false;
     fUseVectorCmd = false;
     fFontMgr = nullptr;
+}
+
+void App::createContext(ImVec4 const &clearColor,int width,int height) {
+    glViewport(0, 0, width, height);
+    glClearColor(clearColor.x * clearColor.w, clearColor.y * clearColor.w, clearColor.z * clearColor.w, clearColor.w);
+    glClearStencil(0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+    fNativeInterface = GrGLInterfaces::MakeGLX();
+    //nativeInterface->checkAndResetOOMed();
+    if(fNativeInterface == nullptr || !fNativeInterface->validate()) {
+        fprintf(stderr, "unable to create skia GrGLInterface (GLX): nativeInterface=%p (%s)\n",
+                fNativeInterface.get(),
+                fNativeInterface->validate() ? "valid" : "invalid");
+        exit(1);
+    }
+    fContext = GrDirectContexts::MakeGL(fNativeInterface);
+    if(fContext == nullptr) {
+        fprintf(stderr,"unable to create skia GrDirectContext (GL)\n");
+        exit(1);
+    }
+}
+sk_sp<SkSurface> App::getSurface() {
+    if(fSurface == nullptr && fContext != nullptr && fWindow != nullptr && fNativeInterface != nullptr) {
+        // Wrap the frame buffer object attached to the screen in a Skia render target so Skia can render to it
+        GrGLint buffer = 0;
+        GR_GL_GetIntegerv(fNativeInterface.get(), GR_GL_FRAMEBUFFER_BINDING, &buffer);
+        GrGLFramebufferInfo info;
+        info.fFBOID = (GrGLuint) buffer;
+
+        SkColorType colorType;
+
+        // TODO: the windowFormat is never any of these?
+        auto windowFormat = SDL_GetWindowPixelFormat(fWindow);
+        int contextType;
+        SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &contextType);
+        if (windowFormat == SDL_PIXELFORMAT_RGBA8888) {
+            info.fFormat = GR_GL_RGBA8;
+            colorType = kRGBA_8888_SkColorType;
+        } else {
+            colorType = kBGRA_8888_SkColorType;
+            if (contextType == SDL_GL_CONTEXT_PROFILE_ES) {
+                info.fFormat = GR_GL_BGRA8;
+            } else {
+                // We assume the internal format is RGBA8 on desktop GL
+                info.fFormat = GR_GL_RGBA8;
+            }
+        }
+        int w, h;
+        SDL_GetWindowSizeInPixels(fWindow, &w, &h);
+
+        constexpr bool createProtectedNativeBackend = false;
+        info.fProtected = skgpu::Protected(createProtectedNativeBackend);
+        auto target = GrBackendRenderTargets::MakeGL(w,
+                                                     h,
+                                                     msaaSampleCount,
+                                                     stencilBits,
+                                                     info);
+
+        // setup SkSurface
+        // To use distance field text, use commented out SkSurfaceProps instead
+        // SkSurfaceProps props(SkSurfaceProps::kUseDeviceIndependentFonts_Flag,
+        //                      SkSurfaceProps::kUnknown_SkPixelGeometry);
+        SkSurfaceProps props;
+        fSurface = SkSurfaces::WrapBackendRenderTarget(fContext.get(),
+                                                       target,
+                                                       kBottomLeft_GrSurfaceOrigin,
+                                                       colorType,
+                                                       SkColorSpace::MakeSRGB(),
+                                                       &props);
+    }
+
+    return fSurface;
+}
+
+void App::destroyContext() {
+    fSurface.reset(nullptr);
+
+    if (fContext != nullptr) {
+        fContext->abandonContext();
+        fContext.reset(nullptr);
+    }
+
+    fContext.reset(nullptr);
 }
