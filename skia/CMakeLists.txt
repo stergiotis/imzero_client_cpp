@@ -1,8 +1,8 @@
 # generated using cmakelists.dhall
 cmake_minimum_required(VERSION 3.24)
-project(imgui_video_exe)
-set(CMAKE_LINKER /home/spx/Downloads/clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04/bin/clang++)
-set(CMAKE_CXX_COMPILER /home/spx/Downloads/clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04/bin/clang++)
+project(imgui_skia_exe)
+set(CMAKE_LINKER clang++)
+set(CMAKE_CXX_COMPILER clang++)
 
 add_compile_definitions(SK_RELEASE
 SK_GAMMA_APPLY_TO_A8
@@ -33,7 +33,6 @@ SK_SHAPER_HARFBUZZ_AVAILABLE
 SK_SHAPER_UNICODE_AVAILABLE
 SK_ENABLE_SVG
 SK_BUILD_FOR_UNIX
-TRACY_ENABLE
 )
 include_directories("${CMAKE_CURRENT_LIST_DIR}/./contrib/flatbuffers"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui"
@@ -110,25 +109,25 @@ link_libraries(-DNDEBUG
 -lbentleyottmann
 # skiaShared
 -lskshaper
-# mainSkiaSdl3Video
+# mainSkiaSdl3
 -ldl
-# mainSkiaSdl3Video
+# mainSkiaSdl3
 -lpthread
-# mainSkiaSdl3Video
+# mainSkiaSdl3
 -lfreetype
-# mainSkiaSdl3Video
+# mainSkiaSdl3
 -lz
-# mainSkiaSdl3Video
+# mainSkiaSdl3
 -lfontconfig
-# mainSkiaSdl3Video
+# mainSkiaSdl3
 -lwebpmux
-# mainSkiaSdl3Video
+# mainSkiaSdl3
 -lwebpdemux
-# mainSkiaSdl3Video
+# mainSkiaSdl3
 -lX11
-# mainSkiaSdl3Video
+# mainSkiaSdl3
 -lGLU
-# mainSkiaSdl3Video
+# mainSkiaSdl3
 -lGL
 )
 
@@ -199,24 +198,24 @@ target_compile_options(imguiTextedit PUBLIC -Wno-unused-variable)
 
 # skiaShared
 
-# mainSkiaSdl3Video
-add_library(mainSkiaSdl3Video OBJECT "${CMAKE_CURRENT_LIST_DIR}/./skia/video/app.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./skia/video/bmpEncoder.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./skia/video/main.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./skia/video/../paragraph.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./skia/video/../cliOptions.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./skia/video/../setupUI.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./skia/video/../vectorCmdSkiaRenderer.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./skia/video/../skiaTracyTracer.cpp")
-target_compile_options(mainSkiaSdl3Video PUBLIC -Wno-unused-parameter)
-target_include_directories(mainSkiaSdl3Video PUBLIC "${CMAKE_CURRENT_LIST_DIR}/./skia/video"
+# mainSkiaSdl3
+add_library(mainSkiaSdl3 OBJECT "${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/imgui_impl_sdl3.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/main.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/app.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/../paragraph.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/../cliOptions.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/../setupUI.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/../vectorCmdSkiaRenderer.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/../skiaTracyTracer.cpp")
+target_compile_options(mainSkiaSdl3 PUBLIC -Wno-unused-parameter)
+target_include_directories(mainSkiaSdl3 PUBLIC "${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui"
 "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_implot"
 "${CMAKE_CURRENT_LIST_DIR}/./src")
 
-# tracyEnabled
-add_library(tracyEnabled OBJECT "${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public/TracyClient.cpp")
-add_executable(imgui_video_exe $<TARGET_OBJECTS:imguiWithSkia>
+# tracyDisabled
+add_library(tracyDisabled OBJECT "${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public/TracyClient.cpp")
+add_executable(imgui_skia_exe $<TARGET_OBJECTS:imguiWithSkia>
 $<TARGET_OBJECTS:render>
 $<TARGET_OBJECTS:marshalling>
 $<TARGET_OBJECTS:arena>
@@ -227,6 +226,6 @@ $<TARGET_OBJECTS:imguiKnobs>
 $<TARGET_OBJECTS:imguiCoolbar>
 $<TARGET_OBJECTS:imguiFlamegraph>
 $<TARGET_OBJECTS:imguiTextedit>
-$<TARGET_OBJECTS:mainSkiaSdl3Video>
-$<TARGET_OBJECTS:tracyEnabled>)
+$<TARGET_OBJECTS:mainSkiaSdl3>
+$<TARGET_OBJECTS:tracyDisabled>)
 

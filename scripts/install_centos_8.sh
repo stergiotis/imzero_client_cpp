@@ -31,4 +31,4 @@ sudo yum install -y glfw glfw-devel
 sudo yum install -y libGL libGL-devel
 
 # skia dependencies
-sudo yum install -y clang libjpeg-devel libicu-devel libwebp-devel fontconfig-devel
+sudo yum install -y clang libjpeg-devel libicu-devel libwebp-devel fontconfig-devel expat-devel

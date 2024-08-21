@@ -20,11 +20,9 @@ let common = \(video : Bool) ->
 		, sourceTreePartsRepo.sdl3Shared
 		, sourceTreePartsRepo.skiaShared
 		, if video then sourceTreePartsRepo.mainSkiaSdl3Video else sourceTreePartsRepo.mainSkiaSdl3
-		, sourceTreePartsRepo.tracyEnabled
 	] 
-	--# (if debug then [ , sourceTreePartsRepo.tracyEnabled ] else [ ,sourceTreePartsRepo.tracyDisabled ] : List lib.sourceTreePart.Type )
-	let clangdir = (env:HOME as Text) ++ "/Downloads/clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04"
-	let cxx = "${clangdir}/bin/clang++"
+	# (if debug then [ , sourceTreePartsRepo.tracyEnabled ] else [ ,sourceTreePartsRepo.tracyDisabled ] : List lib.sourceTreePart.Type )
+        let cxx = "clang++"
 	let cppstd = 20
 	let cxxflags = [
 		, "-fno-omit-frame-pointer" -- increases debuggability with little to no performance impact

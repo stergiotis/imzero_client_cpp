@@ -16,12 +16,10 @@ here=$(dirname "$(readlink -f "$BASH_SOURCE")")
 cd ../../contrib/skia
 python3 tools/git-sync-deps
 
-clangdir=$(realpath "$HOME/Downloads/clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04")
-
 mkdir -p out/Shared
 cat > out/Shared/args.gn <<- EOF
-    cc = "${clangdir}/bin/clang"
-    cxx = "${clangdir}/bin/clang++"
+    cc = "clang"
+    cxx = "clang++"
     extra_cflags = ["-Wno-psabi"]
     is_official_build=true
     is_debug=false
