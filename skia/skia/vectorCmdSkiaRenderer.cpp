@@ -50,8 +50,8 @@ static void loadCmdRectRoundedCorners_(SkRRect &out,const T &cmd) {
     out.setRectRadii(rect,corners);
 }
 
-void VectorCmdSkiaRenderer::prepareOutlinePaint(SkPaint &paint, VectorCmdFB::DrawListFlags dlFlags) const {
-    paint.setAntiAlias(dlFlags & VectorCmdFB::DrawListFlags_AntiAliasedLines);
+void VectorCmdSkiaRenderer::prepareOutlinePaint(SkPaint &paint, ImZeroFB::DrawListFlags dlFlags) const {
+    paint.setAntiAlias(dlFlags & ImZeroFB::DrawListFlags_AntiAliasedLines);
     paint.setStyle(SkPaint::kStroke_Style);
 #ifdef RENDER_MODE_SKETCH_ENABLED
     if(fRenderMode & RenderModeE_Sketch) {
@@ -59,8 +59,8 @@ void VectorCmdSkiaRenderer::prepareOutlinePaint(SkPaint &paint, VectorCmdFB::Dra
     }
 #endif
 }
-void VectorCmdSkiaRenderer::prepareFillPaint(SkPaint &paint, VectorCmdFB::DrawListFlags dlFlags) const {
-    paint.setAntiAlias(dlFlags & VectorCmdFB::DrawListFlags_AntiAliasedFill);
+void VectorCmdSkiaRenderer::prepareFillPaint(SkPaint &paint, ImZeroFB::DrawListFlags dlFlags) const {
+    paint.setAntiAlias(dlFlags & ImZeroFB::DrawListFlags_AntiAliasedFill);
     paint.setStyle(SkPaint::kFill_Style);
 #ifdef RENDER_MODE_SKETCH_ENABLED
     if(fRenderMode & RenderModeE_Sketch) {
@@ -68,8 +68,8 @@ void VectorCmdSkiaRenderer::prepareFillPaint(SkPaint &paint, VectorCmdFB::DrawLi
     }
 #endif
 }
-void VectorCmdSkiaRenderer::prepareFillAndOutlinePaint(SkPaint &paint, VectorCmdFB::DrawListFlags dlFlags) const {
-    paint.setAntiAlias(dlFlags & VectorCmdFB::DrawListFlags_AntiAliasedFill);
+void VectorCmdSkiaRenderer::prepareFillAndOutlinePaint(SkPaint &paint, ImZeroFB::DrawListFlags dlFlags) const {
+    paint.setAntiAlias(dlFlags & ImZeroFB::DrawListFlags_AntiAliasedFill);
     paint.setStyle(SkPaint::kStrokeAndFill_Style);
 #ifdef RENDER_MODE_SKETCH_ENABLED
     if(fRenderMode & RenderModeE_Sketch) {
@@ -108,7 +108,7 @@ static SkColor convertColor(uint32_t col) {
         (col >> IM_COL32_B_SHIFT) & 0xff);
 #endif
 }
-VectorCmdSkiaRenderer::VectorCmdSkiaRenderer() : fVertexPaint(nullptr),fRenderMode(RenderModeE_Normal) {
+VectorCmdSkiaRenderer::VectorCmdSkiaRenderer() : fVertexPaint(nullptr),fRenderMode(RenderModeE_Normal), backdropFilter(nullptr) {
 #ifdef RENDER_MODE_BACKDROP_FILTER_ENABLED
     backdropFilter = SkImageFilters::Blur(8, 8, SkTileMode::kClamp, nullptr);
 #if 0
@@ -162,7 +162,7 @@ static void decorateWindowRRect(SkRRect const &rrect,SkCanvas &canvas,sk_sp<SkIm
     canvas.saveLayer(slr);
     canvas.drawColor(windowDecorationBlurFilterDrawColor);
 }
-void VectorCmdSkiaRenderer::setupWindowRectPaint(SkPaint &paint, VectorCmdFB::DrawListFlags dlFlags, uint32_t col) { ZoneScoped;
+void VectorCmdSkiaRenderer::setupWindowRectPaint(SkPaint &paint, ImZeroFB::DrawListFlags dlFlags, uint32_t col) { ZoneScoped;
     constexpr uint8_t windowBgColorA = 172;
     prepareFillPaint(paint,dlFlags);
     auto color = convertColor(col);
@@ -173,11 +173,11 @@ void VectorCmdSkiaRenderer::setupWindowRectPaint(SkPaint &paint, VectorCmdFB::Dr
 }
 #endif
 void VectorCmdSkiaRenderer::drawSerializedVectorCmdsFB(const uint8_t *buf, SkCanvas &canvas) { ZoneScoped;
-        auto drawListFb = VectorCmdFB::GetDrawList(buf);
+        auto drawListFb = ImZeroFB::GetSizePrefixedDrawList(buf);
         drawVectorCmdsFBDrawList(drawListFb,canvas,false);
 }
 
-void VectorCmdSkiaRenderer::loadVertices(const VectorCmdFB::VertexData *vertices) { ZoneScoped;
+void VectorCmdSkiaRenderer::loadVertices(const ImZeroFB::VertexData *vertices) { ZoneScoped;
     vtxColors.clear();
     vtxXYs.clear();
     vtxTexUVs.clear();
@@ -212,7 +212,7 @@ void VectorCmdSkiaRenderer::loadVertices(const VectorCmdFB::VertexData *vertices
 #endif
 }
 
-void VectorCmdSkiaRenderer::drawVectorCmdsFBDrawList(const VectorCmdFB::DrawList *drawListFb, SkCanvas &canvas, bool inner) { ZoneScoped;
+void VectorCmdSkiaRenderer::drawVectorCmdsFBDrawList(const ImZeroFB::DrawList *drawListFb, SkCanvas &canvas, bool inner) { ZoneScoped;
         auto cmds = drawListFb->cmds();
         auto n = static_cast<int>(cmds->size());
         auto dlFlags = drawListFb->flags();
@@ -230,7 +230,7 @@ void VectorCmdSkiaRenderer::drawVectorCmdsFBDrawList(const VectorCmdFB::DrawList
             for(int i=0;i<n1 && s == 0;i++) {
                 auto const cmdUnion = cmds->Get(i);
                 switch(cmdUnion->arg_type()) {
-                    case VectorCmdFB::VectorCmdArg_CmdRectRoundedFilled:
+                    case ImZeroFB::VectorCmdArg_CmdRectRoundedFilled:
                         // special dispatch for drawing windows
                         {
                             auto const cmd = cmdUnion->arg_as_CmdRectRoundedFilled();
@@ -248,7 +248,7 @@ void VectorCmdSkiaRenderer::drawVectorCmdsFBDrawList(const VectorCmdFB::DrawList
                             s = i+1;
                         }
                         break;
-                    case VectorCmdFB::VectorCmdArg_CmdRectRoundedCornersFilled:
+                    case ImZeroFB::VectorCmdArg_CmdRectRoundedCornersFilled:
                         // special dispatch for drawing windows
                         {
                             auto const cmd = cmdUnion->arg_as_CmdRectRoundedCornersFilled();
@@ -272,103 +272,103 @@ void VectorCmdSkiaRenderer::drawVectorCmdsFBDrawList(const VectorCmdFB::DrawList
         drawVectorCmdFB(cmdUnion,canvas,dlFlags);
     }
 }
-void VectorCmdSkiaRenderer::drawVectorCmdFB(const VectorCmdFB::SingleVectorCmdDto *cmdUnion, SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
+void VectorCmdSkiaRenderer::drawVectorCmdFB(const ImZeroFB::SingleVectorCmdDto *cmdUnion, SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     auto t = cmdUnion->arg_type();
     switch(t) {
-        case VectorCmdFB::VectorCmdArg_CmdPolyline:
+        case ImZeroFB::VectorCmdArg_CmdPolyline:
             drawCmdPolylineFB(*cmdUnion->arg_as_CmdPolyline(),canvas,dlFlags);
             break;
-        case VectorCmdFB::VectorCmdArg_CmdConvexPolyFilled:
+        case ImZeroFB::VectorCmdArg_CmdConvexPolyFilled:
             drawCmdConvexPolylineFilledFB(*cmdUnion->arg_as_CmdConvexPolyFilled(),canvas,dlFlags);
             break;
-        case VectorCmdFB::VectorCmdArg_CmdLine:
+        case ImZeroFB::VectorCmdArg_CmdLine:
             drawCmdLineFB(*cmdUnion->arg_as_CmdLine(),canvas,dlFlags);
             break;
-        case VectorCmdFB::VectorCmdArg_CmdRectRounded:
+        case ImZeroFB::VectorCmdArg_CmdRectRounded:
             drawCmdRectRoundedFB(*cmdUnion->arg_as_CmdRectRounded(),canvas,dlFlags);
             break;
-        case VectorCmdFB::VectorCmdArg_CmdRectRoundedFilled:
+        case ImZeroFB::VectorCmdArg_CmdRectRoundedFilled:
             drawCmdRectRoundedFilledFB(*cmdUnion->arg_as_CmdRectRoundedFilled(),canvas,dlFlags);
             break;
-        case VectorCmdFB::VectorCmdArg_CmdRectRoundedCorners:
+        case ImZeroFB::VectorCmdArg_CmdRectRoundedCorners:
             drawCmdRectRoundedCornersFB(*cmdUnion->arg_as_CmdRectRoundedCorners(),canvas,dlFlags);
             break;
-        case VectorCmdFB::VectorCmdArg_CmdRectRoundedCornersFilled:
+        case ImZeroFB::VectorCmdArg_CmdRectRoundedCornersFilled:
             drawCmdRectRoundedCornersFilledFB(*cmdUnion->arg_as_CmdRectRoundedCornersFilled(),canvas,dlFlags);
             break;
-        case VectorCmdFB::VectorCmdArg_CmdQuad:
+        case ImZeroFB::VectorCmdArg_CmdQuad:
             drawCmdQuadFB(*cmdUnion->arg_as_CmdQuad(),canvas,dlFlags);
             break;
-        case VectorCmdFB::VectorCmdArg_CmdQuadFilled:
+        case ImZeroFB::VectorCmdArg_CmdQuadFilled:
             drawCmdQuadFilledFB(*cmdUnion->arg_as_CmdQuadFilled(),canvas,dlFlags);
             break;
-        case VectorCmdFB::VectorCmdArg_CmdTriangle:
+        case ImZeroFB::VectorCmdArg_CmdTriangle:
             drawCmdTriangleFB(*cmdUnion->arg_as_CmdTriangle(),canvas,dlFlags);
             break;
-        case VectorCmdFB::VectorCmdArg_CmdTriangleFilled:
+        case ImZeroFB::VectorCmdArg_CmdTriangleFilled:
             drawCmdTriangleFilledFB(*cmdUnion->arg_as_CmdTriangleFilled(),canvas,dlFlags);
             break;
-        case VectorCmdFB::VectorCmdArg_CmdCircle:
+        case ImZeroFB::VectorCmdArg_CmdCircle:
             drawCmdCircleFB(*cmdUnion->arg_as_CmdCircle(),canvas,dlFlags);
             break;
-        case VectorCmdFB::VectorCmdArg_CmdCircleFilled:
+        case ImZeroFB::VectorCmdArg_CmdCircleFilled:
             drawCmdCircleFilledFB(*cmdUnion->arg_as_CmdCircleFilled(),canvas,dlFlags);
             break;
-        case VectorCmdFB::VectorCmdArg_CmdNgon: 
+        case ImZeroFB::VectorCmdArg_CmdNgon: 
             drawCmdNgonFB(*cmdUnion->arg_as_CmdNgon(),canvas,dlFlags);
             break;
-        case VectorCmdFB::VectorCmdArg_CmdNgonFilled:
+        case ImZeroFB::VectorCmdArg_CmdNgonFilled:
             drawCmdNgonFilledFB(*cmdUnion->arg_as_CmdNgonFilled(),canvas,dlFlags);
             break;
-        case VectorCmdFB::VectorCmdArg_CmdEllipse:
+        case ImZeroFB::VectorCmdArg_CmdEllipse:
             drawCmdEllipseFB(*cmdUnion->arg_as_CmdEllipse(),canvas,dlFlags);
             break;
-        case VectorCmdFB::VectorCmdArg_CmdEllipseFilled:
+        case ImZeroFB::VectorCmdArg_CmdEllipseFilled:
             drawCmdEllipseFilledFB(*cmdUnion->arg_as_CmdEllipseFilled(),canvas,dlFlags);
             break;
-        case VectorCmdFB::VectorCmdArg_CmdBezierCubic:
+        case ImZeroFB::VectorCmdArg_CmdBezierCubic:
             drawCmdBezierCubicFB(*cmdUnion->arg_as_CmdBezierCubic(),canvas,dlFlags);
             break;
-        case VectorCmdFB::VectorCmdArg_CmdBezierQuadratic:
+        case ImZeroFB::VectorCmdArg_CmdBezierQuadratic:
             drawCmdBezierQuadraticFB(*cmdUnion->arg_as_CmdBezierQuadratic(),canvas,dlFlags);
             break;
-        case VectorCmdFB::VectorCmdArg_CmdImage: break;
-        case VectorCmdFB::VectorCmdArg_CmdImageQuad: break;
-        case VectorCmdFB::VectorCmdArg_CmdImageRounded: break;
-        case VectorCmdFB::VectorCmdArg_CmdPushClipRect:
+        case ImZeroFB::VectorCmdArg_CmdImage: break;
+        case ImZeroFB::VectorCmdArg_CmdImageQuad: break;
+        case ImZeroFB::VectorCmdArg_CmdImageRounded: break;
+        case ImZeroFB::VectorCmdArg_CmdPushClipRect:
             handleCmdPushClipRect(*cmdUnion->arg_as_CmdPushClipRect(),canvas,dlFlags);
             break;
-        case VectorCmdFB::VectorCmdArg_CmdPopClipRect:
+        case ImZeroFB::VectorCmdArg_CmdPopClipRect:
             handleCmdPopClipRect(*cmdUnion->arg_as_CmdPopClipRect(),canvas,dlFlags);
             break;
-        case VectorCmdFB::VectorCmdArg_CmdRenderText:
+        case ImZeroFB::VectorCmdArg_CmdRenderText:
             drawCmdRenderTextFB(*cmdUnion->arg_as_CmdRenderText(),canvas,dlFlags);
             break;
-        case VectorCmdFB::VectorCmdArg_CmdRenderUnicodeCodepoint:
+        case ImZeroFB::VectorCmdArg_CmdRenderUnicodeCodepoint:
             drawCmdRenderUnicodeCodepointFB(*cmdUnion->arg_as_CmdRenderUnicodeCodepoint(),canvas,dlFlags);
             break;
-        case VectorCmdFB::VectorCmdArg_CmdRenderParagraph:
+        case ImZeroFB::VectorCmdArg_CmdRenderParagraph:
             drawCmdRenderParagraphFB(*cmdUnion->arg_as_CmdRenderParagraph(),canvas,dlFlags);
             break;
-        case VectorCmdFB::VectorCmdArg_CmdRectFilledMultiColor:
+        case ImZeroFB::VectorCmdArg_CmdRectFilledMultiColor:
             drawCmdRectFilledMultiColorFB(*cmdUnion->arg_as_CmdRectFilledMultiColor(),canvas,dlFlags);
             break;
-        case VectorCmdFB::VectorCmdArg_CmdVertexDraw: 
+        case ImZeroFB::VectorCmdArg_CmdVertexDraw: 
             drawCmdVertexDraw(*cmdUnion->arg_as_CmdVertexDraw(),canvas,dlFlags);
             break;
-        case VectorCmdFB::VectorCmdArg_CmdSimpleVertexDraw:
+        case ImZeroFB::VectorCmdArg_CmdSimpleVertexDraw:
             drawCmdSimpleVertexDraw(*cmdUnion->arg_as_CmdSimpleVertexDraw(),canvas,dlFlags);
             break;
-        case VectorCmdFB::VectorCmdArg_CmdPath:
+        case ImZeroFB::VectorCmdArg_CmdPath:
             drawCmdPath(*cmdUnion->arg_as_CmdPath(),canvas,dlFlags);
             break;
-        case VectorCmdFB::VectorCmdArg_CmdSvgPathSubset:
+        case ImZeroFB::VectorCmdArg_CmdSvgPathSubset:
             drawCmdSvgPathSubset(*cmdUnion->arg_as_CmdSvgPathSubset(),canvas,dlFlags);
             break;
-        case VectorCmdFB::VectorCmdArg_CmdWrappedDrawList:
+        case ImZeroFB::VectorCmdArg_CmdWrappedDrawList:
             drawVectorCmdsFBDrawList(cmdUnion->arg_as_CmdWrappedDrawList()->buffer_nested_root(),canvas,true);
             break;
-        case VectorCmdFB::VectorCmdArg_CmdRegisterFont: 
+        case ImZeroFB::VectorCmdArg_CmdRegisterFont: 
             registerFont(*cmdUnion->arg_as_CmdRegisterFont(),canvas,dlFlags);
             break;
         default:
@@ -394,13 +394,13 @@ static inline void drawCmdPolyline_(const T &cmd,SkCanvas &canvas,SkPaint &paint
     }
     canvas.drawPath(pa,paint);
 }
-void VectorCmdSkiaRenderer::drawCmdPolylineFB(const VectorCmdFB::CmdPolyline &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
+void VectorCmdSkiaRenderer::drawCmdPolylineFB(const ImZeroFB::CmdPolyline &cmd,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;
     prepareOutlinePaint(paint,dlFlags);
     paint.setStrokeWidth(SkScalar(cmd.thickness()));
     drawCmdPolyline_(cmd,canvas,paint);
 }
-void VectorCmdSkiaRenderer::drawCmdConvexPolylineFilledFB(const VectorCmdFB::CmdConvexPolyFilled &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
+void VectorCmdSkiaRenderer::drawCmdConvexPolylineFilledFB(const ImZeroFB::CmdConvexPolyFilled &cmd,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;
     prepareFillPaint(paint,dlFlags);
     drawCmdPolyline_(cmd,canvas,paint);
@@ -424,18 +424,18 @@ static inline void drawCmdNgon_(const T &cmd,SkCanvas &canvas,SkPaint &paint) { 
     pa.close();
     canvas.drawPath(pa,paint);
 }
-void VectorCmdSkiaRenderer::drawCmdNgonFB(const VectorCmdFB::CmdNgon &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
+void VectorCmdSkiaRenderer::drawCmdNgonFB(const ImZeroFB::CmdNgon &cmd,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;
     prepareOutlinePaint(paint,dlFlags);
     paint.setStrokeWidth(SkScalar(cmd.thickness()));
     drawCmdNgon_(cmd,canvas,paint);
 }
-void VectorCmdSkiaRenderer::drawCmdNgonFilledFB(const VectorCmdFB::CmdNgonFilled &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
+void VectorCmdSkiaRenderer::drawCmdNgonFilledFB(const ImZeroFB::CmdNgonFilled &cmd,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;
     prepareFillPaint(paint,dlFlags);
     drawCmdNgon_(cmd,canvas,paint);
 }
-void VectorCmdSkiaRenderer::drawCmdLineFB(const VectorCmdFB::CmdLine &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
+void VectorCmdSkiaRenderer::drawCmdLineFB(const ImZeroFB::CmdLine &cmd,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;
     prepareOutlinePaint(paint,dlFlags);
     paint.setColor(convertColor(cmd.col()));
@@ -474,7 +474,7 @@ void VectorCmdSkiaRenderer::drawRRect(const SkRRect &rect, SkCanvas &canvas,SkPa
     
     canvas.drawRRect(rect,paint);
 }
-void VectorCmdSkiaRenderer::drawCmdRectRoundedFB(const VectorCmdFB::CmdRectRounded &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
+void VectorCmdSkiaRenderer::drawCmdRectRoundedFB(const ImZeroFB::CmdRectRounded &cmd,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;
     SkRect rect;
     float r;
@@ -484,7 +484,7 @@ void VectorCmdSkiaRenderer::drawCmdRectRoundedFB(const VectorCmdFB::CmdRectRound
     loadCmdRectRounded_(rect,r,cmd);
     drawRectRounded(rect,r,canvas,paint);
 }
-void VectorCmdSkiaRenderer::drawCmdRectRoundedFilledFB(const VectorCmdFB::CmdRectRoundedFilled &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
+void VectorCmdSkiaRenderer::drawCmdRectRoundedFilledFB(const ImZeroFB::CmdRectRoundedFilled &cmd,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;
     SkRect rect;
     float r;
@@ -493,7 +493,7 @@ void VectorCmdSkiaRenderer::drawCmdRectRoundedFilledFB(const VectorCmdFB::CmdRec
     loadCmdRectRounded_(rect,r,cmd);
     drawRectRounded(rect,r,canvas,paint);
 }
-void VectorCmdSkiaRenderer::drawCmdRectRoundedCornersFB(const VectorCmdFB::CmdRectRoundedCorners &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
+void VectorCmdSkiaRenderer::drawCmdRectRoundedCornersFB(const ImZeroFB::CmdRectRoundedCorners &cmd,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;
     SkRRect rect;
     prepareOutlinePaint(paint,dlFlags);
@@ -502,7 +502,7 @@ void VectorCmdSkiaRenderer::drawCmdRectRoundedCornersFB(const VectorCmdFB::CmdRe
     loadCmdRectRoundedCorners_(rect,cmd);
     drawRRect(rect,canvas,paint);
 }
-void VectorCmdSkiaRenderer::drawCmdRectRoundedCornersFilledFB(const VectorCmdFB::CmdRectRoundedCornersFilled &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
+void VectorCmdSkiaRenderer::drawCmdRectRoundedCornersFilledFB(const ImZeroFB::CmdRectRoundedCornersFilled &cmd,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;
     SkRRect rect;
     prepareFillPaint(paint,dlFlags);
@@ -510,7 +510,7 @@ void VectorCmdSkiaRenderer::drawCmdRectRoundedCornersFilledFB(const VectorCmdFB:
     loadCmdRectRoundedCorners_(rect,cmd);
     drawRRect(rect,canvas,paint);
 }
-void VectorCmdSkiaRenderer::drawCmdRectFilledMultiColorFB(const VectorCmdFB::CmdRectFilledMultiColor &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
+void VectorCmdSkiaRenderer::drawCmdRectFilledMultiColorFB(const ImZeroFB::CmdRectFilledMultiColor &cmd,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPoint pts1[] = { {cmd.p_min()->x(), cmd.p_min()->y()},
                       {cmd.p_min()->x(), cmd.p_max()->y()} };
     SkPoint pts2[] = { {cmd.p_min()->x(), cmd.p_min()->y()},
@@ -530,7 +530,7 @@ void VectorCmdSkiaRenderer::drawCmdRectFilledMultiColorFB(const VectorCmdFB::Cmd
         cmd.p_max()->y()),
         paint);
 }
-void VectorCmdSkiaRenderer::registerFont(const VectorCmdFB::CmdRegisterFont &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
+void VectorCmdSkiaRenderer::registerFont(const ImZeroFB::CmdRegisterFont &cmd,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     const auto name  = cmd.name();
     const auto url = cmd.url();
     const auto urlLen = url->size();
@@ -540,25 +540,24 @@ void VectorCmdSkiaRenderer::registerFont(const VectorCmdFB::CmdRegisterFont &cmd
         fParagraph = nullptr;
     }
     
-    sk_sp<SkData> fontData;
     {
         constexpr auto pfx = "file://";
         const auto pfxLen = strlen(pfx);
         if(urlLen > pfxLen && memcmp(urlCStr,pfx,pfxLen) == 0) {
             const auto path = urlCStr+pfxLen;
-            fontData = SkData::MakeFromFileName(path);
+            fFontData = SkData::MakeFromFileName(path);
         } else {
             // TODO handle error
             return;
         }
     }
 
-    auto fontMgr = SkFontMgr_New_Custom_Data(SkSpan<sk_sp<SkData>>(&fontData,1));
-    const auto typeface = fontMgr->makeFromData(fontData);
-    assert(typeface != nullptr);
-    setParagraphHandler(std::make_shared<Paragraph>(fontMgr, typeface));
+    fFontMgr = SkFontMgr_New_Custom_Data(SkSpan<sk_sp<SkData>>(&fFontData,1));
+    fTypeface = fFontMgr->makeFromData(fFontData);
+    assert(fTypeface != nullptr);
+    setParagraphHandler(std::make_shared<Paragraph>(fFontMgr, fTypeface));
 
-    const auto aa = (dlFlags & VectorCmdFB::DrawListFlags_AntiAliasedText) != 0;
+    const auto aa = (dlFlags & ImZeroFB::DrawListFlags_AntiAliasedText) != 0;
     if(cmd.subpixel()) {
         if(aa) {
             fFont.setEdging(SkFont::Edging::kAlias);
@@ -573,7 +572,7 @@ void VectorCmdSkiaRenderer::registerFont(const VectorCmdFB::CmdRegisterFont &cmd
         }
     }
 }
-void VectorCmdSkiaRenderer::drawCmdSvgPathSubset(const VectorCmdFB::CmdSvgPathSubset &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
+void VectorCmdSkiaRenderer::drawCmdSvgPathSubset(const ImZeroFB::CmdSvgPathSubset &cmd,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;
     {
         auto const fill = cmd.fill();
@@ -597,7 +596,7 @@ void VectorCmdSkiaRenderer::drawCmdSvgPathSubset(const VectorCmdFB::CmdSvgPathSu
     //pa.dump((SkWStream*)&stream,true);
     //pa.dump(nullptr,true);
 }
-void VectorCmdSkiaRenderer::drawCmdPath(const VectorCmdFB::CmdPath &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
+void VectorCmdSkiaRenderer::drawCmdPath(const ImZeroFB::CmdPath &cmd,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;
     {
         auto const fill = cmd.fill();
@@ -618,12 +617,12 @@ void VectorCmdSkiaRenderer::drawCmdPath(const VectorCmdFB::CmdPath &cmd,SkCanvas
     auto const weightsFb = cmd.conic_weights();
     auto const weights = weightsFb->data();
     auto const offset = cmd.offset();
-    static_assert(sizeof(VectorCmdFB::PathVerb) == 1);
+    static_assert(sizeof(ImZeroFB::PathVerb) == 1);
 
-    static_assert(static_cast<int64_t>(VectorCmdFB::PathFillType_evenOdd) == static_cast<int64_t>(SkPathFillType::kEvenOdd));
-    static_assert(static_cast<int64_t>(VectorCmdFB::PathFillType_winding) == static_cast<int64_t>(SkPathFillType::kWinding));
-    static_assert(static_cast<int64_t>(VectorCmdFB::PathFillType_inverseEvenOdd) == static_cast<int64_t>(SkPathFillType::kInverseEvenOdd));
-    static_assert(static_cast<int64_t>(VectorCmdFB::PathFillType_inverseWinding) == static_cast<int64_t>(SkPathFillType::kInverseWinding));
+    static_assert(static_cast<int64_t>(ImZeroFB::PathFillType_evenOdd) == static_cast<int64_t>(SkPathFillType::kEvenOdd));
+    static_assert(static_cast<int64_t>(ImZeroFB::PathFillType_winding) == static_cast<int64_t>(SkPathFillType::kWinding));
+    static_assert(static_cast<int64_t>(ImZeroFB::PathFillType_inverseEvenOdd) == static_cast<int64_t>(SkPathFillType::kInverseEvenOdd));
+    static_assert(static_cast<int64_t>(ImZeroFB::PathFillType_inverseWinding) == static_cast<int64_t>(SkPathFillType::kInverseWinding));
     static_assert(std::is_same<SkScalar,float>::value);
 #if 1
     SkTDArray<SkPoint> pointsXYVec;
@@ -636,31 +635,31 @@ void VectorCmdSkiaRenderer::drawCmdPath(const VectorCmdFB::CmdPath &cmd,SkCanvas
     auto pa = SkPath::Make(pointsXYVec.data(),nPoints,
                  verbsFb->data(),static_cast<int>(verbsFb->size()),
                  reinterpret_cast<const SkScalar *>(weights),static_cast<int>(weightsFb->size()),
-                 static_cast<SkPathFillType>(cmd.fillType()),true);
+                 static_cast<SkPathFillType>(cmd.fill_type()),true);
 #else
     auto const nVerbs = verbsFb->size();
-    auto verbs = reinterpret_cast<const VectorCmdFB::PathVerb*>(verbsFb->data());
+    auto verbs = reinterpret_cast<const ImZeroFB::PathVerb*>(verbsFb->data());
     SkPath pa;
-    pa.setFillType(static_cast<SkPathFillType>(cmd.fillType()));
+    pa.setFillType(static_cast<SkPathFillType>(cmd.fill_type()));
     int p=0;
     int pw=0;
     for(int i=0;i<nVerbs;i++) {
         switch(verbs[i]) {
-            case VectorCmdFB::PathVerb_move:
+            case ImZeroFB::PathVerb_move:
             {
                 auto x0= pointsXY[p]; p++;
                 auto y0 = pointsXY[p]; p++;
                 pa.moveTo(SkScalar(x0),SkScalar(y0));
                 break;
             }
-            case VectorCmdFB::PathVerb_line:
+            case ImZeroFB::PathVerb_line:
             {
                 auto x0 = pointsXY[p]; p++;
                 auto y0 = pointsXY[p]; p++;
                 pa.lineTo(SkScalar(x0),SkScalar(y0));
                 break;
             }
-            case VectorCmdFB::PathVerb_quad:
+            case ImZeroFB::PathVerb_quad:
             {
                 auto x0 = pointsXY[p]; p++;
                 auto y0 = pointsXY[p]; p++;
@@ -669,7 +668,7 @@ void VectorCmdSkiaRenderer::drawCmdPath(const VectorCmdFB::CmdPath &cmd,SkCanvas
                 pa.quadTo(SkScalar(x0),SkScalar(y0),SkScalar(x1),SkScalar(y1));
                 break;
             }
-            case VectorCmdFB::PathVerb_conic:
+            case ImZeroFB::PathVerb_conic:
             {
                 auto x0 = pointsXY[p]; p++;
                 auto y0 = pointsXY[p]; p++;
@@ -679,7 +678,7 @@ void VectorCmdSkiaRenderer::drawCmdPath(const VectorCmdFB::CmdPath &cmd,SkCanvas
                 pa.conicTo(SkScalar(x0),SkScalar(y0),SkScalar(x1),SkScalar(y1),SkScalar(w));
                 break;
             }
-            case VectorCmdFB::PathVerb_cubic:
+            case ImZeroFB::PathVerb_cubic:
             {
                 auto x0 = pointsXY[p]; p++;
                 auto y0 = pointsXY[p]; p++;
@@ -690,10 +689,10 @@ void VectorCmdSkiaRenderer::drawCmdPath(const VectorCmdFB::CmdPath &cmd,SkCanvas
                 pa.cubicTo(SkScalar(x0),SkScalar(y0),SkScalar(x1),SkScalar(y1),SkScalar(x2),SkScalar(y2));
                 break;
             }
-            case VectorCmdFB::PathVerb_close:
+            case ImZeroFB::PathVerb_close:
                 pa.close();
                 break;
-            case VectorCmdFB::PathVerb_done:
+            case ImZeroFB::PathVerb_done:
                 // FIXME correct?
                 break;
         }
@@ -708,7 +707,7 @@ void VectorCmdSkiaRenderer::drawCmdPath(const VectorCmdFB::CmdPath &cmd,SkCanvas
 
     canvas.drawPath(pa,paint);
 }
-void VectorCmdSkiaRenderer::drawCmdSimpleVertexDraw(const VectorCmdFB::CmdSimpleVertexDraw &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
+void VectorCmdSkiaRenderer::drawCmdSimpleVertexDraw(const ImZeroFB::CmdSimpleVertexDraw &cmd,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     auto cr = cmd.clip_rect();
     auto const crRect = SkRect::MakeLTRB(cr->x(), cr->y(), cr->z(), cr->w());
 
@@ -765,7 +764,7 @@ void VectorCmdSkiaRenderer::drawCmdSimpleVertexDraw(const VectorCmdFB::CmdSimple
     //canvas.clipRect(crRect);
     canvas.drawVertices(vertices, blendMode, paint);
 }
-void VectorCmdSkiaRenderer::drawCmdVertexDraw(const VectorCmdFB::CmdVertexDraw &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
+void VectorCmdSkiaRenderer::drawCmdVertexDraw(const ImZeroFB::CmdVertexDraw &cmd,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     if(fVertexPaint == nullptr) {
         return;
     }
@@ -826,13 +825,13 @@ static void inline drawCmdQuad_(const T &cmd,SkCanvas &canvas, SkPaint &paint) {
     pa.close();
     canvas.drawPath(pa,paint);
 }
-void VectorCmdSkiaRenderer::drawCmdQuadFB(const VectorCmdFB::CmdQuad &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
+void VectorCmdSkiaRenderer::drawCmdQuadFB(const ImZeroFB::CmdQuad &cmd,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;
     prepareOutlinePaint(paint,dlFlags);
     paint.setStrokeWidth(cmd.thickness());
     drawCmdQuad_(cmd,canvas,paint);
 }
-void VectorCmdSkiaRenderer::drawCmdQuadFilledFB(const VectorCmdFB::CmdQuadFilled &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
+void VectorCmdSkiaRenderer::drawCmdQuadFilledFB(const ImZeroFB::CmdQuadFilled &cmd,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;
     prepareFillPaint(paint,dlFlags);
     drawCmdQuad_(cmd,canvas,paint);
@@ -850,19 +849,19 @@ static inline void drawCmdTriangle_(const T &cmd,SkCanvas &canvas,SkPaint &paint
     pa.close();
     canvas.drawPath(pa,paint);
 }
-void VectorCmdSkiaRenderer::drawCmdTriangleFB(const VectorCmdFB::CmdTriangle &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
+void VectorCmdSkiaRenderer::drawCmdTriangleFB(const ImZeroFB::CmdTriangle &cmd,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;
     prepareOutlinePaint(paint,dlFlags);
     paint.setStrokeWidth(cmd.thickness());
     drawCmdTriangle_(cmd,canvas,paint);
 }
-void VectorCmdSkiaRenderer::drawCmdTriangleFilledFB(const VectorCmdFB::CmdTriangleFilled &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
+void VectorCmdSkiaRenderer::drawCmdTriangleFilledFB(const ImZeroFB::CmdTriangleFilled &cmd,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;
     prepareFillPaint(paint,dlFlags);
     drawCmdTriangle_(cmd,canvas,paint);
 }
 
-void VectorCmdSkiaRenderer::drawCmdRenderParagraphFB(const VectorCmdFB::CmdRenderParagraph &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
+void VectorCmdSkiaRenderer::drawCmdRenderParagraphFB(const ImZeroFB::CmdRenderParagraph &cmd,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;
 
     canvas.save();
@@ -879,14 +878,21 @@ void VectorCmdSkiaRenderer::drawCmdRenderParagraphFB(const VectorCmdFB::CmdRende
     {
         skia::textlayout::TextAlign a;
         switch(cmd.text_align()) {
-            case VectorCmdFB::TextAlignFlags_left: a = skia::textlayout::TextAlign::kLeft; break;
-            case VectorCmdFB::TextAlignFlags_right: a = skia::textlayout::TextAlign::kRight; break;
-            case VectorCmdFB::TextAlignFlags_center: a = skia::textlayout::TextAlign::kCenter; break;
-            case VectorCmdFB::TextAlignFlags_justify: a = skia::textlayout::TextAlign::kJustify; break;
+            case ImZeroFB::TextAlignFlags_left: a = skia::textlayout::TextAlign::kLeft; break;
+            case ImZeroFB::TextAlignFlags_right: a = skia::textlayout::TextAlign::kRight; break;
+            case ImZeroFB::TextAlignFlags_center: a = skia::textlayout::TextAlign::kCenter; break;
+            case ImZeroFB::TextAlignFlags_justify: a = skia::textlayout::TextAlign::kJustify; break;
             default:
                 assert("unhandled text align option for paragraph");
         }
-        fParagraph->setTextAlign(a);
+        skia::textlayout::TextDirection d;
+        switch(cmd.text_direction()) {
+            case ImZeroFB::TextDirection_ltr: d = skia::textlayout::TextDirection::kLtr; break;
+            case ImZeroFB::TextDirection_rtl: d = skia::textlayout::TextDirection::kRtl; break;
+            default:
+                assert("unhandled text direction option for paragraph");
+        }
+        fParagraph->setTextLayout(a, d);
     }
     fParagraph->build(text->data(), text->size());
     const auto ww = cmd.wrap_width();
@@ -896,7 +902,7 @@ void VectorCmdSkiaRenderer::drawCmdRenderParagraphFB(const VectorCmdFB::CmdRende
 
     canvas.restore();
 }
-void VectorCmdSkiaRenderer::drawCmdRenderTextFB(const VectorCmdFB::CmdRenderText &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
+void VectorCmdSkiaRenderer::drawCmdRenderTextFB(const ImZeroFB::CmdRenderText &cmd,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;
 
     canvas.save();
@@ -924,7 +930,7 @@ void VectorCmdSkiaRenderer::drawCmdRenderTextFB(const VectorCmdFB::CmdRenderText
 
     canvas.restore();
 }
-void VectorCmdSkiaRenderer::drawCmdRenderUnicodeCodepointFB(const VectorCmdFB::CmdRenderUnicodeCodepoint &cmd,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
+void VectorCmdSkiaRenderer::drawCmdRenderUnicodeCodepointFB(const ImZeroFB::CmdRenderUnicodeCodepoint &cmd,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;
     paint.setColor(convertColor(cmd.col()));
     auto size = cmd.size();
@@ -954,7 +960,7 @@ void drawCmdCircleAsPath_(const T &cmd,SkCanvas &canvas,SkPaint &paint) { ZoneSc
     pa.addCircle(SkScalar(cmd.center()->x()),SkScalar(cmd.center()->y()),SkScalar(cmd.radius()));
     canvas.drawPath(pa,paint);
 }
-void VectorCmdSkiaRenderer::drawCmdCircleFB(const VectorCmdFB::CmdCircle &cmd, SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
+void VectorCmdSkiaRenderer::drawCmdCircleFB(const ImZeroFB::CmdCircle &cmd, SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;
     prepareOutlinePaint(paint,dlFlags);
     paint.setStrokeWidth(SkScalar(cmd.thickness()));
@@ -966,7 +972,7 @@ void VectorCmdSkiaRenderer::drawCmdCircleFB(const VectorCmdFB::CmdCircle &cmd, S
 #endif
     drawCmdCircle_(cmd,canvas,paint);
 }
-void VectorCmdSkiaRenderer::drawCmdCircleFilledFB(const VectorCmdFB::CmdCircleFilled &cmd, SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
+void VectorCmdSkiaRenderer::drawCmdCircleFilledFB(const ImZeroFB::CmdCircleFilled &cmd, SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;
     prepareFillPaint(paint,dlFlags);
 #if defined (RENDER_MODE_SKETCH_ENABLED) || defined (RENDER_MODE_SVG_ENABLED)
@@ -978,7 +984,7 @@ void VectorCmdSkiaRenderer::drawCmdCircleFilledFB(const VectorCmdFB::CmdCircleFi
     drawCmdCircle_(cmd,canvas,paint);
 }
 #ifdef SKIA_DRAW_BACKEND_DEBUG_CLIPPING
-static void applyClipRect(const SkRect &cr,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags,bool intersect) {
+static void applyClipRect(const SkRect &cr,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags,bool intersect) {
     SkPaint paint;
     paint.setStyle(SkPaint::kStroke_Style);
     if(intersect) {
@@ -988,12 +994,12 @@ static void applyClipRect(const SkRect &cr,SkCanvas &canvas,VectorCmdFB::DrawLis
     }
     canvas.drawRect(cr,paint);
 #else
-static void applyClipRect(const SkRect &cr,SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) {
+static void applyClipRect(const SkRect &cr,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) {
 #endif
-    auto const aa = (dlFlags & VectorCmdFB::DrawListFlags_AntiAliasedClipping) != 0;
+    auto const aa = (dlFlags & ImZeroFB::DrawListFlags_AntiAliasedClipping) != 0;
     canvas.clipRect(cr,aa);
 }
-void VectorCmdSkiaRenderer::handleCmdPushClipRect(const VectorCmdFB::CmdPushClipRect &cmd, SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
+void VectorCmdSkiaRenderer::handleCmdPushClipRect(const ImZeroFB::CmdPushClipRect &cmd, SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     auto crV4 = cmd.rect();
     auto cr = SkRect::MakeLTRB(crV4->x(),crV4->y(),crV4->z(),crV4->w());
 
@@ -1012,7 +1018,7 @@ void VectorCmdSkiaRenderer::handleCmdPushClipRect(const VectorCmdFB::CmdPushClip
     applyClipRect(cr,canvas,dlFlags);
 #endif
 }
-void VectorCmdSkiaRenderer::handleCmdPopClipRect(const VectorCmdFB::CmdPopClipRect &cmd, SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
+void VectorCmdSkiaRenderer::handleCmdPopClipRect(const ImZeroFB::CmdPopClipRect &cmd, SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     canvas.restore();
     canvas.save();
     fClipStack.pop_back();
@@ -1038,18 +1044,18 @@ void drawCmdEllipse_(const T &cmd,SkCanvas &canvas,SkPaint &paint) {
     canvas.drawOval(SkRect::MakeLTRB(x-radius_x,y-radius_y,x+radius_x,y+radius_y),paint);
     canvas.rotate(-r,x,y);
 }
-void VectorCmdSkiaRenderer::drawCmdEllipseFB(const VectorCmdFB::CmdEllipse &cmd, SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
+void VectorCmdSkiaRenderer::drawCmdEllipseFB(const ImZeroFB::CmdEllipse &cmd, SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;
     prepareOutlinePaint(paint,dlFlags);
     paint.setStrokeWidth(SkScalar(cmd.thickness()));
     drawCmdEllipse_(cmd,canvas,paint);
 }
-void VectorCmdSkiaRenderer::drawCmdEllipseFilledFB(const VectorCmdFB::CmdEllipseFilled &cmd, SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
+void VectorCmdSkiaRenderer::drawCmdEllipseFilledFB(const ImZeroFB::CmdEllipseFilled &cmd, SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;
     prepareFillPaint(paint,dlFlags);
     drawCmdEllipse_(cmd,canvas,paint);
 }
-void VectorCmdSkiaRenderer::drawCmdBezierCubicFB(const VectorCmdFB::CmdBezierCubic &cmd, SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
+void VectorCmdSkiaRenderer::drawCmdBezierCubicFB(const ImZeroFB::CmdBezierCubic &cmd, SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;
     prepareOutlinePaint(paint,dlFlags);
     paint.setColor(convertColor(cmd.col()));
@@ -1061,7 +1067,7 @@ void VectorCmdSkiaRenderer::drawCmdBezierCubicFB(const VectorCmdFB::CmdBezierCub
                SkScalar(cmd.p4()->x()),SkScalar(cmd.p4()->y()));
     canvas.drawPath(pa,paint);
 }
-void VectorCmdSkiaRenderer::drawCmdBezierQuadraticFB(const VectorCmdFB::CmdBezierQuadratic &cmd, SkCanvas &canvas,VectorCmdFB::DrawListFlags dlFlags) { ZoneScoped;
+void VectorCmdSkiaRenderer::drawCmdBezierQuadraticFB(const ImZeroFB::CmdBezierQuadratic &cmd, SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;
     prepareOutlinePaint(paint,dlFlags);
     paint.setColor(convertColor(cmd.col()));
@@ -1074,4 +1080,8 @@ void VectorCmdSkiaRenderer::drawCmdBezierQuadraticFB(const VectorCmdFB::CmdBezie
 }
 void VectorCmdSkiaRenderer::prepareForDrawing() {
     fClipStack.resize(0);
+}
+
+sk_sp<SkTypeface> VectorCmdSkiaRenderer::getTypeface() const {
+    return fFont.refTypeface();
 }

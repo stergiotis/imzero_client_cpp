@@ -28,3 +28,6 @@ sudo apt install -y libc++-dev libc++abi-dev
 
 #skia deps
 sudo apt install -y clang libjpeg-dev libicu-dev libwebp-dev libfontconfig-dev
+
+#clang (non-OS version) deps
+sudo apt install libtinfo5

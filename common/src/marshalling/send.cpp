@@ -6,12 +6,6 @@ void sendInit() {
     fdOut = stdout;
     resetSendStat();
 }
-inline size_t fwrite_sendStat(const void *__restrict __ptr, size_t __size,
-                              size_t __n, FILE *__restrict __s) noexcept {
-    auto t = fwrite(__ptr,__size,__n,__s);
-    totalSentBytes += t;
-    return t;
-}
 void resetSendStat() {
     totalSentBytes = 0;
 }

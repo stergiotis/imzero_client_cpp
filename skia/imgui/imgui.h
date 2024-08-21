@@ -1,7 +1,7 @@
 // dear imgui, v1.90.2 WIP
 // (headers)
 
-#define SKIA_DRAW_BACKEND
+#define IMZERO_DRAWLIST
 
 
 // Help:
@@ -293,11 +293,11 @@ struct ImVec4
 };
 IM_MSVC_RUNTIME_CHECKS_RESTORE
 
-#ifdef SKIA_DRAW_BACKEND
+#ifdef IMZERO_DRAWLIST
 #include "include/core/SkSurface.h"
 #include "include/core/SkFontMgr.h"
 #include "include/core/SkFont.h"
-#include "vectorCmd_generated.h"
+#include "ImZeroFB.out.h"
 #include "../skia/paragraph.h"
 #include "imzero_config.h"
 #endif
@@ -309,12 +309,17 @@ IM_MSVC_RUNTIME_CHECKS_RESTORE
 
 namespace ImGui
 {
-#ifdef SKIA_DRAW_BACKEND
+#ifdef IMZERO_DRAWLIST
     extern SkFont skiaFont;
     extern bool useVectorCmd;
     extern float skiaFontDyFudge;
     extern std::shared_ptr<Paragraph> paragraph;
     constexpr unsigned int skiaPasswordDefaultCharacter = U'*'; // TODO make this configurable or runtime selectable
+    // isParagraph: 0 = never, 1 = always, 2 = auto
+    void PushIsParagraphText(uint8_t isParagraph);
+    void PushParagraphTextLayout(ImZeroFB::TextAlignFlags align,ImZeroFB::TextDirection dir);
+    uint8_t PopIsParagraphText();
+    void PopParagraphTextLayout();
 #endif
 
     // Context creation and access
@@ -2782,9 +2787,9 @@ struct ImDrawListSplitter
     int                         _Current;    // Current channel number (0)
     int                         _Count;      // Number of active channels (1+)
     ImVector<ImDrawChannel>     _Channels;   // Draw channels (not resized down so _Count might be < Channels.Size)
-#ifdef SKIA_DRAW_BACKEND
+#ifdef IMZERO_DRAWLIST
     // NOTE: part of ImDrawChannel as std::vector and FlatBufferBuilder are not trivially default constructible
-    ImVector<std::vector<flatbuffers::Offset<VectorCmdFB::SingleVectorCmdDto>>*> _ChannelsFbCmds;
+    ImVector<std::vector<flatbuffers::Offset<ImZeroFB::SingleVectorCmdDto>>*> _ChannelsFbCmds;
     ImVector<flatbuffers::FlatBufferBuilder*> _ChannelsFbBuilders;
 #endif
 
@@ -2963,14 +2968,14 @@ struct ImDrawList
     IMGUI_API void  _PathArcToFastEx(const ImVec2& center, float radius, int a_min_sample, int a_max_sample, int a_step);
     IMGUI_API void  _PathArcToN(const ImVec2& center, float radius, float a_min, float a_max, int num_segments);
 
-    #ifdef SKIA_DRAW_BACKEND
+    #ifdef IMZERO_DRAWLIST
     flatbuffers::FlatBufferBuilder *fbBuilder;
-    std::vector<flatbuffers::Offset<VectorCmdFB::SingleVectorCmdDto>> *_FbCmds;
+    std::vector<flatbuffers::Offset<ImZeroFB::SingleVectorCmdDto>> *_FbCmds;
     uint32_t _FbProcessedDrawCmdIndexOffset;
 public: // public: ImFont needs to access this method, in spirit of the rest of imgui I do not use C++'s friend keyword
-    void addVectorCmdFB(VectorCmdFB::VectorCmdArg arg_type, flatbuffers::Offset<void> arg);
+    void addVectorCmdFB(ImZeroFB::VectorCmdArg arg_type, flatbuffers::Offset<void> arg);
     bool addVerticesAsVectorCmd();
-    #ifdef SKIA_DRAW_BACKEND_PARAGRAPH_AS_PATH
+    #ifdef IMZERO_DRAWLIST_PARAGRAPH_AS_PATH
     ImVector<uint8_t> fPathVerbBuffer;
     ImVector<float> fPathPointBuffer;
     ImVector<float> fPathWeightBuffer;
@@ -3238,7 +3243,7 @@ struct ImFont
     IMGUI_API ~ImFont();
     IMGUI_API const ImFontGlyph*FindGlyph(ImWchar c) const;
     IMGUI_API const ImFontGlyph*FindGlyphNoFallback(ImWchar c) const;
-#ifdef SKIA_DRAW_BACKEND
+#ifdef IMZERO_DRAWLIST
     float GetCharAdvance(ImWchar c) const {
         if(!ImGui::useVectorCmd) {
             return ((int)c < IndexAdvanceX.Size) ? IndexAdvanceX[(int)c] : FallbackAdvanceX;

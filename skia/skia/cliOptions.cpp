@@ -36,6 +36,20 @@ static float findFlagValueDefaultFloat(FILE *logChannel, uint64_t &markUsed, int
     }
     return f;
 }
+static int64_t findFlagValueDefaultInt(FILE *logChannel, uint64_t &markUsed, int argc, char **argv,const char *flag,const char *defaultValue) {
+    const char *v = findFlagValueDefault(logChannel, markUsed,argc,argv,flag,defaultValue);
+    char *end;
+    auto f = strtol(v, &end,0);
+    if(f == 0 && end == v) {
+        fprintf(stderr,"unable to parse argument for flag %s as integer", flag);
+        exit(1);
+    }
+    if(end[0] != '\0') {
+        fprintf(stderr,"unable to parse argument for flag %s as integer: trailing data found '%s'", flag, end);
+        exit(1);
+    }
+    return f;
+}
 static bool getBoolFlagValue(FILE *logChannel, uint64_t &markUsed, int argc, char **argv,const char *flag,bool defaultValue) {
     return strcmp(findFlagValueDefault(logChannel, markUsed, argc,argv,flag,defaultValue ? "on" : "off"),"on") == 0;
 }
@@ -61,6 +75,18 @@ void CliOptions::usage(const char *name, FILE *file) const {
     fprintf(file,"    -imguiNavGamepad [bool:%s]\n", imguiNavGamepad ? "on" : "off");
     fprintf(file,"    -imguiDocking [bool:%s]\n", imguiDocking ? "on" : "off");
     fprintf(file,"    -vectorCmd [bool:%s]   on: intercept ImGui DrawList draw commands and replay them on client (e.g. skia)\n", vectorCmd ? "on" : "off");
+    fprintf(file,"    -fontManager [name:%s]\n", fontManager);
+    fprintf(file,"    -fontManagerArg [arg:%s]\n", fontManagerArg);
+
+    fprintf(file, "video mode flags:\n");
+    fprintf(file, "string flags:\n");
+    fprintf(file, "   -videoRawFramesFile [path:%s]\n", videoRawFramesFile);
+    fprintf(file, "   -videoRawOutputFormat [format:%s]\n", videoRawOutputFormat);
+    fprintf(file, "   -videoUserInteractionEventsInFile [path:%s]\n", videoUserInteractionEventsInFile);
+    fprintf(file, "integer flags:\n");
+    fprintf(file, "   -videoResolutionWidth [int:%u]\n", videoResolutionWidth);
+    fprintf(file, "   -videoResolutionHeight [int:%u]\n", videoResolutionHeight);
+    fprintf(file, "   -videoExitAfterNFrames [int:%u]\n", videoExitAfterNFrames);
 }
 void CliOptions::parse(int argc,char **argv,FILE *logChannel) {
     if(argc > 1) {
@@ -81,6 +107,8 @@ void CliOptions::parse(int argc,char **argv,FILE *logChannel) {
         fprintf(logChannel,"backgroundColorRGBA is not a valid rgba hex color: %s\n", backgroundColorRGBA);
         exit(1);
     }
+    fontManager = findFlagValueDefault(logChannel,u, argc, argv, "-fontManager", fontManager);
+    fontManagerArg = findFlagValueDefault(logChannel,u, argc, argv, "-fontManagerArg", fontManagerArg);
 
     fontDyFudge = findFlagValueDefaultFloat(logChannel,u, argc, argv, "-fontDyFudge", "0.0");
     if(std::isnan(fontDyFudge) || fontDyFudge < -10000.0f || fontDyFudge > 10000.0f) {
@@ -96,6 +124,13 @@ void CliOptions::parse(int argc,char **argv,FILE *logChannel) {
     imguiNavGamepad = getBoolFlagValue(logChannel,u, argc, argv, "-imguiNavGamepad",imguiNavGamepad);
     imguiDocking = getBoolFlagValue(logChannel,u, argc, argv, "-imguiDocking",imguiDocking);
     vectorCmd = getBoolFlagValue(logChannel,u, argc, argv, "-vectorCmd",vectorCmd);
+
+    videoRawFramesFile = findFlagValueDefault(logChannel,u, argc, argv,"-videoRawFramesFile",videoRawFramesFile);
+    videoResolutionWidth = static_cast<uint32_t>(findFlagValueDefaultInt(logChannel, u, argc, argv, "-videoResolutionWidth", "1920"));
+    videoResolutionHeight = static_cast<uint32_t>(findFlagValueDefaultInt(logChannel, u, argc, argv, "-videoResolutionHeight", "1080"));
+    videoExitAfterNFrames = static_cast<uint32_t>(findFlagValueDefaultInt(logChannel, u, argc, argv, "-videoExitAfterNFrames", "0"));
+    videoRawOutputFormat = findFlagValueDefault(logChannel, u, argc, argv, "-videoRawOutputFormat", "qoi");
+    videoUserInteractionEventsInFile = findFlagValueDefault(logChannel, u, argc, argv, "-videoUserInteractionEventsInFile", videoUserInteractionEventsInFile);
 
     if(std::popcount(u) != (argc-1)) {
         for(int i=1;i<argc;i++) {

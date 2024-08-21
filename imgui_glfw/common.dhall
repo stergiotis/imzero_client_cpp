@@ -20,6 +20,7 @@ let sourceTreeParts = [
 	, sourceTreePartsRepo.imguiFlamegraph
 	, sourceTreePartsRepo.imguiTextedit
 	, sourceTreePartsRepo.binding
+	, sourceTreePartsRepo.tracyDisabled
 	, mainPart
 ]
 let cxx = "clang++"

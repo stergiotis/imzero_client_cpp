@@ -3,15 +3,13 @@ set -ev
 here=$(dirname "$(readlink -f "$BASH_SOURCE")")
 cd "$here"
 flatc="../../contrib/flatbuffers/flatc"
-"$flatc" -o imgui --cpp imgui/vectorCmd.fbs
+"$flatc" -o imgui --cpp imgui/ImZeroFB.fbs --reflect-types --reflect-names --filename-suffix .out
 
-# FIXME, needed by dhall
-export PKG_CONFIG_OUTPUT_CFLAGS_FREETYPE2=""
-export PKG_CONFIG_OUTPUT_LIBS_FREETYPE2=""
-export PKG_CONFIG_OUTPUT_CFLAGS_GLFW3=""
-export PKG_CONFIG_OUTPUT_LIBS_GLFW3=""
-
-./cmakelists.dhall
+if [[ -z "${IMZERO_BUILD_VIDEO}" ]]; then
+  ./cmakelists.dhall
+else
+  ./cmakelists_video.dhall
+fi
 
 generate_buildinfo() {
    echo -en "#pragma once\nnamespace buildinfo {\n static const char *gitCommit=\""

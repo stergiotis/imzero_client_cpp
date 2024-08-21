@@ -1,7 +1,7 @@
 #!/bin/bash
 here=$(dirname "$(readlink -f "$BASH_SOURCE")")
 set -ev
-cd ../../contrib/skia
+cd ../../contrib/sdl
 cmake -S . -B build -DSDL_STATIC=ON \
 	            -DSDL_DYNAMIC=off \
 		    -DCMAKE_BUILD_TYPE=RelWithDebInfo

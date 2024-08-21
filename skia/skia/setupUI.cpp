@@ -1,4 +1,5 @@
 #include "setupUI.h"
+#include <sys/time.h>
 #include "imgui_internal.h"
 #include "tracy/Tracy.hpp"
 
@@ -49,9 +50,26 @@ static void helpMarker(const char* desc)
 }
 void ImZeroSkiaSetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &vectorCmdSkiaRenderer, bool &useVectorCmd,
                                size_t totalVectorCmdSerializedSz, size_t totalFffiSz,
-                               size_t skpBytes, size_t svgBytes, size_t pngBytes, int windowW, int windowH
+                               size_t skpBytes, size_t svgBytes, size_t pngBytes, int windowW, int windowH,
+                               SkFontMgr *fontMgr
                                ) { ZoneScoped;
     ImGui::Text("gitCommit=\"%s\",dirty=%s",buildinfo::gitCommit,buildinfo::gitDirty ? "yes" : "no");
+    {
+        struct timeval tv;
+        struct timezone tz;
+
+        gettimeofday(&tv, &tz);
+
+        char buf[sizeof "9999-12-31T23:59:59.999+0000000"];
+        size_t bufsize = sizeof buf;
+        size_t off = 0;
+        struct tm *local = localtime(&tv.tv_sec);
+        off = strftime(buf, bufsize, "%FT%T", local); // same as "%Y-%m-%dT%H:%M:%S"
+        off += snprintf(buf+off, bufsize-off, ".%06ld", tv.tv_usec);
+        off += strftime(buf+off, bufsize-off, "%z", local);
+
+        ImGui::TextUnformatted(buf);
+    }
 
     if(ImGui::CollapsingHeader("Skia Backend")) {
         auto renderMode = vectorCmdSkiaRenderer.getRenderMode();
@@ -79,38 +97,40 @@ void ImZeroSkiaSetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &v
         ImGui::TextUnformatted("RENDER_MODE_BACKDROP_FILTER_ENABLED compile time option is not set");
 #endif
     }
-    saveFormat = SaveFormatE_None;
-    if(ImGui::CollapsingHeader("(Vector) Screenshots")) {
-        ImGui::Text("serialized flatbuffer verctor cmd size: %d Bytes", static_cast<int>(totalVectorCmdSerializedSz));
-        ImGui::Text("fffi cmd size: %d Bytes",static_cast<int>(totalFffiSz));
-        ImGui::Separator();
+    if(saveFormat != SaveFormatE_Disabled) {
+        saveFormat = SaveFormatE_None;
+        if(ImGui::CollapsingHeader("(Vector) Screenshots")) {
+            ImGui::Text("serialized flatbuffer verctor cmd size: %d Bytes", static_cast<int>(totalVectorCmdSerializedSz));
+            ImGui::Text("fffi cmd size: %d Bytes",static_cast<int>(totalFffiSz));
+            ImGui::Separator();
 
-        if(ImGui::Button("Save Snapshot to /tmp/skiaBackend.skp")) {
-            saveFormat = SaveFormatE_SKP;
-        }
-        if(ImGui::IsItemHovered()) {
-            ImGui::SetTooltip("%s","Open SKP files with `viewer --skps PATH_TO_SKP --slide SKP_FILE");
-        }
-        if(skpBytes > 0) {
-            ImGui::Text("skp file size: %d Bytes", static_cast<int>(skpBytes));
-        }
-        if(ImGui::Button("Save Snapshot to /tmp/skiaBackend.svg")) {
-            saveFormat = SaveFormatE_SVG;
-        }
-        if(ImGui::Button("Save Snapshot to /tmp/skiaBackend.nofont.svg")) {
-            saveFormat = SaveFormatE_SVGNoFont;
-        }
-        if(svgBytes > 0) {
-            ImGui::Text("svg file size: %d Bytes", static_cast<int>(svgBytes));
-        }
-        if(ImGui::Button("Save Snapshot to /tmp/skiaBackend.png")) {
-            saveFormat = SaveFormatE_PNG;
-        }
-        if(pngBytes > 0) {
-            ImGui::Text("png file size: %d Bytes", static_cast<int>(pngBytes));
-        }
-        if(ImGui::Button("Save Snapshot to /tmp/skiaBackend.flatbuffers")) {
-            saveFormat = SaveFormatE_VECTORCMD;
+            if(ImGui::Button("Save Snapshot to /tmp/skiaBackend.skp")) {
+                saveFormat = SaveFormatE_SKP;
+            }
+            if(ImGui::IsItemHovered()) {
+                ImGui::SetTooltip("%s","Open SKP files with `viewer --skps PATH_TO_SKP --slide SKP_FILE");
+            }
+            if(skpBytes > 0) {
+                ImGui::Text("skp file size: %d Bytes", static_cast<int>(skpBytes));
+            }
+            if(ImGui::Button("Save Snapshot to /tmp/skiaBackend.svg")) {
+                saveFormat = SaveFormatE_SVG;
+            }
+            if(ImGui::Button("Save Snapshot to /tmp/skiaBackend.nofont.svg")) {
+                saveFormat = SaveFormatE_SVG_TextAsPath;
+            }
+            if(svgBytes > 0) {
+                ImGui::Text("svg file size: %d Bytes", static_cast<int>(svgBytes));
+            }
+            if(ImGui::Button("Save Snapshot to /tmp/skiaBackend.png")) {
+                saveFormat = SaveFormatE_PNG;
+            }
+            if(pngBytes > 0) {
+                ImGui::Text("png file size: %d Bytes", static_cast<int>(pngBytes));
+            }
+            if(ImGui::Button("Save Snapshot to /tmp/skiaBackend.flatbuffers")) {
+                saveFormat = SaveFormatE_VECTORCMD;
+            }
         }
     }
 
@@ -410,8 +430,106 @@ void ImZeroSkiaSetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &v
         }
     }
     if(ImGui::CollapsingHeader("Paragraph")) {
-        //ImGui::TextUnformatted("this is a multiline\ntext with many words that will\nhopefully form a paragraph.");
-        ImGui::TextUnformatted("this is a multiline\ntext with many words that will\n🫠👩🏼‍🤝‍👩🏻\nhopefully form a paragraph.");
+        if(ImGui::TreeNode("English")) {
+            for(int i=ImZeroFB::TextAlignFlags_MIN;i<=ImZeroFB::TextAlignFlags_MAX;i++) {
+                auto const f = static_cast<ImZeroFB::TextAlignFlags>(i);
+                if(ImGui::RadioButton(ImZeroFB::EnumNameTextAlignFlags(f),fTextAlign == f)) {
+                    fTextAlign = f;
+                }
+                ImGui::SameLine();
+            }
+            ImGui::NewLine();
+
+            ImGui::PushParagraphTextLayout(fTextAlign,ImZeroFB::TextDirection_ltr);
+            ImGui::PushIsParagraphText(1);
+            ImGui::TextUnformatted("That, poor contempt, or claim'd thou slept so faithful,\n"
+                                   "I may contrive our father; and, in their defeated queen,\n"
+                                   "Her flesh broke me and puttance of expedition house,\n"
+                                   "And in that same that ever I lament this stomach,\n"
+                                   "And he, nor Butly and my fury, knowing everything\n"
+                                   "Grew daily ever, his great strength and thought\n"
+                                   "The bright buds of mine own.\n"
+                                   "\n"
+                                   "BIONDELLO:\n"
+                                   "Marry, that it may not pray their patience.'\n"
+                                   "\n"
+                                   "KING LEAR:\n"
+                                   "The instant common maid, as we may less be\n"
+                                   "a brave gentleman and joiner: he that finds us with wax\n"
+                                   "And owe so full of presence and our fooder at our\n"
+                                   "staves. It is remorsed the bridal's man his grace\n"
+                                   "for every business in my tongue, but I was thinking\n"
+                                   "that he contends, he hath respected thee.\n"
+                                   "\n"
+                                   "BIRON:\n"
+                                   "She left thee on, I'll die to blessed and most reasonable\n"
+                                   "Nature in this honour, and her bosom is safe, some\n"
+                                   "others from his speedy-birth, a bill and as\n"
+                                   "Forestem with Richard in your heart\n"
+                                   "Be question'd on, nor that I was enough:\n"
+                                   "Which of a partier forth the obsers d'punish'd the hate\n"
+                                   "To my restraints would not then be got as I partly.");
+            ImGui::PopIsParagraphText();
+            ImGui::PopParagraphTextLayout();
+            ImGui::TreePop();
+        }
+
+        if(ImGui::TreeNode("German")) {
+            for(int i=ImZeroFB::TextAlignFlags_MIN;i<=ImZeroFB::TextAlignFlags_MAX;i++) {
+                auto const f = static_cast<ImZeroFB::TextAlignFlags>(i);
+                if(ImGui::RadioButton(ImZeroFB::EnumNameTextAlignFlags(f),fTextAlign == f)) {
+                    fTextAlign = f;
+                }
+                ImGui::SameLine();
+            }
+            ImGui::NewLine();
+
+            ImGui::PushParagraphTextLayout(fTextAlign,ImZeroFB::TextDirection_ltr);
+            ImGui::PushIsParagraphText(1);
+            ImGui::TextUnformatted("Das Kölner Dombaufest 1848 fand vom 14. bis 16. August 1848 anlässlich des 600. Jahrestages der Grundsteinlegung des Kölner Doms 1248 und der Weihe des provisorisch fertiggestellten Innenraums der Kathedrale statt. Sechs Jahre nach der „zweiten“ Grundsteinlegung zum Weiterbau 1842 war die Grundfläche des Doms zu einem zusammenhängenden, teils noch provisorisch mit einer Holzkonstruktion überdachten Kirchenraum verbunden worden.\n"
+                                   "Das von etwa 29.000 Teilnehmern besuchte Fest war als religiöse Feier geplant worden, erhielt durch die Revolutionsereignisse von 1848 aber auch große politische Bedeutung. Sowohl der preußische König Friedrich Wilhelm IV. als auch Reichsverweser Erzherzog Johann von Österreich als höchster Vertreter einer Provisorischen Zentralgewalt der ersten gesamtdeutschen Regierung sowie etwa 300 Abgeordnete der Frankfurter Nationalversammlung, darunter auch deren Präsident Heinrich von Gagern, waren bei den Feierlichkeiten anwesend. Es war damit das einzige größere Zusammentreffen von Repräsentanten der bürgerlichen Revolution und Vertretern der alten Herrschaftsmacht in den deutschen Ländern überhaupt und führte „erst- und letztmalig alle um Einfluss ringenden Parteien an einem Ort zusammen“.");
+            ImGui::PopIsParagraphText();
+            ImGui::PopParagraphTextLayout();
+            ImGui::TreePop();
+        }
+
+        if(ImGui::TreeNode("Emoji")) {
+            ImGui::TextUnformatted("Source: https://perchance.org/emoji");
+            ImGui::PushIsParagraphText(1);
+            ImGui::TextUnformatted(reinterpret_cast<const char*>(u8"🔖 🐶 ⬇️ 📱 🙍 🔵 🛀 ✔️ *⃣ 📤 🐚 🦂 📓 ❌ ⚖ 🎋 📌 🙄 🎳 🈵 🕵 🏯 🐔 📐 🔞 👧 🎊 🐾 💨 🌶 🕕 ✒️ 😰 🏌 🙈 🤘 🔪 ↘️ 🏝 🌌 ⚓️ ♈️ 💾 🖕 😬 💔 🐓 🔟 🔮 🕸 👬 🚆 🎾 🐲 😆 🏥 🍇 🐽 ♏️ 🎷 🍶 🔦 🌄 😿 🌃 🏂 🚈 🙋 🙅 📺 🔠 🎽 👃 💪 💃 💐 ✍ ⛺️ 🏡 📈 🐿 🏊 👱 🍻 ⚡️ 🌴 🐸 📼 🏵 🚁 🔓 🌔 🕖 📷 📕 🕥 👕 🤓 🏖 💒"));
+            ImGui::PopIsParagraphText();
+            ImGui::TreePop();
+        }
+
+        if(ImGui::TreeNode("Greek")) {
+            ImGui::TextUnformatted("Source: https://lipsum.com");
+            ImGui::PushIsParagraphText(1);
+            ImGui::TextUnformatted(reinterpret_cast<const char*>("Το Lorem Ipsum είναι απλά ένα κείμενο χωρίς νόημα για τους επαγγελματίες της τυπογραφίας και στοιχειοθεσίας. Το Lorem Ipsum είναι το επαγγελματικό πρότυπο όσον αφορά το κείμενο χωρίς νόημα, από τον 15ο αιώνα, όταν ένας ανώνυμος τυπογράφος πήρε ένα δοκίμιο και ανακάτεψε τις λέξεις για να δημιουργήσει ένα δείγμα βιβλίου. Όχι μόνο επιβίωσε πέντε αιώνες, αλλά κυριάρχησε στην ηλεκτρονική στοιχειοθεσία, παραμένοντας με κάθε τρόπο αναλλοίωτο. Έγινε δημοφιλές τη δεκαετία του '60 με την έκδοση των δειγμάτων της Letraset όπου περιελάμβαναν αποσπάσματα του Lorem Ipsum, και πιο πρόσφατα με το λογισμικό ηλεκτρονικής σελιδοποίησης όπως το Aldus PageMaker που περιείχαν εκδοχές του Lorem Ipsum."));
+            ImGui::PopIsParagraphText();
+            ImGui::TreePop();
+        }
+
+        if(ImGui::TreeNode("Arabic")) {
+            ImGui::TextUnformatted("Source: https://istizada.com/arabic-lorem-ipsum/");
+            ImGui::PushIsParagraphText(1);
+            ImGui::PushParagraphTextLayout(ImZeroFB::TextAlignFlags_right,ImZeroFB::TextDirection_rtl);
+            ImGui::TextUnformatted(
+                    reinterpret_cast<const char *>(u8"لكن لا بد أن أوضح لك أن كل هذه الأفكار المغلوطة حول استنكار  النشوة وتمجيد الألم نشأت بالفعل، وسأعرض لك التفاصيل لتكتشف حقيقة وأساس تلك السعادة البشرية، فلا أحد يرفض أو يكره أو يتجنب الشعور بالسعادة، ولكن بفضل هؤلاء الأشخاص الذين لا يدركون بأن السعادة لا بد أن نستشعرها بصورة أكثر عقلانية ومنطقية فيعرضهم هذا لمواجهة الظروف الأليمة، وأكرر بأنه لا يوجد من يرغب في الحب ونيل المنال ويتلذذ بالآلام، الألم هو الألم ولكن نتيجة لظروف ما قد تكمن السعاده فيما نتحمله من كد وأسي.\n"
+                                              "\n"
+                                              "و سأعرض مثال حي لهذا، من منا لم يتحمل جهد بدني شاق إلا من أجل الحصول على ميزة أو فائدة؟ ولكن من لديه الحق أن ينتقد شخص ما أراد أن يشعر بالسعادة التي لا تشوبها عواقب أليمة أو آخر أراد أن يتجنب الألم الذي ربما تنجم عنه بعض المتعة ؟ \n"
+                                              "علي الجانب الآخر نشجب ونستنكر هؤلاء الرجال المفتونون بنشوة اللحظة الهائمون في رغباتهم فلا يدركون ما يعقبها من الألم والأسي المحتم، واللوم كذلك يشمل هؤلاء الذين أخفقوا في واجباتهم نتيجة لضعف إرادتهم فيتساوي مع هؤلاء الذين يتجنبون وينأون عن تحمل الكدح والألم .\n" ));
+            ImGui::PopParagraphTextLayout();
+            ImGui::PopIsParagraphText();
+            ImGui::TreePop();
+        }
+
+        if(ImGui::TreeNode("Chinese")) {
+            ImGui::TextUnformatted("Source: https://en.wikipedia.org/wiki/Thousand_Character_Classic");
+            ImGui::PushIsParagraphText(1);
+            ImGui::TextUnformatted(reinterpret_cast<const char*>(u8"天地玄黄。"));
+            ImGui::PopIsParagraphText();
+            ImGui::TreePop();
+        }
     }
 
     if(ImGui::CollapsingHeader("Paragraph Cache")) {
@@ -426,6 +544,32 @@ void ImZeroSkiaSetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &v
         }
         if(ImGui::Button("off")) {
             ImGui::paragraph->setCacheEnable(false);
+        }
+    }
+
+    if(fontMgr != nullptr) {
+        if(ImGui::CollapsingHeader("Font Manager")) {
+            auto const nFamilies = fontMgr->countFamilies();
+            ImGui::TextUnformatted("Families:");
+            for(int i=0;i<nFamilies;i++) {
+                SkString familyName;
+                fontMgr->getFamilyName(i,&familyName);
+                if(ImGui::TreeNode(familyName.c_str())) {
+                    sk_sp<SkFontStyleSet> set(fontMgr->createStyleSet(i));
+                    auto const font = ImGui::skiaFont;
+                    for (int j = 0; j < set->count(); ++j) {
+                        SkString styleName;
+                        SkFontStyle fs;
+                        set->getStyle(j, &fs, &styleName);
+                        styleName.appendf("%s [%d %d %d]", familyName.c_str(), fs.weight(), fs.width(), fs.slant());
+                        ImGui::TextUnformatted(styleName.c_str(), styleName.c_str() + styleName.size());
+                        if(ImGui::SmallButton(styleName.c_str())) {
+                            ImGui::skiaFont.setTypeface(sk_sp<SkTypeface>(set->createTypeface(j)));
+                        }
+                    }
+                    ImGui::TreePop();
+                }
+            }
         }
     }
 }

@@ -8,4 +8,7 @@ cd "$here"
 ./install_dhall.sh
 
 cd "$here"
+./install_clang.sh
+
+cd "$here"
 ./install_3rd_party_git_repos.sh

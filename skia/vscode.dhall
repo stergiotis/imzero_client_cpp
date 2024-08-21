@@ -1,6 +1,7 @@
 #!/usr/bin/env -S dhall-to-json --output .vscode/c_cpp_properties.json --file
 let lib = ../dhall/lib.dhall
-let common = ./common.dhall
+let c = ./common.dhall
+let common = c False
 let prelude = ../../contrib/dhall-lang/Prelude/package.dhall
 let sourceTreeParts = common.sourceTreeParts
 in
