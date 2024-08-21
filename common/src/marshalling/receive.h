@@ -5,6 +5,7 @@
 #include <type_traits>
 #include <cstddef>
 #include <algorithm>
+#include <cassert>
 #include "../arena/simple/simple.h"
 extern FILE *fdIn;
 extern size_t totalReceivedBytes;
@@ -12,8 +13,14 @@ constexpr const unsigned long alignment = alignof(std::max_align_t);
 constexpr const unsigned long prefixedSizeOffset = (sizeof(uint32_t) > alignment) ? ((sizeof(uint32_t)/alignment)+1)*alignment : alignment;
 
 void receiveInit();
-size_t fread_receiveStat(void *__restrict __ptr, size_t __size, size_t __n, FILE *__restrict __stream) noexcept;
+size_t fread_receiveStat(void *__restrict ptr, size_t size, size_t n, FILE *__restrict stream) noexcept;
 void resetReceiveStat();
+
+template <typename T>
+static inline T* checkAlignment(T *ptr) {
+    assert(reinterpret_cast<uintptr_t>(ptr) % alignment == 0 && "pointer is not alignment");
+    return ptr;
+}
 
 template <typename T>
 static T receiveValue() {
@@ -42,11 +49,11 @@ static T *receiveSlice() {
         return nullptr;
     }
     // use calloc if we receiveParam short, can be lowered to malloc as soon we handle fread errors
-    uint8_t *r = (uint8_t *)arenaCalloc(l*sizeof(T)+prefixedSizeOffset,1);
+    auto *r = (uint8_t *)arenaCalloc(l*sizeof(T)+prefixedSizeOffset,1);
     // store length adjacent to slice
     memcpy(r,&l,sizeof(l));
     fread_receiveStat(r+prefixedSizeOffset,sizeof(T),l,fdIn);
-    return (T*)(r+prefixedSizeOffset);
+    return reinterpret_cast<T*>(checkAlignment(r+prefixedSizeOffset));
 }
 const char *receiveString();
 const char* const* receiveStrings();

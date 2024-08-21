@@ -2,8 +2,8 @@
 FILE *fdIn;
 size_t totalReceivedBytes;
 
-size_t fread_receiveStat(void *__restrict __ptr, size_t __size, size_t __n, FILE *__restrict __stream) noexcept {
-    auto t = fread(__ptr,__size,__n,__stream);
+size_t fread_receiveStat(void *__restrict ptr, size_t size, size_t n, FILE *__restrict stream) noexcept {
+    auto t = fread(ptr,size,n,stream);
     totalReceivedBytes += t;
     return t;
 }

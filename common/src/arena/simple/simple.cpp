@@ -1,23 +1,25 @@
-#include <stdint.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <string.h>
-#include <stdio.h>
+#include <cstdint>
+#include <cstdlib>
+#include <cassert>
+#include <cstring>
+#include <cstdio>
 #include <cstddef>
+#include <memory>
 
 uint8_t *arena = nullptr;
 int64_t arenaPos = 0;
-#ifdef __EMSCRIPTEN__
-constexpr int64_t arenaAllocSize = UINT32_MAX;
-#else
-constexpr int64_t arenaAllocSize = 8ULL*1024ULL*1024ULL*1024ULL;
-#endif
+int64_t arenaAllocSize = 8ULL*1024ULL*1024ULL*1024ULL;
+constexpr const int64_t alignment = static_cast<int64_t>(alignof(std::max_align_t));
 
+static void adjustAlignment() {
+    // ensure the _next_ allocation will be properly aligned
+    arenaPos = (arenaPos - 1 + alignment) & -alignment;
+}
 void arenaInit() {
     if(arena == nullptr) {
         arena = (uint8_t*)malloc(arenaAllocSize);
         assert(arena != nullptr);
-        arenaPos = 0;
+        adjustAlignment();
     }
 }
 size_t arenaSize() {
@@ -39,10 +41,8 @@ void *arenaMalloc(size_t sz) {
     	return nullptr;
     }
     auto r = arena+arenaPos;
-    arenaPos+=sz;
-    // ensure the _next_ allocation will be properly aligned
-    // assume that the modulo operations gets narrowed to a bitwise and
-    arenaPos+=arenaPos % alignof(std::max_align_t);
+    arenaPos+=static_cast<int64_t>(sz);
+    adjustAlignment();
     return r;
 }
 void *arenaCalloc(size_t nmemb,size_t sz) {
