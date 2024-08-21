@@ -2,6 +2,7 @@ let common = \(video : Bool) ->
 	let lib = ../dhall/lib.dhall
 	let debug = False
 	let asan = False
+	let ubsan = False
 	let sourceTreePartsRepo = ../dhall/sourceTreeParts.dhall
 	let sourceTreeParts = [
 		, sourceTreePartsRepo.flatbuffers
@@ -24,8 +25,9 @@ let common = \(video : Bool) ->
 	# (if debug then [ , sourceTreePartsRepo.tracyEnabled ] else [ ,sourceTreePartsRepo.tracyDisabled ] : List lib.sourceTreePart.Type )
         let cxx = "clang++"
 	let cppstd = 20
-	let cxxflags = [
+	let cxxflagsRelease = [
 		, "-fno-omit-frame-pointer" -- increases debuggability with little to no performance impact
+		, "-O3"
 		]
 	let cxxflagsDebug = [
 		, "-g"
@@ -34,14 +36,12 @@ let common = \(video : Bool) ->
 		, "-Wformat"
 		, "-Wextra"
 		, "-O1"
-		] # (if asan then [ "-fsanitize=address", "-fsanitize=undefined" ] else [] : List Text) #
-		[
 		, "-DIMZERO_DEBUG_BUILD"
 		--, "-fno-optimize-sibling-calls" -- no tail calls for better stacktraces
 	]
-	let cxxflagsRelease = [
-		, "-O3"
-	]
+	let cxxflags = (if debug then cxxflagsDebug else cxxflagsRelease)
+	               # (if asan then [ "-fsanitize=address" ] else [] : List Text)
+	               # (if ubsan then [ "-fsanitize=undefined" ] else [] : List Text)
 	let linker = "-fuse-ld=lld"
 	let ldflagsDebug = if asan then [ 
 		, "-fsanitize=address"
@@ -57,6 +57,7 @@ let common = \(video : Bool) ->
 	--	, linker
 		] : List Text
 	--let stdlibFlags = ["-stdlib=libc++"] : List Text
+	let ldflags = if debug then ldflagsDebug else ldflagsRelease
 	let stdlibFlags = [] : List Text
 	let linker = cxx
 	in {
@@ -64,8 +65,8 @@ let common = \(video : Bool) ->
 	    , cxx
 		, linker
 	    , cppstd
-		, cxxflags = cxxflags # (if debug then cxxflagsDebug else cxxflagsRelease)
-		, ldflags = if debug then ldflagsDebug else ldflagsRelease
+		, cxxflags = cxxflags
+		, ldflags = ldflags
 		, stdlibFlags
 		, debug
 	}
