@@ -14,6 +14,7 @@ here=$(dirname "$(readlink -f "$BASH_SOURCE")")
 "$here/patch_skia_m124.sh"
 
 cd ../../contrib/skia
+export GIT_SYNC_DEPS_SKIP_EMSDK="true"
 python3 tools/git-sync-deps
 
 mkdir -p out/Shared
