@@ -9,7 +9,7 @@
 extern FILE *fdIn;
 extern size_t totalReceivedBytes;
 constexpr const unsigned long alignment = alignof(std::max_align_t);
-constexpr const unsigned long prefixedSizeOffset = std::max(sizeof(uint32_t),alignment);
+constexpr const unsigned long prefixedSizeOffset = (sizeof(uint32_t) > alignment) ? ((sizeof(uint32_t)/alignment)+1)*alignment : alignment;
 
 void receiveInit();
 size_t fread_receiveStat(void *__restrict __ptr, size_t __size, size_t __n, FILE *__restrict __stream) noexcept;
