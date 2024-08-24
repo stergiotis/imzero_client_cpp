@@ -3,7 +3,6 @@ FILE *fdOut;
 size_t totalSentBytes;
 
 void sendInit() {
-    fdOut = stdout;
     resetSendStat();
 }
 void resetSendStat() {

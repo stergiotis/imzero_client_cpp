@@ -11,7 +11,6 @@ void resetReceiveStat() {
     totalReceivedBytes = 0;
 }
 void receiveInit() {
-    fdIn = stdin;
     resetReceiveStat();
 }
 const char *receiveString() {

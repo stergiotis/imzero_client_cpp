@@ -113,7 +113,9 @@ static void setup_imgui() {
 }
 
 #include "style.h"
-void render_init() {
+void render_init(FILE *fdInput,FILE *fdOutput) {
+    fdIn = fdInput;
+    fdOut = fdOutput;
     //StyeColorsApp();
     setup_imgui();
 

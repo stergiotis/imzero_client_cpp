@@ -219,23 +219,25 @@ static void build_ImFontAtlas(ImFontAtlas& atlas, SkPaint& fontPaint) {
 int App::Run(CliOptions &opts) {
     sk_sp<SkTypeface> typeface = nullptr;
     sk_sp<SkData> ttfData = nullptr;
+    FILE *fffiInFile = stdin;
+    FILE *fffiOutFile = stdout;
     { // setup skia/imgui shared objects
         if (opts.fffiInterpreter) {
             if (opts.fffiInFile != nullptr) {
-                fdIn = fopen(opts.fffiInFile, "r");
-                if (fdIn == nullptr) {
+                fffiInFile = fopen(opts.fffiInFile, "rw");
+                if (fffiInFile == nullptr) {
                     fprintf(stderr, "unable to open fffInFile %s: %s", opts.fffiInFile, strerror(errno));
                     exit(1);
                 }
-                setvbuf(fdIn, nullptr, _IONBF, 0);
+                setvbuf(fffiInFile, nullptr, _IONBF, 0);
             }
             if (opts.fffiOutFile != nullptr) {
-                fdOut = fopen(opts.fffiOutFile, "w");
-                if (fdOut == nullptr) {
+                fffiOutFile = fopen(opts.fffiOutFile, "w");
+                if (fffiOutFile == nullptr) {
                     fprintf(stderr, "unable to open fffOutFile %s: %s", opts.fffiOutFile, strerror(errno));
                     exit(1);
                 }
-                setvbuf(fdOut, nullptr, _IONBF, 0);
+                setvbuf(fffiOutFile, nullptr, _IONBF, 0);
             }
         }
 
@@ -407,7 +409,7 @@ int App::Run(CliOptions &opts) {
     }
 
     if(opts.fffiInterpreter) {
-        render_init();
+        render_init(fffiInFile,fffiOutFile);
     }
 
     createContext(clearColor,dm->w,dm->h);
