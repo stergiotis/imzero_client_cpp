@@ -2201,9 +2201,9 @@ void ImDrawListSplitter::ClearFreeMemory()
             _ChannelsFbBuilders[i] = nullptr;
         } else {
             _ChannelsFbCmds[i]->clear();
-            delete _ChannelsFbCmds[i];
+            IM_DELETE(_ChannelsFbCmds[i]);
             _ChannelsFbBuilders[i]->Clear();
-            delete _ChannelsFbBuilders[i];
+            IM_DELETE(_ChannelsFbBuilders[i]);
         }
     }
     _ChannelsFbCmds.clear();
@@ -2242,8 +2242,8 @@ void ImDrawListSplitter::Split(ImDrawList* draw_list, int channels_count)
         {
             IM_PLACEMENT_NEW(&_Channels[i]) ImDrawChannel();
 #ifdef IMZERO_DRAWLIST
-            _ChannelsFbCmds[i] = new std::vector<flatbuffers::Offset<ImZeroFB::SingleVectorCmdDto>>();
-            _ChannelsFbBuilders[i] = new flatbuffers::FlatBufferBuilder();
+            _ChannelsFbCmds[i] = IM_NEW(std::vector<flatbuffers::Offset<ImZeroFB::SingleVectorCmdDto>>);
+            _ChannelsFbBuilders[i] = IM_NEW(flatbuffers::FlatBufferBuilder);
 #endif
         }
         else
@@ -2381,8 +2381,8 @@ void ImDrawListSplitter::SetCurrentChannel(ImDrawList* draw_list, int idx)
         _ChannelsFbBuilders.resize(idx);
         IM_ASSERT(b > 0 && "first slot is reserved for drawlist's objects");
         for(auto i=b;i<idx;i++) {
-            _ChannelsFbCmds[i] = new std::vector<flatbuffers::Offset<ImZeroFB::SingleVectorCmdDto>>();
-            _ChannelsFbBuilders[i] = new flatbuffers::FlatBufferBuilder();
+            _ChannelsFbCmds[i] = IM_NEW(std::vector<flatbuffers::Offset<ImZeroFB::SingleVectorCmdDto>>);
+            _ChannelsFbBuilders[i] = IM_NEW(flatbuffers::FlatBufferBuilder);
         }
     }
 #endif
