@@ -26,7 +26,7 @@ case 0x000007d2:
     auto foreignptr = receiveValue<uintptr_t>();
     auto title = receiveString();
     {
-    ((TextEditor*)foreignptr)->Render(title);
+    ((TextEditor*)foreignptr)->Render(title, true);
   }
   }
   break;
@@ -38,7 +38,7 @@ case 0x000007d3:
     auto aSize = receiveArray<float,2>();
     auto aBorder = receiveValue<bool>();
     {
-    ((TextEditor*)foreignptr)->Render(title, aSize, aBorder);
+    ((TextEditor*)foreignptr)->Render(title, true, aSize, aBorder);
   }
   }
   break;
@@ -148,7 +148,8 @@ case 0x000007dc:
     bool cursor;
     {
     auto p = ((TextEditor*)foreignptr);
-cursor = p->IsCursorPositionChanged();
+    cursor = false;
+//cursor = p->IsCursorPositionChanged();
 text = p->IsTextChanged();
     sendEmptyString();
     sendValue<bool>(text);

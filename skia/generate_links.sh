@@ -19,6 +19,7 @@ link ../common/contrib/imgui_implot/implot_items.cpp ./implot/implot_items.cpp
 link ../common/contrib/imgui_implot/implot_demo.cpp ./implot/implot_demo.cpp 
 link ../common/contrib/imgui_ImGuiColorTextEdit/TextEditor.cpp ./imcolortextedit/TextEditor.cpp 
 link ../common/contrib/imgui_ImGuiColorTextEdit/TextEditor.h ./imcolortextedit/TextEditor.h 
+link ../common/contrib/imgui_ImGuiColorTextEdit/LanguageDefinitions.cpp ./imcolortextedit/LanguageDefinitions.cpp
 link ../common/contrib/sdl3 contrib/sdl3
 link ../common/contrib/qoi contrib/qoi
 link ../common/contrib/tracy contrib/tracy

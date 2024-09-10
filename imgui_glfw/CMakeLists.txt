@@ -87,7 +87,8 @@ target_include_directories(imguiFlamegraph PUBLIC "${CMAKE_CURRENT_LIST_DIR}/./s
 "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_flamegraph")
 
 # imguiTextedit
-add_library(imguiTextedit OBJECT "${CMAKE_CURRENT_LIST_DIR}/./imcolortextedit/TextEditor.cpp")
+add_library(imguiTextedit OBJECT "${CMAKE_CURRENT_LIST_DIR}/./imcolortextedit/TextEditor.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./imcolortextedit/LanguageDefinitions.cpp")
 target_compile_options(imguiTextedit PUBLIC -Wno-unused-variable)
 
 # binding

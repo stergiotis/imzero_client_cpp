@@ -289,6 +289,7 @@ let imguiTextedit = let dir = "./imcolortextedit" in sourceTreePart::{
 	}
 	, sources = [
 		, "${dir}/TextEditor.cpp"
+		, "${dir}/LanguageDefinitions.cpp"
 	]
 	, cxxflags = {
 		, global = [
