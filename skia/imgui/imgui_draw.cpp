@@ -2183,6 +2183,90 @@ IMZERO_DRAWLIST_END
 // FIXME: This may be a little confusing, trying to be a little too low-level/optimal instead of just doing vector swap..
 //-----------------------------------------------------------------------------
 
+static inline void imDrawListSplitterSaveDrawListToSplitter(ImDrawListSplitter &splitter, const ImDrawList *draw_list, int idx) {
+    IM_ASSERT(splitter._ChannelsFbCmds[idx] != nullptr && "uninitialized channel fb");
+    splitter._ChannelsFbCmds[idx] = draw_list->_FbCmds;
+    splitter._ChannelsFbBuilders[idx] = draw_list->fbBuilder;
+}
+static inline void imDrawListSplitterRestoreDrawListFromSplitter(ImDrawListSplitter const &splitter, ImDrawList *draw_list, int idx) {
+    IM_ASSERT(splitter._ChannelsFbCmds[idx] != nullptr && "uninitialized channel fb");
+    draw_list->_FbCmds = splitter._ChannelsFbCmds[idx];
+    draw_list->fbBuilder = splitter._ChannelsFbBuilders[idx];
+}
+static inline int imDrawListSplitterEnsureSlotsCapacity(ImDrawListSplitter &splitter, int nSlotsTotal) {
+    // _Current is zero when ImDrawListSplitter gets initialized but _Channels.Data[0] is not properly
+    // initialized. Why does the regular ImGui code get away with the check below?
+    auto b = splitter._ChannelsFbCmds.size();
+    if(b < nSlotsTotal) { ZoneScopedN("initialize additional channels");
+        splitter._ChannelsFbCmds.reserve(nSlotsTotal);
+        splitter._ChannelsFbCmds.resize(nSlotsTotal);
+        splitter._ChannelsFbBuilders.reserve(nSlotsTotal);
+        splitter._ChannelsFbBuilders.resize(nSlotsTotal);
+        return nSlotsTotal-b;
+    } else {
+       return 0;
+    }
+}
+static inline void imDrawListSplitterResetSlot(ImDrawListSplitter &splitter,int i) {
+    splitter._ChannelsFbCmds[i]->resize(0);
+    splitter._ChannelsFbBuilders[i]->Clear();
+}
+static inline void imDrawListSplitterInitSlot(ImDrawListSplitter &splitter,int i) {
+    splitter._ChannelsFbCmds[i] = IM_NEW(std::vector<flatbuffers::Offset<ImZeroFB::SingleVectorCmdDto>>);
+    splitter._ChannelsFbBuilders[i] = IM_NEW(flatbuffers::FlatBufferBuilder);
+}
+static inline void imDrawListSplitterInitSlots(ImDrawListSplitter &splitter, int nSlotsToInit) {
+    auto b = splitter._ChannelsFbCmds.size();
+    IM_ASSERT(nSlotsToInit <= b && nSlotsToInit >= 0 && "nSlotsToInit is out of bounds" );
+    for(auto i=b-nSlotsToInit;i<b;i++) {
+        imDrawListSplitterInitSlot(splitter,i);
+    }
+}
+static inline void imDrawListSplitterClearFreeMemory(ImDrawListSplitter &splitter) {
+    for (int i = 0; i < splitter._ChannelsFbCmds.Size; i++)
+    {
+        if (i == splitter._Current) {
+            splitter._ChannelsFbCmds[i] = nullptr;
+            splitter._ChannelsFbBuilders[i] = nullptr;
+        } else {
+            splitter._ChannelsFbCmds[i]->clear();
+            IM_DELETE(splitter._ChannelsFbCmds[i]);
+            splitter._ChannelsFbBuilders[i]->Clear();
+            IM_DELETE(splitter._ChannelsFbBuilders[i]);
+        }
+    }
+    splitter._ChannelsFbCmds.clear();
+    splitter._ChannelsFbBuilders.clear();
+}
+static inline int imDrawListSplitterMergeInitialValue(ImDrawListSplitter &splitter,ImDrawList *drawList) {
+   IM_ASSERT_PARANOID(drawList->fbBuilder == splitter._ChannelsFbBuilders[0] && "lowest channel is active channel");
+   IM_ASSERT_PARANOID(drawList->_FbCmds == splitter._ChannelsFbCmds[0] && "lowest channel is active channel");
+   return 0;
+}
+static inline int imDrawListSplitterMergeUpdate(ImDrawListSplitter &splitter,int i,int prev) {
+    return prev + static_cast<int>(splitter._ChannelsFbCmds[i]->size());
+}
+static inline void imDrawListSplitterMergeReserve(ImDrawList *drawList,int n) {
+    drawList->_FbCmds->reserve(drawList->_FbCmds->size() + n);
+}
+static inline void imDrawListSplitterMergeOp(ImDrawListSplitter &splitter,ImDrawList *drawList,int i) { ZoneScopedN("serialize and add split draw list");
+    // build command
+    auto builder = splitter._ChannelsFbBuilders[i];
+    auto dlFb = createVectorCmdFBDrawList(*drawList,true,*splitter._ChannelsFbCmds[i],*builder);
+    builder->Finish(dlFb,nullptr);
+
+    // serialize
+    auto const buf = builder->GetBufferPointer();
+    auto const bufSize = builder->GetSize();
+
+    // append to drawlist
+    auto const bufVec = drawList->fbBuilder->CreateVector<uint8_t>(buf,bufSize);
+    auto const cmd = ImZeroFB::CreateCmdWrappedDrawList(*drawList->fbBuilder,bufVec);
+    drawList->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdWrappedDrawList,cmd.Union());
+
+    builder->Clear();
+}
+
 void ImDrawListSplitter::ClearFreeMemory()
 { ZoneScoped;
     for (int i = 0; i < _Channels.Size; i++)
@@ -2194,20 +2278,7 @@ void ImDrawListSplitter::ClearFreeMemory()
         _Channels[i]._IdxBuffer.clear();
     }
 #ifdef IMZERO_DRAWLIST
-    for (int i = 0; i < _ChannelsFbCmds.Size; i++)
-    {
-        if (i == _Current) {
-            _ChannelsFbCmds[i] = nullptr;
-            _ChannelsFbBuilders[i] = nullptr;
-        } else {
-            _ChannelsFbCmds[i]->clear();
-            IM_DELETE(_ChannelsFbCmds[i]);
-            _ChannelsFbBuilders[i]->Clear();
-            IM_DELETE(_ChannelsFbBuilders[i]);
-        }
-    }
-    _ChannelsFbCmds.clear();
-    _ChannelsFbBuilders.clear();
+    imDrawListSplitterClearFreeMemory(*this);
 #endif
     _Current = 0;
     _Count = 1;
@@ -2224,10 +2295,7 @@ void ImDrawListSplitter::Split(ImDrawList* draw_list, int channels_count)
         _Channels.reserve(channels_count); // Avoid over reserving since this is likely to stay stable
         _Channels.resize(channels_count);
 #ifdef IMZERO_DRAWLIST
-        _ChannelsFbCmds.reserve(channels_count);
-        _ChannelsFbCmds.resize(channels_count);
-        _ChannelsFbBuilders.reserve(channels_count);
-        _ChannelsFbBuilders.resize(channels_count);
+        imDrawListSplitterEnsureSlotsCapacity(*this,channels_count);
 #endif
     }
     _Count = channels_count;
@@ -2242,8 +2310,7 @@ void ImDrawListSplitter::Split(ImDrawList* draw_list, int channels_count)
         {
             IM_PLACEMENT_NEW(&_Channels[i]) ImDrawChannel();
 #ifdef IMZERO_DRAWLIST
-            _ChannelsFbCmds[i] = IM_NEW(std::vector<flatbuffers::Offset<ImZeroFB::SingleVectorCmdDto>>);
-            _ChannelsFbBuilders[i] = IM_NEW(flatbuffers::FlatBufferBuilder);
+            imDrawListSplitterInitSlot(*this,i);
 #endif
         }
         else
@@ -2251,8 +2318,7 @@ void ImDrawListSplitter::Split(ImDrawList* draw_list, int channels_count)
             _Channels[i]._CmdBuffer.resize(0);
             _Channels[i]._IdxBuffer.resize(0);
 #ifdef IMZERO_DRAWLIST
-            _ChannelsFbCmds[i]->resize(0);
-            _ChannelsFbBuilders[i]->Clear();
+            imDrawListSplitterResetSlot(*this,i);
 #endif
         }
     }
@@ -2272,9 +2338,7 @@ void ImDrawListSplitter::Merge(ImDrawList* draw_list)
     int new_cmd_buffer_count = 0;
     int new_idx_buffer_count = 0;
 #ifdef IMZERO_DRAWLIST
-    IM_ASSERT_PARANOID(draw_list->fbBuilder == _ChannelsFbBuilders[0] && "lowest channel is active channel");
-    IM_ASSERT_PARANOID(draw_list->_FbCmds == _ChannelsFbCmds[0] && "lowest channel is active channel");
-    int new_fb_cmds_count = 0;
+    auto imzero_acc = imDrawListSplitterMergeInitialValue(*this, draw_list);
 #endif
     ImDrawCmd* last_cmd = (_Count > 0 && draw_list->CmdBuffer.Size > 0) ? &draw_list->CmdBuffer.back() : NULL;
     int idx_offset = last_cmd ? last_cmd->IdxOffset + last_cmd->ElemCount : 0;
@@ -2302,7 +2366,7 @@ void ImDrawListSplitter::Merge(ImDrawList* draw_list)
         new_cmd_buffer_count += ch._CmdBuffer.Size;
         new_idx_buffer_count += ch._IdxBuffer.Size;
 #ifdef IMZERO_DRAWLIST
-        new_fb_cmds_count += static_cast<int>(_ChannelsFbCmds[i]->size());
+        imzero_acc = imDrawListSplitterMergeUpdate(*this,i,imzero_acc);
 #endif
         for (int cmd_n = 0; cmd_n < ch._CmdBuffer.Size; cmd_n++)
         {
@@ -2313,7 +2377,7 @@ void ImDrawListSplitter::Merge(ImDrawList* draw_list)
     draw_list->CmdBuffer.resize(draw_list->CmdBuffer.Size + new_cmd_buffer_count);
     draw_list->IdxBuffer.resize(draw_list->IdxBuffer.Size + new_idx_buffer_count);
 #ifdef IMZERO_DRAWLIST
-    draw_list->_FbCmds->reserve(draw_list->_FbCmds->size() + new_fb_cmds_count);
+    imDrawListSplitterMergeReserve(draw_list,imzero_acc);
 #endif
 
     // Write commands and indices in order (they are fairly small structures, we don't copy vertices only indices)
@@ -2325,25 +2389,8 @@ void ImDrawListSplitter::Merge(ImDrawList* draw_list)
         if (int sz = ch._CmdBuffer.Size) { memcpy(cmd_write, ch._CmdBuffer.Data, sz * sizeof(ImDrawCmd)); cmd_write += sz; }
         if (int sz = ch._IdxBuffer.Size) { memcpy(idx_write, ch._IdxBuffer.Data, sz * sizeof(ImDrawIdx)); idx_write += sz; }
 #ifdef IMZERO_DRAWLIST
-        { ZoneScopedN("serialize and add split drawlist");
-            // build command
-            auto builder = _ChannelsFbBuilders[i];
-            auto dlFb = createVectorCmdFBDrawList(*draw_list,true,*_ChannelsFbCmds[i],*builder);
-            builder->Finish(dlFb,nullptr);
-
-            // serialize
-            auto const buf = builder->GetBufferPointer();
-            auto const bufSize = builder->GetSize();
-
-            // append to drawlist
-            auto const bufVec = draw_list->fbBuilder->CreateVector<uint8_t>(buf,bufSize);
-            auto const cmd = ImZeroFB::CreateCmdWrappedDrawList(*draw_list->fbBuilder,bufVec);
-            draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdWrappedDrawList,cmd.Union());
-
-            builder->Clear();
-        }
-        _ChannelsFbCmds[i]->resize(0);
-        _ChannelsFbBuilders[i]->Clear();
+        imDrawListSplitterMergeOp(*this,draw_list,i);
+        imDrawListSplitterResetSlot(*this,i);
 #endif
     }
     draw_list->_IdxWritePtr = idx_write;
@@ -2370,40 +2417,20 @@ void ImDrawListSplitter::SetCurrentChannel(ImDrawList* draw_list, int idx)
     if (_Current == idx)
         return;
 
-#ifdef IMZERO_DRAWLIST
-    // _Current is zero when ImDrawListSplitter gets initialized but _Channels.Data[0] is not properly
-    // initialized. Why does the regular ImGui code get aways with the check below?
-    if(_ChannelsFbCmds.size() < idx) { ZoneScopedN("initialize additional channels");
-        auto b = _ChannelsFbCmds.size();
-        _ChannelsFbCmds.reserve(idx);
-        _ChannelsFbCmds.resize(idx);
-        _ChannelsFbBuilders.reserve(idx);
-        _ChannelsFbBuilders.resize(idx);
-        IM_ASSERT(b > 0 && "first slot is reserved for drawlist's objects");
-        for(auto i=b;i<idx;i++) {
-            _ChannelsFbCmds[i] = IM_NEW(std::vector<flatbuffers::Offset<ImZeroFB::SingleVectorCmdDto>>);
-            _ChannelsFbBuilders[i] = IM_NEW(flatbuffers::FlatBufferBuilder);
-        }
-    }
-#endif
-
     // Overwrite ImVector (12/16 bytes), four times. This is merely a silly optimization instead of doing .swap()
     memcpy(&_Channels.Data[_Current]._CmdBuffer, &draw_list->CmdBuffer, sizeof(draw_list->CmdBuffer));
     memcpy(&_Channels.Data[_Current]._IdxBuffer, &draw_list->IdxBuffer, sizeof(draw_list->IdxBuffer));
+
 #ifdef IMZERO_DRAWLIST
-    IM_ASSERT(_ChannelsFbCmds[idx] != nullptr && "uninitialized channel fb");
-    _ChannelsFbCmds[_Current] = draw_list->_FbCmds;
-    _ChannelsFbBuilders[_Current] = draw_list->fbBuilder;
+    imDrawListSplitterInitSlots(*this, imDrawListSplitterEnsureSlotsCapacity(*this,idx));
+    imDrawListSplitterSaveDrawListToSplitter(*this,draw_list,_Current);
+    imDrawListSplitterRestoreDrawListFromSplitter(*this,draw_list,idx);
 #endif
+
     _Current = idx;
     memcpy(&draw_list->CmdBuffer, &_Channels.Data[idx]._CmdBuffer, sizeof(draw_list->CmdBuffer));
     memcpy(&draw_list->IdxBuffer, &_Channels.Data[idx]._IdxBuffer, sizeof(draw_list->IdxBuffer));
     draw_list->_IdxWritePtr = draw_list->IdxBuffer.Data + draw_list->IdxBuffer.Size;
-#ifdef IMZERO_DRAWLIST
-    IM_ASSERT(_ChannelsFbCmds[idx] != nullptr && "uninitialized channel fb");
-    draw_list->_FbCmds = _ChannelsFbCmds[idx];
-    draw_list->fbBuilder = _ChannelsFbBuilders[idx];
-#endif
 
     // If current command is used with different settings we need to add a new command
     ImDrawCmd* curr_cmd = (draw_list->CmdBuffer.Size == 0) ? NULL : &draw_list->CmdBuffer.Data[draw_list->CmdBuffer.Size - 1];
