@@ -129,8 +129,7 @@ table CmdNgonFilled {
 }
 table CmdEllipse {
     center: SingleVec2;
-    radius_x: float;
-    radius_y: float;
+    radius: SingleVec2;
     col: uint32;
     rot: float;
     num_segments: int;
@@ -138,8 +137,7 @@ table CmdEllipse {
 }
 table CmdEllipseFilled {
     center: SingleVec2;
-    radius_x: float;
-    radius_y: float;
+    radius: SingleVec2;
     col: uint32;
     rot: float;
     num_segments: int;

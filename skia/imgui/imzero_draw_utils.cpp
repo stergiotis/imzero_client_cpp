@@ -50,9 +50,9 @@ ImZeroFB::DrawListFlags getVectorCmdFBFlags(const ImZeroDrawList &drawList) {
             copyFlag(flags, ImDrawListFlags_AntiAliasedLines, ImZeroFB::DrawListFlags_AntiAliasedLines) |
             copyFlag(flags, ImDrawListFlags_AntiAliasedFill, ImZeroFB::DrawListFlags_AntiAliasedFill));
 }
-flatbuffers::Offset<ImZeroFB::DrawList> createVectorCmdFBDrawList(ImZeroDrawList &drawList,bool inner,
-                                                                         std::vector<flatbuffers::Offset<ImZeroFB::SingleVectorCmdDto>> &fbCmds,
-                                                                         flatbuffers::FlatBufferBuilder &fbBuilder) { ZoneScoped;
+flatbuffers::Offset<ImZeroFB::DrawList> createVectorCmdFBDrawList(ImDrawList drawList, bool inner,
+                                                                  std::vector<flatbuffers::Offset<ImZeroFB::SingleVectorCmdDto>> &fbCmds,
+                                                                  flatbuffers::FlatBufferBuilder &fbBuilder) { ZoneScoped;
     auto cmds = fbBuilder.CreateVector(fbCmds);
     flatbuffers::Offset<flatbuffers::String> name;
     if(inner) {

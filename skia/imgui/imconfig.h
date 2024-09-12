@@ -15,16 +15,7 @@
 #pragma once
 
 #ifdef IMZERO_DEBUG_BUILD
-#include <stdio.h>
-#include <cassert>
-#include <cstdlib>
-#include "../skia/imzero_assert.h"
-
-//---- Define assertion handler. Defaults to calling assert().
-// If your macro uses multiple statements, make sure is enclosed in a 'do { .. } while (0)' block so it can be used as a single statement.
-//#define IM_ASSERT(_EXPR)  MyAssert(_EXPR)
-//#define IM_ASSERT(_EXPR)  ((void)(_EXPR))     // Disable asserts
-#define IM_ASSERT(_EXPR) ((_EXPR) ? (void)(0) : imzeroAssert(__func__,__FILE__,__LINE__))
+#include "imgui_user_prolog.h"
 #endif
 
 //---- Define attributes of all API symbols declarations, e.g. for DLL under Windows
@@ -57,8 +48,13 @@
 //#define IMGUI_DISABLE_DEFAULT_ALLOCATORS                  // Don't implement default allocators calling malloc()/free() to avoid linking with them. You will need to call ImGui::SetAllocatorFunctions().
 //#define IMGUI_DISABLE_SSE                                 // Disable use of SSE intrinsics even if available
 
+//---- Enable Test Engine / Automation features.
+//#define IMGUI_ENABLE_TEST_ENGINE                          // Enable imgui_test_engine hooks. Generally set automatically by include "imgui_te_config.h", see Test Engine for details.
+
 //---- Include imgui_user.h at the end of imgui.h as a convenience
+// May be convenient for some users to only explicitly include vanilla imgui.h and have extra stuff included.
 //#define IMGUI_INCLUDE_IMGUI_USER_H
+//#define IMGUI_USER_H_FILENAME         "my_folder/my_imgui_user.h"
 
 //---- Pack colors to BGRA8 instead of RGBA8 (to avoid converting from one to another)
 //#define IMGUI_USE_BGRA_PACKED_COLOR
@@ -135,3 +131,5 @@ namespace ImGui
     void MyFunction(const char* name, MyMatrix44* mtx);
 }
 */
+
+#define IMGUI_HOOK_ENABLE

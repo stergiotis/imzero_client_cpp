@@ -1039,8 +1039,8 @@ void drawCmdEllipse_(const T &cmd,SkCanvas &canvas,SkPaint &paint) {
     auto const r = SkRadiansToDegrees(SkScalar(cmd.rot()));
     canvas.rotate(r,x,y);
 
-    auto const radius_x = SkScalar(cmd.radius_x());
-    auto const radius_y = SkScalar(cmd.radius_y());
+    auto const radius_x = SkScalar(cmd.radius()->x());
+    auto const radius_y = SkScalar(cmd.radius()->y());
     canvas.drawOval(SkRect::MakeLTRB(x-radius_x,y-radius_y,x+radius_x,y+radius_y),paint);
     canvas.rotate(-r,x,y);
 }

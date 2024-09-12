@@ -2935,21 +2935,17 @@ struct CmdEllipse FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
   }
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
     VT_CENTER = 4,
-    VT_RADIUS_X = 6,
-    VT_RADIUS_Y = 8,
-    VT_COL = 10,
-    VT_ROT = 12,
-    VT_NUM_SEGMENTS = 14,
-    VT_THICKNESS = 16
+    VT_RADIUS = 6,
+    VT_COL = 8,
+    VT_ROT = 10,
+    VT_NUM_SEGMENTS = 12,
+    VT_THICKNESS = 14
   };
   const ImZeroFB::SingleVec2 *center() const {
     return GetStruct<const ImZeroFB::SingleVec2 *>(VT_CENTER);
   }
-  float radius_x() const {
-    return GetField<float>(VT_RADIUS_X, 0.0f);
-  }
-  float radius_y() const {
-    return GetField<float>(VT_RADIUS_Y, 0.0f);
+  const ImZeroFB::SingleVec2 *radius() const {
+    return GetStruct<const ImZeroFB::SingleVec2 *>(VT_RADIUS);
   }
   uint32_t col() const {
     return GetField<uint32_t>(VT_COL, 0);
@@ -2966,8 +2962,7 @@ struct CmdEllipse FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
   bool Verify(::flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<ImZeroFB::SingleVec2>(verifier, VT_CENTER, 4) &&
-           VerifyField<float>(verifier, VT_RADIUS_X, 4) &&
-           VerifyField<float>(verifier, VT_RADIUS_Y, 4) &&
+           VerifyField<ImZeroFB::SingleVec2>(verifier, VT_RADIUS, 4) &&
            VerifyField<uint32_t>(verifier, VT_COL, 4) &&
            VerifyField<float>(verifier, VT_ROT, 4) &&
            VerifyField<int32_t>(verifier, VT_NUM_SEGMENTS, 4) &&
@@ -2983,11 +2978,8 @@ struct CmdEllipseBuilder {
   void add_center(const ImZeroFB::SingleVec2 *center) {
     fbb_.AddStruct(CmdEllipse::VT_CENTER, center);
   }
-  void add_radius_x(float radius_x) {
-    fbb_.AddElement<float>(CmdEllipse::VT_RADIUS_X, radius_x, 0.0f);
-  }
-  void add_radius_y(float radius_y) {
-    fbb_.AddElement<float>(CmdEllipse::VT_RADIUS_Y, radius_y, 0.0f);
+  void add_radius(const ImZeroFB::SingleVec2 *radius) {
+    fbb_.AddStruct(CmdEllipse::VT_RADIUS, radius);
   }
   void add_col(uint32_t col) {
     fbb_.AddElement<uint32_t>(CmdEllipse::VT_COL, col, 0);
@@ -3015,8 +3007,7 @@ struct CmdEllipseBuilder {
 inline ::flatbuffers::Offset<CmdEllipse> CreateCmdEllipse(
     ::flatbuffers::FlatBufferBuilder &_fbb,
     const ImZeroFB::SingleVec2 *center = nullptr,
-    float radius_x = 0.0f,
-    float radius_y = 0.0f,
+    const ImZeroFB::SingleVec2 *radius = nullptr,
     uint32_t col = 0,
     float rot = 0.0f,
     int32_t num_segments = 0,
@@ -3026,8 +3017,7 @@ inline ::flatbuffers::Offset<CmdEllipse> CreateCmdEllipse(
   builder_.add_num_segments(num_segments);
   builder_.add_rot(rot);
   builder_.add_col(col);
-  builder_.add_radius_y(radius_y);
-  builder_.add_radius_x(radius_x);
+  builder_.add_radius(radius);
   builder_.add_center(center);
   return builder_.Finish();
 }
@@ -3039,20 +3029,16 @@ struct CmdEllipseFilled FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
   }
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
     VT_CENTER = 4,
-    VT_RADIUS_X = 6,
-    VT_RADIUS_Y = 8,
-    VT_COL = 10,
-    VT_ROT = 12,
-    VT_NUM_SEGMENTS = 14
+    VT_RADIUS = 6,
+    VT_COL = 8,
+    VT_ROT = 10,
+    VT_NUM_SEGMENTS = 12
   };
   const ImZeroFB::SingleVec2 *center() const {
     return GetStruct<const ImZeroFB::SingleVec2 *>(VT_CENTER);
   }
-  float radius_x() const {
-    return GetField<float>(VT_RADIUS_X, 0.0f);
-  }
-  float radius_y() const {
-    return GetField<float>(VT_RADIUS_Y, 0.0f);
+  const ImZeroFB::SingleVec2 *radius() const {
+    return GetStruct<const ImZeroFB::SingleVec2 *>(VT_RADIUS);
   }
   uint32_t col() const {
     return GetField<uint32_t>(VT_COL, 0);
@@ -3066,8 +3052,7 @@ struct CmdEllipseFilled FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
   bool Verify(::flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<ImZeroFB::SingleVec2>(verifier, VT_CENTER, 4) &&
-           VerifyField<float>(verifier, VT_RADIUS_X, 4) &&
-           VerifyField<float>(verifier, VT_RADIUS_Y, 4) &&
+           VerifyField<ImZeroFB::SingleVec2>(verifier, VT_RADIUS, 4) &&
            VerifyField<uint32_t>(verifier, VT_COL, 4) &&
            VerifyField<float>(verifier, VT_ROT, 4) &&
            VerifyField<int32_t>(verifier, VT_NUM_SEGMENTS, 4) &&
@@ -3082,11 +3067,8 @@ struct CmdEllipseFilledBuilder {
   void add_center(const ImZeroFB::SingleVec2 *center) {
     fbb_.AddStruct(CmdEllipseFilled::VT_CENTER, center);
   }
-  void add_radius_x(float radius_x) {
-    fbb_.AddElement<float>(CmdEllipseFilled::VT_RADIUS_X, radius_x, 0.0f);
-  }
-  void add_radius_y(float radius_y) {
-    fbb_.AddElement<float>(CmdEllipseFilled::VT_RADIUS_Y, radius_y, 0.0f);
+  void add_radius(const ImZeroFB::SingleVec2 *radius) {
+    fbb_.AddStruct(CmdEllipseFilled::VT_RADIUS, radius);
   }
   void add_col(uint32_t col) {
     fbb_.AddElement<uint32_t>(CmdEllipseFilled::VT_COL, col, 0);
@@ -3111,8 +3093,7 @@ struct CmdEllipseFilledBuilder {
 inline ::flatbuffers::Offset<CmdEllipseFilled> CreateCmdEllipseFilled(
     ::flatbuffers::FlatBufferBuilder &_fbb,
     const ImZeroFB::SingleVec2 *center = nullptr,
-    float radius_x = 0.0f,
-    float radius_y = 0.0f,
+    const ImZeroFB::SingleVec2 *radius = nullptr,
     uint32_t col = 0,
     float rot = 0.0f,
     int32_t num_segments = 0) {
@@ -3120,8 +3101,7 @@ inline ::flatbuffers::Offset<CmdEllipseFilled> CreateCmdEllipseFilled(
   builder_.add_num_segments(num_segments);
   builder_.add_rot(rot);
   builder_.add_col(col);
-  builder_.add_radius_y(radius_y);
-  builder_.add_radius_x(radius_x);
+  builder_.add_radius(radius);
   builder_.add_center(center);
   return builder_.Finish();
 }
@@ -7075,8 +7055,7 @@ inline const ::flatbuffers::TypeTable *CmdNgonFilledTypeTable() {
 inline const ::flatbuffers::TypeTable *CmdEllipseTypeTable() {
   static const ::flatbuffers::TypeCode type_codes[] = {
     { ::flatbuffers::ET_SEQUENCE, 0, 0 },
-    { ::flatbuffers::ET_FLOAT, 0, -1 },
-    { ::flatbuffers::ET_FLOAT, 0, -1 },
+    { ::flatbuffers::ET_SEQUENCE, 0, 0 },
     { ::flatbuffers::ET_UINT, 0, -1 },
     { ::flatbuffers::ET_FLOAT, 0, -1 },
     { ::flatbuffers::ET_INT, 0, -1 },
@@ -7087,15 +7066,14 @@ inline const ::flatbuffers::TypeTable *CmdEllipseTypeTable() {
   };
   static const char * const names[] = {
     "center",
-    "radius_x",
-    "radius_y",
+    "radius",
     "col",
     "rot",
     "num_segments",
     "thickness"
   };
   static const ::flatbuffers::TypeTable tt = {
-    ::flatbuffers::ST_TABLE, 7, type_codes, type_refs, nullptr, nullptr, names
+    ::flatbuffers::ST_TABLE, 6, type_codes, type_refs, nullptr, nullptr, names
   };
   return &tt;
 }
@@ -7103,8 +7081,7 @@ inline const ::flatbuffers::TypeTable *CmdEllipseTypeTable() {
 inline const ::flatbuffers::TypeTable *CmdEllipseFilledTypeTable() {
   static const ::flatbuffers::TypeCode type_codes[] = {
     { ::flatbuffers::ET_SEQUENCE, 0, 0 },
-    { ::flatbuffers::ET_FLOAT, 0, -1 },
-    { ::flatbuffers::ET_FLOAT, 0, -1 },
+    { ::flatbuffers::ET_SEQUENCE, 0, 0 },
     { ::flatbuffers::ET_UINT, 0, -1 },
     { ::flatbuffers::ET_FLOAT, 0, -1 },
     { ::flatbuffers::ET_INT, 0, -1 }
@@ -7114,14 +7091,13 @@ inline const ::flatbuffers::TypeTable *CmdEllipseFilledTypeTable() {
   };
   static const char * const names[] = {
     "center",
-    "radius_x",
-    "radius_y",
+    "radius",
     "col",
     "rot",
     "num_segments"
   };
   static const ::flatbuffers::TypeTable tt = {
-    ::flatbuffers::ST_TABLE, 6, type_codes, type_refs, nullptr, nullptr, names
+    ::flatbuffers::ST_TABLE, 5, type_codes, type_refs, nullptr, nullptr, names
   };
   return &tt;
 }

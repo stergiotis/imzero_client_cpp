@@ -17,6 +17,6 @@ T copyFlag(V val, U flag1,T flag2) {
     return (static_cast<U>(val) & flag1) != static_cast<U>(0) ? flag2 : static_cast<T>(0);
 }
 ImZeroFB::DrawListFlags getVectorCmdFBFlags(const ImZeroDrawList &drawList);
-flatbuffers::Offset<ImZeroFB::DrawList> createVectorCmdFBDrawList(ImZeroDrawList &drawList,bool inner,
-                                                                         std::vector<flatbuffers::Offset<ImZeroFB::SingleVectorCmdDto>> &fbCmds,
-                                                                         flatbuffers::FlatBufferBuilder &fbBuilder);
+flatbuffers::Offset<ImZeroFB::DrawList> createVectorCmdFBDrawList(ImDrawList drawList, bool inner,
+                                                                  std::vector<flatbuffers::Offset<ImZeroFB::SingleVectorCmdDto>> &fbCmds,
+                                                                  flatbuffers::FlatBufferBuilder &fbBuilder);

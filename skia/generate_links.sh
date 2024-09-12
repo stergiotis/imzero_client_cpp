@@ -12,6 +12,10 @@ link ../common/contrib/imgui/imgui_widgets.cpp ./imgui/imgui_widgets.cpp
 link ../common/contrib/imgui/imstb_rectpack.h ./imgui/imstb_rectpack.h 
 link ../common/contrib/imgui/imstb_textedit.h ./imgui/imstb_textedit.h 
 link ../common/contrib/imgui/imstb_truetype.h ./imgui/imstb_truetype.h 
+link ../common/contrib/imgui/imgui_draw.cpp ./imgui/imgui_draw.cpp
+link ../common/contrib/imgui/imgui.h ./imgui/imgui.h
+link ../common/contrib/imgui/hooking.h ./imgui/hooking.h
+link ../common/contrib/imgui/imgui_draw.cpp ./imgui/imgui_draw.cpp
 link ../common/contrib/imgui_implot/implot.cpp ./implot/implot.cpp 
 link ../common/contrib/imgui_implot/implot.h ./implot/implot.h 
 link ../common/contrib/imgui_implot/implot_internal.h ./implot/implot_internal.h 
@@ -24,3 +28,5 @@ link ../common/contrib/sdl3 contrib/sdl3
 link ../common/contrib/qoi contrib/qoi
 link ../common/contrib/tracy contrib/tracy
 link ../common/contrib/flatbuffers/include contrib/flatbuffers
+link ../common/contrib/imgui/backends/imgui_impl_sdl3.cpp ./skia/sdl3/imgui_impl_sdl3.cpp
+link ../common/contrib/imgui/backends/imgui_impl_sdl3.h ./skia/sdl3/imgui_impl_sdl3.h
