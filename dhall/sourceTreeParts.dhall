@@ -584,14 +584,11 @@ let imguiWithSkia = imgui // {
 		, global = imgui.includeDirs.global
 	}
 	, sources = [
+		, "${imgui.dir}/imzero_hooks.cpp"
+		, "${imgui.dir}/imzero_extensions.cpp"
 		, "${imgui.dir}/imgui.cpp"
 		, "${imgui.dir}/imgui_demo.cpp"
 		, "${imgui.dir}/imgui_draw.cpp"
-		, "${imgui.dir}/hooks.cpp"
-		--, "${imgui.dir}/imzero_draw_list.cpp"
-		--, "${imgui.dir}/imzero_draw_utils.cpp"
-		--, "${imgui.dir}/imzero_draw_splitter.cpp"
-		--, "${imgui.dir}/imzero_draw_font.cpp"
 		, "${imgui.dir}/imgui_tables.cpp"
 		, "${imgui.dir}/imgui_widgets.cpp"
 		]
