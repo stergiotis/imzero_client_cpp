@@ -35,6 +35,10 @@ table CmdConvexPolyFilled {
     points: ArrayOfVec2;
     col: uint32;
 }
+table CmdConcavePolyFilled {
+    points: ArrayOfVec2;
+    col: uint32;
+}
 table CmdLine {
     p1: SingleVec2;
     p2: SingleVec2;
@@ -307,6 +311,7 @@ union VectorCmdArg {
     CmdRegisterFont,
     CmdPolyline,
     CmdConvexPolyFilled,
+    CmdConcavePolyFilled,
     CmdLine,
     CmdRectRounded,
     CmdRectRoundedCorners,

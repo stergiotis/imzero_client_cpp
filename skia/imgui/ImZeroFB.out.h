@@ -34,6 +34,9 @@ struct CmdPolylineBuilder;
 struct CmdConvexPolyFilled;
 struct CmdConvexPolyFilledBuilder;
 
+struct CmdConcavePolyFilled;
+struct CmdConcavePolyFilledBuilder;
+
 struct CmdLine;
 struct CmdLineBuilder;
 
@@ -182,6 +185,8 @@ inline const ::flatbuffers::TypeTable *CmdRegisterFontTypeTable();
 inline const ::flatbuffers::TypeTable *CmdPolylineTypeTable();
 
 inline const ::flatbuffers::TypeTable *CmdConvexPolyFilledTypeTable();
+
+inline const ::flatbuffers::TypeTable *CmdConcavePolyFilledTypeTable();
 
 inline const ::flatbuffers::TypeTable *CmdLineTypeTable();
 
@@ -425,49 +430,51 @@ enum VectorCmdArg : uint8_t {
   VectorCmdArg_CmdRegisterFont = 1,
   VectorCmdArg_CmdPolyline = 2,
   VectorCmdArg_CmdConvexPolyFilled = 3,
-  VectorCmdArg_CmdLine = 4,
-  VectorCmdArg_CmdRectRounded = 5,
-  VectorCmdArg_CmdRectRoundedCorners = 6,
-  VectorCmdArg_CmdRectRoundedFilled = 7,
-  VectorCmdArg_CmdRectRoundedCornersFilled = 8,
-  VectorCmdArg_CmdQuad = 9,
-  VectorCmdArg_CmdQuadFilled = 10,
-  VectorCmdArg_CmdTriangle = 11,
-  VectorCmdArg_CmdTriangleFilled = 12,
-  VectorCmdArg_CmdCircle = 13,
-  VectorCmdArg_CmdCircleFilled = 14,
-  VectorCmdArg_CmdNgon = 15,
-  VectorCmdArg_CmdNgonFilled = 16,
-  VectorCmdArg_CmdEllipse = 17,
-  VectorCmdArg_CmdEllipseFilled = 18,
-  VectorCmdArg_CmdBezierCubic = 19,
-  VectorCmdArg_CmdBezierQuadratic = 20,
-  VectorCmdArg_CmdImage = 21,
-  VectorCmdArg_CmdImageQuad = 22,
-  VectorCmdArg_CmdImageRounded = 23,
-  VectorCmdArg_CmdPushClipRect = 24,
-  VectorCmdArg_CmdPopClipRect = 25,
-  VectorCmdArg_CmdRenderText = 26,
-  VectorCmdArg_CmdRenderParagraph = 27,
-  VectorCmdArg_CmdRenderUnicodeCodepoint = 28,
-  VectorCmdArg_CmdRectFilledMultiColor = 29,
-  VectorCmdArg_CmdWrappedDrawList = 30,
-  VectorCmdArg_CmdVertexDraw = 31,
-  VectorCmdArg_CmdPushRotation = 32,
-  VectorCmdArg_CmdPopRotation = 33,
-  VectorCmdArg_CmdSimpleVertexDraw = 34,
-  VectorCmdArg_CmdSvgPathSubset = 35,
-  VectorCmdArg_CmdPath = 36,
+  VectorCmdArg_CmdConcavePolyFilled = 4,
+  VectorCmdArg_CmdLine = 5,
+  VectorCmdArg_CmdRectRounded = 6,
+  VectorCmdArg_CmdRectRoundedCorners = 7,
+  VectorCmdArg_CmdRectRoundedFilled = 8,
+  VectorCmdArg_CmdRectRoundedCornersFilled = 9,
+  VectorCmdArg_CmdQuad = 10,
+  VectorCmdArg_CmdQuadFilled = 11,
+  VectorCmdArg_CmdTriangle = 12,
+  VectorCmdArg_CmdTriangleFilled = 13,
+  VectorCmdArg_CmdCircle = 14,
+  VectorCmdArg_CmdCircleFilled = 15,
+  VectorCmdArg_CmdNgon = 16,
+  VectorCmdArg_CmdNgonFilled = 17,
+  VectorCmdArg_CmdEllipse = 18,
+  VectorCmdArg_CmdEllipseFilled = 19,
+  VectorCmdArg_CmdBezierCubic = 20,
+  VectorCmdArg_CmdBezierQuadratic = 21,
+  VectorCmdArg_CmdImage = 22,
+  VectorCmdArg_CmdImageQuad = 23,
+  VectorCmdArg_CmdImageRounded = 24,
+  VectorCmdArg_CmdPushClipRect = 25,
+  VectorCmdArg_CmdPopClipRect = 26,
+  VectorCmdArg_CmdRenderText = 27,
+  VectorCmdArg_CmdRenderParagraph = 28,
+  VectorCmdArg_CmdRenderUnicodeCodepoint = 29,
+  VectorCmdArg_CmdRectFilledMultiColor = 30,
+  VectorCmdArg_CmdWrappedDrawList = 31,
+  VectorCmdArg_CmdVertexDraw = 32,
+  VectorCmdArg_CmdPushRotation = 33,
+  VectorCmdArg_CmdPopRotation = 34,
+  VectorCmdArg_CmdSimpleVertexDraw = 35,
+  VectorCmdArg_CmdSvgPathSubset = 36,
+  VectorCmdArg_CmdPath = 37,
   VectorCmdArg_MIN = VectorCmdArg_NONE,
   VectorCmdArg_MAX = VectorCmdArg_CmdPath
 };
 
-inline const VectorCmdArg (&EnumValuesVectorCmdArg())[37] {
+inline const VectorCmdArg (&EnumValuesVectorCmdArg())[38] {
   static const VectorCmdArg values[] = {
     VectorCmdArg_NONE,
     VectorCmdArg_CmdRegisterFont,
     VectorCmdArg_CmdPolyline,
     VectorCmdArg_CmdConvexPolyFilled,
+    VectorCmdArg_CmdConcavePolyFilled,
     VectorCmdArg_CmdLine,
     VectorCmdArg_CmdRectRounded,
     VectorCmdArg_CmdRectRoundedCorners,
@@ -506,11 +513,12 @@ inline const VectorCmdArg (&EnumValuesVectorCmdArg())[37] {
 }
 
 inline const char * const *EnumNamesVectorCmdArg() {
-  static const char * const names[38] = {
+  static const char * const names[39] = {
     "NONE",
     "CmdRegisterFont",
     "CmdPolyline",
     "CmdConvexPolyFilled",
+    "CmdConcavePolyFilled",
     "CmdLine",
     "CmdRectRounded",
     "CmdRectRoundedCorners",
@@ -569,6 +577,10 @@ template<> struct VectorCmdArgTraits<ImZeroFB::CmdPolyline> {
 
 template<> struct VectorCmdArgTraits<ImZeroFB::CmdConvexPolyFilled> {
   static const VectorCmdArg enum_value = VectorCmdArg_CmdConvexPolyFilled;
+};
+
+template<> struct VectorCmdArgTraits<ImZeroFB::CmdConcavePolyFilled> {
+  static const VectorCmdArg enum_value = VectorCmdArg_CmdConcavePolyFilled;
 };
 
 template<> struct VectorCmdArgTraits<ImZeroFB::CmdLine> {
@@ -1821,6 +1833,61 @@ inline ::flatbuffers::Offset<CmdConvexPolyFilled> CreateCmdConvexPolyFilled(
     ::flatbuffers::Offset<ImZeroFB::ArrayOfVec2> points = 0,
     uint32_t col = 0) {
   CmdConvexPolyFilledBuilder builder_(_fbb);
+  builder_.add_col(col);
+  builder_.add_points(points);
+  return builder_.Finish();
+}
+
+struct CmdConcavePolyFilled FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef CmdConcavePolyFilledBuilder Builder;
+  static const ::flatbuffers::TypeTable *MiniReflectTypeTable() {
+    return CmdConcavePolyFilledTypeTable();
+  }
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_POINTS = 4,
+    VT_COL = 6
+  };
+  const ImZeroFB::ArrayOfVec2 *points() const {
+    return GetPointer<const ImZeroFB::ArrayOfVec2 *>(VT_POINTS);
+  }
+  uint32_t col() const {
+    return GetField<uint32_t>(VT_COL, 0);
+  }
+  bool Verify(::flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyOffset(verifier, VT_POINTS) &&
+           verifier.VerifyTable(points()) &&
+           VerifyField<uint32_t>(verifier, VT_COL, 4) &&
+           verifier.EndTable();
+  }
+};
+
+struct CmdConcavePolyFilledBuilder {
+  typedef CmdConcavePolyFilled Table;
+  ::flatbuffers::FlatBufferBuilder &fbb_;
+  ::flatbuffers::uoffset_t start_;
+  void add_points(::flatbuffers::Offset<ImZeroFB::ArrayOfVec2> points) {
+    fbb_.AddOffset(CmdConcavePolyFilled::VT_POINTS, points);
+  }
+  void add_col(uint32_t col) {
+    fbb_.AddElement<uint32_t>(CmdConcavePolyFilled::VT_COL, col, 0);
+  }
+  explicit CmdConcavePolyFilledBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ::flatbuffers::Offset<CmdConcavePolyFilled> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = ::flatbuffers::Offset<CmdConcavePolyFilled>(end);
+    return o;
+  }
+};
+
+inline ::flatbuffers::Offset<CmdConcavePolyFilled> CreateCmdConcavePolyFilled(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    ::flatbuffers::Offset<ImZeroFB::ArrayOfVec2> points = 0,
+    uint32_t col = 0) {
+  CmdConcavePolyFilledBuilder builder_(_fbb);
   builder_.add_col(col);
   builder_.add_points(points);
   return builder_.Finish();
@@ -4827,6 +4894,9 @@ struct SingleVectorCmdDto FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table
   const ImZeroFB::CmdConvexPolyFilled *arg_as_CmdConvexPolyFilled() const {
     return arg_type() == ImZeroFB::VectorCmdArg_CmdConvexPolyFilled ? static_cast<const ImZeroFB::CmdConvexPolyFilled *>(arg()) : nullptr;
   }
+  const ImZeroFB::CmdConcavePolyFilled *arg_as_CmdConcavePolyFilled() const {
+    return arg_type() == ImZeroFB::VectorCmdArg_CmdConcavePolyFilled ? static_cast<const ImZeroFB::CmdConcavePolyFilled *>(arg()) : nullptr;
+  }
   const ImZeroFB::CmdLine *arg_as_CmdLine() const {
     return arg_type() == ImZeroFB::VectorCmdArg_CmdLine ? static_cast<const ImZeroFB::CmdLine *>(arg()) : nullptr;
   }
@@ -4945,6 +5015,10 @@ template<> inline const ImZeroFB::CmdPolyline *SingleVectorCmdDto::arg_as<ImZero
 
 template<> inline const ImZeroFB::CmdConvexPolyFilled *SingleVectorCmdDto::arg_as<ImZeroFB::CmdConvexPolyFilled>() const {
   return arg_as_CmdConvexPolyFilled();
+}
+
+template<> inline const ImZeroFB::CmdConcavePolyFilled *SingleVectorCmdDto::arg_as<ImZeroFB::CmdConcavePolyFilled>() const {
+  return arg_as_CmdConcavePolyFilled();
 }
 
 template<> inline const ImZeroFB::CmdLine *SingleVectorCmdDto::arg_as<ImZeroFB::CmdLine>() const {
@@ -5802,6 +5876,10 @@ inline bool VerifyVectorCmdArg(::flatbuffers::Verifier &verifier, const void *ob
       auto ptr = reinterpret_cast<const ImZeroFB::CmdConvexPolyFilled *>(obj);
       return verifier.VerifyTable(ptr);
     }
+    case VectorCmdArg_CmdConcavePolyFilled: {
+      auto ptr = reinterpret_cast<const ImZeroFB::CmdConcavePolyFilled *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
     case VectorCmdArg_CmdLine: {
       auto ptr = reinterpret_cast<const ImZeroFB::CmdLine *>(obj);
       return verifier.VerifyTable(ptr);
@@ -6119,12 +6197,14 @@ inline const ::flatbuffers::TypeTable *VectorCmdArgTypeTable() {
     { ::flatbuffers::ET_SEQUENCE, 0, 32 },
     { ::flatbuffers::ET_SEQUENCE, 0, 33 },
     { ::flatbuffers::ET_SEQUENCE, 0, 34 },
-    { ::flatbuffers::ET_SEQUENCE, 0, 35 }
+    { ::flatbuffers::ET_SEQUENCE, 0, 35 },
+    { ::flatbuffers::ET_SEQUENCE, 0, 36 }
   };
   static const ::flatbuffers::TypeFunction type_refs[] = {
     ImZeroFB::CmdRegisterFontTypeTable,
     ImZeroFB::CmdPolylineTypeTable,
     ImZeroFB::CmdConvexPolyFilledTypeTable,
+    ImZeroFB::CmdConcavePolyFilledTypeTable,
     ImZeroFB::CmdLineTypeTable,
     ImZeroFB::CmdRectRoundedTypeTable,
     ImZeroFB::CmdRectRoundedCornersTypeTable,
@@ -6164,6 +6244,7 @@ inline const ::flatbuffers::TypeTable *VectorCmdArgTypeTable() {
     "CmdRegisterFont",
     "CmdPolyline",
     "CmdConvexPolyFilled",
+    "CmdConcavePolyFilled",
     "CmdLine",
     "CmdRectRounded",
     "CmdRectRoundedCorners",
@@ -6199,7 +6280,7 @@ inline const ::flatbuffers::TypeTable *VectorCmdArgTypeTable() {
     "CmdPath"
   };
   static const ::flatbuffers::TypeTable tt = {
-    ::flatbuffers::ST_UNION, 37, type_codes, type_refs, nullptr, nullptr, names
+    ::flatbuffers::ST_UNION, 38, type_codes, type_refs, nullptr, nullptr, names
   };
   return &tt;
 }
@@ -6721,6 +6802,24 @@ inline const ::flatbuffers::TypeTable *CmdPolylineTypeTable() {
 }
 
 inline const ::flatbuffers::TypeTable *CmdConvexPolyFilledTypeTable() {
+  static const ::flatbuffers::TypeCode type_codes[] = {
+    { ::flatbuffers::ET_SEQUENCE, 0, 0 },
+    { ::flatbuffers::ET_UINT, 0, -1 }
+  };
+  static const ::flatbuffers::TypeFunction type_refs[] = {
+    ImZeroFB::ArrayOfVec2TypeTable
+  };
+  static const char * const names[] = {
+    "points",
+    "col"
+  };
+  static const ::flatbuffers::TypeTable tt = {
+    ::flatbuffers::ST_TABLE, 2, type_codes, type_refs, nullptr, nullptr, names
+  };
+  return &tt;
+}
+
+inline const ::flatbuffers::TypeTable *CmdConcavePolyFilledTypeTable() {
   static const ::flatbuffers::TypeCode type_codes[] = {
     { ::flatbuffers::ET_SEQUENCE, 0, 0 },
     { ::flatbuffers::ET_UINT, 0, -1 }

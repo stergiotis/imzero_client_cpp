@@ -61,7 +61,7 @@ let imgui = let dir = "./imgui" in sourceTreePart::{
 	}
 	, defines = {
 		, local = [
-	        , "IMGUI_DISABLE_OBSOLETE_FUNCTIONS"
+	          -- , "IMGUI_DISABLE_OBSOLETE_FUNCTIONS"
 		] : List Text
 		, global = [] : List Text
 		}

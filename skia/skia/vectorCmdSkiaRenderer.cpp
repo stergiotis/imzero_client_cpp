@@ -281,6 +281,9 @@ void VectorCmdSkiaRenderer::drawVectorCmdFB(const ImZeroFB::SingleVectorCmdDto *
         case ImZeroFB::VectorCmdArg_CmdConvexPolyFilled:
             drawCmdConvexPolylineFilledFB(*cmdUnion->arg_as_CmdConvexPolyFilled(),canvas,dlFlags);
             break;
+        case ImZeroFB::VectorCmdArg_CmdConcavePolyFilled:
+            drawCmdConcavePolylineFilledFB(*cmdUnion->arg_as_CmdConcavePolyFilled(),canvas,dlFlags);
+            break;
         case ImZeroFB::VectorCmdArg_CmdLine:
             drawCmdLineFB(*cmdUnion->arg_as_CmdLine(),canvas,dlFlags);
             break;
@@ -401,6 +404,11 @@ void VectorCmdSkiaRenderer::drawCmdPolylineFB(const ImZeroFB::CmdPolyline &cmd,S
     drawCmdPolyline_(cmd,canvas,paint);
 }
 void VectorCmdSkiaRenderer::drawCmdConvexPolylineFilledFB(const ImZeroFB::CmdConvexPolyFilled &cmd,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
+    SkPaint paint;
+    prepareFillPaint(paint,dlFlags);
+    drawCmdPolyline_(cmd,canvas,paint);
+}
+void VectorCmdSkiaRenderer::drawCmdConcavePolylineFilledFB(const ImZeroFB::CmdConcavePolyFilled &cmd,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;
     prepareFillPaint(paint,dlFlags);
     drawCmdPolyline_(cmd,canvas,paint);
