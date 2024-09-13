@@ -459,7 +459,7 @@ namespace ImGui {
         IMZERO_DRAWLIST_BEGIN
             auto centerFb = ImZeroFB::SingleVec2(center.x,center.y);
             auto radiusFb = ImZeroFB::SingleVec2(radius.x,radius.y);
-            auto arg = ImZeroFB::CreateCmdEllipseFilled(*draw_list->fbBuilder,&centerFb,&radius,col,rot,num_segments);
+            auto arg = ImZeroFB::CreateCmdEllipseFilled(*draw_list->fbBuilder,&centerFb,&radiusFb,col,rot,num_segments);
             draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdEllipseFilled,arg.Union());
         IMZERO_DRAWLIST_END
         return true;

@@ -490,7 +490,7 @@ int App::Run(CliOptions &opts) {
     ImGui::DestroyContext();
     destroyContext();
 
-    SDL_GL_DeleteContext(glContext);
+    SDL_GL_DestroyContext(glContext);
     SDL_DestroyWindow(fWindow);
     SDL_Quit();
     return 0;

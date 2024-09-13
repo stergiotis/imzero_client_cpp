@@ -14,9 +14,7 @@
 
 #pragma once
 
-#ifdef IMZERO_DEBUG_BUILD
 #include "imgui_user_prolog.h"
-#endif
 
 //---- Define attributes of all API symbols declarations, e.g. for DLL under Windows
 // Using Dear ImGui via a shared library is not recommended, because of function call overhead and because we don't guarantee backward nor forward ABI compatibility.

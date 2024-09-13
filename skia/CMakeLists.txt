@@ -140,6 +140,7 @@ add_library(imguiWithSkia OBJECT "${CMAKE_CURRENT_LIST_DIR}/./imgui/imgui.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui/hooks.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui/imgui_tables.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui/imgui_widgets.cpp")
+target_compile_definitions(imguiWithSkia PUBLIC IMGUI_DISABLE_OBSOLETE_FUNCTIONS)
 
 # render
 add_library(render OBJECT "${CMAKE_CURRENT_LIST_DIR}/./src/render.cpp")

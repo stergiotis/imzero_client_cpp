@@ -59,6 +59,12 @@ let imgui = let dir = "./imgui" in sourceTreePart::{
 		, global = [
 		] : List Text
 	}
+	, defines = {
+		, local = [
+	        , "IMGUI_DISABLE_OBSOLETE_FUNCTIONS"
+		] : List Text
+		, global = [] : List Text
+		}
 }
 let imguiBackendGlfw = let dir = "./imgui" in sourceTreePart::{
 	, name = "imguiBackendGlfw"

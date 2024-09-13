@@ -26,7 +26,7 @@ case 0x000007d2:
     auto foreignptr = receiveValue<uintptr_t>();
     auto title = receiveString();
     {
-    ((TextEditor*)foreignptr)->Render(title, true);
+    ((TextEditor*)foreignptr)->Render(title);
   }
   }
   break;
@@ -35,10 +35,11 @@ case 0x000007d3:
     FFFI_FUNCTION_INVOCATION("RenderV")
     auto foreignptr = receiveValue<uintptr_t>();
     auto title = receiveString();
+    auto parentIsFocused = receiveValue<bool>();
     auto aSize = receiveArray<float,2>();
     auto aBorder = receiveValue<bool>();
     {
-    ((TextEditor*)foreignptr)->Render(title, true, aSize, aBorder);
+    ((TextEditor*)foreignptr)->Render(title, parentIsFocused, aSize, aBorder);
   }
   }
   break;
@@ -58,7 +59,7 @@ case 0x000007d5:
     auto foreignptr = receiveValue<uintptr_t>();
     const char * text;
     {
-    auto text = ((TextEditor*)foreignptr)->GetText();
+    text = ((TextEditor*)foreignptr)->GetText().c_str();
     sendEmptyString();
     sendString(text);
     flushSend();
@@ -71,7 +72,7 @@ case 0x000007d6:
     auto foreignptr = receiveValue<uintptr_t>();
     const char * text;
     {
-    auto text = ((TextEditor*)foreignptr)->GetSelectedText();
+    text = ((TextEditor*)foreignptr)->GetSelectedText().c_str();
     sendEmptyString();
     sendString(text);
     flushSend();
@@ -84,7 +85,7 @@ case 0x000007d7:
     auto foreignptr = receiveValue<uintptr_t>();
     const char * text;
     {
-    auto text = ((TextEditor*)foreignptr)->GetCurrentLineText();
+    text = ((TextEditor*)foreignptr)->GetCurrentLineText().c_str();
     sendEmptyString();
     sendString(text);
     flushSend();
@@ -144,21 +145,36 @@ case 0x000007dc:
   {
     FFFI_FUNCTION_INVOCATION("IsChanged")
     auto foreignptr = receiveValue<uintptr_t>();
-    bool text;
-    bool cursor;
+    bool textChanged;
     {
     auto p = ((TextEditor*)foreignptr);
-    cursor = false;
-//cursor = p->IsCursorPositionChanged();
-text = p->IsTextChanged();
+textChanged = p->IsTextChanged();;
     sendEmptyString();
-    sendValue<bool>(text);
-    sendValue<bool>(cursor);
+    sendValue<bool>(textChanged);
     flushSend();
   }
   }
   break;
 case 0x000007dd:
+  {
+    FFFI_FUNCTION_INVOCATION("GetCursorPosition")
+    auto foreignptr = receiveValue<uintptr_t>();
+    int line;
+    int column;
+    {
+    auto p = ((TextEditor*)foreignptr);
+auto c = p->GetCursorPosition();
+line = c.mLine;
+column = c.mColumn;
+;
+    sendEmptyString();
+    sendValueSignMagnitude<int>(line);
+    sendValueSignMagnitude<int>(column);
+    flushSend();
+  }
+  }
+  break;
+case 0x000007de:
   {
     FFFI_FUNCTION_INVOCATION("IsColorizerEnabled")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -171,7 +187,7 @@ case 0x000007dd:
   }
   }
   break;
-case 0x000007de:
+case 0x000007df:
   {
     FFFI_FUNCTION_INVOCATION("SetColorizerEnable")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -181,7 +197,7 @@ case 0x000007de:
   }
   }
   break;
-case 0x000007df:
+case 0x000007e0:
   {
     FFFI_FUNCTION_INVOCATION("SetHandleMouseInputs")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -191,7 +207,7 @@ case 0x000007df:
   }
   }
   break;
-case 0x000007e0:
+case 0x000007e1:
   {
     FFFI_FUNCTION_INVOCATION("IsHandleMouseInputsEnabled")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -204,7 +220,7 @@ case 0x000007e0:
   }
   }
   break;
-case 0x000007e1:
+case 0x000007e2:
   {
     FFFI_FUNCTION_INVOCATION("SetHandleKeyboardInputs")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -214,7 +230,7 @@ case 0x000007e1:
   }
   }
   break;
-case 0x000007e2:
+case 0x000007e3:
   {
     FFFI_FUNCTION_INVOCATION("IsHandleKeyboardInputsEnabled")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -227,7 +243,7 @@ case 0x000007e2:
   }
   }
   break;
-case 0x000007e3:
+case 0x000007e4:
   {
     FFFI_FUNCTION_INVOCATION("SetImGuiChildIgnored")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -237,7 +253,7 @@ case 0x000007e3:
   }
   }
   break;
-case 0x000007e4:
+case 0x000007e5:
   {
     FFFI_FUNCTION_INVOCATION("IsImGuiChildIgnored")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -250,7 +266,7 @@ case 0x000007e4:
   }
   }
   break;
-case 0x000007e5:
+case 0x000007e6:
   {
     FFFI_FUNCTION_INVOCATION("SetShowWhitespaces")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -260,7 +276,7 @@ case 0x000007e5:
   }
   }
   break;
-case 0x000007e6:
+case 0x000007e7:
   {
     FFFI_FUNCTION_INVOCATION("IsShowingWhitespaces")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -273,7 +289,7 @@ case 0x000007e6:
   }
   }
   break;
-case 0x000007e7:
+case 0x000007e8:
   {
     FFFI_FUNCTION_INVOCATION("SetTabSize")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -283,7 +299,7 @@ case 0x000007e7:
   }
   }
   break;
-case 0x000007e8:
+case 0x000007e9:
   {
     FFFI_FUNCTION_INVOCATION("GetTabSize")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -296,7 +312,7 @@ case 0x000007e8:
   }
   }
   break;
-case 0x000007e9:
+case 0x000007ea:
   {
     FFFI_FUNCTION_INVOCATION("InsertText")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -306,7 +322,7 @@ case 0x000007e9:
   }
   }
   break;
-case 0x000007ea:
+case 0x000007eb:
   {
     FFFI_FUNCTION_INVOCATION("MoveUp")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -315,7 +331,7 @@ case 0x000007ea:
   }
   }
   break;
-case 0x000007eb:
+case 0x000007ec:
   {
     FFFI_FUNCTION_INVOCATION("MoveUpV")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -326,7 +342,7 @@ case 0x000007eb:
   }
   }
   break;
-case 0x000007ec:
+case 0x000007ed:
   {
     FFFI_FUNCTION_INVOCATION("MoveDown")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -335,7 +351,7 @@ case 0x000007ec:
   }
   }
   break;
-case 0x000007ed:
+case 0x000007ee:
   {
     FFFI_FUNCTION_INVOCATION("MoveDownV")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -346,7 +362,7 @@ case 0x000007ed:
   }
   }
   break;
-case 0x000007ee:
+case 0x000007ef:
   {
     FFFI_FUNCTION_INVOCATION("MoveLeft")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -355,7 +371,7 @@ case 0x000007ee:
   }
   }
   break;
-case 0x000007ef:
+case 0x000007f0:
   {
     FFFI_FUNCTION_INVOCATION("MoveLeftV")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -367,7 +383,7 @@ case 0x000007ef:
   }
   }
   break;
-case 0x000007f0:
+case 0x000007f1:
   {
     FFFI_FUNCTION_INVOCATION("MoveRight")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -376,7 +392,7 @@ case 0x000007f0:
   }
   }
   break;
-case 0x000007f1:
+case 0x000007f2:
   {
     FFFI_FUNCTION_INVOCATION("MoveRightV")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -388,7 +404,7 @@ case 0x000007f1:
   }
   }
   break;
-case 0x000007f2:
+case 0x000007f3:
   {
     FFFI_FUNCTION_INVOCATION("MoveTop")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -397,7 +413,7 @@ case 0x000007f2:
   }
   }
   break;
-case 0x000007f3:
+case 0x000007f4:
   {
     FFFI_FUNCTION_INVOCATION("MoveTopV")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -407,7 +423,7 @@ case 0x000007f3:
   }
   }
   break;
-case 0x000007f4:
+case 0x000007f5:
   {
     FFFI_FUNCTION_INVOCATION("MoveBottom")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -416,7 +432,7 @@ case 0x000007f4:
   }
   }
   break;
-case 0x000007f5:
+case 0x000007f6:
   {
     FFFI_FUNCTION_INVOCATION("MoveBottomV")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -426,7 +442,7 @@ case 0x000007f5:
   }
   }
   break;
-case 0x000007f6:
+case 0x000007f7:
   {
     FFFI_FUNCTION_INVOCATION("MoveHome")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -435,7 +451,7 @@ case 0x000007f6:
   }
   }
   break;
-case 0x000007f7:
+case 0x000007f8:
   {
     FFFI_FUNCTION_INVOCATION("MoveHomeV")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -445,7 +461,7 @@ case 0x000007f7:
   }
   }
   break;
-case 0x000007f8:
+case 0x000007f9:
   {
     FFFI_FUNCTION_INVOCATION("MoveEnd")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -454,7 +470,7 @@ case 0x000007f8:
   }
   }
   break;
-case 0x000007f9:
+case 0x000007fa:
   {
     FFFI_FUNCTION_INVOCATION("MoveEndV")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -464,7 +480,7 @@ case 0x000007f9:
   }
   }
   break;
-case 0x000007fa:
+case 0x000007fb:
   {
     FFFI_FUNCTION_INVOCATION("SelectWordUnderCursor")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -473,7 +489,7 @@ case 0x000007fa:
   }
   }
   break;
-case 0x000007fb:
+case 0x000007fc:
   {
     FFFI_FUNCTION_INVOCATION("SelectAll")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -482,7 +498,7 @@ case 0x000007fb:
   }
   }
   break;
-case 0x000007fc:
+case 0x000007fd:
   {
     FFFI_FUNCTION_INVOCATION("HasSelection")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -495,7 +511,7 @@ case 0x000007fc:
   }
   }
   break;
-case 0x000007fd:
+case 0x000007fe:
   {
     FFFI_FUNCTION_INVOCATION("Copy")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -504,7 +520,7 @@ case 0x000007fd:
   }
   }
   break;
-case 0x000007fe:
+case 0x000007ff:
   {
     FFFI_FUNCTION_INVOCATION("Cut")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -513,7 +529,7 @@ case 0x000007fe:
   }
   }
   break;
-case 0x000007ff:
+case 0x00000800:
   {
     FFFI_FUNCTION_INVOCATION("Paste")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -522,7 +538,7 @@ case 0x000007ff:
   }
   }
   break;
-case 0x00000800:
+case 0x00000801:
   {
     FFFI_FUNCTION_INVOCATION("Delete")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -531,7 +547,7 @@ case 0x00000800:
   }
   }
   break;
-case 0x00000801:
+case 0x00000802:
   {
     FFFI_FUNCTION_INVOCATION("CanUndo")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -544,7 +560,7 @@ case 0x00000801:
   }
   }
   break;
-case 0x00000802:
+case 0x00000803:
   {
     FFFI_FUNCTION_INVOCATION("CanRedo")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -557,7 +573,7 @@ case 0x00000802:
   }
   }
   break;
-case 0x00000803:
+case 0x00000804:
   {
     FFFI_FUNCTION_INVOCATION("Undo")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -566,7 +582,7 @@ case 0x00000803:
   }
   }
   break;
-case 0x00000804:
+case 0x00000805:
   {
     FFFI_FUNCTION_INVOCATION("UndoV")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -576,7 +592,7 @@ case 0x00000804:
   }
   }
   break;
-case 0x00000805:
+case 0x00000806:
   {
     FFFI_FUNCTION_INVOCATION("Redo")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -585,7 +601,7 @@ case 0x00000805:
   }
   }
   break;
-case 0x00000806:
+case 0x00000807:
   {
     FFFI_FUNCTION_INVOCATION("RedoV")
     auto foreignptr = receiveValue<uintptr_t>();
