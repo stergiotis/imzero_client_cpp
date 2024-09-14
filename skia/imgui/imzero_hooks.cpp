@@ -751,7 +751,7 @@ namespace ImGui {
 
     bool Hooks::ImFont::Pre::GetCharAdvance(const ::ImFont *font, float &retr, ImWchar c) { ZoneScoped;
         if(!ImGui::useVectorCmd) {
-            return false;
+            return true;
         }
 
         uint32_t tmp;
@@ -766,7 +766,7 @@ namespace ImGui {
         SkScalar advanceX;
         f.getWidths(&glyph,1,&advanceX);
         retr = SkScalarToFloat(advanceX);
-        return true;
+        return false;
     }
 
     bool Hooks::ImFont::Pre::CalcTextSizeA(const ::ImFont *font, float size, float max_width, float wrap_width, const char* text_begin, const char* text_end, const char** remaining, ImVec2 &retr) { ZoneScoped;
