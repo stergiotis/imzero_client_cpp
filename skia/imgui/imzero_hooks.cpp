@@ -174,6 +174,10 @@ void ImDrawList::addVectorCmdFB(ImZeroFB::VectorCmdArg arg_type, flatbuffers::Of
 
 
 namespace ImGui {
+    void Hooks::Global::ShouldAddDrawListToDrawData(const ::ImDrawList *draw_list, bool &shouldAdd) {
+        shouldAdd = shouldAdd || !draw_list->_FbCmds->empty();
+    }
+
     void Hooks::ImDrawListSplitter::SaveDrawListToSplitter(::ImDrawListSplitter &splitter, const ::ImDrawList *draw_list, int idx) {
         IM_ASSERT(splitter._ChannelsFbCmds[idx] != nullptr && "uninitialized channel fb");
         splitter._ChannelsFbCmds[idx] = draw_list->_FbCmds;
@@ -904,7 +908,10 @@ namespace ImGui {
                     constexpr bool renderAsParagraph = true;
 #endif
                     if(renderAsParagraph) {
-                        auto const arg = ImZeroFB::CreateCmdRenderParagraph(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(font),size,&posFb,col,&clipRectFb,textFb,wrap_width,0.0f,ImZeroFB::TextAlignFlags_left);
+                        ImZeroFB::TextAlignFlags align;
+                        ImZeroFB::TextDirection dir;
+                        getParagraphTextLayout(align,dir);
+                        auto const arg = ImZeroFB::CreateCmdRenderParagraph(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(font),size,&posFb,col,&clipRectFb,textFb,wrap_width,0.0f,align, dir);
                         draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdRenderParagraph,arg.Union());
                     } else { ZoneScopedN("paragraphAsPath");
 #ifdef IMZERO_DRAWLIST_PARAGRAPH_AS_PATH

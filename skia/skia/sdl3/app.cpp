@@ -451,12 +451,10 @@ int App::Run(CliOptions &opts) {
                     break;
             }
         }
-#if 0
         if(SDL_GetWindowFlags(fWindow) & SDL_WINDOW_MINIMIZED) {
             SDL_Delay(10);
             continue;
         }
-#endif
 
         auto const surface = getSurface();
 

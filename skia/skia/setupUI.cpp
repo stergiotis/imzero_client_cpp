@@ -430,16 +430,16 @@ void ImZeroSkiaSetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &v
         }
     }
     if(ImGui::CollapsingHeader("Paragraph")) {
-        if(ImGui::TreeNode("English")) {
-            for(int i=ImZeroFB::TextAlignFlags_MIN;i<=ImZeroFB::TextAlignFlags_MAX;i++) {
-                auto const f = static_cast<ImZeroFB::TextAlignFlags>(i);
-                if(ImGui::RadioButton(ImZeroFB::EnumNameTextAlignFlags(f),fTextAlign == f)) {
-                    fTextAlign = f;
-                }
-                ImGui::SameLine();
+        for(int i=ImZeroFB::TextAlignFlags_MIN;i<=ImZeroFB::TextAlignFlags_MAX;i++) {
+            auto const f = static_cast<ImZeroFB::TextAlignFlags>(i);
+            if(ImGui::RadioButton(ImZeroFB::EnumNameTextAlignFlags(f),fTextAlign == f)) {
+                fTextAlign = f;
             }
-            ImGui::NewLine();
+            ImGui::SameLine();
+        }
+        ImGui::NewLine();
 
+        if(ImGui::TreeNode("English")) {
             ImGui::PushParagraphTextLayout(fTextAlign,ImZeroFB::TextDirection_ltr);
             ImGui::PushIsParagraphText(1);
             ImGui::TextUnformatted("That, poor contempt, or claim'd thou slept so faithful,\n"
@@ -475,15 +475,6 @@ void ImZeroSkiaSetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &v
         }
 
         if(ImGui::TreeNode("German")) {
-            for(int i=ImZeroFB::TextAlignFlags_MIN;i<=ImZeroFB::TextAlignFlags_MAX;i++) {
-                auto const f = static_cast<ImZeroFB::TextAlignFlags>(i);
-                if(ImGui::RadioButton(ImZeroFB::EnumNameTextAlignFlags(f),fTextAlign == f)) {
-                    fTextAlign = f;
-                }
-                ImGui::SameLine();
-            }
-            ImGui::NewLine();
-
             ImGui::PushParagraphTextLayout(fTextAlign,ImZeroFB::TextDirection_ltr);
             ImGui::PushIsParagraphText(1);
             ImGui::TextUnformatted("Das Kölner Dombaufest 1848 fand vom 14. bis 16. August 1848 anlässlich des 600. Jahrestages der Grundsteinlegung des Kölner Doms 1248 und der Weihe des provisorisch fertiggestellten Innenraums der Kathedrale statt. Sechs Jahre nach der „zweiten“ Grundsteinlegung zum Weiterbau 1842 war die Grundfläche des Doms zu einem zusammenhängenden, teils noch provisorisch mit einer Holzkonstruktion überdachten Kirchenraum verbunden worden.\n"
