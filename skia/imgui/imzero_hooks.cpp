@@ -348,6 +348,7 @@ namespace ImGui {
         // FIXME
     }
     void Hooks::ImDrawList::Post::CreateImDrawList(::ImDrawList *draw_list, ImDrawListSharedData *shared_data) {
+        ;
     }
     bool Hooks::ImDrawList::Pre::AddCallback(::ImDrawList *draw_list, void *callback, void *callback_data) {
         return true;

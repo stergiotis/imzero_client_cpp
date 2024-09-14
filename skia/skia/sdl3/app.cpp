@@ -3,17 +3,16 @@
 #include <cstdio>
 #include <cstring>
 
-#include "imgui.h"
 #include "imgui_impl_sdl3.h"
 #include "imgui_internal.h"
-//#include "imgui_impl_opengl3.h"
 
-#include "SDL3/SDL.h"
 #include <SDL3/SDL_main.h>
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <SDL3/SDL_opengles2.h>
 #else
 #include <SDL3/SDL_opengl.h>
+#include <SDL3/SDL.h>
+
 #endif
 
 #include "include/core/SkGraphics.h"
@@ -44,7 +43,6 @@
 
 #include "../src/render.h"
 
-#include "imgui_internal.h"
 #include "marshalling/receive.h"
 #include "marshalling/send.h"
 
@@ -311,7 +309,7 @@ int App::Run(CliOptions &opts) {
     const SDL_DisplayMode *dm = nullptr;
     {
         // Setup SDL
-        if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMEPAD) != 0) {
+        if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER ) != SDL_TRUE) {
             fprintf(stderr, "Error: SDL_Init(): %s\n", SDL_GetError());
             return -1;
         }
@@ -453,6 +451,12 @@ int App::Run(CliOptions &opts) {
                     break;
             }
         }
+#if 0
+        if(SDL_GetWindowFlags(fWindow) & SDL_WINDOW_MINIMIZED) {
+            SDL_Delay(10);
+            continue;
+        }
+#endif
 
         auto const surface = getSurface();
 
