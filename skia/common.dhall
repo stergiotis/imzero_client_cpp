@@ -26,6 +26,10 @@ let common = \(video : Bool) ->
         let cxx = "clang++"
 	let cppstd = 20
 	let cxxflagsRelease = [
+	        , "-Wall"
+		, "-Wformat"
+		, "-Wextra"
+		, "-Wno-unused-parameter"
 		, "-fno-omit-frame-pointer" -- increases debuggability with little to no performance impact
 		, "-O3"
 		]

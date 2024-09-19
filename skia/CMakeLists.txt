@@ -41,6 +41,10 @@ include_directories("${CMAKE_CURRENT_LIST_DIR}/./contrib/flatbuffers"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public"
 )
 add_compile_options(-std=c++20
+-Wall
+-Wformat
+-Wextra
+-Wno-unused-parameter
 -fno-omit-frame-pointer
 -O3
 # sdl3Shared

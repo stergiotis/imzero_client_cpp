@@ -177,6 +177,9 @@ namespace ImGui {
     void Hooks::Global::ShouldAddDrawListToDrawData(const ::ImDrawList *draw_list, bool &shouldAdd) {
         shouldAdd = shouldAdd || !draw_list->_FbCmds->empty();
     }
+    bool Hooks::Global::Pre::RenderDimmedBackdgroundBehindWindow(::ImGuiWindow *window, ImU32 col) {
+        return false;
+    }
 
     void Hooks::ImDrawListSplitter::SaveDrawListToSplitter(::ImDrawListSplitter &splitter, const ::ImDrawList *draw_list, int idx) {
         IM_ASSERT(splitter._ChannelsFbCmds[idx] != nullptr && "uninitialized channel fb");
