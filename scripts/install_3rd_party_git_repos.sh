@@ -42,7 +42,7 @@ getContribRepo "https://github.com/stergiotis/imgui.git" "imgui" "imzero_hooks_d
 getContribRepo "https://github.com/stergiotis/imgui_club.git" "imgui_club" "main" "ea49dd3c6803088d50b496e3fe981501543b7cbc"
 getContribRepo "https://github.com/stergiotis/imgui_flame-graph.git" "imgui_flame-graph" "master" "aae0bd9665d1379c511d0b8a64d3752301a327a2"
 getContribRepo "https://github.com/stergiotis/imgui_ImCoolBar.git" "imgui_ImCoolBar" "master" "da3cd38eb3bf083b5a171d5b17e7ee13bf873a77"
-getContribRepo "https://github.com/stergiotis/imgui_ImGuiColorTextEdit.git" "imgui_ImGuiColorTextEdit" "imgui_bundle" "06ce941998358cf8cb524421acb776337ef62125"
+getContribRepo "https://github.com/stergiotis/imgui_ImGuiColorTextEdit.git" "imgui_ImGuiColorTextEdit" "imzero" "3e7734d2d8a5c94ffa3fce0e39ff9a573ed4a9d4"
 getContribRepo "https://github.com/stergiotis/imgui_implot.git" "imgui_implot" "master" "065acc3319f0422479c0fed5a5edccd0f563729f"
 getContribRepo "https://github.com/stergiotis/imgui_imspinner.git" "imgui_imspinner" "master" "4287e464353c05c1e2d8633d091fe0f647de2648"
 getContribRepo "https://github.com/stergiotis/imgui_knobs.git" "imgui_knobs" "main" "4f207526f9ef036a0aff7edfaad92cfbe12d987a"
