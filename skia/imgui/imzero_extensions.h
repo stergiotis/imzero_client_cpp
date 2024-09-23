@@ -4,7 +4,7 @@
 
 namespace ImGui {
     // isParagraph: 0 = never, 1 = always, 2 = auto
-    void PushIsParagraphText(uint8_t isParagraph);
+    void PushIsParagraphText(ImZeroFB::IsParagraphText isParagraph);
     void PushParagraphTextLayout(ImZeroFB::TextAlignFlags align,ImZeroFB::TextDirection dir);
     uint8_t PopIsParagraphText();
     void PopParagraphTextLayout();

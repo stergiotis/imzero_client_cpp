@@ -2676,6 +2676,41 @@ case 0x0000009c:
   break;
 case 0x0000009d:
   {
+    FFFI_FUNCTION_INVOCATION("PushIsParagraphText")
+    auto val = receiveValue<uint8_t>();
+    {
+    ImGui::PushIsParagraphText(static_cast<ImZeroFB::IsParagraphText>(val));
+  }
+  }
+  break;
+case 0x0000009e:
+  {
+    FFFI_FUNCTION_INVOCATION("PopIsParagraphText")
+    {
+    ImGui::PopIsParagraphText();
+  }
+  }
+  break;
+case 0x0000009f:
+  {
+    FFFI_FUNCTION_INVOCATION("PushParagraphTextLayout")
+    auto align = receiveValue<uint8_t>();
+    auto dir = receiveValue<uint8_t>();
+    {
+    ImGui::PushParagraphTextLayout(static_cast<ImZeroFB::TextAlignFlags>(align),static_cast<ImZeroFB::TextDirection>(dir));
+  }
+  }
+  break;
+case 0x000000a0:
+  {
+    FFFI_FUNCTION_INVOCATION("PopParagraphTextLayout")
+    {
+    ImGui::PopParagraphTextLayout();
+  }
+  }
+  break;
+case 0x000000a1:
+  {
     FFFI_FUNCTION_INVOCATION("PlotFlameV")
     auto label = receiveString();
     auto starts = receiveSlice<float>();
@@ -2699,7 +2734,7 @@ case 0x0000009d:
   }
   }
   break;
-case 0x0000009e:
+case 0x000000a2:
   {
     FFFI_FUNCTION_INVOCATION("PushFont")
     auto font = receiveValue<uintptr_t>();
@@ -2708,7 +2743,7 @@ case 0x0000009e:
   }
   }
   break;
-case 0x0000009f:
+case 0x000000a3:
   {
     FFFI_FUNCTION_INVOCATION("GetFont")
     uintptr_t font;
@@ -2720,7 +2755,7 @@ case 0x0000009f:
   }
   }
   break;
-case 0x000000a0:
+case 0x000000a4:
   {
     FFFI_FUNCTION_INVOCATION("GetFontTexID")
     uintptr_t tex;
@@ -2732,7 +2767,7 @@ case 0x000000a0:
   }
   }
   break;
-case 0x000000a1:
+case 0x000000a5:
   {
     FFFI_FUNCTION_INVOCATION("addFontFromMemoryTrueTypeFontV")
     auto name = receiveString();
@@ -2811,7 +2846,7 @@ case 0x000000a1:
   }
   }
   break;
-case 0x000000a2:
+case 0x000000a6:
   {
     FFFI_FUNCTION_INVOCATION("RenderChar")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -2830,7 +2865,7 @@ if(dl == nullptr) {
   }
   }
   break;
-case 0x000000a3:
+case 0x000000a7:
   {
     FFFI_FUNCTION_INVOCATION("FontRenderText")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -2850,7 +2885,7 @@ if(dl == nullptr) {
   }
   }
   break;
-case 0x000000a4:
+case 0x000000a8:
   {
     FFFI_FUNCTION_INVOCATION("FontRenderTextV")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -2872,7 +2907,7 @@ if(dl == nullptr) {
   }
   }
   break;
-case 0x000000a5:
+case 0x000000a9:
   {
     FFFI_FUNCTION_INVOCATION("CalcTextSizeA")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -2905,7 +2940,7 @@ case 0x000000a5:
   }
   }
   break;
-case 0x000000a6:
+case 0x000000aa:
   {
     FFFI_FUNCTION_INVOCATION("DestroyContext")
     {
@@ -2913,7 +2948,7 @@ case 0x000000a6:
   }
   }
   break;
-case 0x000000a7:
+case 0x000000ab:
   {
     FFFI_FUNCTION_INVOCATION("NewFrame")
     {
@@ -2921,7 +2956,7 @@ case 0x000000a7:
   }
   }
   break;
-case 0x000000a8:
+case 0x000000ac:
   {
     FFFI_FUNCTION_INVOCATION("EndFrame")
     {
@@ -2929,7 +2964,7 @@ case 0x000000a8:
   }
   }
   break;
-case 0x000000a9:
+case 0x000000ad:
   {
     FFFI_FUNCTION_INVOCATION("Render")
     {
@@ -2937,7 +2972,7 @@ case 0x000000a9:
   }
   }
   break;
-case 0x000000aa:
+case 0x000000ae:
   {
     FFFI_FUNCTION_INVOCATION("ShowDemoWindow")
     {
@@ -2945,7 +2980,7 @@ case 0x000000aa:
   }
   }
   break;
-case 0x000000ab:
+case 0x000000af:
   {
     FFFI_FUNCTION_INVOCATION("ShowMetricsWindow")
     {
@@ -2953,7 +2988,7 @@ case 0x000000ab:
   }
   }
   break;
-case 0x000000ac:
+case 0x000000b0:
   {
     FFFI_FUNCTION_INVOCATION("ShowDebugLogWindow")
     {
@@ -2961,7 +2996,7 @@ case 0x000000ac:
   }
   }
   break;
-case 0x000000ad:
+case 0x000000b1:
   {
     FFFI_FUNCTION_INVOCATION("ShowIDStackToolWindow")
     {
@@ -2969,7 +3004,7 @@ case 0x000000ad:
   }
   }
   break;
-case 0x000000ae:
+case 0x000000b2:
   {
     FFFI_FUNCTION_INVOCATION("ShowAboutWindow")
     {
@@ -2977,7 +3012,7 @@ case 0x000000ae:
   }
   }
   break;
-case 0x000000af:
+case 0x000000b3:
   {
     FFFI_FUNCTION_INVOCATION("ShowStyleEditor")
     {
@@ -2985,7 +3020,7 @@ case 0x000000af:
   }
   }
   break;
-case 0x000000b0:
+case 0x000000b4:
   {
     FFFI_FUNCTION_INVOCATION("ShowStyleSelector")
     auto label = receiveString();
@@ -2998,7 +3033,7 @@ case 0x000000b0:
   }
   }
   break;
-case 0x000000b1:
+case 0x000000b5:
   {
     FFFI_FUNCTION_INVOCATION("ShowFontSelector")
     auto label = receiveString();
@@ -3007,7 +3042,7 @@ case 0x000000b1:
   }
   }
   break;
-case 0x000000b2:
+case 0x000000b6:
   {
     FFFI_FUNCTION_INVOCATION("ShowUserGuide")
     {
@@ -3015,7 +3050,7 @@ case 0x000000b2:
   }
   }
   break;
-case 0x000000b3:
+case 0x000000b7:
   {
     FFFI_FUNCTION_INVOCATION("GetVersion")
     const char * r;
@@ -3027,7 +3062,7 @@ case 0x000000b3:
   }
   }
   break;
-case 0x000000b4:
+case 0x000000b8:
   {
     FFFI_FUNCTION_INVOCATION("StyleColorsDark")
     {
@@ -3035,7 +3070,7 @@ case 0x000000b4:
   }
   }
   break;
-case 0x000000b5:
+case 0x000000b9:
   {
     FFFI_FUNCTION_INVOCATION("StyleColorsLight")
     {
@@ -3043,7 +3078,7 @@ case 0x000000b5:
   }
   }
   break;
-case 0x000000b6:
+case 0x000000ba:
   {
     FFFI_FUNCTION_INVOCATION("StyleColorsClassic")
     {
@@ -3051,7 +3086,7 @@ case 0x000000b6:
   }
   }
   break;
-case 0x000000b7:
+case 0x000000bb:
   {
     FFFI_FUNCTION_INVOCATION("Begin")
     auto name = receiveString();
@@ -3064,7 +3099,7 @@ case 0x000000b7:
   }
   }
   break;
-case 0x000000b8:
+case 0x000000bc:
   {
     FFFI_FUNCTION_INVOCATION("BeginV")
     auto name = receiveString();
@@ -3081,7 +3116,7 @@ auto r = ImGui::Begin(name, &p_open, flags);
   }
   }
   break;
-case 0x000000b9:
+case 0x000000bd:
   {
     FFFI_FUNCTION_INVOCATION("End")
     {
@@ -3089,7 +3124,7 @@ case 0x000000b9:
   }
   }
   break;
-case 0x000000ba:
+case 0x000000be:
   {
     FFFI_FUNCTION_INVOCATION("BeginChild")
     auto str_id = receiveString();
@@ -3102,7 +3137,7 @@ case 0x000000ba:
   }
   }
   break;
-case 0x000000bb:
+case 0x000000bf:
   {
     FFFI_FUNCTION_INVOCATION("BeginChildV")
     auto str_id = receiveString();
@@ -3118,7 +3153,7 @@ case 0x000000bb:
   }
   }
   break;
-case 0x000000bc:
+case 0x000000c0:
   {
     FFFI_FUNCTION_INVOCATION("BeginChildID")
     auto id = receiveValue<uint32_t>();
@@ -3131,7 +3166,7 @@ case 0x000000bc:
   }
   }
   break;
-case 0x000000bd:
+case 0x000000c1:
   {
     FFFI_FUNCTION_INVOCATION("BeginChildVID")
     auto id = receiveValue<uint32_t>();
@@ -3147,7 +3182,7 @@ case 0x000000bd:
   }
   }
   break;
-case 0x000000be:
+case 0x000000c2:
   {
     FFFI_FUNCTION_INVOCATION("EndChild")
     {
@@ -3155,7 +3190,7 @@ case 0x000000be:
   }
   }
   break;
-case 0x000000bf:
+case 0x000000c3:
   {
     FFFI_FUNCTION_INVOCATION("IsWindowAppearing")
     bool r;
@@ -3167,7 +3202,7 @@ case 0x000000bf:
   }
   }
   break;
-case 0x000000c0:
+case 0x000000c4:
   {
     FFFI_FUNCTION_INVOCATION("IsWindowCollapsed")
     bool r;
@@ -3179,7 +3214,7 @@ case 0x000000c0:
   }
   }
   break;
-case 0x000000c1:
+case 0x000000c5:
   {
     FFFI_FUNCTION_INVOCATION("IsWindowFocused")
     bool r;
@@ -3191,7 +3226,7 @@ case 0x000000c1:
   }
   }
   break;
-case 0x000000c2:
+case 0x000000c6:
   {
     FFFI_FUNCTION_INVOCATION("IsWindowFocusedV")
     auto flags = receiveValueSignMagnitude<int>();
@@ -3204,7 +3239,7 @@ case 0x000000c2:
   }
   }
   break;
-case 0x000000c3:
+case 0x000000c7:
   {
     FFFI_FUNCTION_INVOCATION("IsWindowHovered")
     bool r;
@@ -3216,7 +3251,7 @@ case 0x000000c3:
   }
   }
   break;
-case 0x000000c4:
+case 0x000000c8:
   {
     FFFI_FUNCTION_INVOCATION("IsWindowHoveredV")
     auto flags = receiveValueSignMagnitude<int>();
@@ -3229,7 +3264,7 @@ case 0x000000c4:
   }
   }
   break;
-case 0x000000c5:
+case 0x000000c9:
   {
     FFFI_FUNCTION_INVOCATION("GetWindowDrawList")
     uintptr_t r;
@@ -3241,7 +3276,7 @@ case 0x000000c5:
   }
   }
   break;
-case 0x000000c6:
+case 0x000000ca:
   {
     FFFI_FUNCTION_INVOCATION("GetWindowDpiScale")
     float r;
@@ -3253,7 +3288,7 @@ case 0x000000c6:
   }
   }
   break;
-case 0x000000c7:
+case 0x000000cb:
   {
     FFFI_FUNCTION_INVOCATION("GetWindowPos")
     float* r;
@@ -3265,7 +3300,7 @@ case 0x000000c7:
   }
   }
   break;
-case 0x000000c8:
+case 0x000000cc:
   {
     FFFI_FUNCTION_INVOCATION("GetWindowSize")
     float* r;
@@ -3277,7 +3312,7 @@ case 0x000000c8:
   }
   }
   break;
-case 0x000000c9:
+case 0x000000cd:
   {
     FFFI_FUNCTION_INVOCATION("GetWindowWidth")
     float r;
@@ -3289,7 +3324,7 @@ case 0x000000c9:
   }
   }
   break;
-case 0x000000ca:
+case 0x000000ce:
   {
     FFFI_FUNCTION_INVOCATION("GetWindowHeight")
     float r;
@@ -3301,7 +3336,7 @@ case 0x000000ca:
   }
   }
   break;
-case 0x000000cb:
+case 0x000000cf:
   {
     FFFI_FUNCTION_INVOCATION("SetNextWindowPos")
     auto pos = receiveArray<float,2>();
@@ -3310,7 +3345,7 @@ case 0x000000cb:
   }
   }
   break;
-case 0x000000cc:
+case 0x000000d0:
   {
     FFFI_FUNCTION_INVOCATION("SetNextWindowPosV")
     auto pos = receiveArray<float,2>();
@@ -3321,7 +3356,7 @@ case 0x000000cc:
   }
   }
   break;
-case 0x000000cd:
+case 0x000000d1:
   {
     FFFI_FUNCTION_INVOCATION("SetNextWindowSize")
     auto size = receiveArray<float,2>();
@@ -3330,7 +3365,7 @@ case 0x000000cd:
   }
   }
   break;
-case 0x000000ce:
+case 0x000000d2:
   {
     FFFI_FUNCTION_INVOCATION("SetNextWindowSizeV")
     auto size = receiveArray<float,2>();
@@ -3340,7 +3375,7 @@ case 0x000000ce:
   }
   }
   break;
-case 0x000000cf:
+case 0x000000d3:
   {
     FFFI_FUNCTION_INVOCATION("SetNextWindowSizeConstraints")
     auto size_min = receiveArray<float,2>();
@@ -3350,7 +3385,7 @@ case 0x000000cf:
   }
   }
   break;
-case 0x000000d0:
+case 0x000000d4:
   {
     FFFI_FUNCTION_INVOCATION("SetNextWindowContentSize")
     auto size = receiveArray<float,2>();
@@ -3359,7 +3394,7 @@ case 0x000000d0:
   }
   }
   break;
-case 0x000000d1:
+case 0x000000d5:
   {
     FFFI_FUNCTION_INVOCATION("SetNextWindowCollapsed")
     auto collapsed = receiveValue<bool>();
@@ -3368,7 +3403,7 @@ case 0x000000d1:
   }
   }
   break;
-case 0x000000d2:
+case 0x000000d6:
   {
     FFFI_FUNCTION_INVOCATION("SetNextWindowCollapsedV")
     auto collapsed = receiveValue<bool>();
@@ -3378,7 +3413,7 @@ case 0x000000d2:
   }
   }
   break;
-case 0x000000d3:
+case 0x000000d7:
   {
     FFFI_FUNCTION_INVOCATION("SetNextWindowFocus")
     {
@@ -3386,7 +3421,7 @@ case 0x000000d3:
   }
   }
   break;
-case 0x000000d4:
+case 0x000000d8:
   {
     FFFI_FUNCTION_INVOCATION("SetNextWindowScroll")
     auto scroll = receiveArray<float,2>();
@@ -3395,7 +3430,7 @@ case 0x000000d4:
   }
   }
   break;
-case 0x000000d5:
+case 0x000000d9:
   {
     FFFI_FUNCTION_INVOCATION("SetNextWindowBgAlpha")
     auto alpha = receiveValue<float>();
@@ -3404,7 +3439,7 @@ case 0x000000d5:
   }
   }
   break;
-case 0x000000d6:
+case 0x000000da:
   {
     FFFI_FUNCTION_INVOCATION("SetNextWindowViewport")
     auto viewport_id = receiveValue<uint32_t>();
@@ -3413,7 +3448,7 @@ case 0x000000d6:
   }
   }
   break;
-case 0x000000d7:
+case 0x000000db:
   {
     FFFI_FUNCTION_INVOCATION("SetWindowPos")
     auto name = receiveString();
@@ -3423,7 +3458,7 @@ case 0x000000d7:
   }
   }
   break;
-case 0x000000d8:
+case 0x000000dc:
   {
     FFFI_FUNCTION_INVOCATION("SetWindowPosV")
     auto name = receiveString();
@@ -3434,7 +3469,7 @@ case 0x000000d8:
   }
   }
   break;
-case 0x000000d9:
+case 0x000000dd:
   {
     FFFI_FUNCTION_INVOCATION("SetWindowSize")
     auto name = receiveString();
@@ -3444,7 +3479,7 @@ case 0x000000d9:
   }
   }
   break;
-case 0x000000da:
+case 0x000000de:
   {
     FFFI_FUNCTION_INVOCATION("SetWindowSizeV")
     auto name = receiveString();
@@ -3455,7 +3490,7 @@ case 0x000000da:
   }
   }
   break;
-case 0x000000db:
+case 0x000000df:
   {
     FFFI_FUNCTION_INVOCATION("SetWindowCollapsed")
     auto name = receiveString();
@@ -3465,7 +3500,7 @@ case 0x000000db:
   }
   }
   break;
-case 0x000000dc:
+case 0x000000e0:
   {
     FFFI_FUNCTION_INVOCATION("SetWindowCollapsedV")
     auto name = receiveString();
@@ -3476,7 +3511,7 @@ case 0x000000dc:
   }
   }
   break;
-case 0x000000dd:
+case 0x000000e1:
   {
     FFFI_FUNCTION_INVOCATION("SetWindowFocus")
     auto name = receiveString();
@@ -3485,7 +3520,7 @@ case 0x000000dd:
   }
   }
   break;
-case 0x000000de:
+case 0x000000e2:
   {
     FFFI_FUNCTION_INVOCATION("GetScrollX")
     float r;
@@ -3497,7 +3532,7 @@ case 0x000000de:
   }
   }
   break;
-case 0x000000df:
+case 0x000000e3:
   {
     FFFI_FUNCTION_INVOCATION("GetScrollY")
     float r;
@@ -3509,7 +3544,7 @@ case 0x000000df:
   }
   }
   break;
-case 0x000000e0:
+case 0x000000e4:
   {
     FFFI_FUNCTION_INVOCATION("SetScrollX")
     auto scroll_x = receiveValue<float>();
@@ -3518,7 +3553,7 @@ case 0x000000e0:
   }
   }
   break;
-case 0x000000e1:
+case 0x000000e5:
   {
     FFFI_FUNCTION_INVOCATION("SetScrollY")
     auto scroll_y = receiveValue<float>();
@@ -3527,7 +3562,7 @@ case 0x000000e1:
   }
   }
   break;
-case 0x000000e2:
+case 0x000000e6:
   {
     FFFI_FUNCTION_INVOCATION("GetScrollMaxX")
     float r;
@@ -3539,7 +3574,7 @@ case 0x000000e2:
   }
   }
   break;
-case 0x000000e3:
+case 0x000000e7:
   {
     FFFI_FUNCTION_INVOCATION("GetScrollMaxY")
     float r;
@@ -3551,7 +3586,7 @@ case 0x000000e3:
   }
   }
   break;
-case 0x000000e4:
+case 0x000000e8:
   {
     FFFI_FUNCTION_INVOCATION("SetScrollHereX")
     {
@@ -3559,7 +3594,7 @@ case 0x000000e4:
   }
   }
   break;
-case 0x000000e5:
+case 0x000000e9:
   {
     FFFI_FUNCTION_INVOCATION("SetScrollHereXV")
     auto center_x_ratio = receiveValue<float>();
@@ -3568,7 +3603,7 @@ case 0x000000e5:
   }
   }
   break;
-case 0x000000e6:
+case 0x000000ea:
   {
     FFFI_FUNCTION_INVOCATION("SetScrollHereY")
     {
@@ -3576,7 +3611,7 @@ case 0x000000e6:
   }
   }
   break;
-case 0x000000e7:
+case 0x000000eb:
   {
     FFFI_FUNCTION_INVOCATION("SetScrollHereYV")
     auto center_y_ratio = receiveValue<float>();
@@ -3585,7 +3620,7 @@ case 0x000000e7:
   }
   }
   break;
-case 0x000000e8:
+case 0x000000ec:
   {
     FFFI_FUNCTION_INVOCATION("SetScrollFromPosX")
     auto local_x = receiveValue<float>();
@@ -3594,7 +3629,7 @@ case 0x000000e8:
   }
   }
   break;
-case 0x000000e9:
+case 0x000000ed:
   {
     FFFI_FUNCTION_INVOCATION("SetScrollFromPosXV")
     auto local_x = receiveValue<float>();
@@ -3604,7 +3639,7 @@ case 0x000000e9:
   }
   }
   break;
-case 0x000000ea:
+case 0x000000ee:
   {
     FFFI_FUNCTION_INVOCATION("SetScrollFromPosY")
     auto local_y = receiveValue<float>();
@@ -3613,7 +3648,7 @@ case 0x000000ea:
   }
   }
   break;
-case 0x000000eb:
+case 0x000000ef:
   {
     FFFI_FUNCTION_INVOCATION("SetScrollFromPosYV")
     auto local_y = receiveValue<float>();
@@ -3623,7 +3658,7 @@ case 0x000000eb:
   }
   }
   break;
-case 0x000000ec:
+case 0x000000f0:
   {
     FFFI_FUNCTION_INVOCATION("PopFont")
     {
@@ -3631,7 +3666,7 @@ case 0x000000ec:
   }
   }
   break;
-case 0x000000ed:
+case 0x000000f1:
   {
     FFFI_FUNCTION_INVOCATION("PushStyleColor")
     auto idx = receiveValueSignMagnitude<int>();
@@ -3641,7 +3676,7 @@ case 0x000000ed:
   }
   }
   break;
-case 0x000000ee:
+case 0x000000f2:
   {
     FFFI_FUNCTION_INVOCATION("PushStyleColorImVec4")
     auto idx = receiveValueSignMagnitude<int>();
@@ -3651,7 +3686,7 @@ case 0x000000ee:
   }
   }
   break;
-case 0x000000ef:
+case 0x000000f3:
   {
     FFFI_FUNCTION_INVOCATION("PopStyleColor")
     {
@@ -3659,7 +3694,7 @@ case 0x000000ef:
   }
   }
   break;
-case 0x000000f0:
+case 0x000000f4:
   {
     FFFI_FUNCTION_INVOCATION("PopStyleColorV")
     auto count = receiveValueSignMagnitude<int>();
@@ -3668,7 +3703,7 @@ case 0x000000f0:
   }
   }
   break;
-case 0x000000f1:
+case 0x000000f5:
   {
     FFFI_FUNCTION_INVOCATION("PushStyleVar")
     auto idx = receiveValueSignMagnitude<int>();
@@ -3678,7 +3713,7 @@ case 0x000000f1:
   }
   }
   break;
-case 0x000000f2:
+case 0x000000f6:
   {
     FFFI_FUNCTION_INVOCATION("PushStyleVarImVec2")
     auto idx = receiveValueSignMagnitude<int>();
@@ -3688,7 +3723,7 @@ case 0x000000f2:
   }
   }
   break;
-case 0x000000f3:
+case 0x000000f7:
   {
     FFFI_FUNCTION_INVOCATION("PushStyleVarX")
     auto idx = receiveValueSignMagnitude<int>();
@@ -3698,7 +3733,7 @@ case 0x000000f3:
   }
   }
   break;
-case 0x000000f4:
+case 0x000000f8:
   {
     FFFI_FUNCTION_INVOCATION("PushStyleVarY")
     auto idx = receiveValueSignMagnitude<int>();
@@ -3708,7 +3743,7 @@ case 0x000000f4:
   }
   }
   break;
-case 0x000000f5:
+case 0x000000f9:
   {
     FFFI_FUNCTION_INVOCATION("PopStyleVar")
     {
@@ -3716,7 +3751,7 @@ case 0x000000f5:
   }
   }
   break;
-case 0x000000f6:
+case 0x000000fa:
   {
     FFFI_FUNCTION_INVOCATION("PopStyleVarV")
     auto count = receiveValueSignMagnitude<int>();
@@ -3725,7 +3760,7 @@ case 0x000000f6:
   }
   }
   break;
-case 0x000000f7:
+case 0x000000fb:
   {
     FFFI_FUNCTION_INVOCATION("PushItemFlag")
     auto option = receiveValueSignMagnitude<int>();
@@ -3735,7 +3770,7 @@ case 0x000000f7:
   }
   }
   break;
-case 0x000000f8:
+case 0x000000fc:
   {
     FFFI_FUNCTION_INVOCATION("PopItemFlag")
     {
@@ -3743,7 +3778,7 @@ case 0x000000f8:
   }
   }
   break;
-case 0x000000f9:
+case 0x000000fd:
   {
     FFFI_FUNCTION_INVOCATION("PushItemWidth")
     auto item_width = receiveValue<float>();
@@ -3752,7 +3787,7 @@ case 0x000000f9:
   }
   }
   break;
-case 0x000000fa:
+case 0x000000fe:
   {
     FFFI_FUNCTION_INVOCATION("PopItemWidth")
     {
@@ -3760,7 +3795,7 @@ case 0x000000fa:
   }
   }
   break;
-case 0x000000fb:
+case 0x000000ff:
   {
     FFFI_FUNCTION_INVOCATION("SetNextItemWidth")
     auto item_width = receiveValue<float>();
@@ -3769,7 +3804,7 @@ case 0x000000fb:
   }
   }
   break;
-case 0x000000fc:
+case 0x00000100:
   {
     FFFI_FUNCTION_INVOCATION("CalcItemWidth")
     float r;
@@ -3781,7 +3816,7 @@ case 0x000000fc:
   }
   }
   break;
-case 0x000000fd:
+case 0x00000101:
   {
     FFFI_FUNCTION_INVOCATION("PushTextWrapPos")
     {
@@ -3789,7 +3824,7 @@ case 0x000000fd:
   }
   }
   break;
-case 0x000000fe:
+case 0x00000102:
   {
     FFFI_FUNCTION_INVOCATION("PushTextWrapPosV")
     auto wrap_local_pos_x = receiveValue<float>();
@@ -3798,7 +3833,7 @@ case 0x000000fe:
   }
   }
   break;
-case 0x000000ff:
+case 0x00000103:
   {
     FFFI_FUNCTION_INVOCATION("PopTextWrapPos")
     {
@@ -3806,7 +3841,7 @@ case 0x000000ff:
   }
   }
   break;
-case 0x00000100:
+case 0x00000104:
   {
     FFFI_FUNCTION_INVOCATION("GetFontSize")
     float r;
@@ -3818,7 +3853,7 @@ case 0x00000100:
   }
   }
   break;
-case 0x00000101:
+case 0x00000105:
   {
     FFFI_FUNCTION_INVOCATION("GetFontTexUvWhitePixel")
     float* r;
@@ -3830,7 +3865,7 @@ case 0x00000101:
   }
   }
   break;
-case 0x00000102:
+case 0x00000106:
   {
     FFFI_FUNCTION_INVOCATION("GetColorU32ImGuiCol")
     auto idx = receiveValueSignMagnitude<int>();
@@ -3843,7 +3878,7 @@ case 0x00000102:
   }
   }
   break;
-case 0x00000103:
+case 0x00000107:
   {
     FFFI_FUNCTION_INVOCATION("GetColorU32ImGuiColV")
     auto idx = receiveValueSignMagnitude<int>();
@@ -3857,7 +3892,7 @@ case 0x00000103:
   }
   }
   break;
-case 0x00000104:
+case 0x00000108:
   {
     FFFI_FUNCTION_INVOCATION("GetColorU32ImVec4")
     auto col = receiveArray<float,4>();
@@ -3870,7 +3905,7 @@ case 0x00000104:
   }
   }
   break;
-case 0x00000105:
+case 0x00000109:
   {
     FFFI_FUNCTION_INVOCATION("GetColorU32")
     auto col = receiveValue<uint32_t>();
@@ -3883,7 +3918,7 @@ case 0x00000105:
   }
   }
   break;
-case 0x00000106:
+case 0x0000010a:
   {
     FFFI_FUNCTION_INVOCATION("GetColorU32V")
     auto col = receiveValue<uint32_t>();
@@ -3897,7 +3932,7 @@ case 0x00000106:
   }
   }
   break;
-case 0x00000107:
+case 0x0000010b:
   {
     FFFI_FUNCTION_INVOCATION("GetStyleColorVec4")
     auto idx = receiveValueSignMagnitude<int>();
@@ -3910,7 +3945,7 @@ case 0x00000107:
   }
   }
   break;
-case 0x00000108:
+case 0x0000010c:
   {
     FFFI_FUNCTION_INVOCATION("GetCursorScreenPos")
     float* r;
@@ -3922,7 +3957,7 @@ case 0x00000108:
   }
   }
   break;
-case 0x00000109:
+case 0x0000010d:
   {
     FFFI_FUNCTION_INVOCATION("SetCursorScreenPos")
     auto pos = receiveArray<float,2>();
@@ -3931,7 +3966,7 @@ case 0x00000109:
   }
   }
   break;
-case 0x0000010a:
+case 0x0000010e:
   {
     FFFI_FUNCTION_INVOCATION("GetContentRegionAvail")
     float* r;
@@ -3943,7 +3978,7 @@ case 0x0000010a:
   }
   }
   break;
-case 0x0000010b:
+case 0x0000010f:
   {
     FFFI_FUNCTION_INVOCATION("GetCursorPos")
     float* r;
@@ -3955,7 +3990,7 @@ case 0x0000010b:
   }
   }
   break;
-case 0x0000010c:
+case 0x00000110:
   {
     FFFI_FUNCTION_INVOCATION("GetCursorPosX")
     float r;
@@ -3967,7 +4002,7 @@ case 0x0000010c:
   }
   }
   break;
-case 0x0000010d:
+case 0x00000111:
   {
     FFFI_FUNCTION_INVOCATION("GetCursorPosY")
     float r;
@@ -3979,7 +4014,7 @@ case 0x0000010d:
   }
   }
   break;
-case 0x0000010e:
+case 0x00000112:
   {
     FFFI_FUNCTION_INVOCATION("SetCursorPos")
     auto local_pos = receiveArray<float,2>();
@@ -3988,7 +4023,7 @@ case 0x0000010e:
   }
   }
   break;
-case 0x0000010f:
+case 0x00000113:
   {
     FFFI_FUNCTION_INVOCATION("SetCursorPosX")
     auto local_x = receiveValue<float>();
@@ -3997,7 +4032,7 @@ case 0x0000010f:
   }
   }
   break;
-case 0x00000110:
+case 0x00000114:
   {
     FFFI_FUNCTION_INVOCATION("SetCursorPosY")
     auto local_y = receiveValue<float>();
@@ -4006,7 +4041,7 @@ case 0x00000110:
   }
   }
   break;
-case 0x00000111:
+case 0x00000115:
   {
     FFFI_FUNCTION_INVOCATION("GetCursorStartPos")
     float* r;
@@ -4018,7 +4053,7 @@ case 0x00000111:
   }
   }
   break;
-case 0x00000112:
+case 0x00000116:
   {
     FFFI_FUNCTION_INVOCATION("Separator")
     {
@@ -4026,7 +4061,7 @@ case 0x00000112:
   }
   }
   break;
-case 0x00000113:
+case 0x00000117:
   {
     FFFI_FUNCTION_INVOCATION("SameLine")
     {
@@ -4034,7 +4069,7 @@ case 0x00000113:
   }
   }
   break;
-case 0x00000114:
+case 0x00000118:
   {
     FFFI_FUNCTION_INVOCATION("SameLineV")
     auto offset_from_start_x = receiveValue<float>();
@@ -4044,7 +4079,7 @@ case 0x00000114:
   }
   }
   break;
-case 0x00000115:
+case 0x00000119:
   {
     FFFI_FUNCTION_INVOCATION("NewLine")
     {
@@ -4052,7 +4087,7 @@ case 0x00000115:
   }
   }
   break;
-case 0x00000116:
+case 0x0000011a:
   {
     FFFI_FUNCTION_INVOCATION("Spacing")
     {
@@ -4060,7 +4095,7 @@ case 0x00000116:
   }
   }
   break;
-case 0x00000117:
+case 0x0000011b:
   {
     FFFI_FUNCTION_INVOCATION("Dummy")
     auto size = receiveArray<float,2>();
@@ -4069,7 +4104,7 @@ case 0x00000117:
   }
   }
   break;
-case 0x00000118:
+case 0x0000011c:
   {
     FFFI_FUNCTION_INVOCATION("Indent")
     {
@@ -4077,7 +4112,7 @@ case 0x00000118:
   }
   }
   break;
-case 0x00000119:
+case 0x0000011d:
   {
     FFFI_FUNCTION_INVOCATION("IndentV")
     auto indent_w = receiveValue<float>();
@@ -4086,7 +4121,7 @@ case 0x00000119:
   }
   }
   break;
-case 0x0000011a:
+case 0x0000011e:
   {
     FFFI_FUNCTION_INVOCATION("Unindent")
     {
@@ -4094,7 +4129,7 @@ case 0x0000011a:
   }
   }
   break;
-case 0x0000011b:
+case 0x0000011f:
   {
     FFFI_FUNCTION_INVOCATION("UnindentV")
     auto indent_w = receiveValue<float>();
@@ -4103,7 +4138,7 @@ case 0x0000011b:
   }
   }
   break;
-case 0x0000011c:
+case 0x00000120:
   {
     FFFI_FUNCTION_INVOCATION("BeginGroup")
     {
@@ -4111,7 +4146,7 @@ case 0x0000011c:
   }
   }
   break;
-case 0x0000011d:
+case 0x00000121:
   {
     FFFI_FUNCTION_INVOCATION("EndGroup")
     {
@@ -4119,7 +4154,7 @@ case 0x0000011d:
   }
   }
   break;
-case 0x0000011e:
+case 0x00000122:
   {
     FFFI_FUNCTION_INVOCATION("AlignTextToFramePadding")
     {
@@ -4127,7 +4162,7 @@ case 0x0000011e:
   }
   }
   break;
-case 0x0000011f:
+case 0x00000123:
   {
     FFFI_FUNCTION_INVOCATION("GetTextLineHeight")
     float r;
@@ -4139,7 +4174,7 @@ case 0x0000011f:
   }
   }
   break;
-case 0x00000120:
+case 0x00000124:
   {
     FFFI_FUNCTION_INVOCATION("GetTextLineHeightWithSpacing")
     float r;
@@ -4151,7 +4186,7 @@ case 0x00000120:
   }
   }
   break;
-case 0x00000121:
+case 0x00000125:
   {
     FFFI_FUNCTION_INVOCATION("GetFrameHeight")
     float r;
@@ -4163,7 +4198,7 @@ case 0x00000121:
   }
   }
   break;
-case 0x00000122:
+case 0x00000126:
   {
     FFFI_FUNCTION_INVOCATION("GetFrameHeightWithSpacing")
     float r;
@@ -4175,7 +4210,7 @@ case 0x00000122:
   }
   }
   break;
-case 0x00000123:
+case 0x00000127:
   {
     FFFI_FUNCTION_INVOCATION("PushID")
     auto str_id = receiveString();
@@ -4184,7 +4219,7 @@ case 0x00000123:
   }
   }
   break;
-case 0x00000124:
+case 0x00000128:
   {
     FFFI_FUNCTION_INVOCATION("PushIDInt")
     auto int_id = receiveValueSignMagnitude<int>();
@@ -4193,7 +4228,7 @@ case 0x00000124:
   }
   }
   break;
-case 0x00000125:
+case 0x00000129:
   {
     FFFI_FUNCTION_INVOCATION("PopID")
     {
@@ -4201,7 +4236,7 @@ case 0x00000125:
   }
   }
   break;
-case 0x00000126:
+case 0x0000012a:
   {
     FFFI_FUNCTION_INVOCATION("GetID")
     auto str_id = receiveString();
@@ -4214,7 +4249,7 @@ case 0x00000126:
   }
   }
   break;
-case 0x00000127:
+case 0x0000012b:
   {
     FFFI_FUNCTION_INVOCATION("GetIDInt")
     auto int_id = receiveValueSignMagnitude<int>();
@@ -4227,7 +4262,7 @@ case 0x00000127:
   }
   }
   break;
-case 0x00000128:
+case 0x0000012c:
   {
     FFFI_FUNCTION_INVOCATION("SeparatorText")
     auto label = receiveString();
@@ -4236,7 +4271,7 @@ case 0x00000128:
   }
   }
   break;
-case 0x00000129:
+case 0x0000012d:
   {
     FFFI_FUNCTION_INVOCATION("Button")
     auto label = receiveString();
@@ -4249,7 +4284,7 @@ case 0x00000129:
   }
   }
   break;
-case 0x0000012a:
+case 0x0000012e:
   {
     FFFI_FUNCTION_INVOCATION("ButtonV")
     auto label = receiveString();
@@ -4263,7 +4298,7 @@ case 0x0000012a:
   }
   }
   break;
-case 0x0000012b:
+case 0x0000012f:
   {
     FFFI_FUNCTION_INVOCATION("SmallButton")
     auto label = receiveString();
@@ -4276,7 +4311,7 @@ case 0x0000012b:
   }
   }
   break;
-case 0x0000012c:
+case 0x00000130:
   {
     FFFI_FUNCTION_INVOCATION("InvisibleButton")
     auto str_id = receiveString();
@@ -4290,7 +4325,7 @@ case 0x0000012c:
   }
   }
   break;
-case 0x0000012d:
+case 0x00000131:
   {
     FFFI_FUNCTION_INVOCATION("InvisibleButtonV")
     auto str_id = receiveString();
@@ -4305,7 +4340,7 @@ case 0x0000012d:
   }
   }
   break;
-case 0x0000012e:
+case 0x00000132:
   {
     FFFI_FUNCTION_INVOCATION("ArrowButton")
     auto str_id = receiveString();
@@ -4319,7 +4354,7 @@ case 0x0000012e:
   }
   }
   break;
-case 0x0000012f:
+case 0x00000133:
   {
     FFFI_FUNCTION_INVOCATION("RadioButton")
     auto label = receiveString();
@@ -4333,7 +4368,7 @@ case 0x0000012f:
   }
   }
   break;
-case 0x00000130:
+case 0x00000134:
   {
     FFFI_FUNCTION_INVOCATION("ProgressBar")
     auto fraction = receiveValue<float>();
@@ -4342,7 +4377,7 @@ case 0x00000130:
   }
   }
   break;
-case 0x00000131:
+case 0x00000135:
   {
     FFFI_FUNCTION_INVOCATION("ProgressBarV")
     auto fraction = receiveValue<float>();
@@ -4353,7 +4388,7 @@ case 0x00000131:
   }
   }
   break;
-case 0x00000132:
+case 0x00000136:
   {
     FFFI_FUNCTION_INVOCATION("Bullet")
     {
@@ -4361,7 +4396,7 @@ case 0x00000132:
   }
   }
   break;
-case 0x00000133:
+case 0x00000137:
   {
     FFFI_FUNCTION_INVOCATION("TextLink")
     auto label = receiveString();
@@ -4374,7 +4409,7 @@ case 0x00000133:
   }
   }
   break;
-case 0x00000134:
+case 0x00000138:
   {
     FFFI_FUNCTION_INVOCATION("TextLinkOpenURL")
     auto label = receiveString();
@@ -4383,7 +4418,7 @@ case 0x00000134:
   }
   }
   break;
-case 0x00000135:
+case 0x00000139:
   {
     FFFI_FUNCTION_INVOCATION("TextLinkOpenURLV")
     auto label = receiveString();
@@ -4393,7 +4428,7 @@ case 0x00000135:
   }
   }
   break;
-case 0x00000136:
+case 0x0000013a:
   {
     FFFI_FUNCTION_INVOCATION("Image")
     auto user_texture_id = receiveValue<uintptr_t>();
@@ -4403,7 +4438,7 @@ case 0x00000136:
   }
   }
   break;
-case 0x00000137:
+case 0x0000013b:
   {
     FFFI_FUNCTION_INVOCATION("ImageV")
     auto user_texture_id = receiveValue<uintptr_t>();
@@ -4417,7 +4452,7 @@ case 0x00000137:
   }
   }
   break;
-case 0x00000138:
+case 0x0000013c:
   {
     FFFI_FUNCTION_INVOCATION("ImageButton")
     auto str_id = receiveString();
@@ -4432,7 +4467,7 @@ case 0x00000138:
   }
   }
   break;
-case 0x00000139:
+case 0x0000013d:
   {
     FFFI_FUNCTION_INVOCATION("ImageButtonV")
     auto str_id = receiveString();
@@ -4451,7 +4486,7 @@ case 0x00000139:
   }
   }
   break;
-case 0x0000013a:
+case 0x0000013e:
   {
     FFFI_FUNCTION_INVOCATION("BeginCombo")
     auto label = receiveString();
@@ -4465,7 +4500,7 @@ case 0x0000013a:
   }
   }
   break;
-case 0x0000013b:
+case 0x0000013f:
   {
     FFFI_FUNCTION_INVOCATION("BeginComboV")
     auto label = receiveString();
@@ -4480,7 +4515,7 @@ case 0x0000013b:
   }
   }
   break;
-case 0x0000013c:
+case 0x00000140:
   {
     FFFI_FUNCTION_INVOCATION("EndCombo")
     {
@@ -4488,7 +4523,7 @@ case 0x0000013c:
   }
   }
   break;
-case 0x0000013d:
+case 0x00000141:
   {
     FFFI_FUNCTION_INVOCATION("ColorButton")
     auto desc_id = receiveString();
@@ -4502,7 +4537,7 @@ case 0x0000013d:
   }
   }
   break;
-case 0x0000013e:
+case 0x00000142:
   {
     FFFI_FUNCTION_INVOCATION("ColorButtonV")
     auto desc_id = receiveString();
@@ -4518,7 +4553,7 @@ case 0x0000013e:
   }
   }
   break;
-case 0x0000013f:
+case 0x00000143:
   {
     FFFI_FUNCTION_INVOCATION("SetColorEditOptions")
     auto flags = receiveValueSignMagnitude<int>();
@@ -4527,7 +4562,7 @@ case 0x0000013f:
   }
   }
   break;
-case 0x00000140:
+case 0x00000144:
   {
     FFFI_FUNCTION_INVOCATION("TreeNode")
     auto label = receiveString();
@@ -4540,7 +4575,7 @@ case 0x00000140:
   }
   }
   break;
-case 0x00000141:
+case 0x00000145:
   {
     FFFI_FUNCTION_INVOCATION("TreeNodeEx")
     auto label = receiveString();
@@ -4553,7 +4588,7 @@ case 0x00000141:
   }
   }
   break;
-case 0x00000142:
+case 0x00000146:
   {
     FFFI_FUNCTION_INVOCATION("TreeNodeExV")
     auto label = receiveString();
@@ -4567,7 +4602,7 @@ case 0x00000142:
   }
   }
   break;
-case 0x00000143:
+case 0x00000147:
   {
     FFFI_FUNCTION_INVOCATION("TreePush")
     auto str_id = receiveString();
@@ -4576,7 +4611,7 @@ case 0x00000143:
   }
   }
   break;
-case 0x00000144:
+case 0x00000148:
   {
     FFFI_FUNCTION_INVOCATION("TreePop")
     {
@@ -4584,7 +4619,7 @@ case 0x00000144:
   }
   }
   break;
-case 0x00000145:
+case 0x00000149:
   {
     FFFI_FUNCTION_INVOCATION("GetTreeNodeToLabelSpacing")
     float r;
@@ -4596,7 +4631,7 @@ case 0x00000145:
   }
   }
   break;
-case 0x00000146:
+case 0x0000014a:
   {
     FFFI_FUNCTION_INVOCATION("CollapsingHeader")
     auto label = receiveString();
@@ -4609,7 +4644,7 @@ case 0x00000146:
   }
   }
   break;
-case 0x00000147:
+case 0x0000014b:
   {
     FFFI_FUNCTION_INVOCATION("CollapsingHeaderV")
     auto label = receiveString();
@@ -4623,7 +4658,7 @@ case 0x00000147:
   }
   }
   break;
-case 0x00000148:
+case 0x0000014c:
   {
     FFFI_FUNCTION_INVOCATION("SetNextItemOpen")
     auto is_open = receiveValue<bool>();
@@ -4632,7 +4667,7 @@ case 0x00000148:
   }
   }
   break;
-case 0x00000149:
+case 0x0000014d:
   {
     FFFI_FUNCTION_INVOCATION("SetNextItemOpenV")
     auto is_open = receiveValue<bool>();
@@ -4642,7 +4677,7 @@ case 0x00000149:
   }
   }
   break;
-case 0x0000014a:
+case 0x0000014e:
   {
     FFFI_FUNCTION_INVOCATION("SetNextItemStorageID")
     auto storage_id = receiveValue<uint32_t>();
@@ -4651,7 +4686,7 @@ case 0x0000014a:
   }
   }
   break;
-case 0x0000014b:
+case 0x0000014f:
   {
     FFFI_FUNCTION_INVOCATION("Selectable")
     auto label = receiveString();
@@ -4664,7 +4699,7 @@ case 0x0000014b:
   }
   }
   break;
-case 0x0000014c:
+case 0x00000150:
   {
     FFFI_FUNCTION_INVOCATION("SelectableV")
     auto label = receiveString();
@@ -4680,7 +4715,7 @@ case 0x0000014c:
   }
   }
   break;
-case 0x0000014d:
+case 0x00000151:
   {
     FFFI_FUNCTION_INVOCATION("IsItemToggledSelection")
     bool r;
@@ -4692,7 +4727,7 @@ case 0x0000014d:
   }
   }
   break;
-case 0x0000014e:
+case 0x00000152:
   {
     FFFI_FUNCTION_INVOCATION("BeginListBox")
     auto label = receiveString();
@@ -4705,7 +4740,7 @@ case 0x0000014e:
   }
   }
   break;
-case 0x0000014f:
+case 0x00000153:
   {
     FFFI_FUNCTION_INVOCATION("BeginListBoxV")
     auto label = receiveString();
@@ -4719,7 +4754,7 @@ case 0x0000014f:
   }
   }
   break;
-case 0x00000150:
+case 0x00000154:
   {
     FFFI_FUNCTION_INVOCATION("EndListBox")
     {
@@ -4727,7 +4762,7 @@ case 0x00000150:
   }
   }
   break;
-case 0x00000151:
+case 0x00000155:
   {
     FFFI_FUNCTION_INVOCATION("BeginMenuBar")
     bool r;
@@ -4739,7 +4774,7 @@ case 0x00000151:
   }
   }
   break;
-case 0x00000152:
+case 0x00000156:
   {
     FFFI_FUNCTION_INVOCATION("EndMenuBar")
     {
@@ -4747,7 +4782,7 @@ case 0x00000152:
   }
   }
   break;
-case 0x00000153:
+case 0x00000157:
   {
     FFFI_FUNCTION_INVOCATION("BeginMainMenuBar")
     bool r;
@@ -4759,7 +4794,7 @@ case 0x00000153:
   }
   }
   break;
-case 0x00000154:
+case 0x00000158:
   {
     FFFI_FUNCTION_INVOCATION("EndMainMenuBar")
     {
@@ -4767,7 +4802,7 @@ case 0x00000154:
   }
   }
   break;
-case 0x00000155:
+case 0x00000159:
   {
     FFFI_FUNCTION_INVOCATION("BeginMenu")
     auto label = receiveString();
@@ -4780,7 +4815,7 @@ case 0x00000155:
   }
   }
   break;
-case 0x00000156:
+case 0x0000015a:
   {
     FFFI_FUNCTION_INVOCATION("BeginMenuV")
     auto label = receiveString();
@@ -4794,7 +4829,7 @@ case 0x00000156:
   }
   }
   break;
-case 0x00000157:
+case 0x0000015b:
   {
     FFFI_FUNCTION_INVOCATION("EndMenu")
     {
@@ -4802,7 +4837,7 @@ case 0x00000157:
   }
   }
   break;
-case 0x00000158:
+case 0x0000015c:
   {
     FFFI_FUNCTION_INVOCATION("MenuItem")
     auto label = receiveString();
@@ -4815,7 +4850,7 @@ case 0x00000158:
   }
   }
   break;
-case 0x00000159:
+case 0x0000015d:
   {
     FFFI_FUNCTION_INVOCATION("MenuItemV")
     auto label = receiveString();
@@ -4831,7 +4866,7 @@ case 0x00000159:
   }
   }
   break;
-case 0x0000015a:
+case 0x0000015e:
   {
     FFFI_FUNCTION_INVOCATION("BeginTooltip")
     bool r;
@@ -4843,7 +4878,7 @@ case 0x0000015a:
   }
   }
   break;
-case 0x0000015b:
+case 0x0000015f:
   {
     FFFI_FUNCTION_INVOCATION("EndTooltip")
     {
@@ -4851,7 +4886,7 @@ case 0x0000015b:
   }
   }
   break;
-case 0x0000015c:
+case 0x00000160:
   {
     FFFI_FUNCTION_INVOCATION("BeginItemTooltip")
     bool r;
@@ -4863,7 +4898,7 @@ case 0x0000015c:
   }
   }
   break;
-case 0x0000015d:
+case 0x00000161:
   {
     FFFI_FUNCTION_INVOCATION("BeginPopup")
     auto str_id = receiveString();
@@ -4876,7 +4911,7 @@ case 0x0000015d:
   }
   }
   break;
-case 0x0000015e:
+case 0x00000162:
   {
     FFFI_FUNCTION_INVOCATION("BeginPopupV")
     auto str_id = receiveString();
@@ -4890,7 +4925,7 @@ case 0x0000015e:
   }
   }
   break;
-case 0x0000015f:
+case 0x00000163:
   {
     FFFI_FUNCTION_INVOCATION("BeginPopupModal")
     auto name = receiveString();
@@ -4903,7 +4938,7 @@ case 0x0000015f:
   }
   }
   break;
-case 0x00000160:
+case 0x00000164:
   {
     FFFI_FUNCTION_INVOCATION("BeginPopupModalV")
     auto name = receiveString();
@@ -4920,7 +4955,7 @@ auto r = ImGui::BeginPopupModal(name, &p_open, flags);
   }
   }
   break;
-case 0x00000161:
+case 0x00000165:
   {
     FFFI_FUNCTION_INVOCATION("EndPopup")
     {
@@ -4928,7 +4963,7 @@ case 0x00000161:
   }
   }
   break;
-case 0x00000162:
+case 0x00000166:
   {
     FFFI_FUNCTION_INVOCATION("OpenPopup")
     auto str_id = receiveString();
@@ -4937,7 +4972,7 @@ case 0x00000162:
   }
   }
   break;
-case 0x00000163:
+case 0x00000167:
   {
     FFFI_FUNCTION_INVOCATION("OpenPopupV")
     auto str_id = receiveString();
@@ -4947,7 +4982,7 @@ case 0x00000163:
   }
   }
   break;
-case 0x00000164:
+case 0x00000168:
   {
     FFFI_FUNCTION_INVOCATION("OpenPopupID")
     auto id = receiveValue<uint32_t>();
@@ -4956,7 +4991,7 @@ case 0x00000164:
   }
   }
   break;
-case 0x00000165:
+case 0x00000169:
   {
     FFFI_FUNCTION_INVOCATION("OpenPopupVID")
     auto id = receiveValue<uint32_t>();
@@ -4966,7 +5001,7 @@ case 0x00000165:
   }
   }
   break;
-case 0x00000166:
+case 0x0000016a:
   {
     FFFI_FUNCTION_INVOCATION("OpenPopupOnItemClick")
     {
@@ -4974,7 +5009,7 @@ case 0x00000166:
   }
   }
   break;
-case 0x00000167:
+case 0x0000016b:
   {
     FFFI_FUNCTION_INVOCATION("OpenPopupOnItemClickV")
     auto str_id = receiveString();
@@ -4984,7 +5019,7 @@ case 0x00000167:
   }
   }
   break;
-case 0x00000168:
+case 0x0000016c:
   {
     FFFI_FUNCTION_INVOCATION("CloseCurrentPopup")
     {
@@ -4992,7 +5027,7 @@ case 0x00000168:
   }
   }
   break;
-case 0x00000169:
+case 0x0000016d:
   {
     FFFI_FUNCTION_INVOCATION("BeginPopupContextItem")
     bool r;
@@ -5004,7 +5039,7 @@ case 0x00000169:
   }
   }
   break;
-case 0x0000016a:
+case 0x0000016e:
   {
     FFFI_FUNCTION_INVOCATION("BeginPopupContextItemV")
     auto str_id = receiveString();
@@ -5018,7 +5053,7 @@ case 0x0000016a:
   }
   }
   break;
-case 0x0000016b:
+case 0x0000016f:
   {
     FFFI_FUNCTION_INVOCATION("BeginPopupContextWindow")
     bool r;
@@ -5030,7 +5065,7 @@ case 0x0000016b:
   }
   }
   break;
-case 0x0000016c:
+case 0x00000170:
   {
     FFFI_FUNCTION_INVOCATION("BeginPopupContextWindowV")
     auto str_id = receiveString();
@@ -5044,7 +5079,7 @@ case 0x0000016c:
   }
   }
   break;
-case 0x0000016d:
+case 0x00000171:
   {
     FFFI_FUNCTION_INVOCATION("BeginPopupContextVoid")
     bool r;
@@ -5056,7 +5091,7 @@ case 0x0000016d:
   }
   }
   break;
-case 0x0000016e:
+case 0x00000172:
   {
     FFFI_FUNCTION_INVOCATION("BeginPopupContextVoidV")
     auto str_id = receiveString();
@@ -5070,7 +5105,7 @@ case 0x0000016e:
   }
   }
   break;
-case 0x0000016f:
+case 0x00000173:
   {
     FFFI_FUNCTION_INVOCATION("IsPopupOpen")
     auto str_id = receiveString();
@@ -5083,7 +5118,7 @@ case 0x0000016f:
   }
   }
   break;
-case 0x00000170:
+case 0x00000174:
   {
     FFFI_FUNCTION_INVOCATION("IsPopupOpenV")
     auto str_id = receiveString();
@@ -5097,7 +5132,7 @@ case 0x00000170:
   }
   }
   break;
-case 0x00000171:
+case 0x00000175:
   {
     FFFI_FUNCTION_INVOCATION("BeginTable")
     auto str_id = receiveString();
@@ -5111,7 +5146,7 @@ case 0x00000171:
   }
   }
   break;
-case 0x00000172:
+case 0x00000176:
   {
     FFFI_FUNCTION_INVOCATION("BeginTableV")
     auto str_id = receiveString();
@@ -5128,7 +5163,7 @@ case 0x00000172:
   }
   }
   break;
-case 0x00000173:
+case 0x00000177:
   {
     FFFI_FUNCTION_INVOCATION("EndTable")
     {
@@ -5136,7 +5171,7 @@ case 0x00000173:
   }
   }
   break;
-case 0x00000174:
+case 0x00000178:
   {
     FFFI_FUNCTION_INVOCATION("TableNextRow")
     {
@@ -5144,7 +5179,7 @@ case 0x00000174:
   }
   }
   break;
-case 0x00000175:
+case 0x00000179:
   {
     FFFI_FUNCTION_INVOCATION("TableNextRowV")
     auto row_flags = receiveValueSignMagnitude<int>();
@@ -5154,7 +5189,7 @@ case 0x00000175:
   }
   }
   break;
-case 0x00000176:
+case 0x0000017a:
   {
     FFFI_FUNCTION_INVOCATION("TableNextColumn")
     bool r;
@@ -5166,7 +5201,7 @@ case 0x00000176:
   }
   }
   break;
-case 0x00000177:
+case 0x0000017b:
   {
     FFFI_FUNCTION_INVOCATION("TableSetColumnIndex")
     auto column_n = receiveValueSignMagnitude<int>();
@@ -5179,7 +5214,7 @@ case 0x00000177:
   }
   }
   break;
-case 0x00000178:
+case 0x0000017c:
   {
     FFFI_FUNCTION_INVOCATION("TableSetupColumn")
     auto label = receiveString();
@@ -5188,7 +5223,7 @@ case 0x00000178:
   }
   }
   break;
-case 0x00000179:
+case 0x0000017d:
   {
     FFFI_FUNCTION_INVOCATION("TableSetupColumnV")
     auto label = receiveString();
@@ -5200,7 +5235,7 @@ case 0x00000179:
   }
   }
   break;
-case 0x0000017a:
+case 0x0000017e:
   {
     FFFI_FUNCTION_INVOCATION("TableSetupScrollFreeze")
     auto cols = receiveValueSignMagnitude<int>();
@@ -5210,7 +5245,7 @@ case 0x0000017a:
   }
   }
   break;
-case 0x0000017b:
+case 0x0000017f:
   {
     FFFI_FUNCTION_INVOCATION("TableHeader")
     auto label = receiveString();
@@ -5219,7 +5254,7 @@ case 0x0000017b:
   }
   }
   break;
-case 0x0000017c:
+case 0x00000180:
   {
     FFFI_FUNCTION_INVOCATION("TableHeadersRow")
     {
@@ -5227,7 +5262,7 @@ case 0x0000017c:
   }
   }
   break;
-case 0x0000017d:
+case 0x00000181:
   {
     FFFI_FUNCTION_INVOCATION("TableAngledHeadersRow")
     {
@@ -5235,7 +5270,7 @@ case 0x0000017d:
   }
   }
   break;
-case 0x0000017e:
+case 0x00000182:
   {
     FFFI_FUNCTION_INVOCATION("TableGetColumnCount")
     int r;
@@ -5247,7 +5282,7 @@ case 0x0000017e:
   }
   }
   break;
-case 0x0000017f:
+case 0x00000183:
   {
     FFFI_FUNCTION_INVOCATION("TableGetColumnIndex")
     int r;
@@ -5259,7 +5294,7 @@ case 0x0000017f:
   }
   }
   break;
-case 0x00000180:
+case 0x00000184:
   {
     FFFI_FUNCTION_INVOCATION("TableGetRowIndex")
     int r;
@@ -5271,7 +5306,7 @@ case 0x00000180:
   }
   }
   break;
-case 0x00000181:
+case 0x00000185:
   {
     FFFI_FUNCTION_INVOCATION("TableGetColumnName")
     const char * r;
@@ -5283,7 +5318,7 @@ case 0x00000181:
   }
   }
   break;
-case 0x00000182:
+case 0x00000186:
   {
     FFFI_FUNCTION_INVOCATION("TableGetColumnNameV")
     auto column_n = receiveValueSignMagnitude<int>();
@@ -5296,7 +5331,7 @@ case 0x00000182:
   }
   }
   break;
-case 0x00000183:
+case 0x00000187:
   {
     FFFI_FUNCTION_INVOCATION("TableGetColumnFlags")
     int r;
@@ -5308,7 +5343,7 @@ case 0x00000183:
   }
   }
   break;
-case 0x00000184:
+case 0x00000188:
   {
     FFFI_FUNCTION_INVOCATION("TableGetColumnFlagsV")
     auto column_n = receiveValueSignMagnitude<int>();
@@ -5321,7 +5356,7 @@ case 0x00000184:
   }
   }
   break;
-case 0x00000185:
+case 0x00000189:
   {
     FFFI_FUNCTION_INVOCATION("TableSetColumnEnabled")
     auto column_n = receiveValueSignMagnitude<int>();
@@ -5331,7 +5366,7 @@ case 0x00000185:
   }
   }
   break;
-case 0x00000186:
+case 0x0000018a:
   {
     FFFI_FUNCTION_INVOCATION("TableGetHoveredColumn")
     int r;
@@ -5343,7 +5378,7 @@ case 0x00000186:
   }
   }
   break;
-case 0x00000187:
+case 0x0000018b:
   {
     FFFI_FUNCTION_INVOCATION("TableSetBgColor")
     auto target = receiveValueSignMagnitude<int>();
@@ -5353,7 +5388,7 @@ case 0x00000187:
   }
   }
   break;
-case 0x00000188:
+case 0x0000018c:
   {
     FFFI_FUNCTION_INVOCATION("TableSetBgColorV")
     auto target = receiveValueSignMagnitude<int>();
@@ -5364,7 +5399,7 @@ case 0x00000188:
   }
   }
   break;
-case 0x00000189:
+case 0x0000018d:
   {
     FFFI_FUNCTION_INVOCATION("Columns")
     {
@@ -5372,7 +5407,7 @@ case 0x00000189:
   }
   }
   break;
-case 0x0000018a:
+case 0x0000018e:
   {
     FFFI_FUNCTION_INVOCATION("ColumnsV")
     auto count = receiveValueSignMagnitude<int>();
@@ -5383,7 +5418,7 @@ case 0x0000018a:
   }
   }
   break;
-case 0x0000018b:
+case 0x0000018f:
   {
     FFFI_FUNCTION_INVOCATION("NextColumn")
     {
@@ -5391,7 +5426,7 @@ case 0x0000018b:
   }
   }
   break;
-case 0x0000018c:
+case 0x00000190:
   {
     FFFI_FUNCTION_INVOCATION("GetColumnIndex")
     int r;
@@ -5403,7 +5438,7 @@ case 0x0000018c:
   }
   }
   break;
-case 0x0000018d:
+case 0x00000191:
   {
     FFFI_FUNCTION_INVOCATION("GetColumnWidth")
     float r;
@@ -5415,7 +5450,7 @@ case 0x0000018d:
   }
   }
   break;
-case 0x0000018e:
+case 0x00000192:
   {
     FFFI_FUNCTION_INVOCATION("GetColumnWidthV")
     auto column_index = receiveValueSignMagnitude<int>();
@@ -5428,7 +5463,7 @@ case 0x0000018e:
   }
   }
   break;
-case 0x0000018f:
+case 0x00000193:
   {
     FFFI_FUNCTION_INVOCATION("SetColumnWidth")
     auto column_index = receiveValueSignMagnitude<int>();
@@ -5438,7 +5473,7 @@ case 0x0000018f:
   }
   }
   break;
-case 0x00000190:
+case 0x00000194:
   {
     FFFI_FUNCTION_INVOCATION("GetColumnOffset")
     float r;
@@ -5450,7 +5485,7 @@ case 0x00000190:
   }
   }
   break;
-case 0x00000191:
+case 0x00000195:
   {
     FFFI_FUNCTION_INVOCATION("GetColumnOffsetV")
     auto column_index = receiveValueSignMagnitude<int>();
@@ -5463,7 +5498,7 @@ case 0x00000191:
   }
   }
   break;
-case 0x00000192:
+case 0x00000196:
   {
     FFFI_FUNCTION_INVOCATION("SetColumnOffset")
     auto column_index = receiveValueSignMagnitude<int>();
@@ -5473,7 +5508,7 @@ case 0x00000192:
   }
   }
   break;
-case 0x00000193:
+case 0x00000197:
   {
     FFFI_FUNCTION_INVOCATION("GetColumnsCount")
     int r;
@@ -5485,7 +5520,7 @@ case 0x00000193:
   }
   }
   break;
-case 0x00000194:
+case 0x00000198:
   {
     FFFI_FUNCTION_INVOCATION("BeginTabBar")
     auto str_id = receiveString();
@@ -5498,7 +5533,7 @@ case 0x00000194:
   }
   }
   break;
-case 0x00000195:
+case 0x00000199:
   {
     FFFI_FUNCTION_INVOCATION("BeginTabBarV")
     auto str_id = receiveString();
@@ -5512,7 +5547,7 @@ case 0x00000195:
   }
   }
   break;
-case 0x00000196:
+case 0x0000019a:
   {
     FFFI_FUNCTION_INVOCATION("EndTabBar")
     {
@@ -5520,7 +5555,7 @@ case 0x00000196:
   }
   }
   break;
-case 0x00000197:
+case 0x0000019b:
   {
     FFFI_FUNCTION_INVOCATION("BeginTabItem")
     auto label = receiveString();
@@ -5533,7 +5568,7 @@ case 0x00000197:
   }
   }
   break;
-case 0x00000198:
+case 0x0000019c:
   {
     FFFI_FUNCTION_INVOCATION("BeginTabItemV")
     auto label = receiveString();
@@ -5550,7 +5585,7 @@ auto r = ImGui::BeginTabItem(label, &p_open, flags);
   }
   }
   break;
-case 0x00000199:
+case 0x0000019d:
   {
     FFFI_FUNCTION_INVOCATION("EndTabItem")
     {
@@ -5558,7 +5593,7 @@ case 0x00000199:
   }
   }
   break;
-case 0x0000019a:
+case 0x0000019e:
   {
     FFFI_FUNCTION_INVOCATION("TabItemButton")
     auto label = receiveString();
@@ -5571,7 +5606,7 @@ case 0x0000019a:
   }
   }
   break;
-case 0x0000019b:
+case 0x0000019f:
   {
     FFFI_FUNCTION_INVOCATION("TabItemButtonV")
     auto label = receiveString();
@@ -5585,7 +5620,7 @@ case 0x0000019b:
   }
   }
   break;
-case 0x0000019c:
+case 0x000001a0:
   {
     FFFI_FUNCTION_INVOCATION("SetTabItemClosed")
     auto tab_or_docked_window_label = receiveString();
@@ -5594,7 +5629,7 @@ case 0x0000019c:
   }
   }
   break;
-case 0x0000019d:
+case 0x000001a1:
   {
     FFFI_FUNCTION_INVOCATION("DockSpace")
     auto dockspace_id = receiveValue<uint32_t>();
@@ -5607,7 +5642,7 @@ case 0x0000019d:
   }
   }
   break;
-case 0x0000019e:
+case 0x000001a2:
   {
     FFFI_FUNCTION_INVOCATION("DockSpaceOverViewport")
     uint32_t r;
@@ -5619,7 +5654,7 @@ case 0x0000019e:
   }
   }
   break;
-case 0x0000019f:
+case 0x000001a3:
   {
     FFFI_FUNCTION_INVOCATION("SetNextWindowDockID")
     auto dock_id = receiveValue<uint32_t>();
@@ -5628,7 +5663,7 @@ case 0x0000019f:
   }
   }
   break;
-case 0x000001a0:
+case 0x000001a4:
   {
     FFFI_FUNCTION_INVOCATION("SetNextWindowDockIDV")
     auto dock_id = receiveValue<uint32_t>();
@@ -5638,7 +5673,7 @@ case 0x000001a0:
   }
   }
   break;
-case 0x000001a1:
+case 0x000001a5:
   {
     FFFI_FUNCTION_INVOCATION("GetWindowDockID")
     uint32_t r;
@@ -5650,7 +5685,7 @@ case 0x000001a1:
   }
   }
   break;
-case 0x000001a2:
+case 0x000001a6:
   {
     FFFI_FUNCTION_INVOCATION("IsWindowDocked")
     bool r;
@@ -5662,7 +5697,7 @@ case 0x000001a2:
   }
   }
   break;
-case 0x000001a3:
+case 0x000001a7:
   {
     FFFI_FUNCTION_INVOCATION("LogToTTY")
     {
@@ -5670,7 +5705,7 @@ case 0x000001a3:
   }
   }
   break;
-case 0x000001a4:
+case 0x000001a8:
   {
     FFFI_FUNCTION_INVOCATION("LogToTTYV")
     auto auto_open_depth = receiveValueSignMagnitude<int>();
@@ -5679,7 +5714,7 @@ case 0x000001a4:
   }
   }
   break;
-case 0x000001a5:
+case 0x000001a9:
   {
     FFFI_FUNCTION_INVOCATION("LogToFile")
     {
@@ -5687,7 +5722,7 @@ case 0x000001a5:
   }
   }
   break;
-case 0x000001a6:
+case 0x000001aa:
   {
     FFFI_FUNCTION_INVOCATION("LogToFileV")
     auto auto_open_depth = receiveValueSignMagnitude<int>();
@@ -5697,7 +5732,7 @@ case 0x000001a6:
   }
   }
   break;
-case 0x000001a7:
+case 0x000001ab:
   {
     FFFI_FUNCTION_INVOCATION("LogToClipboard")
     {
@@ -5705,7 +5740,7 @@ case 0x000001a7:
   }
   }
   break;
-case 0x000001a8:
+case 0x000001ac:
   {
     FFFI_FUNCTION_INVOCATION("LogToClipboardV")
     auto auto_open_depth = receiveValueSignMagnitude<int>();
@@ -5714,7 +5749,7 @@ case 0x000001a8:
   }
   }
   break;
-case 0x000001a9:
+case 0x000001ad:
   {
     FFFI_FUNCTION_INVOCATION("LogFinish")
     {
@@ -5722,7 +5757,7 @@ case 0x000001a9:
   }
   }
   break;
-case 0x000001aa:
+case 0x000001ae:
   {
     FFFI_FUNCTION_INVOCATION("LogButtons")
     {
@@ -5730,7 +5765,7 @@ case 0x000001aa:
   }
   }
   break;
-case 0x000001ab:
+case 0x000001af:
   {
     FFFI_FUNCTION_INVOCATION("BeginDragDropSource")
     bool r;
@@ -5742,7 +5777,7 @@ case 0x000001ab:
   }
   }
   break;
-case 0x000001ac:
+case 0x000001b0:
   {
     FFFI_FUNCTION_INVOCATION("BeginDragDropSourceV")
     auto flags = receiveValueSignMagnitude<int>();
@@ -5755,7 +5790,7 @@ case 0x000001ac:
   }
   }
   break;
-case 0x000001ad:
+case 0x000001b1:
   {
     FFFI_FUNCTION_INVOCATION("EndDragDropSource")
     {
@@ -5763,7 +5798,7 @@ case 0x000001ad:
   }
   }
   break;
-case 0x000001ae:
+case 0x000001b2:
   {
     FFFI_FUNCTION_INVOCATION("BeginDragDropTarget")
     bool r;
@@ -5775,7 +5810,7 @@ case 0x000001ae:
   }
   }
   break;
-case 0x000001af:
+case 0x000001b3:
   {
     FFFI_FUNCTION_INVOCATION("EndDragDropTarget")
     {
@@ -5783,7 +5818,7 @@ case 0x000001af:
   }
   }
   break;
-case 0x000001b0:
+case 0x000001b4:
   {
     FFFI_FUNCTION_INVOCATION("BeginDisabled")
     {
@@ -5791,7 +5826,7 @@ case 0x000001b0:
   }
   }
   break;
-case 0x000001b1:
+case 0x000001b5:
   {
     FFFI_FUNCTION_INVOCATION("BeginDisabledV")
     auto disabled = receiveValue<bool>();
@@ -5800,7 +5835,7 @@ case 0x000001b1:
   }
   }
   break;
-case 0x000001b2:
+case 0x000001b6:
   {
     FFFI_FUNCTION_INVOCATION("EndDisabled")
     {
@@ -5808,7 +5843,7 @@ case 0x000001b2:
   }
   }
   break;
-case 0x000001b3:
+case 0x000001b7:
   {
     FFFI_FUNCTION_INVOCATION("PushClipRect")
     auto clip_rect_min = receiveArray<float,2>();
@@ -5819,7 +5854,7 @@ case 0x000001b3:
   }
   }
   break;
-case 0x000001b4:
+case 0x000001b8:
   {
     FFFI_FUNCTION_INVOCATION("PopClipRect")
     {
@@ -5827,7 +5862,7 @@ case 0x000001b4:
   }
   }
   break;
-case 0x000001b5:
+case 0x000001b9:
   {
     FFFI_FUNCTION_INVOCATION("SetItemDefaultFocus")
     {
@@ -5835,7 +5870,7 @@ case 0x000001b5:
   }
   }
   break;
-case 0x000001b6:
+case 0x000001ba:
   {
     FFFI_FUNCTION_INVOCATION("SetKeyboardFocusHere")
     {
@@ -5843,7 +5878,7 @@ case 0x000001b6:
   }
   }
   break;
-case 0x000001b7:
+case 0x000001bb:
   {
     FFFI_FUNCTION_INVOCATION("SetKeyboardFocusHereV")
     auto offset = receiveValueSignMagnitude<int>();
@@ -5852,7 +5887,7 @@ case 0x000001b7:
   }
   }
   break;
-case 0x000001b8:
+case 0x000001bc:
   {
     FFFI_FUNCTION_INVOCATION("SetNextItemAllowOverlap")
     {
@@ -5860,7 +5895,7 @@ case 0x000001b8:
   }
   }
   break;
-case 0x000001b9:
+case 0x000001bd:
   {
     FFFI_FUNCTION_INVOCATION("IsItemHovered")
     bool r;
@@ -5872,7 +5907,7 @@ case 0x000001b9:
   }
   }
   break;
-case 0x000001ba:
+case 0x000001be:
   {
     FFFI_FUNCTION_INVOCATION("IsItemHoveredV")
     auto flags = receiveValueSignMagnitude<int>();
@@ -5885,7 +5920,7 @@ case 0x000001ba:
   }
   }
   break;
-case 0x000001bb:
+case 0x000001bf:
   {
     FFFI_FUNCTION_INVOCATION("IsItemActive")
     bool r;
@@ -5897,7 +5932,7 @@ case 0x000001bb:
   }
   }
   break;
-case 0x000001bc:
+case 0x000001c0:
   {
     FFFI_FUNCTION_INVOCATION("IsItemFocused")
     bool r;
@@ -5909,7 +5944,7 @@ case 0x000001bc:
   }
   }
   break;
-case 0x000001bd:
+case 0x000001c1:
   {
     FFFI_FUNCTION_INVOCATION("IsItemClicked")
     bool r;
@@ -5921,7 +5956,7 @@ case 0x000001bd:
   }
   }
   break;
-case 0x000001be:
+case 0x000001c2:
   {
     FFFI_FUNCTION_INVOCATION("IsItemClickedV")
     auto mouse_button = receiveValueSignMagnitude<int>();
@@ -5934,7 +5969,7 @@ case 0x000001be:
   }
   }
   break;
-case 0x000001bf:
+case 0x000001c3:
   {
     FFFI_FUNCTION_INVOCATION("IsItemVisible")
     bool r;
@@ -5946,7 +5981,7 @@ case 0x000001bf:
   }
   }
   break;
-case 0x000001c0:
+case 0x000001c4:
   {
     FFFI_FUNCTION_INVOCATION("IsItemEdited")
     bool r;
@@ -5958,7 +5993,7 @@ case 0x000001c0:
   }
   }
   break;
-case 0x000001c1:
+case 0x000001c5:
   {
     FFFI_FUNCTION_INVOCATION("IsItemActivated")
     bool r;
@@ -5970,7 +6005,7 @@ case 0x000001c1:
   }
   }
   break;
-case 0x000001c2:
+case 0x000001c6:
   {
     FFFI_FUNCTION_INVOCATION("IsItemDeactivated")
     bool r;
@@ -5982,7 +6017,7 @@ case 0x000001c2:
   }
   }
   break;
-case 0x000001c3:
+case 0x000001c7:
   {
     FFFI_FUNCTION_INVOCATION("IsItemDeactivatedAfterEdit")
     bool r;
@@ -5994,7 +6029,7 @@ case 0x000001c3:
   }
   }
   break;
-case 0x000001c4:
+case 0x000001c8:
   {
     FFFI_FUNCTION_INVOCATION("IsItemToggledOpen")
     bool r;
@@ -6006,7 +6041,7 @@ case 0x000001c4:
   }
   }
   break;
-case 0x000001c5:
+case 0x000001c9:
   {
     FFFI_FUNCTION_INVOCATION("IsAnyItemHovered")
     bool r;
@@ -6018,7 +6053,7 @@ case 0x000001c5:
   }
   }
   break;
-case 0x000001c6:
+case 0x000001ca:
   {
     FFFI_FUNCTION_INVOCATION("IsAnyItemActive")
     bool r;
@@ -6030,7 +6065,7 @@ case 0x000001c6:
   }
   }
   break;
-case 0x000001c7:
+case 0x000001cb:
   {
     FFFI_FUNCTION_INVOCATION("IsAnyItemFocused")
     bool r;
@@ -6042,7 +6077,7 @@ case 0x000001c7:
   }
   }
   break;
-case 0x000001c8:
+case 0x000001cc:
   {
     FFFI_FUNCTION_INVOCATION("GetItemID")
     uint32_t r;
@@ -6054,7 +6089,7 @@ case 0x000001c8:
   }
   }
   break;
-case 0x000001c9:
+case 0x000001cd:
   {
     FFFI_FUNCTION_INVOCATION("GetItemRectMin")
     float* r;
@@ -6066,7 +6101,7 @@ case 0x000001c9:
   }
   }
   break;
-case 0x000001ca:
+case 0x000001ce:
   {
     FFFI_FUNCTION_INVOCATION("GetItemRectMax")
     float* r;
@@ -6078,7 +6113,7 @@ case 0x000001ca:
   }
   }
   break;
-case 0x000001cb:
+case 0x000001cf:
   {
     FFFI_FUNCTION_INVOCATION("GetItemRectSize")
     float* r;
@@ -6090,7 +6125,7 @@ case 0x000001cb:
   }
   }
   break;
-case 0x000001cc:
+case 0x000001d0:
   {
     FFFI_FUNCTION_INVOCATION("GetBackgroundDrawList")
     uintptr_t r;
@@ -6102,7 +6137,7 @@ case 0x000001cc:
   }
   }
   break;
-case 0x000001cd:
+case 0x000001d1:
   {
     FFFI_FUNCTION_INVOCATION("GetForegroundDrawList")
     uintptr_t r;
@@ -6114,7 +6149,7 @@ case 0x000001cd:
   }
   }
   break;
-case 0x000001ce:
+case 0x000001d2:
   {
     FFFI_FUNCTION_INVOCATION("IsRectVisible")
     auto size = receiveArray<float,2>();
@@ -6127,7 +6162,7 @@ case 0x000001ce:
   }
   }
   break;
-case 0x000001cf:
+case 0x000001d3:
   {
     FFFI_FUNCTION_INVOCATION("IsRectVisible2")
     auto rect_min = receiveArray<float,2>();
@@ -6141,7 +6176,7 @@ case 0x000001cf:
   }
   }
   break;
-case 0x000001d0:
+case 0x000001d4:
   {
     FFFI_FUNCTION_INVOCATION("GetTime")
     double r;
@@ -6153,7 +6188,7 @@ case 0x000001d0:
   }
   }
   break;
-case 0x000001d1:
+case 0x000001d5:
   {
     FFFI_FUNCTION_INVOCATION("GetFrameCount")
     int r;
@@ -6165,7 +6200,7 @@ case 0x000001d1:
   }
   }
   break;
-case 0x000001d2:
+case 0x000001d6:
   {
     FFFI_FUNCTION_INVOCATION("GetStyleColorName")
     auto idx = receiveValueSignMagnitude<int>();
@@ -6178,7 +6213,7 @@ case 0x000001d2:
   }
   }
   break;
-case 0x000001d3:
+case 0x000001d7:
   {
     FFFI_FUNCTION_INVOCATION("ColorConvertU32ToFloat4")
     auto in = receiveValue<uint32_t>();
@@ -6191,7 +6226,7 @@ case 0x000001d3:
   }
   }
   break;
-case 0x000001d4:
+case 0x000001d8:
   {
     FFFI_FUNCTION_INVOCATION("ColorConvertFloat4ToU32")
     auto in = receiveArray<float,4>();
@@ -6204,7 +6239,7 @@ case 0x000001d4:
   }
   }
   break;
-case 0x000001d5:
+case 0x000001d9:
   {
     FFFI_FUNCTION_INVOCATION("IsKeyDown")
     auto key = receiveValueSignMagnitude<int>();
@@ -6217,7 +6252,7 @@ case 0x000001d5:
   }
   }
   break;
-case 0x000001d6:
+case 0x000001da:
   {
     FFFI_FUNCTION_INVOCATION("IsKeyPressed")
     auto key = receiveValueSignMagnitude<int>();
@@ -6230,7 +6265,7 @@ case 0x000001d6:
   }
   }
   break;
-case 0x000001d7:
+case 0x000001db:
   {
     FFFI_FUNCTION_INVOCATION("IsKeyPressedV")
     auto key = receiveValueSignMagnitude<int>();
@@ -6244,7 +6279,7 @@ case 0x000001d7:
   }
   }
   break;
-case 0x000001d8:
+case 0x000001dc:
   {
     FFFI_FUNCTION_INVOCATION("IsKeyReleased")
     auto key = receiveValueSignMagnitude<int>();
@@ -6257,7 +6292,7 @@ case 0x000001d8:
   }
   }
   break;
-case 0x000001d9:
+case 0x000001dd:
   {
     FFFI_FUNCTION_INVOCATION("GetKeyPressedAmount")
     auto key = receiveValueSignMagnitude<int>();
@@ -6272,7 +6307,7 @@ case 0x000001d9:
   }
   }
   break;
-case 0x000001da:
+case 0x000001de:
   {
     FFFI_FUNCTION_INVOCATION("GetKeyName")
     auto key = receiveValueSignMagnitude<int>();
@@ -6285,7 +6320,7 @@ case 0x000001da:
   }
   }
   break;
-case 0x000001db:
+case 0x000001df:
   {
     FFFI_FUNCTION_INVOCATION("SetNextFrameWantCaptureKeyboard")
     auto want_capture_keyboard = receiveValue<bool>();
@@ -6294,7 +6329,7 @@ case 0x000001db:
   }
   }
   break;
-case 0x000001dc:
+case 0x000001e0:
   {
     FFFI_FUNCTION_INVOCATION("SetItemKeyOwner")
     auto key = receiveValueSignMagnitude<int>();
@@ -6303,7 +6338,7 @@ case 0x000001dc:
   }
   }
   break;
-case 0x000001dd:
+case 0x000001e1:
   {
     FFFI_FUNCTION_INVOCATION("IsMouseDown")
     auto button = receiveValueSignMagnitude<int>();
@@ -6316,7 +6351,7 @@ case 0x000001dd:
   }
   }
   break;
-case 0x000001de:
+case 0x000001e2:
   {
     FFFI_FUNCTION_INVOCATION("IsMouseClicked")
     auto button = receiveValueSignMagnitude<int>();
@@ -6329,7 +6364,7 @@ case 0x000001de:
   }
   }
   break;
-case 0x000001df:
+case 0x000001e3:
   {
     FFFI_FUNCTION_INVOCATION("IsMouseClickedV")
     auto button = receiveValueSignMagnitude<int>();
@@ -6343,7 +6378,7 @@ case 0x000001df:
   }
   }
   break;
-case 0x000001e0:
+case 0x000001e4:
   {
     FFFI_FUNCTION_INVOCATION("IsMouseReleased")
     auto button = receiveValueSignMagnitude<int>();
@@ -6356,7 +6391,7 @@ case 0x000001e0:
   }
   }
   break;
-case 0x000001e1:
+case 0x000001e5:
   {
     FFFI_FUNCTION_INVOCATION("IsMouseDoubleClicked")
     auto button = receiveValueSignMagnitude<int>();
@@ -6369,7 +6404,7 @@ case 0x000001e1:
   }
   }
   break;
-case 0x000001e2:
+case 0x000001e6:
   {
     FFFI_FUNCTION_INVOCATION("GetMouseClickedCount")
     auto button = receiveValueSignMagnitude<int>();
@@ -6382,7 +6417,7 @@ case 0x000001e2:
   }
   }
   break;
-case 0x000001e3:
+case 0x000001e7:
   {
     FFFI_FUNCTION_INVOCATION("IsMouseHoveringRect")
     auto r_min = receiveArray<float,2>();
@@ -6396,7 +6431,7 @@ case 0x000001e3:
   }
   }
   break;
-case 0x000001e4:
+case 0x000001e8:
   {
     FFFI_FUNCTION_INVOCATION("IsMouseHoveringRectV")
     auto r_min = receiveArray<float,2>();
@@ -6411,7 +6446,7 @@ case 0x000001e4:
   }
   }
   break;
-case 0x000001e5:
+case 0x000001e9:
   {
     FFFI_FUNCTION_INVOCATION("IsMousePosValid")
     bool r;
@@ -6423,7 +6458,7 @@ case 0x000001e5:
   }
   }
   break;
-case 0x000001e6:
+case 0x000001ea:
   {
     FFFI_FUNCTION_INVOCATION("GetMousePos")
     float* r;
@@ -6435,7 +6470,7 @@ case 0x000001e6:
   }
   }
   break;
-case 0x000001e7:
+case 0x000001eb:
   {
     FFFI_FUNCTION_INVOCATION("GetMousePosOnOpeningCurrentPopup")
     float* r;
@@ -6447,7 +6482,7 @@ case 0x000001e7:
   }
   }
   break;
-case 0x000001e8:
+case 0x000001ec:
   {
     FFFI_FUNCTION_INVOCATION("IsMouseDragging")
     auto button = receiveValueSignMagnitude<int>();
@@ -6460,7 +6495,7 @@ case 0x000001e8:
   }
   }
   break;
-case 0x000001e9:
+case 0x000001ed:
   {
     FFFI_FUNCTION_INVOCATION("IsMouseDraggingV")
     auto button = receiveValueSignMagnitude<int>();
@@ -6474,7 +6509,7 @@ case 0x000001e9:
   }
   }
   break;
-case 0x000001ea:
+case 0x000001ee:
   {
     FFFI_FUNCTION_INVOCATION("GetMouseDragDelta")
     float* r;
@@ -6486,7 +6521,7 @@ case 0x000001ea:
   }
   }
   break;
-case 0x000001eb:
+case 0x000001ef:
   {
     FFFI_FUNCTION_INVOCATION("GetMouseDragDeltaV")
     auto button = receiveValueSignMagnitude<int>();
@@ -6500,7 +6535,7 @@ case 0x000001eb:
   }
   }
   break;
-case 0x000001ec:
+case 0x000001f0:
   {
     FFFI_FUNCTION_INVOCATION("ResetMouseDragDelta")
     {
@@ -6508,7 +6543,7 @@ case 0x000001ec:
   }
   }
   break;
-case 0x000001ed:
+case 0x000001f1:
   {
     FFFI_FUNCTION_INVOCATION("ResetMouseDragDeltaV")
     auto button = receiveValueSignMagnitude<int>();
@@ -6517,7 +6552,7 @@ case 0x000001ed:
   }
   }
   break;
-case 0x000001ee:
+case 0x000001f2:
   {
     FFFI_FUNCTION_INVOCATION("GetMouseCursor")
     int r;
@@ -6529,7 +6564,7 @@ case 0x000001ee:
   }
   }
   break;
-case 0x000001ef:
+case 0x000001f3:
   {
     FFFI_FUNCTION_INVOCATION("SetMouseCursor")
     auto cursor_type = receiveValueSignMagnitude<int>();
@@ -6538,7 +6573,7 @@ case 0x000001ef:
   }
   }
   break;
-case 0x000001f0:
+case 0x000001f4:
   {
     FFFI_FUNCTION_INVOCATION("SetNextFrameWantCaptureMouse")
     auto want_capture_mouse = receiveValue<bool>();
@@ -6547,7 +6582,7 @@ case 0x000001f0:
   }
   }
   break;
-case 0x000001f1:
+case 0x000001f5:
   {
     FFFI_FUNCTION_INVOCATION("GetClipboardText")
     const char * r;
@@ -6559,7 +6594,7 @@ case 0x000001f1:
   }
   }
   break;
-case 0x000001f2:
+case 0x000001f6:
   {
     FFFI_FUNCTION_INVOCATION("SetClipboardText")
     auto text = receiveString();
@@ -6568,7 +6603,7 @@ case 0x000001f2:
   }
   }
   break;
-case 0x000001f3:
+case 0x000001f7:
   {
     FFFI_FUNCTION_INVOCATION("LoadIniSettingsFromDisk")
     auto ini_filename = receiveString();
@@ -6577,7 +6612,7 @@ case 0x000001f3:
   }
   }
   break;
-case 0x000001f4:
+case 0x000001f8:
   {
     FFFI_FUNCTION_INVOCATION("LoadIniSettingsFromMemory")
     auto ini_data = receiveString();
@@ -6586,7 +6621,7 @@ case 0x000001f4:
   }
   }
   break;
-case 0x000001f5:
+case 0x000001f9:
   {
     FFFI_FUNCTION_INVOCATION("LoadIniSettingsFromMemoryV")
     auto ini_data = receiveString();
@@ -6596,7 +6631,7 @@ case 0x000001f5:
   }
   }
   break;
-case 0x000001f6:
+case 0x000001fa:
   {
     FFFI_FUNCTION_INVOCATION("SaveIniSettingsToDisk")
     auto ini_filename = receiveString();
@@ -6605,7 +6640,7 @@ case 0x000001f6:
   }
   }
   break;
-case 0x000001f7:
+case 0x000001fb:
   {
     FFFI_FUNCTION_INVOCATION("SaveIniSettingsToMemory")
     const char * r;
@@ -6617,7 +6652,7 @@ case 0x000001f7:
   }
   }
   break;
-case 0x000001f8:
+case 0x000001fc:
   {
     FFFI_FUNCTION_INVOCATION("DebugTextEncoding")
     auto text = receiveString();
@@ -6626,7 +6661,7 @@ case 0x000001f8:
   }
   }
   break;
-case 0x000001f9:
+case 0x000001fd:
   {
     FFFI_FUNCTION_INVOCATION("DebugFlashStyleColor")
     auto idx = receiveValueSignMagnitude<int>();
@@ -6635,7 +6670,7 @@ case 0x000001f9:
   }
   }
   break;
-case 0x000001fa:
+case 0x000001fe:
   {
     FFFI_FUNCTION_INVOCATION("DebugStartItemPicker")
     {
@@ -6643,7 +6678,7 @@ case 0x000001fa:
   }
   }
   break;
-case 0x000001fb:
+case 0x000001ff:
   {
     FFFI_FUNCTION_INVOCATION("DebugCheckVersionAndDataLayout")
     auto version_str = receiveString();
@@ -6662,7 +6697,7 @@ case 0x000001fb:
   }
   }
   break;
-case 0x000001fc:
+case 0x00000200:
   {
     FFFI_FUNCTION_INVOCATION("UpdatePlatformWindows")
     {
@@ -6670,7 +6705,7 @@ case 0x000001fc:
   }
   }
   break;
-case 0x000001fd:
+case 0x00000201:
   {
     FFFI_FUNCTION_INVOCATION("RenderPlatformWindowsDefault")
     {
@@ -6678,7 +6713,7 @@ case 0x000001fd:
   }
   }
   break;
-case 0x000001fe:
+case 0x00000202:
   {
     FFFI_FUNCTION_INVOCATION("DestroyPlatformWindows")
     {
@@ -6686,7 +6721,7 @@ case 0x000001fe:
   }
   }
   break;
-case 0x000001ff:
+case 0x00000203:
   {
     FFFI_FUNCTION_INVOCATION("GetContentRegionMax")
     float* r;
@@ -6698,7 +6733,7 @@ case 0x000001ff:
   }
   }
   break;
-case 0x00000200:
+case 0x00000204:
   {
     FFFI_FUNCTION_INVOCATION("GetWindowContentRegionMin")
     float* r;
@@ -6710,7 +6745,7 @@ case 0x00000200:
   }
   }
   break;
-case 0x00000201:
+case 0x00000205:
   {
     FFFI_FUNCTION_INVOCATION("GetWindowContentRegionMax")
     float* r;
@@ -6722,7 +6757,7 @@ case 0x00000201:
   }
   }
   break;
-case 0x00000202:
+case 0x00000206:
   {
     FFFI_FUNCTION_INVOCATION("SetItemAllowOverlap")
     {
@@ -6730,7 +6765,7 @@ case 0x00000202:
   }
   }
   break;
-case 0x00000203:
+case 0x00000207:
   {
     FFFI_FUNCTION_INVOCATION("GetKeyIndex")
     auto key = receiveValueSignMagnitude<int>();
@@ -6743,7 +6778,7 @@ case 0x00000203:
   }
   }
   break;
-case 0x00000204:
+case 0x00000208:
   {
     FFFI_FUNCTION_INVOCATION("NewHexEditor")
     uintptr_t r;
@@ -6755,7 +6790,7 @@ case 0x00000204:
   }
   }
   break;
-case 0x00000205:
+case 0x00000209:
   {
     FFFI_FUNCTION_INVOCATION("Destroy")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -6764,7 +6799,7 @@ case 0x00000205:
   }
   }
   break;
-case 0x00000206:
+case 0x0000020a:
   {
     FFFI_FUNCTION_INVOCATION("GetSettings")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -6816,7 +6851,7 @@ ASSIGN(highlightColor, t->HighlightColor);
   }
   }
   break;
-case 0x00000207:
+case 0x0000020b:
   {
     FFFI_FUNCTION_INVOCATION("SetSettings")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -6854,7 +6889,7 @@ ASSIGN(highlightColor, t->HighlightColor);
   }
   }
   break;
-case 0x00000208:
+case 0x0000020c:
   {
     FFFI_FUNCTION_INVOCATION("GotoAddrAndHighlight")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -6865,7 +6900,7 @@ case 0x00000208:
   }
   }
   break;
-case 0x00000209:
+case 0x0000020d:
   {
     FFFI_FUNCTION_INVOCATION("DrawWindow")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -6880,7 +6915,7 @@ t->DrawWindow(title,e->data,e->data_length);
   }
   }
   break;
-case 0x0000020a:
+case 0x0000020e:
   {
     FFFI_FUNCTION_INVOCATION("DrawWindowV")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -6895,7 +6930,7 @@ t->DrawWindow(title,e->data,e->data_length,baseDisplayAddr);
   }
   }
   break;
-case 0x0000020b:
+case 0x0000020f:
   {
     FFFI_FUNCTION_INVOCATION("DrawContents")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -6908,7 +6943,7 @@ t->DrawContents(e->data,e->data_length);
   }
   }
   break;
-case 0x0000020c:
+case 0x00000210:
   {
     FFFI_FUNCTION_INVOCATION("DrawContentV")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -6922,7 +6957,7 @@ t->DrawContents(e->data,e->data_length,baseDisplayAddr);
   }
   }
   break;
-case 0x0000020d:
+case 0x00000211:
   {
     FFFI_FUNCTION_INVOCATION("SetData")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -6946,7 +6981,7 @@ if(sz != 0) {
   }
   }
   break;
-case 0x0000020e:
+case 0x00000212:
   {
     FFFI_FUNCTION_INVOCATION("GetData")
     auto foreignptr = receiveValue<uintptr_t>();
@@ -6963,7 +6998,7 @@ auto data_len = e->data_length;
   }
   }
   break;
-case 0x0000020f:
+case 0x00000213:
   {
     FFFI_FUNCTION_INVOCATION("TextUnformatted")
     auto text = receiveString();
@@ -6972,7 +7007,7 @@ case 0x0000020f:
   }
   }
   break;
-case 0x00000210:
+case 0x00000214:
   {
     FFFI_FUNCTION_INVOCATION("LabelText")
     auto label = receiveString();
@@ -6982,7 +7017,7 @@ case 0x00000210:
   }
   }
   break;
-case 0x00000211:
+case 0x00000215:
   {
     FFFI_FUNCTION_INVOCATION("BulletText")
     auto text = receiveString();
@@ -6991,7 +7026,7 @@ case 0x00000211:
   }
   }
   break;
-case 0x00000212:
+case 0x00000216:
   {
     FFFI_FUNCTION_INVOCATION("GetIoDeltaTime")
     float dt;
@@ -7003,7 +7038,7 @@ case 0x00000212:
   }
   }
   break;
-case 0x00000213:
+case 0x00000217:
   {
     FFFI_FUNCTION_INVOCATION("CalcTextWidth")
     auto text = receiveString();
@@ -7016,7 +7051,7 @@ case 0x00000213:
   }
   }
   break;
-case 0x00000214:
+case 0x00000218:
   {
     FFFI_FUNCTION_INVOCATION("CalcTextWidthV")
     auto text = receiveString();
@@ -7031,7 +7066,7 @@ case 0x00000214:
   }
   }
   break;
-case 0x00000215:
+case 0x00000219:
   {
     FFFI_FUNCTION_INVOCATION("InputText")
     auto label = receiveString();
@@ -7053,7 +7088,7 @@ auto textOut_len = strlen(textOut);
   }
   }
   break;
-case 0x00000216:
+case 0x0000021a:
   {
     FFFI_FUNCTION_INVOCATION("InputTextV")
     auto label = receiveString();
@@ -7076,7 +7111,7 @@ auto textOut_len = strlen(textOut);
   }
   }
   break;
-case 0x00000217:
+case 0x0000021b:
   {
     FFFI_FUNCTION_INVOCATION("InputTextWithHint")
     auto label = receiveString();
@@ -7099,7 +7134,7 @@ auto textOut_len = strlen(textOut);
   }
   }
   break;
-case 0x00000218:
+case 0x0000021c:
   {
     FFFI_FUNCTION_INVOCATION("InputTextWithHintV")
     auto label = receiveString();
@@ -7123,7 +7158,7 @@ auto textOut_len = strlen(textOut);
   }
   }
   break;
-case 0x00000219:
+case 0x0000021d:
   {
     FFFI_FUNCTION_INVOCATION("BringCurrentWindowToDisplayFront")
     {
@@ -7131,7 +7166,7 @@ case 0x00000219:
   }
   }
   break;
-case 0x0000021a:
+case 0x0000021e:
   {
     FFFI_FUNCTION_INVOCATION("Knob")
     auto label = receiveString();
@@ -7150,7 +7185,7 @@ case 0x0000021a:
   }
   }
   break;
-case 0x0000021b:
+case 0x0000021f:
   {
     FFFI_FUNCTION_INVOCATION("KnobV")
     auto label = receiveString();
@@ -7175,7 +7210,7 @@ case 0x0000021b:
   }
   }
   break;
-case 0x0000021c:
+case 0x00000220:
   {
     FFFI_FUNCTION_INVOCATION("KnobInt")
     auto label = receiveString();
@@ -7194,7 +7229,7 @@ case 0x0000021c:
   }
   }
   break;
-case 0x0000021d:
+case 0x00000221:
   {
     FFFI_FUNCTION_INVOCATION("KnobIntV")
     auto label = receiveString();
@@ -7219,7 +7254,7 @@ case 0x0000021d:
   }
   }
   break;
-case 0x0000021e:
+case 0x00000222:
   {
     FFFI_FUNCTION_INVOCATION("BeginPiePopup")
     auto name = receiveString();
@@ -7232,7 +7267,7 @@ case 0x0000021e:
   }
   }
   break;
-case 0x0000021f:
+case 0x00000223:
   {
     FFFI_FUNCTION_INVOCATION("BeginPiePopupV")
     auto name = receiveString();
@@ -7246,7 +7281,7 @@ case 0x0000021f:
   }
   }
   break;
-case 0x00000220:
+case 0x00000224:
   {
     FFFI_FUNCTION_INVOCATION("EndPiePopup")
     {
@@ -7254,7 +7289,7 @@ case 0x00000220:
   }
   }
   break;
-case 0x00000221:
+case 0x00000225:
   {
     FFFI_FUNCTION_INVOCATION("PieMenuItem")
     auto name = receiveString();
@@ -7267,7 +7302,7 @@ case 0x00000221:
   }
   }
   break;
-case 0x00000222:
+case 0x00000226:
   {
     FFFI_FUNCTION_INVOCATION("PieMenuItemV")
     auto name = receiveString();
@@ -7281,7 +7316,7 @@ case 0x00000222:
   }
   }
   break;
-case 0x00000223:
+case 0x00000227:
   {
     FFFI_FUNCTION_INVOCATION("BeginPieMenu")
     auto name = receiveString();
@@ -7294,7 +7329,7 @@ case 0x00000223:
   }
   }
   break;
-case 0x00000224:
+case 0x00000228:
   {
     FFFI_FUNCTION_INVOCATION("BeginPieMenuV")
     auto name = receiveString();
@@ -7308,7 +7343,7 @@ case 0x00000224:
   }
   }
   break;
-case 0x00000225:
+case 0x00000229:
   {
     FFFI_FUNCTION_INVOCATION("EndPieMenu")
     {
@@ -7316,7 +7351,7 @@ case 0x00000225:
   }
   }
   break;
-case 0x00000226:
+case 0x0000022a:
   {
     FFFI_FUNCTION_INVOCATION("SliderFloat32")
     auto label = receiveString();
@@ -7337,7 +7372,7 @@ v = vP;
   }
   }
   break;
-case 0x00000227:
+case 0x0000022b:
   {
     FFFI_FUNCTION_INVOCATION("SliderFloat32V")
     auto label = receiveString();
@@ -7360,7 +7395,7 @@ v = vP;
   }
   }
   break;
-case 0x00000228:
+case 0x0000022c:
   {
     FFFI_FUNCTION_INVOCATION("SliderFloat32NV")
     auto label = receiveString();
@@ -7384,7 +7419,7 @@ v = vP;
   }
   }
   break;
-case 0x00000229:
+case 0x0000022d:
   {
     FFFI_FUNCTION_INVOCATION("SliderFloat32N")
     auto label = receiveString();
@@ -7406,7 +7441,7 @@ v = vP;
   }
   }
   break;
-case 0x0000022a:
+case 0x0000022e:
   {
     FFFI_FUNCTION_INVOCATION("SliderFloat64")
     auto label = receiveString();
@@ -7427,7 +7462,7 @@ v = vP;
   }
   }
   break;
-case 0x0000022b:
+case 0x0000022f:
   {
     FFFI_FUNCTION_INVOCATION("SliderFloat64V")
     auto label = receiveString();
@@ -7450,7 +7485,7 @@ v = vP;
   }
   }
   break;
-case 0x0000022c:
+case 0x00000230:
   {
     FFFI_FUNCTION_INVOCATION("SliderFloat64NV")
     auto label = receiveString();
@@ -7474,7 +7509,7 @@ v = vP;
   }
   }
   break;
-case 0x0000022d:
+case 0x00000231:
   {
     FFFI_FUNCTION_INVOCATION("SliderFloat64N")
     auto label = receiveString();
@@ -7496,7 +7531,7 @@ v = vP;
   }
   }
   break;
-case 0x0000022e:
+case 0x00000232:
   {
     FFFI_FUNCTION_INVOCATION("SliderInt")
     auto label = receiveString();
@@ -7517,7 +7552,7 @@ v = vP;
   }
   }
   break;
-case 0x0000022f:
+case 0x00000233:
   {
     FFFI_FUNCTION_INVOCATION("SliderIntV")
     auto label = receiveString();
@@ -7540,7 +7575,7 @@ v = vP;
   }
   }
   break;
-case 0x00000230:
+case 0x00000234:
   {
     FFFI_FUNCTION_INVOCATION("SliderIntNV")
     auto label = receiveString();
@@ -7564,7 +7599,7 @@ v = vP;
   }
   }
   break;
-case 0x00000231:
+case 0x00000235:
   {
     FFFI_FUNCTION_INVOCATION("SliderIntN")
     auto label = receiveString();
@@ -7586,7 +7621,7 @@ v = vP;
   }
   }
   break;
-case 0x00000232:
+case 0x00000236:
   {
     FFFI_FUNCTION_INVOCATION("SliderInt16")
     auto label = receiveString();
@@ -7607,7 +7642,7 @@ v = vP;
   }
   }
   break;
-case 0x00000233:
+case 0x00000237:
   {
     FFFI_FUNCTION_INVOCATION("SliderInt16V")
     auto label = receiveString();
@@ -7630,7 +7665,7 @@ v = vP;
   }
   }
   break;
-case 0x00000234:
+case 0x00000238:
   {
     FFFI_FUNCTION_INVOCATION("SliderInt16NV")
     auto label = receiveString();
@@ -7654,7 +7689,7 @@ v = vP;
   }
   }
   break;
-case 0x00000235:
+case 0x00000239:
   {
     FFFI_FUNCTION_INVOCATION("SliderInt16N")
     auto label = receiveString();
@@ -7676,7 +7711,7 @@ v = vP;
   }
   }
   break;
-case 0x00000236:
+case 0x0000023a:
   {
     FFFI_FUNCTION_INVOCATION("SliderInt32")
     auto label = receiveString();
@@ -7697,7 +7732,7 @@ v = vP;
   }
   }
   break;
-case 0x00000237:
+case 0x0000023b:
   {
     FFFI_FUNCTION_INVOCATION("SliderInt32V")
     auto label = receiveString();
@@ -7720,7 +7755,7 @@ v = vP;
   }
   }
   break;
-case 0x00000238:
+case 0x0000023c:
   {
     FFFI_FUNCTION_INVOCATION("SliderInt32NV")
     auto label = receiveString();
@@ -7744,7 +7779,7 @@ v = vP;
   }
   }
   break;
-case 0x00000239:
+case 0x0000023d:
   {
     FFFI_FUNCTION_INVOCATION("SliderInt32N")
     auto label = receiveString();
@@ -7766,7 +7801,7 @@ v = vP;
   }
   }
   break;
-case 0x0000023a:
+case 0x0000023e:
   {
     FFFI_FUNCTION_INVOCATION("SliderInt8")
     auto label = receiveString();
@@ -7787,7 +7822,7 @@ v = vP;
   }
   }
   break;
-case 0x0000023b:
+case 0x0000023f:
   {
     FFFI_FUNCTION_INVOCATION("SliderInt8V")
     auto label = receiveString();
@@ -7810,7 +7845,7 @@ v = vP;
   }
   }
   break;
-case 0x0000023c:
+case 0x00000240:
   {
     FFFI_FUNCTION_INVOCATION("SliderInt8NV")
     auto label = receiveString();
@@ -7834,7 +7869,7 @@ v = vP;
   }
   }
   break;
-case 0x0000023d:
+case 0x00000241:
   {
     FFFI_FUNCTION_INVOCATION("SliderInt8N")
     auto label = receiveString();
@@ -7856,7 +7891,7 @@ v = vP;
   }
   }
   break;
-case 0x0000023e:
+case 0x00000242:
   {
     FFFI_FUNCTION_INVOCATION("SliderUInt")
     auto label = receiveString();
@@ -7877,7 +7912,7 @@ v = vP;
   }
   }
   break;
-case 0x0000023f:
+case 0x00000243:
   {
     FFFI_FUNCTION_INVOCATION("SliderUIntV")
     auto label = receiveString();
@@ -7900,7 +7935,7 @@ v = vP;
   }
   }
   break;
-case 0x00000240:
+case 0x00000244:
   {
     FFFI_FUNCTION_INVOCATION("SliderUIntNV")
     auto label = receiveString();
@@ -7924,7 +7959,7 @@ v = vP;
   }
   }
   break;
-case 0x00000241:
+case 0x00000245:
   {
     FFFI_FUNCTION_INVOCATION("SliderUIntN")
     auto label = receiveString();
@@ -7946,7 +7981,7 @@ v = vP;
   }
   }
   break;
-case 0x00000242:
+case 0x00000246:
   {
     FFFI_FUNCTION_INVOCATION("SliderUInt16")
     auto label = receiveString();
@@ -7967,7 +8002,7 @@ v = vP;
   }
   }
   break;
-case 0x00000243:
+case 0x00000247:
   {
     FFFI_FUNCTION_INVOCATION("SliderUInt16V")
     auto label = receiveString();
@@ -7990,7 +8025,7 @@ v = vP;
   }
   }
   break;
-case 0x00000244:
+case 0x00000248:
   {
     FFFI_FUNCTION_INVOCATION("SliderUInt16NV")
     auto label = receiveString();
@@ -8014,7 +8049,7 @@ v = vP;
   }
   }
   break;
-case 0x00000245:
+case 0x00000249:
   {
     FFFI_FUNCTION_INVOCATION("SliderUInt16N")
     auto label = receiveString();
@@ -8036,7 +8071,7 @@ v = vP;
   }
   }
   break;
-case 0x00000246:
+case 0x0000024a:
   {
     FFFI_FUNCTION_INVOCATION("SliderUInt32")
     auto label = receiveString();
@@ -8057,7 +8092,7 @@ v = vP;
   }
   }
   break;
-case 0x00000247:
+case 0x0000024b:
   {
     FFFI_FUNCTION_INVOCATION("SliderUInt32V")
     auto label = receiveString();
@@ -8080,7 +8115,7 @@ v = vP;
   }
   }
   break;
-case 0x00000248:
+case 0x0000024c:
   {
     FFFI_FUNCTION_INVOCATION("SliderUInt32NV")
     auto label = receiveString();
@@ -8104,7 +8139,7 @@ v = vP;
   }
   }
   break;
-case 0x00000249:
+case 0x0000024d:
   {
     FFFI_FUNCTION_INVOCATION("SliderUInt32N")
     auto label = receiveString();
@@ -8126,7 +8161,7 @@ v = vP;
   }
   }
   break;
-case 0x0000024a:
+case 0x0000024e:
   {
     FFFI_FUNCTION_INVOCATION("SliderUInt8")
     auto label = receiveString();
@@ -8147,7 +8182,7 @@ v = vP;
   }
   }
   break;
-case 0x0000024b:
+case 0x0000024f:
   {
     FFFI_FUNCTION_INVOCATION("SliderUInt8V")
     auto label = receiveString();
@@ -8170,7 +8205,7 @@ v = vP;
   }
   }
   break;
-case 0x0000024c:
+case 0x00000250:
   {
     FFFI_FUNCTION_INVOCATION("SliderUInt8NV")
     auto label = receiveString();
@@ -8194,7 +8229,7 @@ v = vP;
   }
   }
   break;
-case 0x0000024d:
+case 0x00000251:
   {
     FFFI_FUNCTION_INVOCATION("SliderUInt8N")
     auto label = receiveString();
@@ -8216,7 +8251,7 @@ v = vP;
   }
   }
   break;
-case 0x0000024e:
+case 0x00000252:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerDots")
     auto label = receiveString();
@@ -8233,7 +8268,7 @@ nextdot = nextdotP;;
   }
   }
   break;
-case 0x0000024f:
+case 0x00000253:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerDotsV")
     auto label = receiveString();
@@ -8254,7 +8289,7 @@ nextdot = nextdotP;;
   }
   }
   break;
-case 0x00000250:
+case 0x00000254:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerDemos")
     {
@@ -8262,7 +8297,7 @@ case 0x00000250:
   }
   }
   break;
-case 0x00000251:
+case 0x00000255:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRainbow")
     auto label = receiveString();
@@ -8275,7 +8310,7 @@ case 0x00000251:
   }
   }
   break;
-case 0x00000252:
+case 0x00000256:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRainbowV")
     auto label = receiveString();
@@ -8291,7 +8326,7 @@ case 0x00000252:
   }
   }
   break;
-case 0x00000253:
+case 0x00000257:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRainbowMix")
     auto label = receiveString();
@@ -8304,7 +8339,7 @@ case 0x00000253:
   }
   }
   break;
-case 0x00000254:
+case 0x00000258:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRainbowMixV")
     auto label = receiveString();
@@ -8321,7 +8356,7 @@ case 0x00000254:
   }
   }
   break;
-case 0x00000255:
+case 0x00000259:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotatingHeart")
     auto label = receiveString();
@@ -8334,7 +8369,7 @@ case 0x00000255:
   }
   }
   break;
-case 0x00000256:
+case 0x0000025a:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotatingHeartV")
     auto label = receiveString();
@@ -8348,7 +8383,7 @@ case 0x00000256:
   }
   }
   break;
-case 0x00000257:
+case 0x0000025b:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerAng")
     auto label = receiveString();
@@ -8359,7 +8394,7 @@ case 0x00000257:
   }
   }
   break;
-case 0x00000258:
+case 0x0000025c:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerAngV")
     auto label = receiveString();
@@ -8375,7 +8410,7 @@ case 0x00000258:
   }
   }
   break;
-case 0x00000259:
+case 0x0000025d:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerAngMix")
     auto label = receiveString();
@@ -8386,7 +8421,7 @@ case 0x00000259:
   }
   }
   break;
-case 0x0000025a:
+case 0x0000025e:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerAngMixV")
     auto label = receiveString();
@@ -8402,7 +8437,7 @@ case 0x0000025a:
   }
   }
   break;
-case 0x0000025b:
+case 0x0000025f:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerLoadingRing")
     auto label = receiveString();
@@ -8413,7 +8448,7 @@ case 0x0000025b:
   }
   }
   break;
-case 0x0000025c:
+case 0x00000260:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerLoadingRingV")
     auto label = receiveString();
@@ -8428,7 +8463,7 @@ case 0x0000025c:
   }
   }
   break;
-case 0x0000025d:
+case 0x00000261:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerClock")
     auto label = receiveString();
@@ -8439,7 +8474,7 @@ case 0x0000025d:
   }
   }
   break;
-case 0x0000025e:
+case 0x00000262:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerClockV")
     auto label = receiveString();
@@ -8453,7 +8488,7 @@ case 0x0000025e:
   }
   }
   break;
-case 0x0000025f:
+case 0x00000263:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerPulsar")
     auto label = receiveString();
@@ -8464,7 +8499,7 @@ case 0x0000025f:
   }
   }
   break;
-case 0x00000260:
+case 0x00000264:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerPulsarV")
     auto label = receiveString();
@@ -8478,7 +8513,7 @@ case 0x00000260:
   }
   }
   break;
-case 0x00000261:
+case 0x00000265:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTwinPulsar")
     auto label = receiveString();
@@ -8489,7 +8524,7 @@ case 0x00000261:
   }
   }
   break;
-case 0x00000262:
+case 0x00000266:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTwinPulsarV")
     auto label = receiveString();
@@ -8503,7 +8538,7 @@ case 0x00000262:
   }
   }
   break;
-case 0x00000263:
+case 0x00000267:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFadePulsar")
     auto label = receiveString();
@@ -8513,7 +8548,7 @@ case 0x00000263:
   }
   }
   break;
-case 0x00000264:
+case 0x00000268:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFadePulsarV")
     auto label = receiveString();
@@ -8526,7 +8561,7 @@ case 0x00000264:
   }
   }
   break;
-case 0x00000265:
+case 0x00000269:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerCircularLines")
     auto label = receiveString();
@@ -8536,7 +8571,7 @@ case 0x00000265:
   }
   }
   break;
-case 0x00000266:
+case 0x0000026a:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerCircularLinesV")
     auto label = receiveString();
@@ -8549,7 +8584,7 @@ case 0x00000266:
   }
   }
   break;
-case 0x00000267:
+case 0x0000026b:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerVDots")
     auto label = receiveString();
@@ -8560,7 +8595,7 @@ case 0x00000267:
   }
   }
   break;
-case 0x00000268:
+case 0x0000026c:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerVDotsV")
     auto label = receiveString();
@@ -8576,7 +8611,7 @@ case 0x00000268:
   }
   }
   break;
-case 0x00000269:
+case 0x0000026d:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBounceDots")
     auto label = receiveString();
@@ -8587,7 +8622,7 @@ case 0x00000269:
   }
   }
   break;
-case 0x0000026a:
+case 0x0000026e:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBounceDotsV")
     auto label = receiveString();
@@ -8602,7 +8637,7 @@ case 0x0000026a:
   }
   }
   break;
-case 0x0000026b:
+case 0x0000026f:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerZipDots")
     auto label = receiveString();
@@ -8613,7 +8648,7 @@ case 0x0000026b:
   }
   }
   break;
-case 0x0000026c:
+case 0x00000270:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerZipDotsV")
     auto label = receiveString();
@@ -8627,7 +8662,7 @@ case 0x0000026c:
   }
   }
   break;
-case 0x0000026d:
+case 0x00000271:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerDotsToPoints")
     auto label = receiveString();
@@ -8639,7 +8674,7 @@ case 0x0000026d:
   }
   }
   break;
-case 0x0000026e:
+case 0x00000272:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerDotsToPointsV")
     auto label = receiveString();
@@ -8654,7 +8689,7 @@ case 0x0000026e:
   }
   }
   break;
-case 0x0000026f:
+case 0x00000273:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerDotsToBar")
     auto label = receiveString();
@@ -8666,7 +8701,7 @@ case 0x0000026f:
   }
   }
   break;
-case 0x00000270:
+case 0x00000274:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerDotsToBarV")
     auto label = receiveString();
@@ -8681,7 +8716,7 @@ case 0x00000270:
   }
   }
   break;
-case 0x00000271:
+case 0x00000275:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerWaveDots")
     auto label = receiveString();
@@ -8692,7 +8727,7 @@ case 0x00000271:
   }
   }
   break;
-case 0x00000272:
+case 0x00000276:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerWaveDotsV")
     auto label = receiveString();
@@ -8706,7 +8741,7 @@ case 0x00000272:
   }
   }
   break;
-case 0x00000273:
+case 0x00000277:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFadeDots")
     auto label = receiveString();
@@ -8717,7 +8752,7 @@ case 0x00000273:
   }
   }
   break;
-case 0x00000274:
+case 0x00000278:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFadeDotsV")
     auto label = receiveString();
@@ -8732,7 +8767,7 @@ case 0x00000274:
   }
   }
   break;
-case 0x00000275:
+case 0x00000279:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerThreeDots")
     auto label = receiveString();
@@ -8743,7 +8778,7 @@ case 0x00000275:
   }
   }
   break;
-case 0x00000276:
+case 0x0000027a:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerThreeDotsV")
     auto label = receiveString();
@@ -8757,7 +8792,7 @@ case 0x00000276:
   }
   }
   break;
-case 0x00000277:
+case 0x0000027b:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFiveDots")
     auto label = receiveString();
@@ -8768,7 +8803,7 @@ case 0x00000277:
   }
   }
   break;
-case 0x00000278:
+case 0x0000027c:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFiveDotsV")
     auto label = receiveString();
@@ -8782,7 +8817,7 @@ case 0x00000278:
   }
   }
   break;
-case 0x00000279:
+case 0x0000027d:
   {
     FFFI_FUNCTION_INVOCATION("Spinner4Caleidospcope")
     auto label = receiveString();
@@ -8793,7 +8828,7 @@ case 0x00000279:
   }
   }
   break;
-case 0x0000027a:
+case 0x0000027e:
   {
     FFFI_FUNCTION_INVOCATION("Spinner4CaleidospcopeV")
     auto label = receiveString();
@@ -8807,7 +8842,7 @@ case 0x0000027a:
   }
   }
   break;
-case 0x0000027b:
+case 0x0000027f:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerMultiFadeDots")
     auto label = receiveString();
@@ -8818,7 +8853,7 @@ case 0x0000027b:
   }
   }
   break;
-case 0x0000027c:
+case 0x00000280:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerMultiFadeDotsV")
     auto label = receiveString();
@@ -8832,7 +8867,7 @@ case 0x0000027c:
   }
   }
   break;
-case 0x0000027d:
+case 0x00000281:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerScaleDots")
     auto label = receiveString();
@@ -8843,7 +8878,7 @@ case 0x0000027d:
   }
   }
   break;
-case 0x0000027e:
+case 0x00000282:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerScaleDotsV")
     auto label = receiveString();
@@ -8857,7 +8892,7 @@ case 0x0000027e:
   }
   }
   break;
-case 0x0000027f:
+case 0x00000283:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSquareSpins")
     auto label = receiveString();
@@ -8868,7 +8903,7 @@ case 0x0000027f:
   }
   }
   break;
-case 0x00000280:
+case 0x00000284:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSquareSpinsV")
     auto label = receiveString();
@@ -8881,7 +8916,7 @@ case 0x00000280:
   }
   }
   break;
-case 0x00000281:
+case 0x00000285:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerMovingDots")
     auto label = receiveString();
@@ -8892,7 +8927,7 @@ case 0x00000281:
   }
   }
   break;
-case 0x00000282:
+case 0x00000286:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerMovingDotsV")
     auto label = receiveString();
@@ -8906,7 +8941,7 @@ case 0x00000282:
   }
   }
   break;
-case 0x00000283:
+case 0x00000287:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotateDots")
     auto label = receiveString();
@@ -8917,7 +8952,7 @@ case 0x00000283:
   }
   }
   break;
-case 0x00000284:
+case 0x00000288:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotateDotsV")
     auto label = receiveString();
@@ -8932,7 +8967,7 @@ case 0x00000284:
   }
   }
   break;
-case 0x00000285:
+case 0x00000289:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerOrionDots")
     auto label = receiveString();
@@ -8943,7 +8978,7 @@ case 0x00000285:
   }
   }
   break;
-case 0x00000286:
+case 0x0000028a:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerOrionDotsV")
     auto label = receiveString();
@@ -8957,7 +8992,7 @@ case 0x00000286:
   }
   }
   break;
-case 0x00000287:
+case 0x0000028b:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerGalaxyDots")
     auto label = receiveString();
@@ -8968,7 +9003,7 @@ case 0x00000287:
   }
   }
   break;
-case 0x00000288:
+case 0x0000028c:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerGalaxyDotsV")
     auto label = receiveString();
@@ -8982,7 +9017,7 @@ case 0x00000288:
   }
   }
   break;
-case 0x00000289:
+case 0x0000028d:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTwinAng")
     auto label = receiveString();
@@ -8994,7 +9029,7 @@ case 0x00000289:
   }
   }
   break;
-case 0x0000028a:
+case 0x0000028e:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTwinAngV")
     auto label = receiveString();
@@ -9010,7 +9045,7 @@ case 0x0000028a:
   }
   }
   break;
-case 0x0000028b:
+case 0x0000028f:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFilling")
     auto label = receiveString();
@@ -9021,7 +9056,7 @@ case 0x0000028b:
   }
   }
   break;
-case 0x0000028c:
+case 0x00000290:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFillingV")
     auto label = receiveString();
@@ -9035,7 +9070,7 @@ case 0x0000028c:
   }
   }
   break;
-case 0x0000028d:
+case 0x00000291:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTopup")
     auto label = receiveString();
@@ -9046,7 +9081,7 @@ case 0x0000028d:
   }
   }
   break;
-case 0x0000028e:
+case 0x00000292:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTopupV")
     auto label = receiveString();
@@ -9061,7 +9096,7 @@ case 0x0000028e:
   }
   }
   break;
-case 0x0000028f:
+case 0x00000293:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTwinAng180")
     auto label = receiveString();
@@ -9073,7 +9108,7 @@ case 0x0000028f:
   }
   }
   break;
-case 0x00000290:
+case 0x00000294:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTwinAng180V")
     auto label = receiveString();
@@ -9088,7 +9123,7 @@ case 0x00000290:
   }
   }
   break;
-case 0x00000291:
+case 0x00000295:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTwinAng360")
     auto label = receiveString();
@@ -9100,7 +9135,7 @@ case 0x00000291:
   }
   }
   break;
-case 0x00000292:
+case 0x00000296:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTwinAng360V")
     auto label = receiveString();
@@ -9117,7 +9152,7 @@ case 0x00000292:
   }
   }
   break;
-case 0x00000293:
+case 0x00000297:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerIncDots")
     auto label = receiveString();
@@ -9128,7 +9163,7 @@ case 0x00000293:
   }
   }
   break;
-case 0x00000294:
+case 0x00000298:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerIncDotsV")
     auto label = receiveString();
@@ -9142,7 +9177,7 @@ case 0x00000294:
   }
   }
   break;
-case 0x00000295:
+case 0x00000299:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerIncFullDots")
     auto label = receiveString();
@@ -9153,7 +9188,7 @@ case 0x00000295:
   }
   }
   break;
-case 0x00000296:
+case 0x0000029a:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerIncFullDotsV")
     auto label = receiveString();
@@ -9167,7 +9202,7 @@ case 0x00000296:
   }
   }
   break;
-case 0x00000297:
+case 0x0000029b:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFadeBars")
     auto label = receiveString();
@@ -9177,7 +9212,7 @@ case 0x00000297:
   }
   }
   break;
-case 0x00000298:
+case 0x0000029c:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFadeBarsV")
     auto label = receiveString();
@@ -9191,7 +9226,7 @@ case 0x00000298:
   }
   }
   break;
-case 0x00000299:
+case 0x0000029d:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFadeTris")
     auto label = receiveString();
@@ -9201,7 +9236,7 @@ case 0x00000299:
   }
   }
   break;
-case 0x0000029a:
+case 0x0000029e:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFadeTrisV")
     auto label = receiveString();
@@ -9215,7 +9250,7 @@ case 0x0000029a:
   }
   }
   break;
-case 0x0000029b:
+case 0x0000029f:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBarsRotateFade")
     auto label = receiveString();
@@ -9227,7 +9262,7 @@ case 0x0000029b:
   }
   }
   break;
-case 0x0000029c:
+case 0x000002a0:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBarsRotateFadeV")
     auto label = receiveString();
@@ -9242,7 +9277,7 @@ case 0x0000029c:
   }
   }
   break;
-case 0x0000029d:
+case 0x000002a1:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBarsScaleMiddle")
     auto label = receiveString();
@@ -9252,7 +9287,7 @@ case 0x0000029d:
   }
   }
   break;
-case 0x0000029e:
+case 0x000002a2:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBarsScaleMiddleV")
     auto label = receiveString();
@@ -9265,7 +9300,7 @@ case 0x0000029e:
   }
   }
   break;
-case 0x0000029f:
+case 0x000002a3:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerAngTwin")
     auto label = receiveString();
@@ -9277,7 +9312,7 @@ case 0x0000029f:
   }
   }
   break;
-case 0x000002a0:
+case 0x000002a4:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerAngTwinV")
     auto label = receiveString();
@@ -9295,7 +9330,7 @@ case 0x000002a0:
   }
   }
   break;
-case 0x000002a1:
+case 0x000002a5:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerArcRotation")
     auto label = receiveString();
@@ -9306,7 +9341,7 @@ case 0x000002a1:
   }
   }
   break;
-case 0x000002a2:
+case 0x000002a6:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerArcRotationV")
     auto label = receiveString();
@@ -9321,7 +9356,7 @@ case 0x000002a2:
   }
   }
   break;
-case 0x000002a3:
+case 0x000002a7:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerArcFade")
     auto label = receiveString();
@@ -9332,7 +9367,7 @@ case 0x000002a3:
   }
   }
   break;
-case 0x000002a4:
+case 0x000002a8:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerArcFadeV")
     auto label = receiveString();
@@ -9346,7 +9381,7 @@ case 0x000002a4:
   }
   }
   break;
-case 0x000002a5:
+case 0x000002a9:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSimpleArcFade")
     auto label = receiveString();
@@ -9357,7 +9392,7 @@ case 0x000002a5:
   }
   }
   break;
-case 0x000002a6:
+case 0x000002aa:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSimpleArcFadeV")
     auto label = receiveString();
@@ -9370,7 +9405,7 @@ case 0x000002a6:
   }
   }
   break;
-case 0x000002a7:
+case 0x000002ab:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSquareStrokeFade")
     auto label = receiveString();
@@ -9381,7 +9416,7 @@ case 0x000002a7:
   }
   }
   break;
-case 0x000002a8:
+case 0x000002ac:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSquareStrokeFadeV")
     auto label = receiveString();
@@ -9394,7 +9429,7 @@ case 0x000002a8:
   }
   }
   break;
-case 0x000002a9:
+case 0x000002ad:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerAsciiSymbolPoints")
     auto label = receiveString();
@@ -9406,7 +9441,7 @@ case 0x000002a9:
   }
   }
   break;
-case 0x000002aa:
+case 0x000002ae:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerAsciiSymbolPointsV")
     auto label = receiveString();
@@ -9420,7 +9455,7 @@ case 0x000002aa:
   }
   }
   break;
-case 0x000002ab:
+case 0x000002af:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTextFading")
     auto label = receiveString();
@@ -9432,7 +9467,7 @@ case 0x000002ab:
   }
   }
   break;
-case 0x000002ac:
+case 0x000002b0:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTextFadingV")
     auto label = receiveString();
@@ -9446,7 +9481,7 @@ case 0x000002ac:
   }
   }
   break;
-case 0x000002ad:
+case 0x000002b1:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSevenSegments")
     auto label = receiveString();
@@ -9458,7 +9493,7 @@ case 0x000002ad:
   }
   }
   break;
-case 0x000002ae:
+case 0x000002b2:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSevenSegmentsV")
     auto label = receiveString();
@@ -9472,7 +9507,7 @@ case 0x000002ae:
   }
   }
   break;
-case 0x000002af:
+case 0x000002b3:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSquareStrokeFill")
     auto label = receiveString();
@@ -9483,7 +9518,7 @@ case 0x000002af:
   }
   }
   break;
-case 0x000002b0:
+case 0x000002b4:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSquareStrokeFillV")
     auto label = receiveString();
@@ -9496,7 +9531,7 @@ case 0x000002b0:
   }
   }
   break;
-case 0x000002b1:
+case 0x000002b5:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSquareStrokeLoading")
     auto label = receiveString();
@@ -9507,7 +9542,7 @@ case 0x000002b1:
   }
   }
   break;
-case 0x000002b2:
+case 0x000002b6:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSquareStrokeLoadingV")
     auto label = receiveString();
@@ -9520,7 +9555,7 @@ case 0x000002b2:
   }
   }
   break;
-case 0x000002b3:
+case 0x000002b7:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSquareLoading")
     auto label = receiveString();
@@ -9531,7 +9566,7 @@ case 0x000002b3:
   }
   }
   break;
-case 0x000002b4:
+case 0x000002b8:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSquareLoadingV")
     auto label = receiveString();
@@ -9544,7 +9579,7 @@ case 0x000002b4:
   }
   }
   break;
-case 0x000002b5:
+case 0x000002b9:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFilledArcFade")
     auto label = receiveString();
@@ -9554,7 +9589,7 @@ case 0x000002b5:
   }
   }
   break;
-case 0x000002b6:
+case 0x000002ba:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFilledArcFadeV")
     auto label = receiveString();
@@ -9568,7 +9603,7 @@ case 0x000002b6:
   }
   }
   break;
-case 0x000002b7:
+case 0x000002bb:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerPointsArcBounce")
     auto label = receiveString();
@@ -9579,7 +9614,7 @@ case 0x000002b7:
   }
   }
   break;
-case 0x000002b8:
+case 0x000002bc:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerPointsArcBounceV")
     auto label = receiveString();
@@ -9595,7 +9630,7 @@ case 0x000002b8:
   }
   }
   break;
-case 0x000002b9:
+case 0x000002bd:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFilledArcColor")
     auto label = receiveString();
@@ -9605,7 +9640,7 @@ case 0x000002b9:
   }
   }
   break;
-case 0x000002ba:
+case 0x000002be:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFilledArcColorV")
     auto label = receiveString();
@@ -9619,7 +9654,7 @@ case 0x000002ba:
   }
   }
   break;
-case 0x000002bb:
+case 0x000002bf:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFilledArcRing")
     auto label = receiveString();
@@ -9630,7 +9665,7 @@ case 0x000002bb:
   }
   }
   break;
-case 0x000002bc:
+case 0x000002c0:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFilledArcRingV")
     auto label = receiveString();
@@ -9645,7 +9680,7 @@ case 0x000002bc:
   }
   }
   break;
-case 0x000002bd:
+case 0x000002c1:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerArcWedges")
     auto label = receiveString();
@@ -9655,7 +9690,7 @@ case 0x000002bd:
   }
   }
   break;
-case 0x000002be:
+case 0x000002c2:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerArcWedgesV")
     auto label = receiveString();
@@ -9668,7 +9703,7 @@ case 0x000002be:
   }
   }
   break;
-case 0x000002bf:
+case 0x000002c3:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTwinBall")
     auto label = receiveString();
@@ -9681,7 +9716,7 @@ case 0x000002bf:
   }
   }
   break;
-case 0x000002c0:
+case 0x000002c4:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTwinBallV")
     auto label = receiveString();
@@ -9698,7 +9733,7 @@ case 0x000002c0:
   }
   }
   break;
-case 0x000002c1:
+case 0x000002c5:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSolarBalls")
     auto label = receiveString();
@@ -9709,7 +9744,7 @@ case 0x000002c1:
   }
   }
   break;
-case 0x000002c2:
+case 0x000002c6:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSolarBallsV")
     auto label = receiveString();
@@ -9724,7 +9759,7 @@ case 0x000002c2:
   }
   }
   break;
-case 0x000002c3:
+case 0x000002c7:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSolarScaleBalls")
     auto label = receiveString();
@@ -9735,7 +9770,7 @@ case 0x000002c3:
   }
   }
   break;
-case 0x000002c4:
+case 0x000002c8:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSolarScaleBallsV")
     auto label = receiveString();
@@ -9749,7 +9784,7 @@ case 0x000002c4:
   }
   }
   break;
-case 0x000002c5:
+case 0x000002c9:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSolarArcs")
     auto label = receiveString();
@@ -9760,7 +9795,7 @@ case 0x000002c5:
   }
   }
   break;
-case 0x000002c6:
+case 0x000002ca:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSolarArcsV")
     auto label = receiveString();
@@ -9775,7 +9810,7 @@ case 0x000002c6:
   }
   }
   break;
-case 0x000002c7:
+case 0x000002cb:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerMovingArcs")
     auto label = receiveString();
@@ -9786,7 +9821,7 @@ case 0x000002c7:
   }
   }
   break;
-case 0x000002c8:
+case 0x000002cc:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerMovingArcsV")
     auto label = receiveString();
@@ -9800,7 +9835,7 @@ case 0x000002c8:
   }
   }
   break;
-case 0x000002c9:
+case 0x000002cd:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRainbowCircle")
     auto label = receiveString();
@@ -9811,7 +9846,7 @@ case 0x000002c9:
   }
   }
   break;
-case 0x000002ca:
+case 0x000002ce:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRainbowCircleV")
     auto label = receiveString();
@@ -9826,7 +9861,7 @@ case 0x000002ca:
   }
   }
   break;
-case 0x000002cb:
+case 0x000002cf:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBounceBall")
     auto label = receiveString();
@@ -9837,7 +9872,7 @@ case 0x000002cb:
   }
   }
   break;
-case 0x000002cc:
+case 0x000002d0:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBounceBallV")
     auto label = receiveString();
@@ -9852,7 +9887,7 @@ case 0x000002cc:
   }
   }
   break;
-case 0x000002cd:
+case 0x000002d1:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerPulsarBall")
     auto label = receiveString();
@@ -9863,7 +9898,7 @@ case 0x000002cd:
   }
   }
   break;
-case 0x000002ce:
+case 0x000002d2:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerPulsarBallV")
     auto label = receiveString();
@@ -9878,7 +9913,7 @@ case 0x000002ce:
   }
   }
   break;
-case 0x000002cf:
+case 0x000002d3:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerIncScaleDots")
     auto label = receiveString();
@@ -9889,7 +9924,7 @@ case 0x000002cf:
   }
   }
   break;
-case 0x000002d0:
+case 0x000002d4:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerIncScaleDotsV")
     auto label = receiveString();
@@ -9903,7 +9938,7 @@ case 0x000002d0:
   }
   }
   break;
-case 0x000002d1:
+case 0x000002d5:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSomeScaleDots")
     auto label = receiveString();
@@ -9914,7 +9949,7 @@ case 0x000002d1:
   }
   }
   break;
-case 0x000002d2:
+case 0x000002d6:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSomeScaleDotsV")
     auto label = receiveString();
@@ -9929,7 +9964,7 @@ case 0x000002d2:
   }
   }
   break;
-case 0x000002d3:
+case 0x000002d7:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerAngTriple")
     auto label = receiveString();
@@ -9942,7 +9977,7 @@ case 0x000002d3:
   }
   }
   break;
-case 0x000002d4:
+case 0x000002d8:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerAngTripleV")
     auto label = receiveString();
@@ -9960,7 +9995,7 @@ case 0x000002d4:
   }
   }
   break;
-case 0x000002d5:
+case 0x000002d9:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerAngEclipse")
     auto label = receiveString();
@@ -9971,7 +10006,7 @@ case 0x000002d5:
   }
   }
   break;
-case 0x000002d6:
+case 0x000002da:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerAngEclipseV")
     auto label = receiveString();
@@ -9985,7 +10020,7 @@ case 0x000002d6:
   }
   }
   break;
-case 0x000002d7:
+case 0x000002db:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerIngYang")
     auto label = receiveString();
@@ -9998,7 +10033,7 @@ case 0x000002d7:
   }
   }
   break;
-case 0x000002d8:
+case 0x000002dc:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerIngYangV")
     auto label = receiveString();
@@ -10015,7 +10050,7 @@ case 0x000002d8:
   }
   }
   break;
-case 0x000002d9:
+case 0x000002dd:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerGooeyBalls")
     auto label = receiveString();
@@ -10027,7 +10062,7 @@ case 0x000002d9:
   }
   }
   break;
-case 0x000002da:
+case 0x000002de:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerGooeyBallsV")
     auto label = receiveString();
@@ -10040,7 +10075,7 @@ case 0x000002da:
   }
   }
   break;
-case 0x000002db:
+case 0x000002df:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerDotsLoading")
     auto label = receiveString();
@@ -10054,7 +10089,7 @@ case 0x000002db:
   }
   }
   break;
-case 0x000002dc:
+case 0x000002e0:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotateGooeyBalls")
     auto label = receiveString();
@@ -10068,7 +10103,7 @@ case 0x000002dc:
   }
   }
   break;
-case 0x000002dd:
+case 0x000002e1:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerHerbertBalls")
     auto label = receiveString();
@@ -10082,7 +10117,7 @@ case 0x000002dd:
   }
   }
   break;
-case 0x000002de:
+case 0x000002e2:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerHerbertBalls3D")
     auto label = receiveString();
@@ -10095,7 +10130,7 @@ case 0x000002de:
   }
   }
   break;
-case 0x000002df:
+case 0x000002e3:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotateTriangles")
     auto label = receiveString();
@@ -10109,7 +10144,7 @@ case 0x000002df:
   }
   }
   break;
-case 0x000002e0:
+case 0x000002e4:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotateShapes")
     auto label = receiveString();
@@ -10124,7 +10159,7 @@ case 0x000002e0:
   }
   }
   break;
-case 0x000002e1:
+case 0x000002e5:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSinSquares")
     auto label = receiveString();
@@ -10137,7 +10172,7 @@ case 0x000002e1:
   }
   }
   break;
-case 0x000002e2:
+case 0x000002e6:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerMoonLine")
     auto label = receiveString();
@@ -10148,7 +10183,7 @@ case 0x000002e2:
   }
   }
   break;
-case 0x000002e3:
+case 0x000002e7:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerMoonLineV")
     auto label = receiveString();
@@ -10163,7 +10198,7 @@ case 0x000002e3:
   }
   }
   break;
-case 0x000002e4:
+case 0x000002e8:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerCircleDrop")
     auto label = receiveString();
@@ -10175,7 +10210,7 @@ case 0x000002e4:
   }
   }
   break;
-case 0x000002e5:
+case 0x000002e9:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerCircleDropV")
     auto label = receiveString();
@@ -10191,7 +10226,7 @@ case 0x000002e5:
   }
   }
   break;
-case 0x000002e6:
+case 0x000002ea:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSurroundedIndicator")
     auto label = receiveString();
@@ -10202,7 +10237,7 @@ case 0x000002e6:
   }
   }
   break;
-case 0x000002e7:
+case 0x000002eb:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSurroundedIndicatorV")
     auto label = receiveString();
@@ -10216,7 +10251,7 @@ case 0x000002e7:
   }
   }
   break;
-case 0x000002e8:
+case 0x000002ec:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerWifiIndicator")
     auto label = receiveString();
@@ -10227,7 +10262,7 @@ case 0x000002e8:
   }
   }
   break;
-case 0x000002e9:
+case 0x000002ed:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerWifiIndicatorV")
     auto label = receiveString();
@@ -10243,7 +10278,7 @@ case 0x000002e9:
   }
   }
   break;
-case 0x000002ea:
+case 0x000002ee:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTrianglesSelector")
     auto label = receiveString();
@@ -10254,7 +10289,7 @@ case 0x000002ea:
   }
   }
   break;
-case 0x000002eb:
+case 0x000002ef:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTrianglesSelectorV")
     auto label = receiveString();
@@ -10269,7 +10304,7 @@ case 0x000002eb:
   }
   }
   break;
-case 0x000002ec:
+case 0x000002f0:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFlowingGradient")
     auto label = receiveString();
@@ -10280,7 +10315,7 @@ case 0x000002ec:
   }
   }
   break;
-case 0x000002ed:
+case 0x000002f1:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFlowingGradientV")
     auto label = receiveString();
@@ -10295,7 +10330,7 @@ case 0x000002ed:
   }
   }
   break;
-case 0x000002ee:
+case 0x000002f2:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotateSegments")
     auto label = receiveString();
@@ -10306,7 +10341,7 @@ case 0x000002ee:
   }
   }
   break;
-case 0x000002ef:
+case 0x000002f3:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotateSegmentsV")
     auto label = receiveString();
@@ -10321,7 +10356,7 @@ case 0x000002ef:
   }
   }
   break;
-case 0x000002f0:
+case 0x000002f4:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerLemniscate")
     auto label = receiveString();
@@ -10332,7 +10367,7 @@ case 0x000002f0:
   }
   }
   break;
-case 0x000002f1:
+case 0x000002f5:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerLemniscateV")
     auto label = receiveString();
@@ -10346,7 +10381,7 @@ case 0x000002f1:
   }
   }
   break;
-case 0x000002f2:
+case 0x000002f6:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotateGear")
     auto label = receiveString();
@@ -10357,7 +10392,7 @@ case 0x000002f2:
   }
   }
   break;
-case 0x000002f3:
+case 0x000002f7:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotateGearV")
     auto label = receiveString();
@@ -10371,7 +10406,7 @@ case 0x000002f3:
   }
   }
   break;
-case 0x000002f4:
+case 0x000002f8:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotateWheel")
     auto label = receiveString();
@@ -10382,7 +10417,7 @@ case 0x000002f4:
   }
   }
   break;
-case 0x000002f5:
+case 0x000002f9:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotateWheelV")
     auto label = receiveString();
@@ -10397,7 +10432,7 @@ case 0x000002f5:
   }
   }
   break;
-case 0x000002f6:
+case 0x000002fa:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerAtom")
     auto label = receiveString();
@@ -10408,7 +10443,7 @@ case 0x000002f6:
   }
   }
   break;
-case 0x000002f7:
+case 0x000002fb:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerAtomV")
     auto label = receiveString();
@@ -10422,7 +10457,7 @@ case 0x000002f7:
   }
   }
   break;
-case 0x000002f8:
+case 0x000002fc:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerPatternRings")
     auto label = receiveString();
@@ -10433,7 +10468,7 @@ case 0x000002f8:
   }
   }
   break;
-case 0x000002f9:
+case 0x000002fd:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerPatternRingsV")
     auto label = receiveString();
@@ -10447,7 +10482,7 @@ case 0x000002f9:
   }
   }
   break;
-case 0x000002fa:
+case 0x000002fe:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerPatternEclipse")
     auto label = receiveString();
@@ -10458,7 +10493,7 @@ case 0x000002fa:
   }
   }
   break;
-case 0x000002fb:
+case 0x000002ff:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerPatternEclipseV")
     auto label = receiveString();
@@ -10474,7 +10509,7 @@ case 0x000002fb:
   }
   }
   break;
-case 0x000002fc:
+case 0x00000300:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerPatternSphere")
     auto label = receiveString();
@@ -10485,7 +10520,7 @@ case 0x000002fc:
   }
   }
   break;
-case 0x000002fd:
+case 0x00000301:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerPatternSphereV")
     auto label = receiveString();
@@ -10499,7 +10534,7 @@ case 0x000002fd:
   }
   }
   break;
-case 0x000002fe:
+case 0x00000302:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRingSynchronous")
     auto label = receiveString();
@@ -10510,7 +10545,7 @@ case 0x000002fe:
   }
   }
   break;
-case 0x000002ff:
+case 0x00000303:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRingSynchronousV")
     auto label = receiveString();
@@ -10524,7 +10559,7 @@ case 0x000002ff:
   }
   }
   break;
-case 0x00000300:
+case 0x00000304:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRingWatermarks")
     auto label = receiveString();
@@ -10535,7 +10570,7 @@ case 0x00000300:
   }
   }
   break;
-case 0x00000301:
+case 0x00000305:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRingWatermarksV")
     auto label = receiveString();
@@ -10549,7 +10584,7 @@ case 0x00000301:
   }
   }
   break;
-case 0x00000302:
+case 0x00000306:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotatedAtom")
     auto label = receiveString();
@@ -10560,7 +10595,7 @@ case 0x00000302:
   }
   }
   break;
-case 0x00000303:
+case 0x00000307:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotatedAtomV")
     auto label = receiveString();
@@ -10574,7 +10609,7 @@ case 0x00000303:
   }
   }
   break;
-case 0x00000304:
+case 0x00000308:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRainbowBalls")
     auto label = receiveString();
@@ -10587,7 +10622,7 @@ case 0x00000304:
   }
   }
   break;
-case 0x00000305:
+case 0x00000309:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRainbowBallsV")
     auto label = receiveString();
@@ -10601,7 +10636,7 @@ case 0x00000305:
   }
   }
   break;
-case 0x00000306:
+case 0x0000030a:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRainbowShot")
     auto label = receiveString();
@@ -10614,7 +10649,7 @@ case 0x00000306:
   }
   }
   break;
-case 0x00000307:
+case 0x0000030b:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRainbowShotV")
     auto label = receiveString();
@@ -10628,7 +10663,7 @@ case 0x00000307:
   }
   }
   break;
-case 0x00000308:
+case 0x0000030c:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSpiral")
     auto label = receiveString();
@@ -10639,7 +10674,7 @@ case 0x00000308:
   }
   }
   break;
-case 0x00000309:
+case 0x0000030d:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSpiralV")
     auto label = receiveString();
@@ -10653,7 +10688,7 @@ case 0x00000309:
   }
   }
   break;
-case 0x0000030a:
+case 0x0000030e:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSpiralEye")
     auto label = receiveString();
@@ -10664,7 +10699,7 @@ case 0x0000030a:
   }
   }
   break;
-case 0x0000030b:
+case 0x0000030f:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSpiralEyeV")
     auto label = receiveString();
@@ -10677,7 +10712,7 @@ case 0x0000030b:
   }
   }
   break;
-case 0x0000030c:
+case 0x00000310:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBarChartSine")
     auto label = receiveString();
@@ -10690,7 +10725,7 @@ case 0x0000030c:
   }
   }
   break;
-case 0x0000030d:
+case 0x00000311:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBarChartSineV")
     auto label = receiveString();
@@ -10705,7 +10740,7 @@ case 0x0000030d:
   }
   }
   break;
-case 0x0000030e:
+case 0x00000312:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBarChartAdvSine")
     auto label = receiveString();
@@ -10718,7 +10753,7 @@ case 0x0000030e:
   }
   }
   break;
-case 0x0000030f:
+case 0x00000313:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBarChartAdvSineV")
     auto label = receiveString();
@@ -10732,7 +10767,7 @@ case 0x0000030f:
   }
   }
   break;
-case 0x00000310:
+case 0x00000314:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBarChartAdvSineFade")
     auto label = receiveString();
@@ -10745,7 +10780,7 @@ case 0x00000310:
   }
   }
   break;
-case 0x00000311:
+case 0x00000315:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBarChartAdvSineFadeV")
     auto label = receiveString();
@@ -10759,7 +10794,7 @@ case 0x00000311:
   }
   }
   break;
-case 0x00000312:
+case 0x00000316:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBarChartRainbow")
     auto label = receiveString();
@@ -10772,7 +10807,7 @@ case 0x00000312:
   }
   }
   break;
-case 0x00000313:
+case 0x00000317:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBarChartRainbowV")
     auto label = receiveString();
@@ -10786,7 +10821,7 @@ case 0x00000313:
   }
   }
   break;
-case 0x00000314:
+case 0x00000318:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBlocks")
     auto label = receiveString();
@@ -10800,7 +10835,7 @@ case 0x00000314:
   }
   }
   break;
-case 0x00000315:
+case 0x00000319:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTwinBlocks")
     auto label = receiveString();
@@ -10814,7 +10849,7 @@ case 0x00000315:
   }
   }
   break;
-case 0x00000316:
+case 0x0000031a:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSquareRandomDots")
     auto label = receiveString();
@@ -10828,7 +10863,7 @@ case 0x00000316:
   }
   }
   break;
-case 0x00000317:
+case 0x0000031b:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerScaleBlocks")
     auto label = receiveString();
@@ -10841,7 +10876,7 @@ case 0x00000317:
   }
   }
   break;
-case 0x00000318:
+case 0x0000031c:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerScaleBlocksV")
     auto label = receiveString();
@@ -10855,7 +10890,7 @@ case 0x00000318:
   }
   }
   break;
-case 0x00000319:
+case 0x0000031d:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerScaleSquares")
     auto label = receiveString();
@@ -10868,7 +10903,7 @@ case 0x00000319:
   }
   }
   break;
-case 0x0000031a:
+case 0x0000031e:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSquishSquare")
     auto label = receiveString();
@@ -10880,7 +10915,7 @@ case 0x0000031a:
   }
   }
   break;
-case 0x0000031b:
+case 0x0000031f:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFluid")
     auto label = receiveString();
@@ -10892,7 +10927,7 @@ case 0x0000031b:
   }
   }
   break;
-case 0x0000031c:
+case 0x00000320:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFluidV")
     auto label = receiveString();
@@ -10905,7 +10940,7 @@ case 0x0000031c:
   }
   }
   break;
-case 0x0000031d:
+case 0x00000321:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFluidPoints")
     auto label = receiveString();
@@ -10918,7 +10953,7 @@ case 0x0000031d:
   }
   }
   break;
-case 0x0000031e:
+case 0x00000322:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFluidPointsV")
     auto label = receiveString();
@@ -10933,7 +10968,7 @@ case 0x0000031e:
   }
   }
   break;
-case 0x0000031f:
+case 0x00000323:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerArcPolarFade")
     auto label = receiveString();
@@ -10943,7 +10978,7 @@ case 0x0000031f:
   }
   }
   break;
-case 0x00000320:
+case 0x00000324:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerArcPolarFadeV")
     auto label = receiveString();
@@ -10956,7 +10991,7 @@ case 0x00000320:
   }
   }
   break;
-case 0x00000321:
+case 0x00000325:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerArcPolarRadius")
     auto label = receiveString();
@@ -10966,7 +11001,7 @@ case 0x00000321:
   }
   }
   break;
-case 0x00000322:
+case 0x00000326:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerArcPolarRadiusV")
     auto label = receiveString();
@@ -10979,7 +11014,7 @@ case 0x00000322:
   }
   }
   break;
-case 0x00000323:
+case 0x00000327:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerCaleidoscope")
     auto label = receiveString();
@@ -10990,7 +11025,7 @@ case 0x00000323:
   }
   }
   break;
-case 0x00000324:
+case 0x00000328:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerCaleidoscopeV")
     auto label = receiveString();
@@ -11005,7 +11040,7 @@ case 0x00000324:
   }
   }
   break;
-case 0x00000325:
+case 0x00000329:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerHboDots")
     auto label = receiveString();
@@ -11016,7 +11051,7 @@ case 0x00000325:
   }
   }
   break;
-case 0x00000326:
+case 0x0000032a:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerHboDotsV")
     auto label = receiveString();
@@ -11032,7 +11067,7 @@ case 0x00000326:
   }
   }
   break;
-case 0x00000327:
+case 0x0000032b:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerMoonDots")
     auto label = receiveString();
@@ -11045,7 +11080,7 @@ case 0x00000327:
   }
   }
   break;
-case 0x00000328:
+case 0x0000032c:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerMoonDotsV")
     auto label = receiveString();
@@ -11059,7 +11094,7 @@ case 0x00000328:
   }
   }
   break;
-case 0x00000329:
+case 0x0000032d:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTwinHboDots")
     auto label = receiveString();
@@ -11070,7 +11105,7 @@ case 0x00000329:
   }
   }
   break;
-case 0x0000032a:
+case 0x0000032e:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTwinHboDotsV")
     auto label = receiveString();
@@ -11087,7 +11122,7 @@ case 0x0000032a:
   }
   }
   break;
-case 0x0000032b:
+case 0x0000032f:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerThreeDotsStar")
     auto label = receiveString();
@@ -11098,7 +11133,7 @@ case 0x0000032b:
   }
   }
   break;
-case 0x0000032c:
+case 0x00000330:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerThreeDotsStarV")
     auto label = receiveString();
@@ -11114,7 +11149,7 @@ case 0x0000032c:
   }
   }
   break;
-case 0x0000032d:
+case 0x00000331:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSineArcs")
     auto label = receiveString();
@@ -11125,7 +11160,7 @@ case 0x0000032d:
   }
   }
   break;
-case 0x0000032e:
+case 0x00000332:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSineArcsV")
     auto label = receiveString();
@@ -11138,7 +11173,7 @@ case 0x0000032e:
   }
   }
   break;
-case 0x0000032f:
+case 0x00000333:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTrianglesShift")
     auto label = receiveString();
@@ -11149,7 +11184,7 @@ case 0x0000032f:
   }
   }
   break;
-case 0x00000330:
+case 0x00000334:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTrianglesShiftV")
     auto label = receiveString();
@@ -11164,7 +11199,7 @@ case 0x00000330:
   }
   }
   break;
-case 0x00000331:
+case 0x00000335:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerPointsShift")
     auto label = receiveString();
@@ -11175,7 +11210,7 @@ case 0x00000331:
   }
   }
   break;
-case 0x00000332:
+case 0x00000336:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerPointsShiftV")
     auto label = receiveString();
@@ -11190,7 +11225,7 @@ case 0x00000332:
   }
   }
   break;
-case 0x00000333:
+case 0x00000337:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSwingDots")
     auto label = receiveString();
@@ -11201,7 +11236,7 @@ case 0x00000333:
   }
   }
   break;
-case 0x00000334:
+case 0x00000338:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSwingDotsV")
     auto label = receiveString();
@@ -11214,7 +11249,7 @@ case 0x00000334:
   }
   }
   break;
-case 0x00000335:
+case 0x00000339:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerCircularPoints")
     auto label = receiveString();
@@ -11225,7 +11260,7 @@ case 0x00000335:
   }
   }
   break;
-case 0x00000336:
+case 0x0000033a:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerCircularPointsV")
     auto label = receiveString();
@@ -11239,7 +11274,7 @@ case 0x00000336:
   }
   }
   break;
-case 0x00000337:
+case 0x0000033b:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerCurvedCircle")
     auto label = receiveString();
@@ -11250,7 +11285,7 @@ case 0x00000337:
   }
   }
   break;
-case 0x00000338:
+case 0x0000033c:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerCurvedCircleV")
     auto label = receiveString();
@@ -11264,7 +11299,7 @@ case 0x00000338:
   }
   }
   break;
-case 0x00000339:
+case 0x0000033d:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerModCircle")
     auto label = receiveString();
@@ -11275,7 +11310,7 @@ case 0x00000339:
   }
   }
   break;
-case 0x0000033a:
+case 0x0000033e:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerModCircleV")
     auto label = receiveString();
@@ -11290,7 +11325,7 @@ case 0x0000033a:
   }
   }
   break;
-case 0x0000033b:
+case 0x0000033f:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerDnaDots")
     auto label = receiveString();
@@ -11301,7 +11336,7 @@ case 0x0000033b:
   }
   }
   break;
-case 0x0000033c:
+case 0x00000340:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerDnaDotsV")
     auto label = receiveString();
@@ -11317,7 +11352,7 @@ case 0x0000033c:
   }
   }
   break;
-case 0x0000033d:
+case 0x00000341:
   {
     FFFI_FUNCTION_INVOCATION("Spinner3SmuggleDots")
     auto label = receiveString();
@@ -11328,7 +11363,7 @@ case 0x0000033d:
   }
   }
   break;
-case 0x0000033e:
+case 0x00000342:
   {
     FFFI_FUNCTION_INVOCATION("Spinner3SmuggleDotsV")
     auto label = receiveString();
@@ -11344,7 +11379,7 @@ case 0x0000033e:
   }
   }
   break;
-case 0x0000033f:
+case 0x00000343:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotateSegmentsPulsar")
     auto label = receiveString();
@@ -11355,7 +11390,7 @@ case 0x0000033f:
   }
   }
   break;
-case 0x00000340:
+case 0x00000344:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotateSegmentsPulsarV")
     auto label = receiveString();
@@ -11370,7 +11405,7 @@ case 0x00000340:
   }
   }
   break;
-case 0x00000341:
+case 0x00000345:
   {
     FFFI_FUNCTION_INVOCATION("Splitter")
     auto split_vertically = receiveValue<bool>();
@@ -11394,7 +11429,7 @@ case 0x00000341:
   }
   }
   break;
-case 0x00000342:
+case 0x00000346:
   {
     FFFI_FUNCTION_INVOCATION("SplitterV")
     auto split_vertically = receiveValue<bool>();
@@ -11419,7 +11454,7 @@ case 0x00000342:
   }
   }
   break;
-case 0x00000343:
+case 0x00000347:
   {
     FFFI_FUNCTION_INVOCATION("loadStyle")
     auto ptr = receiveValue<uintptr_t>();
@@ -11520,7 +11555,7 @@ case 0x00000343:
   }
   }
   break;
-case 0x00000344:
+case 0x00000348:
   {
     FFFI_FUNCTION_INVOCATION("GetStyle")
     uintptr_t r;
@@ -11532,7 +11567,7 @@ case 0x00000344:
   }
   }
   break;
-case 0x00000345:
+case 0x00000349:
   {
     FFFI_FUNCTION_INVOCATION("dumpStyle")
     auto ptr = receiveValue<uintptr_t>();
@@ -11654,7 +11689,7 @@ case 0x00000345:
   }
   }
   break;
-case 0x00000346:
+case 0x0000034a:
   {
     FFFI_FUNCTION_INVOCATION("TableGetSortSpecs")
     bool sort;
@@ -11698,7 +11733,7 @@ case 0x00000346:
   }
   }
   break;
-case 0x00000347:
+case 0x0000034b:
   {
     FFFI_FUNCTION_INVOCATION("Toggle")
     auto label = receiveString();
@@ -11715,7 +11750,7 @@ valR = val;
   }
   }
   break;
-case 0x00000348:
+case 0x0000034c:
   {
     FFFI_FUNCTION_INVOCATION("ToggleV")
     auto label = receiveString();
@@ -11737,7 +11772,7 @@ valR = val;
   }
   }
   break;
-case 0x00000349:
+case 0x0000034d:
   {
     FFFI_FUNCTION_INVOCATION("InvisibleButtonP")
     auto str_id = receiveString();
@@ -11747,7 +11782,7 @@ case 0x00000349:
   }
   }
   break;
-case 0x0000034a:
+case 0x0000034e:
   {
     FFFI_FUNCTION_INVOCATION("InvisibleButtonVP")
     auto str_id = receiveString();

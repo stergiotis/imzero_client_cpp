@@ -5,7 +5,7 @@ namespace ImGui {
     std::vector<uint16_t> paragraphTextLayoutStack{};
 }
 
-void ImGui::PushIsParagraphText(uint8_t isParagraph) {
+void ImGui::PushIsParagraphText(ImZeroFB::IsParagraphText isParagraph) {
     ImGui::isParagraphTextStack.push_back(isParagraph);
 }
 uint8_t ImGui::PopIsParagraphText() {

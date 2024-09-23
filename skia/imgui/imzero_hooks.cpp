@@ -7,8 +7,8 @@
 
 static void getParagraphTextLayout(ImZeroFB::TextAlignFlags &align,ImZeroFB::TextDirection &dir) {
     if(ImGui::paragraphTextLayoutStack.empty()) {
-        align = ImZeroFB::TextAlignFlags_left;
-        dir = ImZeroFB::TextDirection_ltr;
+        align = ImZeroFB::TextAlignFlags_Left;
+        dir = ImZeroFB::TextDirection_Ltr;
     } else {
         auto const v = ImGui::paragraphTextLayoutStack.back();
         align = static_cast<ImZeroFB::TextAlignFlags>(v >> 8);

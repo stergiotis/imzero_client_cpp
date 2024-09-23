@@ -611,3 +611,166 @@ case 0x00000807:
   }
   }
   break;
+case 0x00000808:
+  {
+    FFFI_FUNCTION_INVOCATION("GetLanguageDefinitionName")
+    auto foreignptr = receiveValue<uintptr_t>();
+    const char * name;
+    {
+    name = ((TextEditor*)foreignptr)->GetLanguageDefinitionName();;
+    sendEmptyString();
+    sendString(name);
+    flushSend();
+  }
+  }
+  break;
+case 0x00000809:
+  {
+    FFFI_FUNCTION_INVOCATION("ActivatePaletteMariana")
+    auto foreignptr = receiveValue<uintptr_t>();
+    {
+    auto const u = ((TextEditor*)foreignptr);
+u->SetPalette(u->GetMarianaPalette());;
+  }
+  }
+  break;
+case 0x0000080a:
+  {
+    FFFI_FUNCTION_INVOCATION("ActivatePaletteDark")
+    auto foreignptr = receiveValue<uintptr_t>();
+    {
+    auto const u = ((TextEditor*)foreignptr);
+u->SetPalette(u->GetDarkPalette());;
+  }
+  }
+  break;
+case 0x0000080b:
+  {
+    FFFI_FUNCTION_INVOCATION("ActivatePaletteLight")
+    auto foreignptr = receiveValue<uintptr_t>();
+    {
+    auto const u = ((TextEditor*)foreignptr);
+u->SetPalette(u->GetLightPalette());;
+  }
+  }
+  break;
+case 0x0000080c:
+  {
+    FFFI_FUNCTION_INVOCATION("ActivatePaletteRetroBlue")
+    auto foreignptr = receiveValue<uintptr_t>();
+    {
+    auto const u = ((TextEditor*)foreignptr);
+u->SetPalette(u->GetRetroBluePalette());;
+  }
+  }
+  break;
+case 0x0000080d:
+  {
+    FFFI_FUNCTION_INVOCATION("ActivateLanguageCPlusPlus")
+    auto foreignptr = receiveValue<uintptr_t>();
+    {
+    auto const u = ((TextEditor*)foreignptr);
+u->SetLanguageDefinition(TextEditor::LanguageDefinition::CPlusPlus());
+;
+  }
+  }
+  break;
+case 0x0000080e:
+  {
+    FFFI_FUNCTION_INVOCATION("ActivateLanguageHLSL")
+    auto foreignptr = receiveValue<uintptr_t>();
+    {
+    auto const u = ((TextEditor*)foreignptr);
+u->SetLanguageDefinition(TextEditor::LanguageDefinition::HLSL());
+;
+  }
+  }
+  break;
+case 0x0000080f:
+  {
+    FFFI_FUNCTION_INVOCATION("ActivateLanguageGLSL")
+    auto foreignptr = receiveValue<uintptr_t>();
+    {
+    auto const u = ((TextEditor*)foreignptr);
+u->SetLanguageDefinition(TextEditor::LanguageDefinition::GLSL());
+;
+  }
+  }
+  break;
+case 0x00000810:
+  {
+    FFFI_FUNCTION_INVOCATION("ActivateLanguagePython")
+    auto foreignptr = receiveValue<uintptr_t>();
+    {
+    auto const u = ((TextEditor*)foreignptr);
+u->SetLanguageDefinition(TextEditor::LanguageDefinition::Python());
+;
+  }
+  }
+  break;
+case 0x00000811:
+  {
+    FFFI_FUNCTION_INVOCATION("ActivateLanguageC")
+    auto foreignptr = receiveValue<uintptr_t>();
+    {
+    auto const u = ((TextEditor*)foreignptr);
+u->SetLanguageDefinition(TextEditor::LanguageDefinition::C());
+;
+  }
+  }
+  break;
+case 0x00000812:
+  {
+    FFFI_FUNCTION_INVOCATION("ActivateLanguageSQL")
+    auto foreignptr = receiveValue<uintptr_t>();
+    {
+    auto const u = ((TextEditor*)foreignptr);
+u->SetLanguageDefinition(TextEditor::LanguageDefinition::SQL());
+;
+  }
+  }
+  break;
+case 0x00000813:
+  {
+    FFFI_FUNCTION_INVOCATION("ActivateLanguageAngelScript")
+    auto foreignptr = receiveValue<uintptr_t>();
+    {
+    auto const u = ((TextEditor*)foreignptr);
+u->SetLanguageDefinition(TextEditor::LanguageDefinition::AngelScript());
+;
+  }
+  }
+  break;
+case 0x00000814:
+  {
+    FFFI_FUNCTION_INVOCATION("ActivateLanguageLua")
+    auto foreignptr = receiveValue<uintptr_t>();
+    {
+    auto const u = ((TextEditor*)foreignptr);
+u->SetLanguageDefinition(TextEditor::LanguageDefinition::Lua());
+;
+  }
+  }
+  break;
+case 0x00000815:
+  {
+    FFFI_FUNCTION_INVOCATION("ActivateLanguageCSharp")
+    auto foreignptr = receiveValue<uintptr_t>();
+    {
+    auto const u = ((TextEditor*)foreignptr);
+u->SetLanguageDefinition(TextEditor::LanguageDefinition::CSharp());
+;
+  }
+  }
+  break;
+case 0x00000816:
+  {
+    FFFI_FUNCTION_INVOCATION("ActivateLanguageJson")
+    auto foreignptr = receiveValue<uintptr_t>();
+    {
+    auto const u = ((TextEditor*)foreignptr);
+u->SetLanguageDefinition(TextEditor::LanguageDefinition::Json());
+;
+  }
+  }
+  break;

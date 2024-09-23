@@ -207,15 +207,20 @@ table CmdRenderText {
     clip_rect: SingleVec4;
     text: string;
 }
+enum IsParagraphText:uint8 {
+    Never = 0,
+    Always = 1,
+    Auto = 2,
+}
 enum TextAlignFlags:uint8 {
-    left = 0,
-    right = 1,
-    center = 2,
-    justify = 3
+    Left = 0,
+    Right = 1,
+    Center = 2,
+    Justify = 3
 }
 enum TextDirection:uint8 {
-    ltr = 0,
-    rtl = 1,
+    Ltr = 0,
+    Rtl = 1,
     //mixed = 2, // TODO
 }
 table CmdRenderParagraph {
@@ -279,23 +284,23 @@ table CmdSvgPathSubset {
     fill: bool;
 }
 enum PathVerb:uint8 {
-    move = 0, // 1 point
-    line = 1, // 2 points
-    quad = 2, // 3 points
-    conic = 3, // 3 points + 1 weight
-    cubic = 4, // 4 points
-    close = 5, // 0 points
-    done = 6,
+    Move = 0, // 1 point
+    Line = 1, // 2 points
+    Quad = 2, // 3 points
+    Conic = 3, // 3 points + 1 weight
+    Cubic = 4, // 4 points
+    Close = 5, // 0 points
+    Done = 6,
 }
 enum PathFillType:uint8 {
     /** Specifies that "inside" is computed by a non-zero sum of signed edge crossings */
-    winding = 0,
+    Winding = 0,
     /** Specifies that "inside" is computed by an odd number of edge crossings */
-    evenOdd = 1,
+    EvenOdd = 1,
     /** Same as Winding, but draws outside of the path, rather than inside */
-    inverseWinding = 2,
+    InverseWinding = 2,
     /** Same as EvenOdd, but draws outside of the path, rather than inside */
-    inverseEvenOdd = 3
+    InverseEvenOdd = 3
 }
 table CmdPath {
     offset: SingleVec2;

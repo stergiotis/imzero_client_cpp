@@ -5,8 +5,9 @@ go 1.21.0
 replace github.com/stergiotis/boxer => ../boxer
 
 require (
+	github.com/google/flatbuffers v24.3.25+incompatible
 	github.com/rs/zerolog v1.32.0
-	github.com/stergiotis/boxer v0.0.0-20240223202811-e6296ee99ccd
+	github.com/stergiotis/boxer v0.0.0-00010101000000-000000000000
 	github.com/urfave/cli/v2 v2.27.1
 )
 

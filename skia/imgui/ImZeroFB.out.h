@@ -278,149 +278,182 @@ inline const ::flatbuffers::TypeTable *EventKeyboardTypeTable();
 
 inline const ::flatbuffers::TypeTable *InputEventTypeTable();
 
+enum IsParagraphText : uint8_t {
+  IsParagraphText_Never = 0,
+  IsParagraphText_Always = 1,
+  IsParagraphText_Auto = 2,
+  IsParagraphText_MIN = IsParagraphText_Never,
+  IsParagraphText_MAX = IsParagraphText_Auto
+};
+
+inline const IsParagraphText (&EnumValuesIsParagraphText())[3] {
+  static const IsParagraphText values[] = {
+    IsParagraphText_Never,
+    IsParagraphText_Always,
+    IsParagraphText_Auto
+  };
+  return values;
+}
+
+inline const char * const *EnumNamesIsParagraphText() {
+  static const char * const names[4] = {
+    "Never",
+    "Always",
+    "Auto",
+    nullptr
+  };
+  return names;
+}
+
+inline const char *EnumNameIsParagraphText(IsParagraphText e) {
+  if (::flatbuffers::IsOutRange(e, IsParagraphText_Never, IsParagraphText_Auto)) return "";
+  const size_t index = static_cast<size_t>(e);
+  return EnumNamesIsParagraphText()[index];
+}
+
 enum TextAlignFlags : uint8_t {
-  TextAlignFlags_left = 0,
-  TextAlignFlags_right = 1,
-  TextAlignFlags_center = 2,
-  TextAlignFlags_justify = 3,
-  TextAlignFlags_MIN = TextAlignFlags_left,
-  TextAlignFlags_MAX = TextAlignFlags_justify
+  TextAlignFlags_Left = 0,
+  TextAlignFlags_Right = 1,
+  TextAlignFlags_Center = 2,
+  TextAlignFlags_Justify = 3,
+  TextAlignFlags_MIN = TextAlignFlags_Left,
+  TextAlignFlags_MAX = TextAlignFlags_Justify
 };
 
 inline const TextAlignFlags (&EnumValuesTextAlignFlags())[4] {
   static const TextAlignFlags values[] = {
-    TextAlignFlags_left,
-    TextAlignFlags_right,
-    TextAlignFlags_center,
-    TextAlignFlags_justify
+    TextAlignFlags_Left,
+    TextAlignFlags_Right,
+    TextAlignFlags_Center,
+    TextAlignFlags_Justify
   };
   return values;
 }
 
 inline const char * const *EnumNamesTextAlignFlags() {
   static const char * const names[5] = {
-    "left",
-    "right",
-    "center",
-    "justify",
+    "Left",
+    "Right",
+    "Center",
+    "Justify",
     nullptr
   };
   return names;
 }
 
 inline const char *EnumNameTextAlignFlags(TextAlignFlags e) {
-  if (::flatbuffers::IsOutRange(e, TextAlignFlags_left, TextAlignFlags_justify)) return "";
+  if (::flatbuffers::IsOutRange(e, TextAlignFlags_Left, TextAlignFlags_Justify)) return "";
   const size_t index = static_cast<size_t>(e);
   return EnumNamesTextAlignFlags()[index];
 }
 
 enum TextDirection : uint8_t {
-  TextDirection_ltr = 0,
-  TextDirection_rtl = 1,
-  TextDirection_MIN = TextDirection_ltr,
-  TextDirection_MAX = TextDirection_rtl
+  TextDirection_Ltr = 0,
+  TextDirection_Rtl = 1,
+  TextDirection_MIN = TextDirection_Ltr,
+  TextDirection_MAX = TextDirection_Rtl
 };
 
 inline const TextDirection (&EnumValuesTextDirection())[2] {
   static const TextDirection values[] = {
-    TextDirection_ltr,
-    TextDirection_rtl
+    TextDirection_Ltr,
+    TextDirection_Rtl
   };
   return values;
 }
 
 inline const char * const *EnumNamesTextDirection() {
   static const char * const names[3] = {
-    "ltr",
-    "rtl",
+    "Ltr",
+    "Rtl",
     nullptr
   };
   return names;
 }
 
 inline const char *EnumNameTextDirection(TextDirection e) {
-  if (::flatbuffers::IsOutRange(e, TextDirection_ltr, TextDirection_rtl)) return "";
+  if (::flatbuffers::IsOutRange(e, TextDirection_Ltr, TextDirection_Rtl)) return "";
   const size_t index = static_cast<size_t>(e);
   return EnumNamesTextDirection()[index];
 }
 
 enum PathVerb : uint8_t {
-  PathVerb_move = 0,
-  PathVerb_line = 1,
-  PathVerb_quad = 2,
-  PathVerb_conic = 3,
-  PathVerb_cubic = 4,
-  PathVerb_close = 5,
-  PathVerb_done = 6,
-  PathVerb_MIN = PathVerb_move,
-  PathVerb_MAX = PathVerb_done
+  PathVerb_Move = 0,
+  PathVerb_Line = 1,
+  PathVerb_Quad = 2,
+  PathVerb_Conic = 3,
+  PathVerb_Cubic = 4,
+  PathVerb_Close = 5,
+  PathVerb_Done = 6,
+  PathVerb_MIN = PathVerb_Move,
+  PathVerb_MAX = PathVerb_Done
 };
 
 inline const PathVerb (&EnumValuesPathVerb())[7] {
   static const PathVerb values[] = {
-    PathVerb_move,
-    PathVerb_line,
-    PathVerb_quad,
-    PathVerb_conic,
-    PathVerb_cubic,
-    PathVerb_close,
-    PathVerb_done
+    PathVerb_Move,
+    PathVerb_Line,
+    PathVerb_Quad,
+    PathVerb_Conic,
+    PathVerb_Cubic,
+    PathVerb_Close,
+    PathVerb_Done
   };
   return values;
 }
 
 inline const char * const *EnumNamesPathVerb() {
   static const char * const names[8] = {
-    "move",
-    "line",
-    "quad",
-    "conic",
-    "cubic",
-    "close",
-    "done",
+    "Move",
+    "Line",
+    "Quad",
+    "Conic",
+    "Cubic",
+    "Close",
+    "Done",
     nullptr
   };
   return names;
 }
 
 inline const char *EnumNamePathVerb(PathVerb e) {
-  if (::flatbuffers::IsOutRange(e, PathVerb_move, PathVerb_done)) return "";
+  if (::flatbuffers::IsOutRange(e, PathVerb_Move, PathVerb_Done)) return "";
   const size_t index = static_cast<size_t>(e);
   return EnumNamesPathVerb()[index];
 }
 
 enum PathFillType : uint8_t {
-  PathFillType_winding = 0,
-  PathFillType_evenOdd = 1,
-  PathFillType_inverseWinding = 2,
-  PathFillType_inverseEvenOdd = 3,
-  PathFillType_MIN = PathFillType_winding,
-  PathFillType_MAX = PathFillType_inverseEvenOdd
+  PathFillType_Winding = 0,
+  PathFillType_EvenOdd = 1,
+  PathFillType_InverseWinding = 2,
+  PathFillType_InverseEvenOdd = 3,
+  PathFillType_MIN = PathFillType_Winding,
+  PathFillType_MAX = PathFillType_InverseEvenOdd
 };
 
 inline const PathFillType (&EnumValuesPathFillType())[4] {
   static const PathFillType values[] = {
-    PathFillType_winding,
-    PathFillType_evenOdd,
-    PathFillType_inverseWinding,
-    PathFillType_inverseEvenOdd
+    PathFillType_Winding,
+    PathFillType_EvenOdd,
+    PathFillType_InverseWinding,
+    PathFillType_InverseEvenOdd
   };
   return values;
 }
 
 inline const char * const *EnumNamesPathFillType() {
   static const char * const names[5] = {
-    "winding",
-    "evenOdd",
-    "inverseWinding",
-    "inverseEvenOdd",
+    "Winding",
+    "EvenOdd",
+    "InverseWinding",
+    "InverseEvenOdd",
     nullptr
   };
   return names;
 }
 
 inline const char *EnumNamePathFillType(PathFillType e) {
-  if (::flatbuffers::IsOutRange(e, PathFillType_winding, PathFillType_inverseEvenOdd)) return "";
+  if (::flatbuffers::IsOutRange(e, PathFillType_Winding, PathFillType_InverseEvenOdd)) return "";
   const size_t index = static_cast<size_t>(e);
   return EnumNamesPathFillType()[index];
 }
@@ -4032,8 +4065,8 @@ inline ::flatbuffers::Offset<CmdRenderParagraph> CreateCmdRenderParagraph(
     ::flatbuffers::Offset<::flatbuffers::String> text = 0,
     float wrap_width = 0.0f,
     float letter_spacing = 0.0f,
-    ImZeroFB::TextAlignFlags text_align = ImZeroFB::TextAlignFlags_left,
-    ImZeroFB::TextDirection text_direction = ImZeroFB::TextDirection_ltr) {
+    ImZeroFB::TextAlignFlags text_align = ImZeroFB::TextAlignFlags_Left,
+    ImZeroFB::TextDirection text_direction = ImZeroFB::TextDirection_Ltr) {
   CmdRenderParagraphBuilder builder_(_fbb);
   builder_.add_imfont(imfont);
   builder_.add_letter_spacing(letter_spacing);
@@ -4058,8 +4091,8 @@ inline ::flatbuffers::Offset<CmdRenderParagraph> CreateCmdRenderParagraphDirect(
     const char *text = nullptr,
     float wrap_width = 0.0f,
     float letter_spacing = 0.0f,
-    ImZeroFB::TextAlignFlags text_align = ImZeroFB::TextAlignFlags_left,
-    ImZeroFB::TextDirection text_direction = ImZeroFB::TextDirection_ltr) {
+    ImZeroFB::TextAlignFlags text_align = ImZeroFB::TextAlignFlags_Left,
+    ImZeroFB::TextDirection text_direction = ImZeroFB::TextDirection_Ltr) {
   auto text__ = text ? _fbb.CreateString(text) : 0;
   return ImZeroFB::CreateCmdRenderParagraph(
       _fbb,
@@ -4831,7 +4864,7 @@ inline ::flatbuffers::Offset<CmdPath> CreateCmdPath(
     uint32_t col = 0,
     bool stroke = false,
     bool fill = false,
-    ImZeroFB::PathFillType fill_type = ImZeroFB::PathFillType_winding) {
+    ImZeroFB::PathFillType fill_type = ImZeroFB::PathFillType_Winding) {
   CmdPathBuilder builder_(_fbb);
   builder_.add_col(col);
   builder_.add_conic_weights(conic_weights);
@@ -4853,7 +4886,7 @@ inline ::flatbuffers::Offset<CmdPath> CreateCmdPathDirect(
     uint32_t col = 0,
     bool stroke = false,
     bool fill = false,
-    ImZeroFB::PathFillType fill_type = ImZeroFB::PathFillType_winding) {
+    ImZeroFB::PathFillType fill_type = ImZeroFB::PathFillType_Winding) {
   auto verbs__ = verbs ? _fbb.CreateVector<uint8_t>(*verbs) : 0;
   auto points_xy__ = points_xy ? _fbb.CreateVector<float>(*points_xy) : 0;
   auto conic_weights__ = conic_weights ? _fbb.CreateVector<float>(*conic_weights) : 0;
@@ -6069,6 +6102,26 @@ inline bool VerifyUserInteractionVector(::flatbuffers::Verifier &verifier, const
   return true;
 }
 
+inline const ::flatbuffers::TypeTable *IsParagraphTextTypeTable() {
+  static const ::flatbuffers::TypeCode type_codes[] = {
+    { ::flatbuffers::ET_UCHAR, 0, 0 },
+    { ::flatbuffers::ET_UCHAR, 0, 0 },
+    { ::flatbuffers::ET_UCHAR, 0, 0 }
+  };
+  static const ::flatbuffers::TypeFunction type_refs[] = {
+    ImZeroFB::IsParagraphTextTypeTable
+  };
+  static const char * const names[] = {
+    "Never",
+    "Always",
+    "Auto"
+  };
+  static const ::flatbuffers::TypeTable tt = {
+    ::flatbuffers::ST_ENUM, 3, type_codes, type_refs, nullptr, nullptr, names
+  };
+  return &tt;
+}
+
 inline const ::flatbuffers::TypeTable *TextAlignFlagsTypeTable() {
   static const ::flatbuffers::TypeCode type_codes[] = {
     { ::flatbuffers::ET_UCHAR, 0, 0 },
@@ -6080,10 +6133,10 @@ inline const ::flatbuffers::TypeTable *TextAlignFlagsTypeTable() {
     ImZeroFB::TextAlignFlagsTypeTable
   };
   static const char * const names[] = {
-    "left",
-    "right",
-    "center",
-    "justify"
+    "Left",
+    "Right",
+    "Center",
+    "Justify"
   };
   static const ::flatbuffers::TypeTable tt = {
     ::flatbuffers::ST_ENUM, 4, type_codes, type_refs, nullptr, nullptr, names
@@ -6100,8 +6153,8 @@ inline const ::flatbuffers::TypeTable *TextDirectionTypeTable() {
     ImZeroFB::TextDirectionTypeTable
   };
   static const char * const names[] = {
-    "ltr",
-    "rtl"
+    "Ltr",
+    "Rtl"
   };
   static const ::flatbuffers::TypeTable tt = {
     ::flatbuffers::ST_ENUM, 2, type_codes, type_refs, nullptr, nullptr, names
@@ -6123,13 +6176,13 @@ inline const ::flatbuffers::TypeTable *PathVerbTypeTable() {
     ImZeroFB::PathVerbTypeTable
   };
   static const char * const names[] = {
-    "move",
-    "line",
-    "quad",
-    "conic",
-    "cubic",
-    "close",
-    "done"
+    "Move",
+    "Line",
+    "Quad",
+    "Conic",
+    "Cubic",
+    "Close",
+    "Done"
   };
   static const ::flatbuffers::TypeTable tt = {
     ::flatbuffers::ST_ENUM, 7, type_codes, type_refs, nullptr, nullptr, names
@@ -6148,10 +6201,10 @@ inline const ::flatbuffers::TypeTable *PathFillTypeTypeTable() {
     ImZeroFB::PathFillTypeTypeTable
   };
   static const char * const names[] = {
-    "winding",
-    "evenOdd",
-    "inverseWinding",
-    "inverseEvenOdd"
+    "Winding",
+    "EvenOdd",
+    "InverseWinding",
+    "InverseEvenOdd"
   };
   static const ::flatbuffers::TypeTable tt = {
     ::flatbuffers::ST_ENUM, 4, type_codes, type_refs, nullptr, nullptr, names

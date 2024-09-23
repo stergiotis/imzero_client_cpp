@@ -627,10 +627,10 @@ void VectorCmdSkiaRenderer::drawCmdPath(const ImZeroFB::CmdPath &cmd,SkCanvas &c
     auto const offset = cmd.offset();
     static_assert(sizeof(ImZeroFB::PathVerb) == 1);
 
-    static_assert(static_cast<int64_t>(ImZeroFB::PathFillType_evenOdd) == static_cast<int64_t>(SkPathFillType::kEvenOdd));
-    static_assert(static_cast<int64_t>(ImZeroFB::PathFillType_winding) == static_cast<int64_t>(SkPathFillType::kWinding));
-    static_assert(static_cast<int64_t>(ImZeroFB::PathFillType_inverseEvenOdd) == static_cast<int64_t>(SkPathFillType::kInverseEvenOdd));
-    static_assert(static_cast<int64_t>(ImZeroFB::PathFillType_inverseWinding) == static_cast<int64_t>(SkPathFillType::kInverseWinding));
+    static_assert(static_cast<int64_t>(ImZeroFB::PathFillType_EvenOdd) == static_cast<int64_t>(SkPathFillType::kEvenOdd));
+    static_assert(static_cast<int64_t>(ImZeroFB::PathFillType_Winding) == static_cast<int64_t>(SkPathFillType::kWinding));
+    static_assert(static_cast<int64_t>(ImZeroFB::PathFillType_InverseEvenOdd) == static_cast<int64_t>(SkPathFillType::kInverseEvenOdd));
+    static_assert(static_cast<int64_t>(ImZeroFB::PathFillType_InverseWinding) == static_cast<int64_t>(SkPathFillType::kInverseWinding));
     static_assert(std::is_same<SkScalar,float>::value);
 #if 1
     SkTDArray<SkPoint> pointsXYVec;
@@ -886,17 +886,17 @@ void VectorCmdSkiaRenderer::drawCmdRenderParagraphFB(const ImZeroFB::CmdRenderPa
     {
         skia::textlayout::TextAlign a;
         switch(cmd.text_align()) {
-            case ImZeroFB::TextAlignFlags_left: a = skia::textlayout::TextAlign::kLeft; break;
-            case ImZeroFB::TextAlignFlags_right: a = skia::textlayout::TextAlign::kRight; break;
-            case ImZeroFB::TextAlignFlags_center: a = skia::textlayout::TextAlign::kCenter; break;
-            case ImZeroFB::TextAlignFlags_justify: a = skia::textlayout::TextAlign::kJustify; break;
+            case ImZeroFB::TextAlignFlags_Left: a = skia::textlayout::TextAlign::kLeft; break;
+            case ImZeroFB::TextAlignFlags_Right: a = skia::textlayout::TextAlign::kRight; break;
+            case ImZeroFB::TextAlignFlags_Center: a = skia::textlayout::TextAlign::kCenter; break;
+            case ImZeroFB::TextAlignFlags_Justify: a = skia::textlayout::TextAlign::kJustify; break;
             default:
                 assert("unhandled text align option for paragraph");
         }
         skia::textlayout::TextDirection d;
         switch(cmd.text_direction()) {
-            case ImZeroFB::TextDirection_ltr: d = skia::textlayout::TextDirection::kLtr; break;
-            case ImZeroFB::TextDirection_rtl: d = skia::textlayout::TextDirection::kRtl; break;
+            case ImZeroFB::TextDirection_Ltr: d = skia::textlayout::TextDirection::kLtr; break;
+            case ImZeroFB::TextDirection_Rtl: d = skia::textlayout::TextDirection::kRtl; break;
             default:
                 assert("unhandled text direction option for paragraph");
         }
