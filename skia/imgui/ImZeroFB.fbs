@@ -387,6 +387,14 @@ table IoRecord {
     flags : IoFlags;
 }
 
+table EventClientConnect {
+    desc: string;
+}
+table EventClientDisconnect {
+    desc: string;
+}
+table EventClientKeepAlive {
+}
 table EventMouseMotion {
     pos: SingleVec2;
     mouse_id: uint32;
@@ -397,13 +405,12 @@ table EventMouseWheel {
     mouse_id: uint32;
     is_touch: bool;
 }
-enum MouseButton:uint8 {
-    None = 0,
-    Left = 1,
+enum MouseButtons:uint8 (bit_flags) {
+    Left = 0,
+    Middle = 1,
     Right = 2,
-    Middle = 3,
-    X1 = 4,
-    X2 = 5,
+    X1 = 3,
+    X2 = 4,
 }
 enum MouseButtonEventType:uint8 {
     Up = 0,
@@ -413,18 +420,25 @@ table EventMouseButton {
     pos: SingleVec2;
     mouse_id: uint32;
     is_touch: bool;
-    button: MouseButton;
+    buttons: MouseButtons;
     type: MouseButtonEventType;
 }
 table EventTextInput {
     text: string;
 }
-enum KeyModifiers:uint8 {
-    None = 0,
-    Ctrl = 1,
-    Shift = 2,
-    Alt = 4,
-    Super = 8,
+enum KeyModifiers:uint16 (bit_flags) {
+    LeftShift = 0,
+    RightShift = 1,
+    LeftCtrl = 2,
+    RightCtrl = 3,
+    LeftAlt = 4,
+    RightAlt = 5,
+    LeftSuper = 6,
+    RightSuper = 7,
+    NumLock = 8,
+    CapsLock = 9,
+    Mode = 10,
+    ScrolLock = 11,
 }
 enum KeyCode:uint32 {
     Key_None=0,
@@ -556,6 +570,9 @@ table EventKeyboard {
     scancode: uint32;
 }
 union UserInteraction {
+    EventClientConnect,
+    EventClientDisconnect,
+    EventClientKeepAlive,
     EventMouseMotion,
     EventMouseWheel,
     EventMouseButton,

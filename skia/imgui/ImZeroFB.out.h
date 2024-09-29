@@ -154,6 +154,15 @@ struct DrawListBuilder;
 struct IoRecord;
 struct IoRecordBuilder;
 
+struct EventClientConnect;
+struct EventClientConnectBuilder;
+
+struct EventClientDisconnect;
+struct EventClientDisconnectBuilder;
+
+struct EventClientKeepAlive;
+struct EventClientKeepAliveBuilder;
+
 struct EventMouseMotion;
 struct EventMouseMotionBuilder;
 
@@ -265,6 +274,12 @@ inline const ::flatbuffers::TypeTable *VertexDataTypeTable();
 inline const ::flatbuffers::TypeTable *DrawListTypeTable();
 
 inline const ::flatbuffers::TypeTable *IoRecordTypeTable();
+
+inline const ::flatbuffers::TypeTable *EventClientConnectTypeTable();
+
+inline const ::flatbuffers::TypeTable *EventClientDisconnectTypeTable();
+
+inline const ::flatbuffers::TypeTable *EventClientKeepAliveTypeTable();
 
 inline const ::flatbuffers::TypeTable *EventMouseMotionTypeTable();
 
@@ -865,46 +880,54 @@ inline const char *EnumNameIoFlags(IoFlags e) {
   return EnumNamesIoFlags()[index];
 }
 
-enum MouseButton : uint8_t {
-  MouseButton_None = 0,
-  MouseButton_Left = 1,
-  MouseButton_Right = 2,
-  MouseButton_Middle = 3,
-  MouseButton_X1 = 4,
-  MouseButton_X2 = 5,
-  MouseButton_MIN = MouseButton_None,
-  MouseButton_MAX = MouseButton_X2
+enum MouseButtons : uint8_t {
+  MouseButtons_Left = 1,
+  MouseButtons_Middle = 2,
+  MouseButtons_Right = 4,
+  MouseButtons_X1 = 8,
+  MouseButtons_X2 = 16,
+  MouseButtons_NONE = 0,
+  MouseButtons_ANY = 31
 };
 
-inline const MouseButton (&EnumValuesMouseButton())[6] {
-  static const MouseButton values[] = {
-    MouseButton_None,
-    MouseButton_Left,
-    MouseButton_Right,
-    MouseButton_Middle,
-    MouseButton_X1,
-    MouseButton_X2
+inline const MouseButtons (&EnumValuesMouseButtons())[5] {
+  static const MouseButtons values[] = {
+    MouseButtons_Left,
+    MouseButtons_Middle,
+    MouseButtons_Right,
+    MouseButtons_X1,
+    MouseButtons_X2
   };
   return values;
 }
 
-inline const char * const *EnumNamesMouseButton() {
-  static const char * const names[7] = {
-    "None",
+inline const char * const *EnumNamesMouseButtons() {
+  static const char * const names[17] = {
     "Left",
-    "Right",
     "Middle",
+    "",
+    "Right",
+    "",
+    "",
+    "",
     "X1",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
     "X2",
     nullptr
   };
   return names;
 }
 
-inline const char *EnumNameMouseButton(MouseButton e) {
-  if (::flatbuffers::IsOutRange(e, MouseButton_None, MouseButton_X2)) return "";
-  const size_t index = static_cast<size_t>(e);
-  return EnumNamesMouseButton()[index];
+inline const char *EnumNameMouseButtons(MouseButtons e) {
+  if (::flatbuffers::IsOutRange(e, MouseButtons_Left, MouseButtons_X2)) return "";
+  const size_t index = static_cast<size_t>(e) - static_cast<size_t>(MouseButtons_Left);
+  return EnumNamesMouseButtons()[index];
 }
 
 enum MouseButtonEventType : uint8_t {
@@ -937,47 +960,57 @@ inline const char *EnumNameMouseButtonEventType(MouseButtonEventType e) {
   return EnumNamesMouseButtonEventType()[index];
 }
 
-enum KeyModifiers : uint8_t {
-  KeyModifiers_None = 0,
-  KeyModifiers_Ctrl = 1,
-  KeyModifiers_Shift = 2,
-  KeyModifiers_Alt = 4,
-  KeyModifiers_Super = 8,
-  KeyModifiers_MIN = KeyModifiers_None,
-  KeyModifiers_MAX = KeyModifiers_Super
+enum KeyModifiers : uint16_t {
+  KeyModifiers_LeftShift = 1,
+  KeyModifiers_RightShift = 2,
+  KeyModifiers_LeftCtrl = 4,
+  KeyModifiers_RightCtrl = 8,
+  KeyModifiers_LeftAlt = 16,
+  KeyModifiers_RightAlt = 32,
+  KeyModifiers_LeftSuper = 64,
+  KeyModifiers_RightSuper = 128,
+  KeyModifiers_NumLock = 256,
+  KeyModifiers_CapsLock = 512,
+  KeyModifiers_Mode = 1024,
+  KeyModifiers_ScrolLock = 2048,
+  KeyModifiers_NONE = 0,
+  KeyModifiers_ANY = 4095
 };
 
-inline const KeyModifiers (&EnumValuesKeyModifiers())[5] {
+inline const KeyModifiers (&EnumValuesKeyModifiers())[12] {
   static const KeyModifiers values[] = {
-    KeyModifiers_None,
-    KeyModifiers_Ctrl,
-    KeyModifiers_Shift,
-    KeyModifiers_Alt,
-    KeyModifiers_Super
+    KeyModifiers_LeftShift,
+    KeyModifiers_RightShift,
+    KeyModifiers_LeftCtrl,
+    KeyModifiers_RightCtrl,
+    KeyModifiers_LeftAlt,
+    KeyModifiers_RightAlt,
+    KeyModifiers_LeftSuper,
+    KeyModifiers_RightSuper,
+    KeyModifiers_NumLock,
+    KeyModifiers_CapsLock,
+    KeyModifiers_Mode,
+    KeyModifiers_ScrolLock
   };
   return values;
 }
 
-inline const char * const *EnumNamesKeyModifiers() {
-  static const char * const names[10] = {
-    "None",
-    "Ctrl",
-    "Shift",
-    "",
-    "Alt",
-    "",
-    "",
-    "",
-    "Super",
-    nullptr
-  };
-  return names;
-}
-
 inline const char *EnumNameKeyModifiers(KeyModifiers e) {
-  if (::flatbuffers::IsOutRange(e, KeyModifiers_None, KeyModifiers_Super)) return "";
-  const size_t index = static_cast<size_t>(e);
-  return EnumNamesKeyModifiers()[index];
+  switch (e) {
+    case KeyModifiers_LeftShift: return "LeftShift";
+    case KeyModifiers_RightShift: return "RightShift";
+    case KeyModifiers_LeftCtrl: return "LeftCtrl";
+    case KeyModifiers_RightCtrl: return "RightCtrl";
+    case KeyModifiers_LeftAlt: return "LeftAlt";
+    case KeyModifiers_RightAlt: return "RightAlt";
+    case KeyModifiers_LeftSuper: return "LeftSuper";
+    case KeyModifiers_RightSuper: return "RightSuper";
+    case KeyModifiers_NumLock: return "NumLock";
+    case KeyModifiers_CapsLock: return "CapsLock";
+    case KeyModifiers_Mode: return "Mode";
+    case KeyModifiers_ScrolLock: return "ScrolLock";
+    default: return "";
+  }
 }
 
 enum KeyCode : uint32_t {
@@ -1366,18 +1399,24 @@ inline const char *EnumNameKeyCode(KeyCode e) {
 
 enum UserInteraction : uint8_t {
   UserInteraction_NONE = 0,
-  UserInteraction_EventMouseMotion = 1,
-  UserInteraction_EventMouseWheel = 2,
-  UserInteraction_EventMouseButton = 3,
-  UserInteraction_EventTextInput = 4,
-  UserInteraction_EventKeyboard = 5,
+  UserInteraction_EventClientConnect = 1,
+  UserInteraction_EventClientDisconnect = 2,
+  UserInteraction_EventClientKeepAlive = 3,
+  UserInteraction_EventMouseMotion = 4,
+  UserInteraction_EventMouseWheel = 5,
+  UserInteraction_EventMouseButton = 6,
+  UserInteraction_EventTextInput = 7,
+  UserInteraction_EventKeyboard = 8,
   UserInteraction_MIN = UserInteraction_NONE,
   UserInteraction_MAX = UserInteraction_EventKeyboard
 };
 
-inline const UserInteraction (&EnumValuesUserInteraction())[6] {
+inline const UserInteraction (&EnumValuesUserInteraction())[9] {
   static const UserInteraction values[] = {
     UserInteraction_NONE,
+    UserInteraction_EventClientConnect,
+    UserInteraction_EventClientDisconnect,
+    UserInteraction_EventClientKeepAlive,
     UserInteraction_EventMouseMotion,
     UserInteraction_EventMouseWheel,
     UserInteraction_EventMouseButton,
@@ -1388,8 +1427,11 @@ inline const UserInteraction (&EnumValuesUserInteraction())[6] {
 }
 
 inline const char * const *EnumNamesUserInteraction() {
-  static const char * const names[7] = {
+  static const char * const names[10] = {
     "NONE",
+    "EventClientConnect",
+    "EventClientDisconnect",
+    "EventClientKeepAlive",
     "EventMouseMotion",
     "EventMouseWheel",
     "EventMouseButton",
@@ -1408,6 +1450,18 @@ inline const char *EnumNameUserInteraction(UserInteraction e) {
 
 template<typename T> struct UserInteractionTraits {
   static const UserInteraction enum_value = UserInteraction_NONE;
+};
+
+template<> struct UserInteractionTraits<ImZeroFB::EventClientConnect> {
+  static const UserInteraction enum_value = UserInteraction_EventClientConnect;
+};
+
+template<> struct UserInteractionTraits<ImZeroFB::EventClientDisconnect> {
+  static const UserInteraction enum_value = UserInteraction_EventClientDisconnect;
+};
+
+template<> struct UserInteractionTraits<ImZeroFB::EventClientKeepAlive> {
+  static const UserInteraction enum_value = UserInteraction_EventClientKeepAlive;
 };
 
 template<> struct UserInteractionTraits<ImZeroFB::EventMouseMotion> {
@@ -5451,6 +5505,146 @@ inline ::flatbuffers::Offset<IoRecord> CreateIoRecord(
   return builder_.Finish();
 }
 
+struct EventClientConnect FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef EventClientConnectBuilder Builder;
+  static const ::flatbuffers::TypeTable *MiniReflectTypeTable() {
+    return EventClientConnectTypeTable();
+  }
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_DESC = 4
+  };
+  const ::flatbuffers::String *desc() const {
+    return GetPointer<const ::flatbuffers::String *>(VT_DESC);
+  }
+  bool Verify(::flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyOffset(verifier, VT_DESC) &&
+           verifier.VerifyString(desc()) &&
+           verifier.EndTable();
+  }
+};
+
+struct EventClientConnectBuilder {
+  typedef EventClientConnect Table;
+  ::flatbuffers::FlatBufferBuilder &fbb_;
+  ::flatbuffers::uoffset_t start_;
+  void add_desc(::flatbuffers::Offset<::flatbuffers::String> desc) {
+    fbb_.AddOffset(EventClientConnect::VT_DESC, desc);
+  }
+  explicit EventClientConnectBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ::flatbuffers::Offset<EventClientConnect> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = ::flatbuffers::Offset<EventClientConnect>(end);
+    return o;
+  }
+};
+
+inline ::flatbuffers::Offset<EventClientConnect> CreateEventClientConnect(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    ::flatbuffers::Offset<::flatbuffers::String> desc = 0) {
+  EventClientConnectBuilder builder_(_fbb);
+  builder_.add_desc(desc);
+  return builder_.Finish();
+}
+
+inline ::flatbuffers::Offset<EventClientConnect> CreateEventClientConnectDirect(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    const char *desc = nullptr) {
+  auto desc__ = desc ? _fbb.CreateString(desc) : 0;
+  return ImZeroFB::CreateEventClientConnect(
+      _fbb,
+      desc__);
+}
+
+struct EventClientDisconnect FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef EventClientDisconnectBuilder Builder;
+  static const ::flatbuffers::TypeTable *MiniReflectTypeTable() {
+    return EventClientDisconnectTypeTable();
+  }
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_DESC = 4
+  };
+  const ::flatbuffers::String *desc() const {
+    return GetPointer<const ::flatbuffers::String *>(VT_DESC);
+  }
+  bool Verify(::flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyOffset(verifier, VT_DESC) &&
+           verifier.VerifyString(desc()) &&
+           verifier.EndTable();
+  }
+};
+
+struct EventClientDisconnectBuilder {
+  typedef EventClientDisconnect Table;
+  ::flatbuffers::FlatBufferBuilder &fbb_;
+  ::flatbuffers::uoffset_t start_;
+  void add_desc(::flatbuffers::Offset<::flatbuffers::String> desc) {
+    fbb_.AddOffset(EventClientDisconnect::VT_DESC, desc);
+  }
+  explicit EventClientDisconnectBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ::flatbuffers::Offset<EventClientDisconnect> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = ::flatbuffers::Offset<EventClientDisconnect>(end);
+    return o;
+  }
+};
+
+inline ::flatbuffers::Offset<EventClientDisconnect> CreateEventClientDisconnect(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    ::flatbuffers::Offset<::flatbuffers::String> desc = 0) {
+  EventClientDisconnectBuilder builder_(_fbb);
+  builder_.add_desc(desc);
+  return builder_.Finish();
+}
+
+inline ::flatbuffers::Offset<EventClientDisconnect> CreateEventClientDisconnectDirect(
+    ::flatbuffers::FlatBufferBuilder &_fbb,
+    const char *desc = nullptr) {
+  auto desc__ = desc ? _fbb.CreateString(desc) : 0;
+  return ImZeroFB::CreateEventClientDisconnect(
+      _fbb,
+      desc__);
+}
+
+struct EventClientKeepAlive FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
+  typedef EventClientKeepAliveBuilder Builder;
+  static const ::flatbuffers::TypeTable *MiniReflectTypeTable() {
+    return EventClientKeepAliveTypeTable();
+  }
+  bool Verify(::flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           verifier.EndTable();
+  }
+};
+
+struct EventClientKeepAliveBuilder {
+  typedef EventClientKeepAlive Table;
+  ::flatbuffers::FlatBufferBuilder &fbb_;
+  ::flatbuffers::uoffset_t start_;
+  explicit EventClientKeepAliveBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ::flatbuffers::Offset<EventClientKeepAlive> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = ::flatbuffers::Offset<EventClientKeepAlive>(end);
+    return o;
+  }
+};
+
+inline ::flatbuffers::Offset<EventClientKeepAlive> CreateEventClientKeepAlive(
+    ::flatbuffers::FlatBufferBuilder &_fbb) {
+  EventClientKeepAliveBuilder builder_(_fbb);
+  return builder_.Finish();
+}
+
 struct EventMouseMotion FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
   typedef EventMouseMotionBuilder Builder;
   static const ::flatbuffers::TypeTable *MiniReflectTypeTable() {
@@ -5588,7 +5782,7 @@ struct EventMouseButton FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
     VT_POS = 4,
     VT_MOUSE_ID = 6,
     VT_IS_TOUCH = 8,
-    VT_BUTTON = 10,
+    VT_BUTTONS = 10,
     VT_TYPE = 12
   };
   const ImZeroFB::SingleVec2 *pos() const {
@@ -5600,8 +5794,8 @@ struct EventMouseButton FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
   bool is_touch() const {
     return GetField<uint8_t>(VT_IS_TOUCH, 0) != 0;
   }
-  ImZeroFB::MouseButton button() const {
-    return static_cast<ImZeroFB::MouseButton>(GetField<uint8_t>(VT_BUTTON, 0));
+  ImZeroFB::MouseButtons buttons() const {
+    return static_cast<ImZeroFB::MouseButtons>(GetField<uint8_t>(VT_BUTTONS, 0));
   }
   ImZeroFB::MouseButtonEventType type() const {
     return static_cast<ImZeroFB::MouseButtonEventType>(GetField<uint8_t>(VT_TYPE, 0));
@@ -5611,7 +5805,7 @@ struct EventMouseButton FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
            VerifyField<ImZeroFB::SingleVec2>(verifier, VT_POS, 4) &&
            VerifyField<uint32_t>(verifier, VT_MOUSE_ID, 4) &&
            VerifyField<uint8_t>(verifier, VT_IS_TOUCH, 1) &&
-           VerifyField<uint8_t>(verifier, VT_BUTTON, 1) &&
+           VerifyField<uint8_t>(verifier, VT_BUTTONS, 1) &&
            VerifyField<uint8_t>(verifier, VT_TYPE, 1) &&
            verifier.EndTable();
   }
@@ -5630,8 +5824,8 @@ struct EventMouseButtonBuilder {
   void add_is_touch(bool is_touch) {
     fbb_.AddElement<uint8_t>(EventMouseButton::VT_IS_TOUCH, static_cast<uint8_t>(is_touch), 0);
   }
-  void add_button(ImZeroFB::MouseButton button) {
-    fbb_.AddElement<uint8_t>(EventMouseButton::VT_BUTTON, static_cast<uint8_t>(button), 0);
+  void add_buttons(ImZeroFB::MouseButtons buttons) {
+    fbb_.AddElement<uint8_t>(EventMouseButton::VT_BUTTONS, static_cast<uint8_t>(buttons), 0);
   }
   void add_type(ImZeroFB::MouseButtonEventType type) {
     fbb_.AddElement<uint8_t>(EventMouseButton::VT_TYPE, static_cast<uint8_t>(type), 0);
@@ -5652,13 +5846,13 @@ inline ::flatbuffers::Offset<EventMouseButton> CreateEventMouseButton(
     const ImZeroFB::SingleVec2 *pos = nullptr,
     uint32_t mouse_id = 0,
     bool is_touch = false,
-    ImZeroFB::MouseButton button = ImZeroFB::MouseButton_None,
+    ImZeroFB::MouseButtons buttons = static_cast<ImZeroFB::MouseButtons>(0),
     ImZeroFB::MouseButtonEventType type = ImZeroFB::MouseButtonEventType_Up) {
   EventMouseButtonBuilder builder_(_fbb);
   builder_.add_mouse_id(mouse_id);
   builder_.add_pos(pos);
   builder_.add_type(type);
-  builder_.add_button(button);
+  builder_.add_buttons(buttons);
   builder_.add_is_touch(is_touch);
   return builder_.Finish();
 }
@@ -5730,7 +5924,7 @@ struct EventKeyboard FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
     VT_SCANCODE = 12
   };
   ImZeroFB::KeyModifiers modifiers() const {
-    return static_cast<ImZeroFB::KeyModifiers>(GetField<uint8_t>(VT_MODIFIERS, 0));
+    return static_cast<ImZeroFB::KeyModifiers>(GetField<uint16_t>(VT_MODIFIERS, 0));
   }
   ImZeroFB::KeyCode code() const {
     return static_cast<ImZeroFB::KeyCode>(GetField<uint32_t>(VT_CODE, 0));
@@ -5746,7 +5940,7 @@ struct EventKeyboard FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
   }
   bool Verify(::flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyField<uint8_t>(verifier, VT_MODIFIERS, 1) &&
+           VerifyField<uint16_t>(verifier, VT_MODIFIERS, 2) &&
            VerifyField<uint32_t>(verifier, VT_CODE, 4) &&
            VerifyField<uint8_t>(verifier, VT_IS_DOWN, 1) &&
            VerifyField<uint32_t>(verifier, VT_NATIVE_SYM, 4) &&
@@ -5760,7 +5954,7 @@ struct EventKeyboardBuilder {
   ::flatbuffers::FlatBufferBuilder &fbb_;
   ::flatbuffers::uoffset_t start_;
   void add_modifiers(ImZeroFB::KeyModifiers modifiers) {
-    fbb_.AddElement<uint8_t>(EventKeyboard::VT_MODIFIERS, static_cast<uint8_t>(modifiers), 0);
+    fbb_.AddElement<uint16_t>(EventKeyboard::VT_MODIFIERS, static_cast<uint16_t>(modifiers), 0);
   }
   void add_code(ImZeroFB::KeyCode code) {
     fbb_.AddElement<uint32_t>(EventKeyboard::VT_CODE, static_cast<uint32_t>(code), 0);
@@ -5787,7 +5981,7 @@ struct EventKeyboardBuilder {
 
 inline ::flatbuffers::Offset<EventKeyboard> CreateEventKeyboard(
     ::flatbuffers::FlatBufferBuilder &_fbb,
-    ImZeroFB::KeyModifiers modifiers = ImZeroFB::KeyModifiers_None,
+    ImZeroFB::KeyModifiers modifiers = static_cast<ImZeroFB::KeyModifiers>(0),
     ImZeroFB::KeyCode code = ImZeroFB::KeyCode_Key_None,
     bool is_down = false,
     uint32_t native_sym = 0,
@@ -5796,8 +5990,8 @@ inline ::flatbuffers::Offset<EventKeyboard> CreateEventKeyboard(
   builder_.add_scancode(scancode);
   builder_.add_native_sym(native_sym);
   builder_.add_code(code);
-  builder_.add_is_down(is_down);
   builder_.add_modifiers(modifiers);
+  builder_.add_is_down(is_down);
   return builder_.Finish();
 }
 
@@ -5817,6 +6011,15 @@ struct InputEvent FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
     return GetPointer<const void *>(VT_EVENT);
   }
   template<typename T> const T *event_as() const;
+  const ImZeroFB::EventClientConnect *event_as_EventClientConnect() const {
+    return event_type() == ImZeroFB::UserInteraction_EventClientConnect ? static_cast<const ImZeroFB::EventClientConnect *>(event()) : nullptr;
+  }
+  const ImZeroFB::EventClientDisconnect *event_as_EventClientDisconnect() const {
+    return event_type() == ImZeroFB::UserInteraction_EventClientDisconnect ? static_cast<const ImZeroFB::EventClientDisconnect *>(event()) : nullptr;
+  }
+  const ImZeroFB::EventClientKeepAlive *event_as_EventClientKeepAlive() const {
+    return event_type() == ImZeroFB::UserInteraction_EventClientKeepAlive ? static_cast<const ImZeroFB::EventClientKeepAlive *>(event()) : nullptr;
+  }
   const ImZeroFB::EventMouseMotion *event_as_EventMouseMotion() const {
     return event_type() == ImZeroFB::UserInteraction_EventMouseMotion ? static_cast<const ImZeroFB::EventMouseMotion *>(event()) : nullptr;
   }
@@ -5840,6 +6043,18 @@ struct InputEvent FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
            verifier.EndTable();
   }
 };
+
+template<> inline const ImZeroFB::EventClientConnect *InputEvent::event_as<ImZeroFB::EventClientConnect>() const {
+  return event_as_EventClientConnect();
+}
+
+template<> inline const ImZeroFB::EventClientDisconnect *InputEvent::event_as<ImZeroFB::EventClientDisconnect>() const {
+  return event_as_EventClientDisconnect();
+}
+
+template<> inline const ImZeroFB::EventClientKeepAlive *InputEvent::event_as<ImZeroFB::EventClientKeepAlive>() const {
+  return event_as_EventClientKeepAlive();
+}
 
 template<> inline const ImZeroFB::EventMouseMotion *InputEvent::event_as<ImZeroFB::EventMouseMotion>() const {
   return event_as_EventMouseMotion();
@@ -6065,6 +6280,18 @@ inline bool VerifyUserInteraction(::flatbuffers::Verifier &verifier, const void 
   switch (type) {
     case UserInteraction_NONE: {
       return true;
+    }
+    case UserInteraction_EventClientConnect: {
+      auto ptr = reinterpret_cast<const ImZeroFB::EventClientConnect *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case UserInteraction_EventClientDisconnect: {
+      auto ptr = reinterpret_cast<const ImZeroFB::EventClientDisconnect *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case UserInteraction_EventClientKeepAlive: {
+      auto ptr = reinterpret_cast<const ImZeroFB::EventClientKeepAlive *>(obj);
+      return verifier.VerifyTable(ptr);
     }
     case UserInteraction_EventMouseMotion: {
       auto ptr = reinterpret_cast<const ImZeroFB::EventMouseMotion *>(obj);
@@ -6392,9 +6619,8 @@ inline const ::flatbuffers::TypeTable *IoFlagsTypeTable() {
   return &tt;
 }
 
-inline const ::flatbuffers::TypeTable *MouseButtonTypeTable() {
+inline const ::flatbuffers::TypeTable *MouseButtonsTypeTable() {
   static const ::flatbuffers::TypeCode type_codes[] = {
-    { ::flatbuffers::ET_UCHAR, 0, 0 },
     { ::flatbuffers::ET_UCHAR, 0, 0 },
     { ::flatbuffers::ET_UCHAR, 0, 0 },
     { ::flatbuffers::ET_UCHAR, 0, 0 },
@@ -6402,18 +6628,18 @@ inline const ::flatbuffers::TypeTable *MouseButtonTypeTable() {
     { ::flatbuffers::ET_UCHAR, 0, 0 }
   };
   static const ::flatbuffers::TypeFunction type_refs[] = {
-    ImZeroFB::MouseButtonTypeTable
+    ImZeroFB::MouseButtonsTypeTable
   };
+  static const int64_t values[] = { 1, 2, 4, 8, 16 };
   static const char * const names[] = {
-    "None",
     "Left",
-    "Right",
     "Middle",
+    "Right",
     "X1",
     "X2"
   };
   static const ::flatbuffers::TypeTable tt = {
-    ::flatbuffers::ST_ENUM, 6, type_codes, type_refs, nullptr, nullptr, names
+    ::flatbuffers::ST_ENUM, 5, type_codes, type_refs, nullptr, values, names
   };
   return &tt;
 }
@@ -6438,25 +6664,39 @@ inline const ::flatbuffers::TypeTable *MouseButtonEventTypeTypeTable() {
 
 inline const ::flatbuffers::TypeTable *KeyModifiersTypeTable() {
   static const ::flatbuffers::TypeCode type_codes[] = {
-    { ::flatbuffers::ET_UCHAR, 0, 0 },
-    { ::flatbuffers::ET_UCHAR, 0, 0 },
-    { ::flatbuffers::ET_UCHAR, 0, 0 },
-    { ::flatbuffers::ET_UCHAR, 0, 0 },
-    { ::flatbuffers::ET_UCHAR, 0, 0 }
+    { ::flatbuffers::ET_USHORT, 0, 0 },
+    { ::flatbuffers::ET_USHORT, 0, 0 },
+    { ::flatbuffers::ET_USHORT, 0, 0 },
+    { ::flatbuffers::ET_USHORT, 0, 0 },
+    { ::flatbuffers::ET_USHORT, 0, 0 },
+    { ::flatbuffers::ET_USHORT, 0, 0 },
+    { ::flatbuffers::ET_USHORT, 0, 0 },
+    { ::flatbuffers::ET_USHORT, 0, 0 },
+    { ::flatbuffers::ET_USHORT, 0, 0 },
+    { ::flatbuffers::ET_USHORT, 0, 0 },
+    { ::flatbuffers::ET_USHORT, 0, 0 },
+    { ::flatbuffers::ET_USHORT, 0, 0 }
   };
   static const ::flatbuffers::TypeFunction type_refs[] = {
     ImZeroFB::KeyModifiersTypeTable
   };
-  static const int64_t values[] = { 0, 1, 2, 4, 8 };
+  static const int64_t values[] = { 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048 };
   static const char * const names[] = {
-    "None",
-    "Ctrl",
-    "Shift",
-    "Alt",
-    "Super"
+    "LeftShift",
+    "RightShift",
+    "LeftCtrl",
+    "RightCtrl",
+    "LeftAlt",
+    "RightAlt",
+    "LeftSuper",
+    "RightSuper",
+    "NumLock",
+    "CapsLock",
+    "Mode",
+    "ScrolLock"
   };
   static const ::flatbuffers::TypeTable tt = {
-    ::flatbuffers::ST_ENUM, 5, type_codes, type_refs, nullptr, values, names
+    ::flatbuffers::ST_ENUM, 12, type_codes, type_refs, nullptr, values, names
   };
   return &tt;
 }
@@ -6722,9 +6962,15 @@ inline const ::flatbuffers::TypeTable *UserInteractionTypeTable() {
     { ::flatbuffers::ET_SEQUENCE, 0, 1 },
     { ::flatbuffers::ET_SEQUENCE, 0, 2 },
     { ::flatbuffers::ET_SEQUENCE, 0, 3 },
-    { ::flatbuffers::ET_SEQUENCE, 0, 4 }
+    { ::flatbuffers::ET_SEQUENCE, 0, 4 },
+    { ::flatbuffers::ET_SEQUENCE, 0, 5 },
+    { ::flatbuffers::ET_SEQUENCE, 0, 6 },
+    { ::flatbuffers::ET_SEQUENCE, 0, 7 }
   };
   static const ::flatbuffers::TypeFunction type_refs[] = {
+    ImZeroFB::EventClientConnectTypeTable,
+    ImZeroFB::EventClientDisconnectTypeTable,
+    ImZeroFB::EventClientKeepAliveTypeTable,
     ImZeroFB::EventMouseMotionTypeTable,
     ImZeroFB::EventMouseWheelTypeTable,
     ImZeroFB::EventMouseButtonTypeTable,
@@ -6733,6 +6979,9 @@ inline const ::flatbuffers::TypeTable *UserInteractionTypeTable() {
   };
   static const char * const names[] = {
     "NONE",
+    "EventClientConnect",
+    "EventClientDisconnect",
+    "EventClientKeepAlive",
     "EventMouseMotion",
     "EventMouseWheel",
     "EventMouseButton",
@@ -6740,7 +6989,7 @@ inline const ::flatbuffers::TypeTable *UserInteractionTypeTable() {
     "EventKeyboard"
   };
   static const ::flatbuffers::TypeTable tt = {
-    ::flatbuffers::ST_UNION, 6, type_codes, type_refs, nullptr, nullptr, names
+    ::flatbuffers::ST_UNION, 9, type_codes, type_refs, nullptr, nullptr, names
   };
   return &tt;
 }
@@ -7768,6 +8017,39 @@ inline const ::flatbuffers::TypeTable *IoRecordTypeTable() {
   return &tt;
 }
 
+inline const ::flatbuffers::TypeTable *EventClientConnectTypeTable() {
+  static const ::flatbuffers::TypeCode type_codes[] = {
+    { ::flatbuffers::ET_STRING, 0, -1 }
+  };
+  static const char * const names[] = {
+    "desc"
+  };
+  static const ::flatbuffers::TypeTable tt = {
+    ::flatbuffers::ST_TABLE, 1, type_codes, nullptr, nullptr, nullptr, names
+  };
+  return &tt;
+}
+
+inline const ::flatbuffers::TypeTable *EventClientDisconnectTypeTable() {
+  static const ::flatbuffers::TypeCode type_codes[] = {
+    { ::flatbuffers::ET_STRING, 0, -1 }
+  };
+  static const char * const names[] = {
+    "desc"
+  };
+  static const ::flatbuffers::TypeTable tt = {
+    ::flatbuffers::ST_TABLE, 1, type_codes, nullptr, nullptr, nullptr, names
+  };
+  return &tt;
+}
+
+inline const ::flatbuffers::TypeTable *EventClientKeepAliveTypeTable() {
+  static const ::flatbuffers::TypeTable tt = {
+    ::flatbuffers::ST_TABLE, 0, nullptr, nullptr, nullptr, nullptr, nullptr
+  };
+  return &tt;
+}
+
 inline const ::flatbuffers::TypeTable *EventMouseMotionTypeTable() {
   static const ::flatbuffers::TypeCode type_codes[] = {
     { ::flatbuffers::ET_SEQUENCE, 0, 0 },
@@ -7818,14 +8100,14 @@ inline const ::flatbuffers::TypeTable *EventMouseButtonTypeTable() {
   };
   static const ::flatbuffers::TypeFunction type_refs[] = {
     ImZeroFB::SingleVec2TypeTable,
-    ImZeroFB::MouseButtonTypeTable,
+    ImZeroFB::MouseButtonsTypeTable,
     ImZeroFB::MouseButtonEventTypeTypeTable
   };
   static const char * const names[] = {
     "pos",
     "mouse_id",
     "is_touch",
-    "button",
+    "buttons",
     "type"
   };
   static const ::flatbuffers::TypeTable tt = {
@@ -7849,7 +8131,7 @@ inline const ::flatbuffers::TypeTable *EventTextInputTypeTable() {
 
 inline const ::flatbuffers::TypeTable *EventKeyboardTypeTable() {
   static const ::flatbuffers::TypeCode type_codes[] = {
-    { ::flatbuffers::ET_UCHAR, 0, 0 },
+    { ::flatbuffers::ET_USHORT, 0, 0 },
     { ::flatbuffers::ET_UINT, 0, 1 },
     { ::flatbuffers::ET_BOOL, 0, -1 },
     { ::flatbuffers::ET_UINT, 0, -1 },
