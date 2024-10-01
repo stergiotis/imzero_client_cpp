@@ -1040,13 +1040,21 @@ void App::dispatchUserInteractionEventsBinary() {
                     }
                     if(t != ImZeroFB::UserInteraction_NONE) {
                         fInteractionFBBuilder.Finish(ImZeroFB::CreateInputEvent(fInteractionFBBuilder,t,ev));
-                        auto const iev = flatbuffers::GetRoot<ImZeroFB::InputEvent>(fInteractionFBBuilder.GetBufferPointer());
+                        auto const buf = fInteractionFBBuilder.GetBufferPointer();
+                        auto const sz = fInteractionFBBuilder.GetSize();
+                        auto const iev = flatbuffers::GetRoot<ImZeroFB::InputEvent>(buf);
                         if(iev == nullptr) {
                             fprintf(stderr,"unable to get ImZeroFB::InputEvent root, skipping.");
                         } else {
+                            auto txt = flatbuffers::FlatBufferToString(buf,ImZeroFB::InputEventTypeTable());
+                            fprintf(stderr, "userInteractionEvent(%d Bytes)=%s\n", static_cast<int>(sz),txt.c_str());
                             handleUserInteractionEvent(*iev);
                         }
+                        fInteractionFBBuilder.Clear();
                     }
+                    state = 1;
+                    p = mem;
+                    bytesToRead = sizeOfLengthPrefix;
                 }
             }
                 break;
@@ -1390,7 +1398,7 @@ void App::handleUserInteractionEvent(ImZeroFB::InputEvent const &ev) {
             break;
         case ImZeroFB::UserInteraction_EventMouseWheel:
         {
-            auto const e = ev.event_as_EventMouseMotion();
+            auto const e = ev.event_as_EventMouseWheel();
             io.AddMouseSourceEvent(e->is_touch() ? ImGuiMouseSource_TouchScreen : ImGuiMouseSource_Mouse);
             auto const p = e->pos();
             io.AddMouseWheelEvent(-p->x(), p->y());
