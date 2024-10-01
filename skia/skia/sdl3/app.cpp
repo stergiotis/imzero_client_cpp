@@ -51,6 +51,8 @@
 #include "marshalling/send.h"
 
 #include "flatbuffers/minireflect.h"
+#include "flatbuffers/util.h"
+#include "../ImZeroFB.fbs.gen.h"
 
 #define QOI_IMPLEMENTATION
 #define QOI_NO_STDIO
@@ -472,7 +474,7 @@ int App::Run(CliOptions &opts) {
 
         io.ConfigInputTrickleEventQueue = true;
         io.ConfigWindowsMoveFromTitleBarOnly = false; // make config option
-        io.MouseDrawCursor = true;
+        //io.MouseDrawCursor = true; // FIXME video?
     }
 
 
@@ -508,13 +510,15 @@ int App::mainLoopVideo(CliOptions &opts, ImVec4 const &clearColor) {
     }
     fBackgroundColor = SkColorSetARGB(clearColor.w * 255.0f, clearColor.x * 255.0f, clearColor.y * 255.0f, clearColor.z * 255.0f);
 
-    if(opts.videoUserInteractionEventsInFile != nullptr && opts.videoUserInteractionEventsInFile[0] != '\0') {
+    if(opts.videoUserInteractionEventsFile != nullptr && opts.videoUserInteractionEventsFile[0] != '\0') {
         // RDWR: having at least one writer will prevent SIG_PIPE
-        fUserInteractionFd = open(opts.videoUserInteractionEventsInFile, O_RDWR | O_NONBLOCK);
+        fUserInteractionFd = open(opts.videoUserInteractionEventsFile, O_RDWR | O_NONBLOCK);
         if(fUserInteractionFd == -1) {
-            fprintf(stderr, "unable to open user interaction events in file %s: %s\n", opts.videoUserInteractionEventsInFile, strerror(errno));
+            fprintf(stderr, "unable to open user interaction events in file %s: %s\n", opts.videoUserInteractionEventsFile, strerror(errno));
             return 1;
         }
+        fInteractionEventsAreInBinary = opts.videoUserInteractionEventsAreBinary;
+        fInteractionFBBuilder = flatbuffers::FlatBufferBuilder();
         fDispatchInteractionEvents = true;
     }
     fRawFrameFileOpened = false;
@@ -853,7 +857,11 @@ void App::videoPostPaint() {
     fTime = current_time;
 
     fFrame++;
-    dispatchUserInteractionEvents();
+    if(fInteractionEventsAreInBinary) {
+        dispatchUserInteractionEventsBinary();
+    } else {
+        dispatchUserInteractionEventsFB();
+    }
 }
 void App::videoPaint(SkCanvas* canvas, int width, int height) { ZoneScoped;
     ImGui::NewFrame();
@@ -895,8 +903,151 @@ App::~App() {
         fDispatchInteractionEvents = false;
     }
 }
+template <typename T>
+static T binaryUnmarshallIntegral(uint8_t **mem) {
+    T v;
+    memcpy(&v,*mem,sizeof(T));
+    (*mem) += sizeof(T);
+    return v;
+}
+static const char *binaryUnmarshallString(uint8_t **mem,uint32_t &lenExclTermination) {
+    memcpy(&lenExclTermination,*mem,sizeof(lenExclTermination));
+    (*mem) += sizeof(lenExclTermination); // +1: zero termination
+    const char *r = reinterpret_cast<const char*>(*mem);
+    (*mem) += lenExclTermination+1;
+    return r;
+}
+void App::dispatchUserInteractionEventsBinary() {
+    constexpr uint8_t eventType_MouseMotion = 0;
+    constexpr uint8_t eventType_MouseButton = 1;
+    constexpr uint8_t eventType_MouseWheel = 2;
+    constexpr uint8_t eventType_ClientConnect = 3;
+    constexpr uint8_t eventType_ClientDisconnect = 4;
+    constexpr uint8_t eventType_InputText = 5;
+    constexpr uint8_t eventType_InputKeyboard = 6;
 
-void App::dispatchUserInteractionEvents() {
+    static size_t memorySize = 1024 * 1024;
+    static uint8_t state = 0;
+    static uint8_t* mem = nullptr;
+    static uint8_t* p = nullptr;
+    static uint32_t bytesToRead = 0;
+    constexpr const int sizeOfLengthPrefix = 4;
+
+    if(!fDispatchInteractionEvents) {
+        return;
+    }
+    while(true) {
+        switch(state) {
+            case 0: // init
+                mem = static_cast<uint8_t *>(malloc(memorySize));
+                if(mem == nullptr) {
+                    fprintf(stderr,"unable to allocate memory\n");
+                    exit(2);
+                }
+                state = 1;
+                bytesToRead = sizeOfLengthPrefix;
+                p = mem;
+                break;
+            case 1: // read message length
+            {
+                auto r = read(fUserInteractionFd,p,bytesToRead);
+                if(r <= 0) {
+                    return;
+                }
+                bytesToRead -= r;
+                p += r;
+                if(bytesToRead == 0) {
+                    // read length of message
+                    memcpy(&bytesToRead,mem,sizeof(bytesToRead));
+                    if(bytesToRead > memorySize) {
+                        memorySize = (bytesToRead/4096+1)*4096;
+                        mem = static_cast<uint8_t *>(realloc(mem, memorySize));
+                        p = mem+sizeOfLengthPrefix;
+                    }
+                    state = 2;
+                }
+            }
+                break;
+            case 2: // read message
+            {
+                auto r = read(fUserInteractionFd,p,bytesToRead);
+                bytesToRead -= r;
+                p += r;
+                if(bytesToRead == 0) {
+                    flatbuffers::Offset ev = 0;
+                    ImZeroFB::UserInteraction t = ImZeroFB::UserInteraction_NONE;
+                    switch(p[0]) {
+                        case eventType_MouseMotion:
+                        {
+                            auto const x = binaryUnmarshallIntegral<float>(&p);
+                            auto const y = binaryUnmarshallIntegral<float>(&p);
+                            auto const mouseId = binaryUnmarshallIntegral<uint32_t>(&p);
+                            auto const isTouch = binaryUnmarshallIntegral<uint8_t >(&p) != 0;
+                            auto const posFB = ImZeroFB::SingleVec2(x,y);
+                            ev = ImZeroFB::CreateEventMouseMotion(fInteractionFBBuilder,&posFB,mouseId,isTouch).Union();
+                            t = ImZeroFB::UserInteraction_EventMouseMotion;
+                        }
+                            break;
+                        case eventType_MouseButton:
+                        {
+                            auto const x = binaryUnmarshallIntegral<float>(&p);
+                            auto const y = binaryUnmarshallIntegral<float>(&p);
+                            auto const mouseId = binaryUnmarshallIntegral<uint32_t>(&p);
+                            auto const isTouch = binaryUnmarshallIntegral<uint8_t >(&p) != 0;
+                            auto const buttons = binaryUnmarshallIntegral<uint8_t >(&p);
+                            auto const isDown = binaryUnmarshallIntegral<uint8_t >(&p) != 0;
+
+                            auto const posFB = ImZeroFB::SingleVec2(x,y);
+                            auto buttonsFB = ImZeroFB::MouseButtons_NONE;
+                            buttonsFB = static_cast<ImZeroFB::MouseButtons>(buttonsFB | (((buttons & 0b1) != 0) ? ImZeroFB::MouseButtons_Left : ImZeroFB::MouseButtons_NONE));
+                            buttonsFB = static_cast<ImZeroFB::MouseButtons>(buttonsFB | (((buttons & 0b10) != 0) ? ImZeroFB::MouseButtons_Middle : ImZeroFB::MouseButtons_NONE));
+                            buttonsFB = static_cast<ImZeroFB::MouseButtons>(buttonsFB | (((buttons & 0b100) != 0) ? ImZeroFB::MouseButtons_Right : ImZeroFB::MouseButtons_NONE));
+                            buttonsFB = static_cast<ImZeroFB::MouseButtons>(buttonsFB | (((buttons & 0b1000) != 0) ? ImZeroFB::MouseButtons_X1 : ImZeroFB::MouseButtons_NONE));
+                            buttonsFB = static_cast<ImZeroFB::MouseButtons>(buttonsFB | (((buttons & 0b10000) != 0) ? ImZeroFB::MouseButtons_X2 : ImZeroFB::MouseButtons_NONE));
+                            auto const etFB = isDown ? ImZeroFB::MouseButtonEventType_Down : ImZeroFB::MouseButtonEventType_Up;
+                            ev = ImZeroFB::CreateEventMouseButton(fInteractionFBBuilder,&posFB,mouseId,isTouch,buttonsFB,etFB).Union();
+                            t = ImZeroFB::UserInteraction_EventMouseButton;
+                        }
+                            break;
+                        case eventType_MouseWheel:
+                        {
+                            auto const x = binaryUnmarshallIntegral<float>(&p);
+                            auto const y = binaryUnmarshallIntegral<float>(&p);
+                            auto const mouseId = binaryUnmarshallIntegral<uint32_t>(&p);
+                            auto const isTouch = binaryUnmarshallIntegral<uint8_t >(&p) != 0;
+
+                            auto const posFB = ImZeroFB::SingleVec2(x,y);
+                            ev = ImZeroFB::CreateEventMouseWheel(fInteractionFBBuilder,&posFB,mouseId,isTouch).Union();
+                            t = ImZeroFB::UserInteraction_EventMouseWheel;
+                        }
+                            break;
+                        case eventType_InputKeyboard:
+                            break;
+                        case eventType_InputText:
+                            break;
+                        case eventType_ClientConnect:
+                            fInteractionClientConnected = true;
+                            break;
+                        case eventType_ClientDisconnect:
+                            fInteractionClientConnected = false;
+                            break;
+                    }
+                    if(t != ImZeroFB::UserInteraction_NONE) {
+                        fInteractionFBBuilder.Finish(ImZeroFB::CreateInputEvent(fInteractionFBBuilder,t,ev));
+                        auto const iev = flatbuffers::GetRoot<ImZeroFB::InputEvent>(fInteractionFBBuilder.GetBufferPointer());
+                        if(iev == nullptr) {
+                            fprintf(stderr,"unable to get ImZeroFB::InputEvent root, skipping.");
+                        } else {
+                            handleUserInteractionEvent(*iev);
+                        }
+                    }
+                }
+            }
+                break;
+        }
+    }
+}
+void App::dispatchUserInteractionEventsFB() {
     static size_t memorySize = 1024 * 1024;
     static uint8_t state = 0;
     static uint8_t* mem = nullptr;
@@ -948,16 +1099,21 @@ void App::dispatchUserInteractionEvents() {
                 if(bytesToRead == 0) {
                     auto verifier = flatbuffers::Verifier(mem+sizeOfLengthPrefix,bytesToRead);
                     if(!verifier.VerifyBuffer<ImZeroFB::InputEvent>()) {
-                        auto txt = flatbuffers::FlatBufferToString(mem+sizeOfLengthPrefix,ImZeroFB::InputEventTypeTable());
+                        /*auto txt = flatbuffers::FlatBufferToString(mem+sizeOfLengthPrefix,ImZeroFB::InputEventTypeTable());
                         fprintf(stderr, "userInteractionEvent=%s\n", txt.c_str());
+                         */
 
                         auto const e = flatbuffers::GetSizePrefixedRoot<ImZeroFB::InputEvent>(mem);
-                        handleUserInteractionEvent(*e);
+                        if(e == nullptr) {
+                            fprintf(stderr,"unable to get ImZeroFB::InputEvent root, skipping.");
+                        } else {
+                            handleUserInteractionEvent(*e);
+                        }
                         state = 1;
                         p = mem;
                         bytesToRead = sizeOfLengthPrefix;
                     } else {
-                        fprintf(stderr, "received corrupt user interaction event!\n");
+                        fprintf(stderr, "received corrupted user interaction event!\n");
                         exit(1);
                     }
                 }

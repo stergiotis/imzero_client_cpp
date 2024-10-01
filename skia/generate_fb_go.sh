@@ -3,7 +3,7 @@ set -ev
 here=$(dirname "$(readlink -f "$BASH_SOURCE")")
 cd "$here"
 flatc="../../contrib/flatbuffers/flatc"
-"$flatc" -o imgui --go imgui/ImZeroFB.fbs --reflect-types --reflect-names --go-namespace dto
+"$flatc" -o imgui --go ../spec/ImZeroFB.fbs --reflect-types --reflect-names --go-namespace dto
 rm -rf ../../boxer/public/imzero/dto/
 
 

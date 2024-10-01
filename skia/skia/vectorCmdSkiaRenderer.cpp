@@ -220,8 +220,10 @@ void VectorCmdSkiaRenderer::drawVectorCmdsFBDrawList(const ImZeroFB::DrawList *d
         int s = 0;
         if(!inner) {
             ZoneText(drawListFb->name()->c_str(),drawListFb->name()->size());
+        } else {
+            //fprintf(stderr,"rendering inner %s\n", drawListFb->name()->c_str());
         }
-        
+
         loadVertices(drawListFb->vertices());
 
 #ifdef RENDER_MODE_BACKDROP_FILTER_ENABLED

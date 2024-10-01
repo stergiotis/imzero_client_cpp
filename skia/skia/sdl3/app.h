@@ -64,7 +64,8 @@ private:
     void loopFlatbuffers(CliOptions const &opts);
     void loopSvg(CliOptions const &opts);
     void loopSkp(CliOptions const &opts);
-    void dispatchUserInteractionEvents();
+    void dispatchUserInteractionEventsBinary();
+    void dispatchUserInteractionEventsFB();
     static void handleUserInteractionEvent(ImZeroFB::InputEvent const &ev);
     void ensureRawFrameFileOpened(const CliOptions &opts);
     void videoPostPaint();
@@ -75,6 +76,9 @@ private:
     rawFrameOutputFormat fOutputFormat;
     int fUserInteractionFd;
     bool fDispatchInteractionEvents = false;
+    bool fInteractionEventsAreInBinary = false;
+    bool fInteractionClientConnected = false;
+    flatbuffers::FlatBufferBuilder fInteractionFBBuilder{};
     bool fRawFrameFileOpened = true;
     std::unique_ptr<SkFILEWStream> fRawFrameFileStream = nullptr;
     uint64_t fTime = 0;

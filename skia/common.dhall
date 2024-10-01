@@ -1,7 +1,7 @@
 let common = \(video : Bool) ->
 	let lib = ../dhall/lib.dhall
-	let debug = True
-	let asan = True
+	let debug = False
+	let asan = False
 	let ubsan = False
 	let sourceTreePartsRepo = ../dhall/sourceTreeParts.dhall
 	let sourceTreeParts = [
@@ -39,6 +39,7 @@ let common = \(video : Bool) ->
 		, "-Wall"
 		, "-Wformat"
 		, "-Wextra"
+		, "-Wno-unused-parameter"
 		, "-O1"
 		, "-DIMZERO_DEBUG_BUILD"
 		--, "-fno-optimize-sibling-calls" -- no tail calls for better stacktraces

@@ -27,11 +27,13 @@ struct CliOptions {
     uint32_t videoResolutionHeight = 0;
     const char *videoRawOutputFormat = nullptr;
     uint32_t videoExitAfterNFrames = 0;
-    const char *videoUserInteractionEventsInFile = nullptr;
+    const char *videoUserInteractionEventsFile = nullptr;
+    bool videoUserInteractionEventsAreBinary = false;
 
     CliOptions() = default;
     ~CliOptions() = default;
 
     void usage(const char *name, FILE *file) const;
+    void version(FILE *file) const;
     void parse(int argc,char **argv, FILE *logChannel);
 };

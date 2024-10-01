@@ -8,7 +8,7 @@
 #include "include/core/SkSurface.h"
 #include "include/core/SkFontMgr.h"
 #include "include/core/SkFont.h"
-#include "ImZeroFB.out.h"
+#include "../skia/ImZeroFB.out.h"
 #include "../skia/paragraph.h"
 #include "../skia/imzero_assert.h"
 

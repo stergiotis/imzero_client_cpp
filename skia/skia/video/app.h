@@ -38,7 +38,7 @@ private:
     void loopFlatbuffers(CliOptions const &opts);
     void loopSvg(CliOptions const &opts);
     void loopSkp(CliOptions const &opts);
-    void dispatchUserInteractionEvents();
+    void dispatchUserInteractionEventsBinary();
     static void handleUserInteractionEvent(ImZeroFB::InputEvent const &ev);
     void ensureRawFrameFileOpened(const CliOptions &opts);
 

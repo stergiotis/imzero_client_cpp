@@ -687,7 +687,7 @@ App::~App() {
     }
 }
 
-void App::dispatchUserInteractionEvents() {
+void App::dispatchUserInteractionEventsBinary() {
     static size_t memorySize = 1024 * 1024;
     static uint8_t state = 0;
     static uint8_t* mem = nullptr;
@@ -1028,17 +1028,20 @@ void App::handleUserInteractionEvent(ImZeroFB::InputEvent const &ev) {
         case ImZeroFB::UserInteraction_EventMouseButton:
         {
             auto const e = ev.event_as_EventMouseButton();
-            int mb = -1;
-            auto const b = e->button();
-            switch(b) {
-                case ImZeroFB::MouseButton_None: break;
-                case ImZeroFB::MouseButton_Left: mb = 0; break;
-                case ImZeroFB::MouseButton_Right: mb = 1; break;
-                case ImZeroFB::MouseButton_Middle: mb = 2; break;
-                case ImZeroFB::MouseButton_X1: mb = 3; break;
-                case ImZeroFB::MouseButton_X2: mb = 4; break;
+            int mb = 0;
+            auto const b = e->buttons();
+            if(b != ImZeroFB::MouseButtons_NONE) {
+                if(b & ImZeroFB::MouseButtons_Left) {
+                   mb |= ImGuiMouseButton_Left;
+                }
+                if(b & ImZeroFB::MouseButtons_Right) {
+                    mb |= ImGuiMouseButton_Right;
+                }
+                if(b & ImZeroFB::MouseButtons_Middle) {
+                    mb |= ImGuiMouseButton_Middle;
+                }
             }
-            if (mb >= 0) {
+            if (mb != 0) {
                 const bool d = e->type() == ImZeroFB::MouseButtonEventType_Down;
                 io.AddMouseSourceEvent(e->is_touch() ? ImGuiMouseSource_TouchScreen : ImGuiMouseSource_Mouse);
                 io.AddMouseButtonEvent(mb, d);
@@ -1051,10 +1054,10 @@ void App::handleUserInteractionEvent(ImZeroFB::InputEvent const &ev) {
            auto const e = ev.event_as_EventKeyboard();
            auto const keyMod = e->modifiers();
            auto const key= keyCodeToImGuiKey(e->code());
-           io.AddKeyEvent(ImGuiMod_Ctrl, (keyMod & ImZeroFB::KeyModifiers_Ctrl) != 0);
-           io.AddKeyEvent(ImGuiMod_Shift, (keyMod & ImZeroFB::KeyModifiers_Shift) != 0);
-           io.AddKeyEvent(ImGuiMod_Alt, (keyMod & ImZeroFB::KeyModifiers_Alt) != 0);
-           io.AddKeyEvent(ImGuiMod_Super, (keyMod & ImZeroFB::KeyModifiers_Super) != 0);
+           io.AddKeyEvent(ImGuiMod_Ctrl, (keyMod & (ImZeroFB::KeyModifiers_LeftCtrl | ImZeroFB::KeyModifiers_RightCtrl)) != 0);
+           io.AddKeyEvent(ImGuiMod_Shift, (keyMod & (ImZeroFB::KeyModifiers_LeftShift | ImZeroFB::KeyModifiers_RightShift)) != 0);
+           io.AddKeyEvent(ImGuiMod_Alt, (keyMod & (ImZeroFB::KeyModifiers_LeftAlt | ImZeroFB::KeyModifiers_RightAlt)) != 0);
+           io.AddKeyEvent(ImGuiMod_Super, (keyMod & (ImZeroFB::KeyModifiers_LeftSuper | ImZeroFB::KeyModifiers_RightSuper)) != 0);
            io.AddKeyEvent(key, e->is_down());
            io.SetKeyEventNativeData(key,static_cast<int>(e->native_sym()),static_cast<int>(e->scancode()));
         }
@@ -1064,9 +1067,15 @@ void App::handleUserInteractionEvent(ImZeroFB::InputEvent const &ev) {
             auto const e = ev.event_as_EventTextInput();
             auto const t = e->text();
 
-            io.AddInputCharactersUTF8(e->text()->c_str());
+            io.AddInputCharactersUTF8(t->c_str());
         }
         break;
+        case ImZeroFB::UserInteraction_EventClientConnect:
+            break;
+        case ImZeroFB::UserInteraction_EventClientDisconnect:
+            break;
+        case ImZeroFB::UserInteraction_EventClientKeepAlive:
+            break;
     }
 }
 

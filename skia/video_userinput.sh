@@ -15,10 +15,12 @@ resH=1080
 		 -videoResolutionWidth $resW \
 		 -videoResolutionHeight $resH \
 		 -videoRawOutputFormat bmp_bgra8888 \
-		 -videoUserInteractionEventsInFile transferUserInteractionEvents \
+		 -videoUserInteractionEventsFile transferUserInteractionEvents \
+		 -videoUserInteractionEventsAreBinary on \
                  -videoExitAfterNFrames 0 &
 pid=$!
-cat transferRawFrames | ../video_player/imzero_video_play - > transferUserInteractionEvents
+#cat transferRawFrames | ../video_player/imzero_video_play - > transferUserInteractionEvents
+cat transferRawFrames | ../contrib/FFmpeg/ffplay -imzero_user_interaction_path transferUserInteractionEvents -
 # ../video_player/imzero_video_play transferRawFrames > transferUserInteractionEvents
 #cat transferRawFrames | tee out.raw | mpv -
 kill $pid

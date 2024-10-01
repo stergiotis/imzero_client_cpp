@@ -33,7 +33,6 @@ SK_SHAPER_HARFBUZZ_AVAILABLE
 SK_SHAPER_UNICODE_AVAILABLE
 SK_ENABLE_SVG
 SK_BUILD_FOR_UNIX
-TRACY_ENABLE
 )
 include_directories("${CMAKE_CURRENT_LIST_DIR}/./contrib/flatbuffers"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui"
@@ -42,14 +41,12 @@ include_directories("${CMAKE_CURRENT_LIST_DIR}/./contrib/flatbuffers"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public"
 )
 add_compile_options(-std=c++20
--g
--gdwarf-4
 -Wall
 -Wformat
 -Wextra
--O1
--DIMZERO_DEBUG_BUILD
--fsanitize=address
+-Wno-unused-parameter
+-fno-omit-frame-pointer
+-O3
 # sdl3Shared
 -I/data/repo/contrib/sdl/include
 # skiaShared
@@ -71,8 +68,7 @@ add_compile_options(-std=c++20
 # skiaShared
 -fno-rtti
 )
-link_libraries(-fsanitize=address
--fsanitize=undefined
+link_libraries(-DNDEBUG
 # sdl3Shared
 -L/data/repo/contrib/sdl/build
 # sdl3Shared
@@ -225,8 +221,8 @@ target_include_directories(mainSkiaSdl3 PUBLIC "${CMAKE_CURRENT_LIST_DIR}/./skia
 "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_implot"
 "${CMAKE_CURRENT_LIST_DIR}/./src")
 
-# tracyEnabled
-add_library(tracyEnabled OBJECT "${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public/TracyClient.cpp")
+# tracyDisabled
+add_library(tracyDisabled OBJECT "${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public/TracyClient.cpp")
 add_executable(imgui_skia_exe $<TARGET_OBJECTS:imguiWithSkia>
 $<TARGET_OBJECTS:render>
 $<TARGET_OBJECTS:marshalling>
@@ -239,5 +235,5 @@ $<TARGET_OBJECTS:imguiCoolbar>
 $<TARGET_OBJECTS:imguiFlamegraph>
 $<TARGET_OBJECTS:imguiTextedit>
 $<TARGET_OBJECTS:mainSkiaSdl3>
-$<TARGET_OBJECTS:tracyEnabled>)
+$<TARGET_OBJECTS:tracyDisabled>)
 

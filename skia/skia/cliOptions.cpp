@@ -53,45 +53,61 @@ static int64_t findFlagValueDefaultInt(FILE *logChannel, uint64_t &markUsed, int
 static bool getBoolFlagValue(FILE *logChannel, uint64_t &markUsed, int argc, char **argv,const char *flag,bool defaultValue) {
     return strcmp(findFlagValueDefault(logChannel, markUsed, argc,argv,flag,defaultValue ? "on" : "off"),"on") == 0;
 }
+void CliOptions::version(FILE *file) const {
+    fprintf(file, "   version: git-commit=\"%s\",dirty=\"%s\"\n\n",buildinfo::gitCommit,buildinfo::gitDirty ? "yes" : "no");
+}
 void CliOptions::usage(const char *name, FILE *file) const {
     fprintf(file,"%s\n", name);
-    fprintf(file, "   version: git-commit=\"%s\",dirty=\"%s\"\n\n",buildinfo::gitCommit,buildinfo::gitDirty ? "yes" : "no");
-    fprintf(file, "   -help\n");
-    fprintf(file," string flags:\n");
-    fprintf(file,"    -ttfFilePath [path:%s]\n",ttfFilePath);
-    fprintf(file,"    -fffiInFile [path:%s]\n",fffiInFile == nullptr ? "<stdin>" : fffiInFile);
-    fprintf(file,"    -fffiOutFile [path:%s]\n",fffiOutFile == nullptr ? "<stdout>" : fffiOutFile);
+    version(file);
+
+    fprintf(file,"info flags:\n");
+    fprintf(file,"   -help\n");
+    fprintf(file,"   -version\n");
+
+    fprintf(file,"general flags:\n");
     fprintf(file,"    -appTitle [title:%s]\n", appTitle);
+
+    fprintf(file,"graphics flags:\n");
     fprintf(file,"    -skiaBackendType [type:%s]    choices: raster,gl,vulkan\n",skiaBackendType);
-    fprintf(file,"    -backgroundColorRGBA [hexrgba:%s]   example: 1199ffaa\n",backgroundColorRGBA);
-    fprintf(file," float flags:\n");
-    fprintf(file,"    -fontDyFudge [float:%f]\n", fontDyFudge);
-    fprintf(file," bool flags:\n");
-    fprintf(file,"    -fffiInterpreter [bool:%s]\n",fffiInterpreter ? "on" : "off");
     fprintf(file,"    -vsync [bool:%s]\n",vsync ? "on" : "off");
+    fprintf(file,"    -backgroundColorRGBA [hexrgba:%s]   example: 1199ffaa\n",backgroundColorRGBA);
     fprintf(file,"    -backdropFilter [bool:%s]\n", backdropFilter ? "on" : "off");
     fprintf(file,"    -sketchFilter [bool:%s]\n", sketchFilter ? "on" : "off");
+    fprintf(file,"    -vectorCmd [bool:%s]   on: intercept ImGui DrawList draw commands and replay them on client (e.g. skia)\n", vectorCmd ? "on" : "off");
+
+    fprintf(file,"imgui flags:\n");
     fprintf(file,"    -imguiNavKeyboard [bool:%s]\n", imguiNavKeyboard ? "on" : "off");
     fprintf(file,"    -imguiNavGamepad [bool:%s]\n", imguiNavGamepad ? "on" : "off");
     fprintf(file,"    -imguiDocking [bool:%s]\n", imguiDocking ? "on" : "off");
-    fprintf(file,"    -vectorCmd [bool:%s]   on: intercept ImGui DrawList draw commands and replay them on client (e.g. skia)\n", vectorCmd ? "on" : "off");
+
+    fprintf(file,"fffi flags:\n");
+    fprintf(file,"    -fffiInterpreter [bool:%s]\n",fffiInterpreter ? "on" : "off");
+    fprintf(file,"    -fffiInFile [path:%s]\n",fffiInFile == nullptr ? "<stdin>" : fffiInFile);
+    fprintf(file,"    -fffiOutFile [path:%s]\n",fffiOutFile == nullptr ? "<stdout>" : fffiOutFile);
+
+    fprintf(file,"font flags:\n");
+    fprintf(file,"    -ttfFilePath [path:%s]\n",ttfFilePath);
+    fprintf(file,"    -fontDyFudge [float:%f]\n", fontDyFudge);
     fprintf(file,"    -fontManager [name:%s]\n", fontManager);
     fprintf(file,"    -fontManagerArg [arg:%s]\n", fontManagerArg);
 
-    fprintf(file, "video mode flags:\n");
-    fprintf(file, "string flags:\n");
-    fprintf(file, "   -videoRawFramesFile [path:%s]\n", videoRawFramesFile);
-    fprintf(file, "   -videoRawOutputFormat [format:%s]\n", videoRawOutputFormat);
-    fprintf(file, "   -videoUserInteractionEventsInFile [path:%s]\n", videoUserInteractionEventsInFile);
-    fprintf(file, "integer flags:\n");
-    fprintf(file, "   -videoResolutionWidth [int:%u]\n", videoResolutionWidth);
-    fprintf(file, "   -videoResolutionHeight [int:%u]\n", videoResolutionHeight);
-    fprintf(file, "   -videoExitAfterNFrames [int:%u]\n", videoExitAfterNFrames);
+    fprintf(file,"video mode flags:\n");
+    fprintf(file,"    -videoUserInteractionEventsInFile [path:%s]\n", videoUserInteractionEventsFile);
+    fprintf(file,"    -videoUserInteractionEventsAreBinary [bool:%s]\n", videoUserInteractionEventsAreBinary ? "on" : "off");
+    fprintf(file,"    -videoRawFramesFile [path:%s]\n", videoRawFramesFile);
+    fprintf(file,"    -videoRawOutputFormat [format:%s]\n", videoRawOutputFormat);
+    fprintf(file,"    -videoResolutionWidth [int:%u]\n", videoResolutionWidth);
+    fprintf(file,"    -videoResolutionHeight [int:%u]\n", videoResolutionHeight);
+    fprintf(file,"    -videoExitAfterNFrames [int:%u]\n", videoExitAfterNFrames);
 }
 void CliOptions::parse(int argc,char **argv,FILE *logChannel) {
     if(argc > 1) {
-        if(strcmp(argv[1],"-help") == 0) {
+        if(strcmp(argv[1],"-help") == 0 || strcmp(argv[1],"--help") == 0) {
             usage(argv[0],stderr);
+            exit(0);
+        }
+        if(strcmp(argv[1],"-version") == 0) {
+            version(stderr);
             exit(0);
         }
     }
@@ -124,13 +140,14 @@ void CliOptions::parse(int argc,char **argv,FILE *logChannel) {
     imguiNavGamepad = getBoolFlagValue(logChannel,u, argc, argv, "-imguiNavGamepad",imguiNavGamepad);
     imguiDocking = getBoolFlagValue(logChannel,u, argc, argv, "-imguiDocking",imguiDocking);
     vectorCmd = getBoolFlagValue(logChannel,u, argc, argv, "-vectorCmd",vectorCmd);
+    videoUserInteractionEventsAreBinary = getBoolFlagValue(logChannel,u,argc,argv,"-videoUserInteractionEventsAreBinary",videoUserInteractionEventsAreBinary);
 
     videoRawFramesFile = findFlagValueDefault(logChannel,u, argc, argv,"-videoRawFramesFile",videoRawFramesFile);
     videoResolutionWidth = static_cast<uint32_t>(findFlagValueDefaultInt(logChannel, u, argc, argv, "-videoResolutionWidth", "1920"));
     videoResolutionHeight = static_cast<uint32_t>(findFlagValueDefaultInt(logChannel, u, argc, argv, "-videoResolutionHeight", "1080"));
     videoExitAfterNFrames = static_cast<uint32_t>(findFlagValueDefaultInt(logChannel, u, argc, argv, "-videoExitAfterNFrames", "0"));
     videoRawOutputFormat = findFlagValueDefault(logChannel, u, argc, argv, "-videoRawOutputFormat", "qoi");
-    videoUserInteractionEventsInFile = findFlagValueDefault(logChannel, u, argc, argv, "-videoUserInteractionEventsInFile", videoUserInteractionEventsInFile);
+    videoUserInteractionEventsFile = findFlagValueDefault(logChannel, u, argc, argv, "-videoUserInteractionEventsFile", videoUserInteractionEventsFile);
 
     if(std::popcount(u) != (argc-1)) {
         for(int i=1;i<argc;i++) {

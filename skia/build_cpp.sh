@@ -3,7 +3,8 @@ set -ev
 here=$(dirname "$(readlink -f "$BASH_SOURCE")")
 cd "$here"
 flatc="../../contrib/flatbuffers/flatc"
-"$flatc" -o imgui --cpp imgui/ImZeroFB.fbs --reflect-types --reflect-names --filename-suffix .out
+"$flatc" -o skia --cpp ../spec/ImZeroFB.fbs --reflect-types --reflect-names --filename-suffix .out
+xxd -i ../spec/ImZeroFB.fbs skia/ImZeroFB.fbs.gen.h
 
 if [[ -z "${IMZERO_BUILD_VIDEO}" ]]; then
   ./cmakelists.dhall
