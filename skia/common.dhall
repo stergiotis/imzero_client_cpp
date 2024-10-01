@@ -1,7 +1,7 @@
 let common = \(video : Bool) ->
 	let lib = ../dhall/lib.dhall
-	let debug = False
-	let asan = False
+	let debug = True
+	let asan = True
 	let ubsan = False
 	let sourceTreePartsRepo = ../dhall/sourceTreeParts.dhall
 	let sourceTreeParts = [

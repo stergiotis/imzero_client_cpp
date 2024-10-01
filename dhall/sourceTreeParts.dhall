@@ -448,6 +448,7 @@ let mainSkiaSdl3 =
 		, "${dir}/imgui_impl_sdl3.cpp"
 		, "${dir}/main.cpp"
 		, "${dir}/app.cpp"
+		, "${dir}/bmpEncoder.cpp"
 
 		, "${dir}/../paragraph.cpp"
 		, "${dir}/../cliOptions.cpp"

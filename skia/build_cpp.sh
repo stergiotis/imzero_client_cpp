@@ -4,7 +4,6 @@ here=$(dirname "$(readlink -f "$BASH_SOURCE")")
 cd "$here"
 flatc="../../contrib/flatbuffers/flatc"
 "$flatc" -o imgui --cpp imgui/ImZeroFB.fbs --reflect-types --reflect-names --filename-suffix .out
-"$flatc" -o imgui --go imgui/ImZeroFB.fbs --reflect-types --reflect-names --filename-suffix .out
 
 if [[ -z "${IMZERO_BUILD_VIDEO}" ]]; then
   ./cmakelists.dhall
