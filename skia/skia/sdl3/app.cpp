@@ -495,7 +495,13 @@ int App::Run(CliOptions &opts) {
     }
 }
 int App::mainLoopVideo(CliOptions &opts, ImVec4 const &clearColor) {
+    ImGuiIO &io = ImGui::GetIO();
     fOutputFormat = resolveRawFrameOutputFormat(opts.videoRawOutputFormat);
+
+    auto const w = static_cast<float>(opts.videoResolutionWidth);
+    auto const h = static_cast<float>(opts.videoResolutionHeight);
+    io.DisplaySize.x = w;
+    io.DisplaySize.y = h;
 
     { // rescale font
         auto f = ImGui::GetIO().FontDefault;
@@ -1440,6 +1446,8 @@ void App::handleUserInteractionEvent(ImZeroFB::InputEvent const &ev) {
         case ImZeroFB::UserInteraction_EventClientDisconnect:
             break;
         case ImZeroFB::UserInteraction_EventClientKeepAlive:
+            break;
+        case ImZeroFB::UserInteraction_EventKeepAlive:
             break;
     }
 }
