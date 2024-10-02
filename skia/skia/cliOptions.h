@@ -8,9 +8,9 @@ struct CliOptions {
     const char *fffiInFile = nullptr;
     const char *fffiOutFile = nullptr;
     const char *appTitle = "ImZeroClient";
-    bool backdropFilter = true;
+    bool backdropFilter = false;
     bool sketchFilter = false;
-    bool fffiInterpreter = true;
+    bool fffiInterpreter = false;
     bool vsync = true;
     bool imguiNavKeyboard = false;
     bool imguiNavGamepad = false;
