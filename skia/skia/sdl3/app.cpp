@@ -803,6 +803,7 @@ int App::Run(CliOptions &opts) {
         }
 
         fUseVectorCmd = opts.vectorCmd;
+        ImGui::useVectorCmd = fUseVectorCmd;
         fFffiInterpreter = opts.fffiInterpreter;
 
         {
@@ -1625,6 +1626,15 @@ void App::dispatchUserInteractionEventsBinary() {
                         }
                             break;
                         case eventType_InputText:
+                        {
+                            uint32_t textLen;
+                            auto const text = binaryUnmarshallString(&p,textLen);
+
+                            auto const textFB = fInteractionFBBuilder.CreateString(text,static_cast<size_t>(textLen));
+
+                            ev = ImZeroFB::CreateEventTextInput(fInteractionFBBuilder,textFB).Union();
+                            t = ImZeroFB::UserInteraction_EventTextInput;
+                        }
                             break;
                         case eventType_ClientConnect:
                             fInteractionClientConnected = true;
@@ -1792,7 +1802,7 @@ void App::handleUserInteractionEvent(ImZeroFB::InputEvent const &ev) {
             io.AddKeyEvent(ImGuiMod_Alt, (keyMod & (ImZeroFB::KeyModifiers_LeftAlt | ImZeroFB::KeyModifiers_RightAlt)) != 0);
             io.AddKeyEvent(ImGuiMod_Super, (keyMod & (ImZeroFB::KeyModifiers_LeftSuper | ImZeroFB::KeyModifiers_RightSuper)) != 0);
             io.AddKeyEvent(key, e->is_down());
-            io.SetKeyEventNativeData(key,static_cast<int>(e->native_sym()),static_cast<int>(e->scancode()));
+            //io.SetKeyEventNativeData(key,static_cast<int>(e->native_sym()),static_cast<int>(e->scancode()));
         }
             break;
         case ImZeroFB::UserInteraction_EventTextInput:
