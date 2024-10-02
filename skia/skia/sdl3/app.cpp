@@ -857,11 +857,11 @@ int App::Run(CliOptions &opts) {
         }
         fVectorCmdSkiaRenderer.changeRenderMode(mode);
     }
-    const auto video = opts.videoRawFramesFile != nullptr;
+    const auto headless = opts.videoRawFramesFile != nullptr;
 
     SDL_GLContext glContext = nullptr;
     const SDL_DisplayMode *dm = nullptr;
-    if(!video) {
+    if(!headless) {
         // Setup SDL
         if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != SDL_TRUE) {
             fprintf(stderr, "Error: SDL_Init(): %s\n", SDL_GetError());
@@ -955,7 +955,7 @@ int App::Run(CliOptions &opts) {
         }
 
         // Setup Platform/Renderer backends
-        if(glContext != nullptr) {
+        if(!headless && glContext != nullptr) {
             ImGui_ImplSDL3_InitForOpenGL(fWindow, glContext);
         }
 
@@ -963,7 +963,10 @@ int App::Run(CliOptions &opts) {
 
         io.ConfigInputTrickleEventQueue = true;
         io.ConfigWindowsMoveFromTitleBarOnly = false; // make config option
-        //io.MouseDrawCursor = true; // FIXME video?
+
+        if(headless) {
+            io.MouseDrawCursor = true; // FIXME video?
+        }
     }
 
 
@@ -977,13 +980,13 @@ int App::Run(CliOptions &opts) {
 
     build_ImFontAtlas(*io.Fonts, fFontPaint);
 
-    if(video) {
-        return mainLoopVideo(opts,clearColor);
+    if(headless) {
+        return mainLoopHeadless(opts, clearColor);
     } else {
         return mainLoopInteractive(opts,glContext,clearColor);
     }
 }
-int App::mainLoopVideo(CliOptions &opts, ImVec4 const &clearColor) {
+int App::mainLoopHeadless(CliOptions &opts, ImVec4 const &clearColor) {
     ImGuiIO &io = ImGui::GetIO();
     fOutputFormat = resolveRawFrameOutputFormat(opts.videoRawOutputFormat);
 
@@ -1074,15 +1077,12 @@ void App::loopWebp(const CliOptions &opts) {
     const auto rasterSurface = SkSurfaces::Raster(SkImageInfo::Make(SkISize::Make(w,h), c));
     auto canvas = rasterSurface->getCanvas();
 
-    switch(fOutputFormat) {
-        case kRawFrameOutputFormat_WebP_Lossy:
-            webPOptions.fCompression = SkWebpEncoder::Compression::kLossy;
-            webPOptions.fQuality = 70.0f;
-            break;
-        case kRawFrameOutputFormat_WebP_Lossless:
-            webPOptions.fCompression = SkWebpEncoder::Compression::kLossless;
-            webPOptions.fQuality = 0.0f;
-            break;
+    if(fOutputFormat == kRawFrameOutputFormat_WebP_Lossy) {
+        webPOptions.fCompression = SkWebpEncoder::Compression::kLossy;
+        webPOptions.fQuality = 70.0f;
+    } else {
+        webPOptions.fCompression = SkWebpEncoder::Compression::kLossless;
+        webPOptions.fQuality = 0.0f;
     }
     uint64_t maxFrame = opts.videoExitAfterNFrames;
 
@@ -1358,6 +1358,36 @@ void App::videoPostPaint() {
         dispatchUserInteractionEventsFB();
     }
 }
+static void uuu() {
+    if(ImGui::Begin("uuu")) {
+        ImGuiIO& io = ImGui::GetIO();
+        ImGui::Text("%s", io.AppAcceptingEvents ? "accepting events" : "not accepting events");
+        if (ImGui::IsMousePosValid())
+            ImGui::Text("Mouse pos: (%g, %g)", io.MousePos.x, io.MousePos.y);
+        else
+            ImGui::Text("Mouse pos: <INVALID>");
+        ImGui::Text("Mouse delta: (%g, %g)", io.MouseDelta.x, io.MouseDelta.y);
+        ImGui::Text("Mouse down:");
+        for (int i = 0; i < IM_ARRAYSIZE(io.MouseDown); i++) if (ImGui::IsMouseDown(i)) { ImGui::SameLine(); ImGui::Text("b%d (%.02f secs)", i, io.MouseDownDuration[i]); }
+        ImGui::Text("Mouse wheel: %.1f", io.MouseWheel);
+
+        // We iterate both legacy native range and named ImGuiKey ranges. This is a little unusual/odd but this allows
+        // displaying the data for old/new backends.
+        // User code should never have to go through such hoops!
+        // You can generally iterate between ImGuiKey_NamedKey_BEGIN and ImGuiKey_NamedKey_END.
+#ifdef IMGUI_DISABLE_OBSOLETE_KEYIO
+        struct funcs { static bool IsLegacyNativeDupe(ImGuiKey) { return false; } };
+            ImGuiKey start_key = ImGuiKey_NamedKey_BEGIN;
+#else
+        struct funcs { static bool IsLegacyNativeDupe(ImGuiKey key) { return key >= 0 && key < 512 && ImGui::GetIO().KeyMap[key] != -1; } }; // Hide Native<>ImGuiKey duplicates when both exists in the array
+        auto start_key = (ImGuiKey)0;
+#endif
+        ImGui::Text("Keys down:");         for (ImGuiKey key = start_key; key < ImGuiKey_NamedKey_END; key = (ImGuiKey)(key + 1)) { if (funcs::IsLegacyNativeDupe(key) || !ImGui::IsKeyDown(key)) continue; ImGui::SameLine(); ImGui::Text((key < ImGuiKey_NamedKey_BEGIN) ? "\"%s\"" : "\"%s\" %d", ImGui::GetKeyName(key), key); }
+        ImGui::Text("Keys mods: %s%s%s%s", io.KeyCtrl ? "CTRL " : "", io.KeyShift ? "SHIFT " : "", io.KeyAlt ? "ALT " : "", io.KeySuper ? "SUPER " : "");
+        ImGui::Text("Chars queue:");       for (int i = 0; i < io.InputQueueCharacters.Size; i++) { ImWchar c = io.InputQueueCharacters[i]; ImGui::SameLine();  ImGui::Text("\'%c\' (0x%04X)", (c > ' ' && c <= 255) ? (char)c : '?', c); } // FIXME: We should convert 'c' to UTF-8 here but the functions are not public.
+    }
+    ImGui::End();
+}
 void App::videoPaint(SkCanvas* canvas, int width, int height) { ZoneScoped;
     ImGui::NewFrame();
     ImGui::ShowMetricsWindow();
@@ -1380,6 +1410,8 @@ void App::videoPaint(SkCanvas* canvas, int width, int height) { ZoneScoped;
         );
     }
     ImGui::End();
+    uuu();
+
     ImGui::Render();
 
     if(canvas != nullptr) { ZoneScoped;
@@ -1682,20 +1714,38 @@ void App::handleUserInteractionEvent(ImZeroFB::InputEvent const &ev) {
         case ImZeroFB::UserInteraction_EventMouseButton:
         {
             auto const e = ev.event_as_EventMouseButton();
-            int mb = 0;
+            int mb = -1;
             auto const b = e->buttons();
+#if 0
             if(b != ImZeroFB::MouseButtons_NONE) {
                 if(b & ImZeroFB::MouseButtons_Left) {
-                    mb = ImGuiMouseButton_Left;
+                    mb |= ImGuiMouseButton_Left;
                 }
                 if(b & ImZeroFB::MouseButtons_Right) {
-                    mb = ImGuiMouseButton_Right;
+                    mb |= ImGuiMouseButton_Right;
                 }
                 if(b & ImZeroFB::MouseButtons_Middle) {
-                    mb = ImGuiMouseButton_Middle;
+                    mb |= ImGuiMouseButton_Middle;
                 }
             }
-            if (mb != 0) {
+#else
+            switch(b) {
+                case ImZeroFB::MouseButtons_Left:
+                    mb = ImGuiMouseButton_Left;
+                    break;
+                case ImZeroFB::MouseButtons_Right:
+                    mb = ImGuiMouseButton_Right;
+                    break;
+                case ImZeroFB::MouseButtons_Middle:
+                    mb = ImGuiMouseButton_Middle;
+                    break;
+                case ImZeroFB::MouseButtons_X1:
+                    break;
+                case ImZeroFB::MouseButtons_X2:
+                    break;
+            }
+#endif
+            if (mb != -1) {
                 const bool d = e->type() == ImZeroFB::MouseButtonEventType_Down;
                 io.AddMouseSourceEvent(e->is_touch() ? ImGuiMouseSource_TouchScreen : ImGuiMouseSource_Mouse);
                 io.AddMouseButtonEvent(mb, d);
@@ -1845,6 +1895,11 @@ App::App() {
     fFffiInterpreter = false;
     fUseVectorCmd = false;
     fFontMgr = nullptr;
+
+    fFrame = 0;
+    fPreviousTime = 0.0;
+    fOutputFormat = kRawFrameOutputFormat_None;
+    fUserInteractionFd = 0;
 }
 
 void App::createContext(ImVec4 const &clearColor,int width,int height) {

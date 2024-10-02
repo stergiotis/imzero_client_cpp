@@ -54,7 +54,7 @@ private:
     SDL_Window *fWindow = nullptr;
 
     /* video */
-    int mainLoopVideo(CliOptions &opts,ImVec4 const &clearColor);
+    int mainLoopHeadless(CliOptions &opts, ImVec4 const &clearColor);
     void loopEmpty(CliOptions const &opts);
     void loopWebp(CliOptions const &opts);
     void loopJpeg(CliOptions const &opts);
