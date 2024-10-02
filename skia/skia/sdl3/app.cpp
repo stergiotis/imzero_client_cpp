@@ -508,6 +508,7 @@ static ImZeroFB::KeyCode sdlKeyCodeToImZeroFBKeyCode(SDL_Keycode keyCode,SDL_Sca
 static ImGuiKey imZeroFBKeyCodeToImGuiKey(ImZeroFB::KeyCode keyCode) {
     switch(keyCode) {
         case ImZeroFB::KeyCode_Key_Tab:
+            fprintf(stderr,"TAB\n");
             return ImGuiKey_Tab;
         case ImZeroFB::KeyCode_Key_LeftArrow:
             return ImGuiKey_LeftArrow;
@@ -1552,8 +1553,8 @@ void App::dispatchUserInteractionEventsBinary() {
                             break;
                         case eventType_InputKeyboard:
                         {
-                            auto const modifiers = binaryUnmarshallIntegral<uint16_t>(&p);
                             uint32_t symNameLen;
+                            auto const modifiers = binaryUnmarshallIntegral<uint16_t>(&p);
                             auto const symName = binaryUnmarshallString(&p,symNameLen);
                             auto const isDown = binaryUnmarshallIntegral<uint8_t>(&p) != 0;
                             auto const nativeSym = binaryUnmarshallIntegral<uint32_t>(&p);
@@ -1571,11 +1572,53 @@ void App::dispatchUserInteractionEventsBinary() {
 
                             auto keyCodeFB = ImZeroFB::KeyCode_Key_None;
                             if(symNameLen == 0) {
+                                ImGuiIO& io = ImGui::GetIO();
+                                SDL_Keymod currentMod = 0;
+                                if(io.KeyAlt) {
+                                    currentMod |= SDL_KMOD_ALT;
+                                }
+                                if(io.KeyShift) {
+                                    currentMod |= SDL_KMOD_SHIFT;
+                                }
+                                if(io.KeyCtrl) {
+                                    currentMod |= SDL_KMOD_CTRL;
+                                }
+                                if(io.KeySuper) {
+                                    currentMod |= SDL_KMOD_GUI;
+                                }
+                                if(isDown) {
+                                    if((modifiersFB & (ImZeroFB::KeyModifiers_LeftAlt | ImZeroFB::KeyModifiers_RightAlt)) != 0) {
+                                        currentMod |= SDL_KMOD_ALT;
+                                    }
+                                    if((modifiersFB & (ImZeroFB::KeyModifiers_LeftShift | ImZeroFB::KeyModifiers_RightShift)) != 0) {
+                                        currentMod |= SDL_KMOD_SHIFT;
+                                    }
+                                    if((modifiersFB & (ImZeroFB::KeyModifiers_LeftCtrl | ImZeroFB::KeyModifiers_RightCtrl)) != 0) {
+                                        currentMod |= SDL_KMOD_CTRL;
+                                    }
+                                    if((modifiersFB & (ImZeroFB::KeyModifiers_LeftSuper | ImZeroFB::KeyModifiers_RightSuper)) != 0) {
+                                        currentMod |= SDL_KMOD_GUI;
+                                    }
+                                } else {
+                                    if((modifiersFB & (ImZeroFB::KeyModifiers_LeftAlt | ImZeroFB::KeyModifiers_RightAlt)) != 0) {
+                                        currentMod &= (~SDL_KMOD_ALT);
+                                    }
+                                    if((modifiersFB & (ImZeroFB::KeyModifiers_LeftShift | ImZeroFB::KeyModifiers_RightShift)) != 0) {
+                                        currentMod &= (~SDL_KMOD_SHIFT);
+                                    }
+                                    if((modifiersFB & (ImZeroFB::KeyModifiers_LeftCtrl | ImZeroFB::KeyModifiers_RightCtrl)) != 0) {
+                                        currentMod &= (~SDL_KMOD_CTRL);
+                                    }
+                                    if((modifiersFB & (ImZeroFB::KeyModifiers_LeftSuper | ImZeroFB::KeyModifiers_RightSuper)) != 0) {
+                                        currentMod &= (~SDL_KMOD_GUI);
+                                    }
+                                }
                                 // use server-side keyboard layout encoded in SDL
-                                keyCodeFB = sdlKeyCodeToImZeroFBKeyCode(SDL_SCANCODE_TO_KEYCODE(scanCode), static_cast<SDL_Scancode>(scanCode));
+                                keyCodeFB = sdlKeyCodeToImZeroFBKeyCode(SDL_GetKeyFromScancode(static_cast<SDL_Scancode>(scanCode),currentMod,SDL_FALSE), static_cast<SDL_Scancode>(scanCode));
                             } else {
                                 // FIXME
                             }
+
 
                             ev = ImZeroFB::CreateEventKeyboard(fInteractionFBBuilder,modifiersFB,keyCodeFB,isDown,nativeSym,scanCode).Union();
                             t = ImZeroFB::UserInteraction_EventKeyboard;
@@ -1714,21 +1757,9 @@ void App::handleUserInteractionEvent(ImZeroFB::InputEvent const &ev) {
         case ImZeroFB::UserInteraction_EventMouseButton:
         {
             auto const e = ev.event_as_EventMouseButton();
-            int mb = -1;
+            int mb = 0;
+            bool skip = false;
             auto const b = e->buttons();
-#if 0
-            if(b != ImZeroFB::MouseButtons_NONE) {
-                if(b & ImZeroFB::MouseButtons_Left) {
-                    mb |= ImGuiMouseButton_Left;
-                }
-                if(b & ImZeroFB::MouseButtons_Right) {
-                    mb |= ImGuiMouseButton_Right;
-                }
-                if(b & ImZeroFB::MouseButtons_Middle) {
-                    mb |= ImGuiMouseButton_Middle;
-                }
-            }
-#else
             switch(b) {
                 case ImZeroFB::MouseButtons_Left:
                     mb = ImGuiMouseButton_Left;
@@ -1739,17 +1770,15 @@ void App::handleUserInteractionEvent(ImZeroFB::InputEvent const &ev) {
                 case ImZeroFB::MouseButtons_Middle:
                     mb = ImGuiMouseButton_Middle;
                     break;
-                case ImZeroFB::MouseButtons_X1:
-                    break;
-                case ImZeroFB::MouseButtons_X2:
-                    break;
+                case ImZeroFB::MouseButtons_X1: // fallthrough
+                case ImZeroFB::MouseButtons_X2: // fallthrough
+                default:
+                    skip = true;
             }
-#endif
-            if (mb != -1) {
+            if(!skip) {
                 const bool d = e->type() == ImZeroFB::MouseButtonEventType_Down;
                 io.AddMouseSourceEvent(e->is_touch() ? ImGuiMouseSource_TouchScreen : ImGuiMouseSource_Mouse);
                 io.AddMouseButtonEvent(mb, d);
-                //bd->MouseButtonsDown = d ? (bd->MouseButtonsDown | (1 << mb)) : (bd->MouseButtonsDown & ~(1 << mb));
             }
         }
             break;
