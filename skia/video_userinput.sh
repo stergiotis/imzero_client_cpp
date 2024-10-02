@@ -26,11 +26,12 @@ resH=1080
 pid=$!
 ffmpeg -hide_banner \
        -re -fflags +genpts  \
+       -framerate 60 \
        -f image2pipe -vcodec bmp -i transferRawFrames \
        -flags +global_header -r 30000/1001 \
        -an \
        -vaapi_device /dev/dri/renderD128 \
-       -vf "format=nv12,hwupload,scale_vaapi=w=$resW:h=$resH" \
+       -vf "fps=60,format=nv12,hwupload,scale_vaapi=w=$resW:h=$resH" \
        -c:v h264_vaapi -qp:v 26 -bf 0 -qp:v 26 -bf 0 -async_depth 4  \
        -f nut "pipe:1" | \
 ../../contrib/FFmpeg/ffplay -hide_banner \
