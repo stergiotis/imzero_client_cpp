@@ -38,7 +38,7 @@ function getMyRepo() {
 	getRepo "$1" "$2" "$3" "$4"
 }
 getContribRepo "https://github.com/emscripten-core/emsdk.git" "emsdk" "main" ""
-getContribRepo "https://github.com/stergiotis/imgui.git" "imgui" "imzero_hooks_docking" "68aa9a86ec933510073932980a0940742ecc833c"
+getContribRepo "https://github.com/stergiotis/imgui.git" "imgui" "imzero_hooks_docking" ""
 getContribRepo "https://github.com/stergiotis/imgui_club.git" "imgui_club" "main" "ea49dd3c6803088d50b496e3fe981501543b7cbc"
 getContribRepo "https://github.com/stergiotis/imgui_flame-graph.git" "imgui_flame-graph" "master" "aae0bd9665d1379c511d0b8a64d3752301a327a2"
 getContribRepo "https://github.com/stergiotis/imgui_ImCoolBar.git" "imgui_ImCoolBar" "master" "da3cd38eb3bf083b5a171d5b17e7ee13bf873a77"
