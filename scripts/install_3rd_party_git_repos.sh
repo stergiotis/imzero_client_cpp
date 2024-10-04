@@ -19,10 +19,10 @@ function getRepo() {
 	fi
 	git clean -f -d
 	git reset --hard
+	git pull
 	if [ ! -z "$branch" ]; then
 		git checkout -q "$branch"
 	fi
-	git pull
 	if [ ! -z "$commit" ]; then
 		git checkout -q "$commit"
 	fi
