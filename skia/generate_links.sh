@@ -28,5 +28,5 @@ link ../common/contrib/sdl3 contrib/sdl3
 link ../common/contrib/qoi contrib/qoi
 link ../common/contrib/tracy contrib/tracy
 link ../common/contrib/flatbuffers/include contrib/flatbuffers
-link ../common/contrib/imgui/backends/imgui_impl_sdl3.cpp ./skia/sdl3/imgui_impl_sdl3.cpp
-link ../common/contrib/imgui/backends/imgui_impl_sdl3.h ./skia/sdl3/imgui_impl_sdl3.h
+link ../common/contrib/imgui/backends/imgui_impl_sdl3.cpp ./imgui/imgui_impl_sdl3.cpp
+link ../common/contrib/imgui/backends/imgui_impl_sdl3.h ./imgui/imgui_impl_sdl3.h

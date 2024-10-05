@@ -440,16 +440,16 @@ let skiaShared =
 	, nonSourceObjs = [] : List Text
 }
 let mainSkiaSdl3 = 
-    let dir = "./skia/sdl3"
+    let dir = "./main/sdl3"
     in sourceTreePart::{
 	, name = "mainSkiaSdl3"
 	, dir = dir
 	, sources = [
-		, "${dir}/imgui_impl_sdl3.cpp"
+		, "${dir}/../../imgui/imgui_impl_sdl3.cpp"
 		, "${dir}/main.cpp"
 		, "${dir}/app.cpp"
-		, "${dir}/bmpEncoder.cpp"
 
+		, "${dir}/../bmpEncoder.cpp"
 		, "${dir}/../paragraph.cpp"
 		, "${dir}/../cliOptions.cpp"
 		, "${dir}/../setupUI.cpp"
@@ -490,23 +490,6 @@ let mainSkiaSdl3 =
 		] : List Text
 	}
 	, nonSourceObjs = [ ] : List Text
-}
-let mainSkiaSdl3Video = 
-    let dir = "./skia/video"
-    in mainSkiaSdl3 // {
-	, name = "mainSkiaSdl3Video"
-	, dir = dir
-	, sources = [
-		, "${dir}/app.cpp"
-		, "${dir}/bmpEncoder.cpp"
-		, "${dir}/main.cpp"
-
-		, "${dir}/../paragraph.cpp"
-		, "${dir}/../cliOptions.cpp"
-		, "${dir}/../setupUI.cpp"
-		, "${dir}/../vectorCmdSkiaRenderer.cpp"
-		, "${dir}/../skiaTracyTracer.cpp"
-	]
 }
 let mainVideoPlayerSdl3Mpv = 
     let dir = "./sdl3_mpv"
@@ -613,7 +596,6 @@ in
 	, imguiTextedit
 	, binding
 	, mainSkiaSdl3
-	, mainSkiaSdl3Video
 	, tracyEnabled
 	, tracyDisabled
 	, sdl3Shared

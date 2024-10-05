@@ -1,4 +1,4 @@
-let common = \(video : Bool) ->
+let common = 
 	let lib = ../dhall/lib.dhall
 	let debug = False
 	let asan = False
@@ -20,7 +20,7 @@ let common = \(video : Bool) ->
 		, sourceTreePartsRepo.binding
 		, sourceTreePartsRepo.sdl3Shared
 		, sourceTreePartsRepo.skiaShared
-		, if video then sourceTreePartsRepo.mainSkiaSdl3Video else sourceTreePartsRepo.mainSkiaSdl3
+		, sourceTreePartsRepo.mainSkiaSdl3
 	] 
 	# (if debug then [ , sourceTreePartsRepo.tracyEnabled ] else [ ,sourceTreePartsRepo.tracyDisabled ] : List lib.sourceTreePart.Type )
         let cxx = "clang++"

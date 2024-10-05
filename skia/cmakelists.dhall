@@ -3,8 +3,7 @@ let prelude = ../dhall/prelude.dhall
 let lib = ../dhall/lib.dhall
 let cmake = ../dhall/cmakelists.dhall
 let sourceTreePartsRepo = ../dhall/sourceTreeParts.dhall
-let c = ./common.dhall
-let common = c False
+let common = ./common.dhall
 in 
 cmake.cmakelistsToText cmake.cmakelists::{
 	, cxx = common.cxx

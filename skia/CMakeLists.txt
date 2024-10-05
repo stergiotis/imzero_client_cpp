@@ -206,17 +206,17 @@ target_compile_options(imguiTextedit PUBLIC -Wno-unused-variable)
 # skiaShared
 
 # mainSkiaSdl3
-add_library(mainSkiaSdl3 OBJECT "${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/imgui_impl_sdl3.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/main.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/app.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/bmpEncoder.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/../paragraph.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/../cliOptions.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/../setupUI.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/../vectorCmdSkiaRenderer.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3/../skiaTracyTracer.cpp")
+add_library(mainSkiaSdl3 OBJECT "${CMAKE_CURRENT_LIST_DIR}/./main/sdl3/../../imgui/imgui_impl_sdl3.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./main/sdl3/main.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./main/sdl3/app.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./main/sdl3/../bmpEncoder.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./main/sdl3/../paragraph.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./main/sdl3/../cliOptions.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./main/sdl3/../setupUI.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./main/sdl3/../vectorCmdSkiaRenderer.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./main/sdl3/../skiaTracyTracer.cpp")
 target_compile_options(mainSkiaSdl3 PUBLIC -Wno-unused-parameter)
-target_include_directories(mainSkiaSdl3 PUBLIC "${CMAKE_CURRENT_LIST_DIR}/./skia/sdl3"
+target_include_directories(mainSkiaSdl3 PUBLIC "${CMAKE_CURRENT_LIST_DIR}/./main/sdl3"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui"
 "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_implot"
 "${CMAKE_CURRENT_LIST_DIR}/./src")

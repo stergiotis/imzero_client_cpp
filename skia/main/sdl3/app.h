@@ -28,11 +28,12 @@ public:
     ~App();
     int Run(CliOptions &opts);
 private:
-    void Paint(SkSurface* surface, int width, int height);
-    void DrawImGuiVectorCmdsFB(SkCanvas &canvas);
+    void paint(SkSurface* surface, int width, int height);
+    void drawImGuiVectorCmdsFB(SkCanvas &canvas);
     void createContext(ImVec4 const &clearColor, int width, int height);
     void destroyContext();
-    sk_sp<SkSurface> getSurface();
+    sk_sp<SkSurface> getSurfaceGL();
+    sk_sp<SkSurface> getSurfaceRaster(int w, int h);
 
     sk_sp<SkFontMgr> fFontMgr = nullptr;
     SkPaint fFontPaint;

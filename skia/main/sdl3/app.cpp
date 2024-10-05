@@ -31,7 +31,7 @@
 #include "include/encode/SkPngEncoder.h"
 #include "include/encode/SkJpegEncoder.h"
 #include "include/encode/SkWebpEncoder.h"
-#include "bmpEncoder.h"
+#include "../bmpEncoder.h"
 #if defined(__linux__)
 #include "include/gpu/gl/glx/GrGLMakeGLXInterface.h"
 #endif
@@ -81,7 +81,7 @@ static inline void applyFlag(int &flag,T val,bool v) {
 constexpr int msaaSampleCount = 0; //4;
 constexpr int stencilBits = 8;  // Skia needs 8 stencil bits
 
-void App::DrawImGuiVectorCmdsFB(SkCanvas &canvas) { ZoneScoped;
+void App::drawImGuiVectorCmdsFB(SkCanvas &canvas) { ZoneScoped;
     const ImDrawData* drawData = ImGui::GetDrawData();
     fTotalVectorCmdSerializedSize = 0;
     for (int i = 0; i < drawData->CmdListsCount; ++i) {
@@ -95,7 +95,7 @@ void App::DrawImGuiVectorCmdsFB(SkCanvas &canvas) { ZoneScoped;
     }
 }
 
-void App::Paint(SkSurface* surface, int width, int height) { ZoneScoped;
+void App::paint(SkSurface* surface, int width, int height) { ZoneScoped;
     ImGui::useVectorCmd = fUseVectorCmd && surface != nullptr;
     auto renderMode = fVectorCmdSkiaRenderer.getRenderMode();
     resetReceiveStat();
@@ -133,7 +133,7 @@ void App::Paint(SkSurface* surface, int width, int height) { ZoneScoped;
 
                 skiaCanvas->clear(fBackgroundColor);
                 skiaCanvas->save();
-                DrawImGuiVectorCmdsFB(*skiaCanvas);
+                drawImGuiVectorCmdsFB(*skiaCanvas);
                 skiaCanvas->restore();
 
                 sk_sp<SkPicture> picture = skiaRecorder.finishRecordingAsPicture();
@@ -155,7 +155,7 @@ void App::Paint(SkSurface* surface, int width, int height) { ZoneScoped;
                         SkFILEWStream svgStream(path1);
                         { // svg canvas may buffer commands, extra scope to ensure flush by RAII
                             auto skiaCanvas = SkSVGCanvas::Make(bounds, &svgStream, flags1);
-                            DrawImGuiVectorCmdsFB(*skiaCanvas);
+                            drawImGuiVectorCmdsFB(*skiaCanvas);
                         }
                         fSvgBytesWritten = svgStream.bytesWritten();
                     }
@@ -167,7 +167,7 @@ void App::Paint(SkSurface* surface, int width, int height) { ZoneScoped;
                         SkFILEWStream svgStream(path);
                         { // svg canvas may buffer commands, extra scope to ensure flush by RAII
                             auto skiaCanvas = SkSVGCanvas::Make(bounds, &svgStream, flags);
-                            DrawImGuiVectorCmdsFB(*skiaCanvas);
+                            drawImGuiVectorCmdsFB(*skiaCanvas);
                         }
                         fSvgBytesWritten = svgStream.bytesWritten();
                     }
@@ -185,7 +185,7 @@ void App::Paint(SkSurface* surface, int width, int height) { ZoneScoped;
                 const auto c = SkColorInfo(kRGBA_8888_SkColorType, kPremul_SkAlphaType, SkColorSpace::MakeSRGB());
                 sk_sp<SkSurface> rasterSurface = SkSurfaces::Raster(SkImageInfo::Make(s, c));
                 SkCanvas *rasterCanvas = rasterSurface->getCanvas();
-                DrawImGuiVectorCmdsFB(*rasterCanvas);
+                drawImGuiVectorCmdsFB(*rasterCanvas);
                 sk_sp<SkImage> img(rasterSurface->makeImageSnapshot());
                 SkFILEWStream pngStream(path);
                 SkPixmap pixmap;
@@ -218,7 +218,7 @@ void App::Paint(SkSurface* surface, int width, int height) { ZoneScoped;
         skiaCanvas->clear(fBackgroundColor);
 
         skiaCanvas->save();
-        DrawImGuiVectorCmdsFB(*skiaCanvas);
+        drawImGuiVectorCmdsFB(*skiaCanvas);
         skiaCanvas->restore();
     }
 
@@ -1072,11 +1072,7 @@ void App::loopWebp(const CliOptions &opts) {
     const int h = static_cast<int>(opts.videoResolutionHeight);
     SkWebpEncoder::Options webPOptions;
 
-    SkColorType colorType = kRGBA_8888_SkColorType;
-    SkAlphaType alphaType = kPremul_SkAlphaType;
-    sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
-    const auto c = SkColorInfo(colorType, alphaType, colorSpace);
-    const auto rasterSurface = SkSurfaces::Raster(SkImageInfo::Make(SkISize::Make(w,h), c));
+    auto const rasterSurface = getSurfaceRaster(w,h);
     auto canvas = rasterSurface->getCanvas();
 
     if(fOutputFormat == kRawFrameOutputFormat_WebP_Lossy) {
@@ -1114,11 +1110,7 @@ void App::loopJpeg(const CliOptions &opts) {
     const int h = static_cast<int>(opts.videoResolutionHeight);
     SkJpegEncoder::Options jpegOptions;
 
-    SkColorType colorType = kRGBA_8888_SkColorType;
-    SkAlphaType alphaType = kPremul_SkAlphaType;
-    sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
-    const auto c = SkColorInfo(colorType, alphaType, colorSpace);
-    const auto rasterSurface = SkSurfaces::Raster(SkImageInfo::Make(SkISize::Make(w,h), c));
+    auto const rasterSurface = getSurfaceRaster(w,h);
     auto canvas = rasterSurface->getCanvas();
 
     jpegOptions.fQuality = 80;
@@ -1150,11 +1142,7 @@ void App::loopPng(const CliOptions &opts) {
     const int h = static_cast<int>(opts.videoResolutionHeight);
     SkPngEncoder::Options pngOptions;
 
-    SkColorType colorType = kRGBA_8888_SkColorType;
-    SkAlphaType alphaType = kPremul_SkAlphaType;
-    sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
-    const auto c = SkColorInfo(colorType, alphaType, colorSpace);
-    const auto rasterSurface = SkSurfaces::Raster(SkImageInfo::Make(SkISize::Make(w,h), c));
+    auto const rasterSurface = getSurfaceRaster(w,h);
     auto canvas = rasterSurface->getCanvas();
 
     pngOptions.fZLibLevel = 6;
@@ -1191,11 +1179,7 @@ void App::loopQoi(const CliOptions &opts) {
             QOI_SRGB
     };
 
-    SkColorType colorType = kRGBA_8888_SkColorType;
-    SkAlphaType alphaType = kPremul_SkAlphaType;
-    sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
-    const auto c = SkColorInfo(colorType, alphaType, colorSpace);
-    const auto rasterSurface = SkSurfaces::Raster(SkImageInfo::Make(SkISize::Make(w,h), c));
+    auto const rasterSurface = getSurfaceRaster(w,h);
     auto canvas = rasterSurface->getCanvas();
     auto stream = SkFILEWStream(opts.videoRawFramesFile);
     uint64_t maxFrame = opts.videoExitAfterNFrames;
@@ -1225,11 +1209,7 @@ void App::loopBmp(const CliOptions &opts) {
     const int h = static_cast<int>(opts.videoResolutionHeight);
     const auto bmpEncoder = BmpBGRA8888Encoder(w,h);
 
-    SkColorType colorType = kBGRA_8888_SkColorType;
-    SkAlphaType alphaType = kPremul_SkAlphaType;
-    sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
-    const auto c = SkColorInfo(colorType, alphaType, colorSpace);
-    const auto rasterSurface = SkSurfaces::Raster(SkImageInfo::Make(SkISize::Make(w,h), c));
+    auto const rasterSurface = getSurfaceRaster(w,h);
     auto canvas = rasterSurface->getCanvas();
 
     uint64_t maxFrame = opts.videoExitAfterNFrames;
@@ -1420,7 +1400,7 @@ void App::videoPaint(SkCanvas* canvas, int width, int height) { ZoneScoped;
         canvas->clear(fBackgroundColor);
 
         canvas->save();
-        DrawImGuiVectorCmdsFB(*canvas);
+        drawImGuiVectorCmdsFB(*canvas);
         canvas->restore();
     }
 
@@ -1884,7 +1864,7 @@ int App::mainLoopInteractive(CliOptions &opts,SDL_GLContext glContext,ImVec4 con
             continue;
         }
 
-        auto const surface = getSurface();
+        auto const surface = getSurfaceGL();
 
         // Start the Dear ImGui frame
         ImGui_ImplSDL3_NewFrame();
@@ -1893,7 +1873,7 @@ int App::mainLoopInteractive(CliOptions &opts,SDL_GLContext glContext,ImVec4 con
         {
 
             ImGui::ShowMetricsWindow();
-            Paint(surface.get(),width,height); // will call ImGui::Render();
+            paint(surface.get(),width,height); // will call ImGui::Render();
             fContext->flush();
 
             // Update and Render additional Platform Windows
@@ -1961,7 +1941,17 @@ void App::createContext(ImVec4 const &clearColor,int width,int height) {
         exit(1);
     }
 }
-sk_sp<SkSurface> App::getSurface() {
+sk_sp<SkSurface> App::getSurfaceRaster(int w, int h) {
+    if(fSurface == nullptr) {
+        SkColorType colorType = kRGBA_8888_SkColorType;
+        SkAlphaType alphaType = kPremul_SkAlphaType;
+        sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
+        const auto c = SkColorInfo(colorType, alphaType, colorSpace);
+        fSurface = SkSurfaces::Raster(SkImageInfo::Make(SkISize::Make(w,h), c));
+    }
+    return fSurface;
+}
+sk_sp<SkSurface> App::getSurfaceGL() {
     if(fSurface == nullptr && fContext != nullptr && fWindow != nullptr && fNativeInterface != nullptr) {
         // Wrap the frame buffer object attached to the screen in a Skia render target so Skia can render to it
         GrGLint buffer = 0;

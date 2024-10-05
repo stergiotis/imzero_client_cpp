@@ -8,9 +8,9 @@
 #include "include/core/SkSurface.h"
 #include "include/core/SkFontMgr.h"
 #include "include/core/SkFont.h"
-#include "../skia/ImZeroFB.out.h"
-#include "../skia/paragraph.h"
-#include "../skia/imzero_assert.h"
+#include "../main/ImZeroFB.out.h"
+#include "../main/paragraph.h"
+#include "../main/imzero_assert.h"
 
 
 // NOTE: part of ImDrawChannel as std::vector and FlatBufferBuilder are not trivially default constructible

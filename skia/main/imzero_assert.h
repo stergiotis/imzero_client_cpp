@@ -1,3 +1,5 @@
+#pragma once
+#ifdef IMZERO_DEBUG_BUILD
 static void imzeroAssert(const char *func,const char *file,int line) {
    const char *basePath = std::getenv("IMZERO_ASSERT_BASE_PATH");
    fprintf(stderr,",------------------------[ ASSERTION ]-----------------------\n");
@@ -19,3 +21,4 @@ static void imzeroAssert(const char *func,const char *file,int line) {
    fflush(stderr);
    assert(false && "imzeroAssert");
 }
+#endif

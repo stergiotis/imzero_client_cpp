@@ -3,14 +3,10 @@ set -ev
 here=$(dirname "$(readlink -f "$BASH_SOURCE")")
 cd "$here"
 flatc="../../contrib/flatbuffers/flatc"
-"$flatc" -o skia --cpp ../spec/ImZeroFB.fbs --reflect-types --reflect-names --filename-suffix .out
-xxd -i ../spec/ImZeroFB.fbs skia/ImZeroFB.fbs.gen.h
+"$flatc" -o main --cpp ../spec/ImZeroFB.fbs --reflect-types --reflect-names --filename-suffix .out
+xxd -i ../spec/ImZeroFB.fbs main/ImZeroFB.fbs.gen.h
 
-if [[ -z "${IMZERO_BUILD_VIDEO}" ]]; then
-  ./cmakelists.dhall
-else
-  ./cmakelists_video.dhall
-fi
+./cmakelists.dhall
 
 generate_buildinfo() {
    echo -en "#pragma once\nnamespace buildinfo {\n static const char *gitCommit=\""
