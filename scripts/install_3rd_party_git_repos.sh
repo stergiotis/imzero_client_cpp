@@ -3,7 +3,7 @@ set -e
 here=$(dirname "$(readlink -f "$BASH_SOURCE")")
 cd "$here"
 mkdir -p "../../contrib"
-
+export LC_ALL=C
 function getRepo() {
 	url="$1"
 	dir="$2"
@@ -17,12 +17,20 @@ function getRepo() {
 	   echo "directory \"$dir\" not found after cloning \"$url\""
 	   exit 1
 	fi
+	git remote set-url origin "$url"
+	git config pull.rebase false
+	defaultBranch=$(git remote show origin | sed -n '/HEAD branch/s/.*: //p')
 	git clean -f -d
 	git reset --hard
-	git pull
+	git merge --abort || true
+	git checkout HEAD
+	git clean -f -d
+	git reset --hard
+	git fetch origin "$defaultBranch"
 	if [ ! -z "$branch" ]; then
 		git checkout -q "$branch"
 	fi
+	git fetch
 	if [ ! -z "$commit" ]; then
 		git checkout -q "$commit"
 	fi
