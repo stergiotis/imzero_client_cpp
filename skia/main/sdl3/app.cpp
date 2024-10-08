@@ -1340,36 +1340,6 @@ void App::videoPostPaint() {
         dispatchUserInteractionEventsFB();
     }
 }
-static void uuu() {
-    if(ImGui::Begin("uuu")) {
-        ImGuiIO& io = ImGui::GetIO();
-        ImGui::Text("%s", io.AppAcceptingEvents ? "accepting events" : "not accepting events");
-        if (ImGui::IsMousePosValid())
-            ImGui::Text("Mouse pos: (%g, %g)", io.MousePos.x, io.MousePos.y);
-        else
-            ImGui::Text("Mouse pos: <INVALID>");
-        ImGui::Text("Mouse delta: (%g, %g)", io.MouseDelta.x, io.MouseDelta.y);
-        ImGui::Text("Mouse down:");
-        for (int i = 0; i < IM_ARRAYSIZE(io.MouseDown); i++) if (ImGui::IsMouseDown(i)) { ImGui::SameLine(); ImGui::Text("b%d (%.02f secs)", i, io.MouseDownDuration[i]); }
-        ImGui::Text("Mouse wheel: %.1f", io.MouseWheel);
-
-        // We iterate both legacy native range and named ImGuiKey ranges. This is a little unusual/odd but this allows
-        // displaying the data for old/new backends.
-        // User code should never have to go through such hoops!
-        // You can generally iterate between ImGuiKey_NamedKey_BEGIN and ImGuiKey_NamedKey_END.
-#ifdef IMGUI_DISABLE_OBSOLETE_KEYIO
-        struct funcs { static bool IsLegacyNativeDupe(ImGuiKey) { return false; } };
-            ImGuiKey start_key = ImGuiKey_NamedKey_BEGIN;
-#else
-        struct funcs { static bool IsLegacyNativeDupe(ImGuiKey key) { return key >= 0 && key < 512 && ImGui::GetIO().KeyMap[key] != -1; } }; // Hide Native<>ImGuiKey duplicates when both exists in the array
-        auto start_key = (ImGuiKey)0;
-#endif
-        ImGui::Text("Keys down:");         for (ImGuiKey key = start_key; key < ImGuiKey_NamedKey_END; key = (ImGuiKey)(key + 1)) { if (funcs::IsLegacyNativeDupe(key) || !ImGui::IsKeyDown(key)) continue; ImGui::SameLine(); ImGui::Text((key < ImGuiKey_NamedKey_BEGIN) ? "\"%s\"" : "\"%s\" %d", ImGui::GetKeyName(key), key); }
-        ImGui::Text("Keys mods: %s%s%s%s", io.KeyCtrl ? "CTRL " : "", io.KeyShift ? "SHIFT " : "", io.KeyAlt ? "ALT " : "", io.KeySuper ? "SUPER " : "");
-        ImGui::Text("Chars queue:");       for (int i = 0; i < io.InputQueueCharacters.Size; i++) { ImWchar c = io.InputQueueCharacters[i]; ImGui::SameLine();  ImGui::Text("\'%c\' (0x%04X)", (c > ' ' && c <= 255) ? (char)c : '?', c); } // FIXME: We should convert 'c' to UTF-8 here but the functions are not public.
-    }
-    ImGui::End();
-}
 void App::videoPaint(SkCanvas* canvas, int width, int height) { ZoneScoped;
     ImGui::NewFrame();
     ImGui::ShowMetricsWindow();
@@ -1392,7 +1362,6 @@ void App::videoPaint(SkCanvas* canvas, int width, int height) { ZoneScoped;
         );
     }
     ImGui::End();
-    uuu();
 
     ImGui::Render();
 
