@@ -1,4 +1,5 @@
 let lib = ./lib.dhall
+let prelude = ./prelude.dhall
 let sourceTreePart = lib.sourceTreePart
 let tracyEnabled = let dir = "./contrib/tracy/public" in sourceTreePart::{
 	, name = "tracyEnabled"
@@ -529,19 +530,28 @@ let flatbuffers = let dir = "./contrib/flatbuffers" in
 	}
 	, sources = [] : List Text
 }
-let sdl3Shared = sourceTreePart::{
+
+let locationToString = \(loc : prelude.Location.Type) -> (merge {
+	, Environment = \(t : Text) -> "UNDEFINED LOCATION"
+	, Local = \(t : Text) -> t
+	, Missing = "MISSING LOCATION"
+	, Remote = \(t : Text) -> "REMOTE LOCATION"
+} loc)
+let sdl3Shared = let sdlDir = "${env:IMZERO_CLIENT_CPP_ROOT as Text}/${locationToString (../../contrib/sdl as Location)}"
+in
+sourceTreePart::{
 	, dir = ""
 	, name = "sdl3Shared"
 	, sources = [] : List Text
 	, cxxflags = {
 	   , local = [] : List Text
 	   , global = [
-		, "-I/data/repo/contrib/sdl/include"
+		, "-I${sdlDir}/include"
 		 ] : List Text
 	}
 	, ldflags = { global = [
-		, "-L/data/repo/contrib/sdl/build"
-		, "-Wl,-rpath,/data/repo/contrib/sdl/build"
+		, "-L${sdlDir}/build"
+		, "-Wl,-rpath,${sdlDir}/build"
 		, "-Wl,--enable-new-dtags"
 		, "-lSDL3"
 	 ] : List Text }

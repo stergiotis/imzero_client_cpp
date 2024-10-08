@@ -48,7 +48,7 @@ add_compile_options(-std=c++20
 -fno-omit-frame-pointer
 -O3
 # sdl3Shared
--I/data/repo/contrib/sdl/include
+-I/data/repo/imzero_client_cpp/skia/./../../contrib/sdl/include
 # skiaShared
 -ffp-contract=off
 # skiaShared
@@ -70,9 +70,9 @@ add_compile_options(-std=c++20
 )
 link_libraries(-DNDEBUG
 # sdl3Shared
--L/data/repo/contrib/sdl/build
+-L/data/repo/imzero_client_cpp/skia/./../../contrib/sdl/build
 # sdl3Shared
--Wl,-rpath,/data/repo/contrib/sdl/build
+-Wl,-rpath,/data/repo/imzero_client_cpp/skia/./../../contrib/sdl/build
 # sdl3Shared
 -Wl,--enable-new-dtags
 # sdl3Shared
