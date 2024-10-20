@@ -353,6 +353,7 @@ let binding = let dir = "./src/binding" in sourceTreePart::{
 	}
 }
 let skiaShared = 
+    let skiaSharedBaseDir = "${env:IMZERO_CLIENT_CPP_ROOT as Text}/${locationToString (../../contrib/skia as Location)}"
     let dir = "./skia"
     let contribDir = "./contrib/skia"
 	let objDir = "${contribDir}/out/Shared/obj"
@@ -427,8 +428,8 @@ let skiaShared =
 			, "-lX11"
 			, "-lGLU"
 			, "-lGL"
-		    , "-L/data/repo/contrib/skia/out/Shared"
-		    , "-Wl,-rpath,/data/repo/contrib/skia/out/Shared"
+		    , "-L${skiaSharedBaseDir}/out/Shared"
+		    , "-Wl,-rpath,${skiaSharedBaseDir}/out/Shared"
 			, "-lskparagraph"
 			, "-lskia"
 			, "-lskunicode"
