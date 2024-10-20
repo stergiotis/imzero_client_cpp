@@ -1,6 +1,12 @@
 let lib = ./lib.dhall
 let prelude = ./prelude.dhall
 let sourceTreePart = lib.sourceTreePart
+let locationToString = \(loc : prelude.Location.Type) -> (merge {
+	, Environment = \(t : Text) -> "UNDEFINED LOCATION"
+	, Local = \(t : Text) -> t
+	, Missing = "MISSING LOCATION"
+	, Remote = \(t : Text) -> "REMOTE LOCATION"
+} loc)
 let tracyEnabled = let dir = "./contrib/tracy/public" in sourceTreePart::{
 	, name = "tracyEnabled"
 	, dir = dir
@@ -532,12 +538,6 @@ let flatbuffers = let dir = "./contrib/flatbuffers" in
 	, sources = [] : List Text
 }
 
-let locationToString = \(loc : prelude.Location.Type) -> (merge {
-	, Environment = \(t : Text) -> "UNDEFINED LOCATION"
-	, Local = \(t : Text) -> t
-	, Missing = "MISSING LOCATION"
-	, Remote = \(t : Text) -> "REMOTE LOCATION"
-} loc)
 let sdl3Shared = let sdlDir = "${env:IMZERO_CLIENT_CPP_ROOT as Text}/${locationToString (../../contrib/sdl as Location)}"
 in
 sourceTreePart::{
