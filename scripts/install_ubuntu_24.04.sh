@@ -31,7 +31,7 @@ sudo apt install -y libgl-dev
 sudo apt install -y libc++-dev libc++abi-dev
 
 #skia deps
-sudo apt install -y clang libjpeg-dev libicu-dev libwebp-dev libfontconfig-dev
+sudo apt install -y clang libjpeg-dev libicu-dev libwebp-dev libfontconfig-dev libglu1-mesa-dev
 
 #clang (non-OS version) deps
 sudo apt install libtinfo6
