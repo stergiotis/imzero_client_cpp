@@ -11713,7 +11713,7 @@ case 0x0000034b:
 		size_t userIds_len = 0;
         size_t columnIndices_len = 0;
         size_t directions_len = 0;
-        if(spec == nullptr){
+        if(spec == nullptr) {
             sort = false;
             dirty = false;
         } else {
@@ -11745,6 +11745,18 @@ case 0x0000034b:
   break;
 case 0x0000034c:
   {
+    FFFI_FUNCTION_INVOCATION("TableSetSortSpecsDirty")
+    auto dirty = receiveValue<bool>();
+    {
+    auto spec = ImGui::TableGetSortSpecs();
+        if(spec == nullptr){ return }
+        spec->SpecsDirty = dirt;
+;
+  }
+  }
+  break;
+case 0x0000034d:
+  {
     FFFI_FUNCTION_INVOCATION("Toggle")
     auto label = receiveString();
     auto val = receiveValue<bool>();
@@ -11760,7 +11772,7 @@ valR = val;
   }
   }
   break;
-case 0x0000034d:
+case 0x0000034e:
   {
     FFFI_FUNCTION_INVOCATION("ToggleV")
     auto label = receiveString();
@@ -11782,7 +11794,7 @@ valR = val;
   }
   }
   break;
-case 0x0000034e:
+case 0x0000034f:
   {
     FFFI_FUNCTION_INVOCATION("InvisibleButtonP")
     auto str_id = receiveString();
@@ -11792,7 +11804,7 @@ case 0x0000034e:
   }
   }
   break;
-case 0x0000034f:
+case 0x00000350:
   {
     FFFI_FUNCTION_INVOCATION("InvisibleButtonVP")
     auto str_id = receiveString();
