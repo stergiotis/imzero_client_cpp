@@ -100,9 +100,9 @@ link_libraries(-DNDEBUG
 # skiaShared
 -lGL
 # skiaShared
--L/data/repo/contrib/skia/out/Shared
+-L/data/repo/imzero_client_cpp/skia/./../../contrib/skia/out/Shared
 # skiaShared
--Wl,-rpath,/data/repo/contrib/skia/out/Shared
+-Wl,-rpath,/data/repo/imzero_client_cpp/skia/./../../contrib/skia/out/Shared
 # skiaShared
 -lskparagraph
 # skiaShared

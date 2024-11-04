@@ -11749,8 +11749,8 @@ case 0x0000034c:
     auto dirty = receiveValue<bool>();
     {
     auto spec = ImGui::TableGetSortSpecs();
-        if(spec == nullptr){ return }
-        spec->SpecsDirty = dirt;
+        if(spec == nullptr){ return; }
+        spec->SpecsDirty = dirty;
 ;
   }
   }
