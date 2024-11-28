@@ -59,7 +59,7 @@ case 0x000007d5:
     auto foreignptr = receiveValue<uintptr_t>();
     const char * text;
     {
-    text = ((TextEditor*)foreignptr)->GetText().c_str();
+    auto const text = ((TextEditor*)foreignptr)->GetText();
     sendEmptyString();
     sendString(text);
     flushSend();
@@ -72,7 +72,7 @@ case 0x000007d6:
     auto foreignptr = receiveValue<uintptr_t>();
     const char * text;
     {
-    text = ((TextEditor*)foreignptr)->GetSelectedText().c_str();
+    auto const text = ((TextEditor*)foreignptr)->GetSelectedText();
     sendEmptyString();
     sendString(text);
     flushSend();
@@ -85,7 +85,7 @@ case 0x000007d7:
     auto foreignptr = receiveValue<uintptr_t>();
     const char * text;
     {
-    text = ((TextEditor*)foreignptr)->GetCurrentLineText().c_str();
+    auto const text = ((TextEditor*)foreignptr)->GetCurrentLineText();
     sendEmptyString();
     sendString(text);
     flushSend();
