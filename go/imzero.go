@@ -23,7 +23,7 @@ func main() {
 	defer ph.PanicHandler(2, nil, nil)
 	app := cli.App{
 		Name:                 "imzero",
-		Copyright:            "Copyright © 2023 Panos Stergiotis",
+		Copyright:            "Copyright © 2023,2024 Panos Stergiotis",
 		HelpName:             "",
 		Usage:                "",
 		UsageText:            "",
