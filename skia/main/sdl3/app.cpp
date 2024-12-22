@@ -1839,8 +1839,9 @@ int App::mainLoopInteractive(CliOptions &opts,SDL_GLContext glContext,ImVec4 con
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
 
-        {
-
+        if(width <= 0 || height <= 0) {
+           ImGui::Render();
+	} else {
             ImGui::ShowMetricsWindow();
             paint(surface.get(),width,height); // will call ImGui::Render();
             fContext->flush();
