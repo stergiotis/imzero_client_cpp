@@ -7,7 +7,7 @@ A GUI technology with ...
 This repository contains the C++ code needed to render ImZero [GUI commands](./spec/ImZeroFB.fbs) and generating ImZero [user interaction events](./spec/ImZeroFB.fbs).
 
 
-See [imzero.go](./go/imzero.go) for a sample driver application using the ImZero go binding [Boxer](https://github.com/stergiotis/boxer). The necessary patches for ImGui are available in [here](https://github.com/stergiotis/imgui/tree/imzero_hooks_docking).
+See [imzero.go](./go/imzero.go) for a sample driver application using the ImZero go binding [Boxer](https://github.com/stergiotis/boxer). The necessary patches for ImGui are available in [here](https://github.com/stergiotis/imgui/tree/imzero_hooks_docking), see [diff](https://github.com/ocornut/imgui/compare/v1.91.3-docking...stergiotis:imgui:imzero_hooks_docking) for summary of the neede changes.
 
 ## Screenshots
 <img src="./doc/img/screenshots/skia.png"></img>
