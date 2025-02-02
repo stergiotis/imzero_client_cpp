@@ -7178,6 +7178,24 @@ case 0x0000021e:
   break;
 case 0x0000021f:
   {
+    FFFI_FUNCTION_INVOCATION("GetIdPreviousFrame")
+    uint32_t hoveredId;
+    uint32_t activeId;
+    {
+    
+	ImGuiContext& g = *GImGui;
+	hoveredId = g.HoveredIdPreviousFrame;
+	activeId = g.ActiveId;
+;
+    sendEmptyString();
+    sendValue<uint32_t>(hoveredId);
+    sendValue<uint32_t>(activeId);
+    flushSend();
+  }
+  }
+  break;
+case 0x00000220:
+  {
     FFFI_FUNCTION_INVOCATION("Knob")
     auto label = receiveString();
     auto valueP = receiveValue<float>();
@@ -7195,7 +7213,7 @@ case 0x0000021f:
   }
   }
   break;
-case 0x00000220:
+case 0x00000221:
   {
     FFFI_FUNCTION_INVOCATION("KnobV")
     auto label = receiveString();
@@ -7220,7 +7238,7 @@ case 0x00000220:
   }
   }
   break;
-case 0x00000221:
+case 0x00000222:
   {
     FFFI_FUNCTION_INVOCATION("KnobInt")
     auto label = receiveString();
@@ -7239,7 +7257,7 @@ case 0x00000221:
   }
   }
   break;
-case 0x00000222:
+case 0x00000223:
   {
     FFFI_FUNCTION_INVOCATION("KnobIntV")
     auto label = receiveString();
@@ -7264,7 +7282,7 @@ case 0x00000222:
   }
   }
   break;
-case 0x00000223:
+case 0x00000224:
   {
     FFFI_FUNCTION_INVOCATION("BeginPiePopup")
     auto name = receiveString();
@@ -7277,7 +7295,7 @@ case 0x00000223:
   }
   }
   break;
-case 0x00000224:
+case 0x00000225:
   {
     FFFI_FUNCTION_INVOCATION("BeginPiePopupV")
     auto name = receiveString();
@@ -7291,7 +7309,7 @@ case 0x00000224:
   }
   }
   break;
-case 0x00000225:
+case 0x00000226:
   {
     FFFI_FUNCTION_INVOCATION("EndPiePopup")
     {
@@ -7299,7 +7317,7 @@ case 0x00000225:
   }
   }
   break;
-case 0x00000226:
+case 0x00000227:
   {
     FFFI_FUNCTION_INVOCATION("PieMenuItem")
     auto name = receiveString();
@@ -7312,7 +7330,7 @@ case 0x00000226:
   }
   }
   break;
-case 0x00000227:
+case 0x00000228:
   {
     FFFI_FUNCTION_INVOCATION("PieMenuItemV")
     auto name = receiveString();
@@ -7326,7 +7344,7 @@ case 0x00000227:
   }
   }
   break;
-case 0x00000228:
+case 0x00000229:
   {
     FFFI_FUNCTION_INVOCATION("BeginPieMenu")
     auto name = receiveString();
@@ -7339,7 +7357,7 @@ case 0x00000228:
   }
   }
   break;
-case 0x00000229:
+case 0x0000022a:
   {
     FFFI_FUNCTION_INVOCATION("BeginPieMenuV")
     auto name = receiveString();
@@ -7353,7 +7371,7 @@ case 0x00000229:
   }
   }
   break;
-case 0x0000022a:
+case 0x0000022b:
   {
     FFFI_FUNCTION_INVOCATION("EndPieMenu")
     {
@@ -7361,7 +7379,7 @@ case 0x0000022a:
   }
   }
   break;
-case 0x0000022b:
+case 0x0000022c:
   {
     FFFI_FUNCTION_INVOCATION("SliderFloat32")
     auto label = receiveString();
@@ -7382,7 +7400,7 @@ v = vP;
   }
   }
   break;
-case 0x0000022c:
+case 0x0000022d:
   {
     FFFI_FUNCTION_INVOCATION("SliderFloat32V")
     auto label = receiveString();
@@ -7405,7 +7423,7 @@ v = vP;
   }
   }
   break;
-case 0x0000022d:
+case 0x0000022e:
   {
     FFFI_FUNCTION_INVOCATION("SliderFloat32NV")
     auto label = receiveString();
@@ -7429,7 +7447,7 @@ v = vP;
   }
   }
   break;
-case 0x0000022e:
+case 0x0000022f:
   {
     FFFI_FUNCTION_INVOCATION("SliderFloat32N")
     auto label = receiveString();
@@ -7451,7 +7469,7 @@ v = vP;
   }
   }
   break;
-case 0x0000022f:
+case 0x00000230:
   {
     FFFI_FUNCTION_INVOCATION("SliderFloat64")
     auto label = receiveString();
@@ -7472,7 +7490,7 @@ v = vP;
   }
   }
   break;
-case 0x00000230:
+case 0x00000231:
   {
     FFFI_FUNCTION_INVOCATION("SliderFloat64V")
     auto label = receiveString();
@@ -7495,7 +7513,7 @@ v = vP;
   }
   }
   break;
-case 0x00000231:
+case 0x00000232:
   {
     FFFI_FUNCTION_INVOCATION("SliderFloat64NV")
     auto label = receiveString();
@@ -7519,7 +7537,7 @@ v = vP;
   }
   }
   break;
-case 0x00000232:
+case 0x00000233:
   {
     FFFI_FUNCTION_INVOCATION("SliderFloat64N")
     auto label = receiveString();
@@ -7541,7 +7559,7 @@ v = vP;
   }
   }
   break;
-case 0x00000233:
+case 0x00000234:
   {
     FFFI_FUNCTION_INVOCATION("SliderInt")
     auto label = receiveString();
@@ -7562,7 +7580,7 @@ v = vP;
   }
   }
   break;
-case 0x00000234:
+case 0x00000235:
   {
     FFFI_FUNCTION_INVOCATION("SliderIntV")
     auto label = receiveString();
@@ -7585,7 +7603,7 @@ v = vP;
   }
   }
   break;
-case 0x00000235:
+case 0x00000236:
   {
     FFFI_FUNCTION_INVOCATION("SliderIntNV")
     auto label = receiveString();
@@ -7609,7 +7627,7 @@ v = vP;
   }
   }
   break;
-case 0x00000236:
+case 0x00000237:
   {
     FFFI_FUNCTION_INVOCATION("SliderIntN")
     auto label = receiveString();
@@ -7631,7 +7649,7 @@ v = vP;
   }
   }
   break;
-case 0x00000237:
+case 0x00000238:
   {
     FFFI_FUNCTION_INVOCATION("SliderInt16")
     auto label = receiveString();
@@ -7652,7 +7670,7 @@ v = vP;
   }
   }
   break;
-case 0x00000238:
+case 0x00000239:
   {
     FFFI_FUNCTION_INVOCATION("SliderInt16V")
     auto label = receiveString();
@@ -7675,7 +7693,7 @@ v = vP;
   }
   }
   break;
-case 0x00000239:
+case 0x0000023a:
   {
     FFFI_FUNCTION_INVOCATION("SliderInt16NV")
     auto label = receiveString();
@@ -7699,7 +7717,7 @@ v = vP;
   }
   }
   break;
-case 0x0000023a:
+case 0x0000023b:
   {
     FFFI_FUNCTION_INVOCATION("SliderInt16N")
     auto label = receiveString();
@@ -7721,7 +7739,7 @@ v = vP;
   }
   }
   break;
-case 0x0000023b:
+case 0x0000023c:
   {
     FFFI_FUNCTION_INVOCATION("SliderInt32")
     auto label = receiveString();
@@ -7742,7 +7760,7 @@ v = vP;
   }
   }
   break;
-case 0x0000023c:
+case 0x0000023d:
   {
     FFFI_FUNCTION_INVOCATION("SliderInt32V")
     auto label = receiveString();
@@ -7765,7 +7783,7 @@ v = vP;
   }
   }
   break;
-case 0x0000023d:
+case 0x0000023e:
   {
     FFFI_FUNCTION_INVOCATION("SliderInt32NV")
     auto label = receiveString();
@@ -7789,7 +7807,7 @@ v = vP;
   }
   }
   break;
-case 0x0000023e:
+case 0x0000023f:
   {
     FFFI_FUNCTION_INVOCATION("SliderInt32N")
     auto label = receiveString();
@@ -7811,7 +7829,7 @@ v = vP;
   }
   }
   break;
-case 0x0000023f:
+case 0x00000240:
   {
     FFFI_FUNCTION_INVOCATION("SliderInt8")
     auto label = receiveString();
@@ -7832,7 +7850,7 @@ v = vP;
   }
   }
   break;
-case 0x00000240:
+case 0x00000241:
   {
     FFFI_FUNCTION_INVOCATION("SliderInt8V")
     auto label = receiveString();
@@ -7855,7 +7873,7 @@ v = vP;
   }
   }
   break;
-case 0x00000241:
+case 0x00000242:
   {
     FFFI_FUNCTION_INVOCATION("SliderInt8NV")
     auto label = receiveString();
@@ -7879,7 +7897,7 @@ v = vP;
   }
   }
   break;
-case 0x00000242:
+case 0x00000243:
   {
     FFFI_FUNCTION_INVOCATION("SliderInt8N")
     auto label = receiveString();
@@ -7901,7 +7919,7 @@ v = vP;
   }
   }
   break;
-case 0x00000243:
+case 0x00000244:
   {
     FFFI_FUNCTION_INVOCATION("SliderUInt")
     auto label = receiveString();
@@ -7922,7 +7940,7 @@ v = vP;
   }
   }
   break;
-case 0x00000244:
+case 0x00000245:
   {
     FFFI_FUNCTION_INVOCATION("SliderUIntV")
     auto label = receiveString();
@@ -7945,7 +7963,7 @@ v = vP;
   }
   }
   break;
-case 0x00000245:
+case 0x00000246:
   {
     FFFI_FUNCTION_INVOCATION("SliderUIntNV")
     auto label = receiveString();
@@ -7969,7 +7987,7 @@ v = vP;
   }
   }
   break;
-case 0x00000246:
+case 0x00000247:
   {
     FFFI_FUNCTION_INVOCATION("SliderUIntN")
     auto label = receiveString();
@@ -7991,7 +8009,7 @@ v = vP;
   }
   }
   break;
-case 0x00000247:
+case 0x00000248:
   {
     FFFI_FUNCTION_INVOCATION("SliderUInt16")
     auto label = receiveString();
@@ -8012,7 +8030,7 @@ v = vP;
   }
   }
   break;
-case 0x00000248:
+case 0x00000249:
   {
     FFFI_FUNCTION_INVOCATION("SliderUInt16V")
     auto label = receiveString();
@@ -8035,7 +8053,7 @@ v = vP;
   }
   }
   break;
-case 0x00000249:
+case 0x0000024a:
   {
     FFFI_FUNCTION_INVOCATION("SliderUInt16NV")
     auto label = receiveString();
@@ -8059,7 +8077,7 @@ v = vP;
   }
   }
   break;
-case 0x0000024a:
+case 0x0000024b:
   {
     FFFI_FUNCTION_INVOCATION("SliderUInt16N")
     auto label = receiveString();
@@ -8081,7 +8099,7 @@ v = vP;
   }
   }
   break;
-case 0x0000024b:
+case 0x0000024c:
   {
     FFFI_FUNCTION_INVOCATION("SliderUInt32")
     auto label = receiveString();
@@ -8102,7 +8120,7 @@ v = vP;
   }
   }
   break;
-case 0x0000024c:
+case 0x0000024d:
   {
     FFFI_FUNCTION_INVOCATION("SliderUInt32V")
     auto label = receiveString();
@@ -8125,7 +8143,7 @@ v = vP;
   }
   }
   break;
-case 0x0000024d:
+case 0x0000024e:
   {
     FFFI_FUNCTION_INVOCATION("SliderUInt32NV")
     auto label = receiveString();
@@ -8149,7 +8167,7 @@ v = vP;
   }
   }
   break;
-case 0x0000024e:
+case 0x0000024f:
   {
     FFFI_FUNCTION_INVOCATION("SliderUInt32N")
     auto label = receiveString();
@@ -8171,7 +8189,7 @@ v = vP;
   }
   }
   break;
-case 0x0000024f:
+case 0x00000250:
   {
     FFFI_FUNCTION_INVOCATION("SliderUInt8")
     auto label = receiveString();
@@ -8192,7 +8210,7 @@ v = vP;
   }
   }
   break;
-case 0x00000250:
+case 0x00000251:
   {
     FFFI_FUNCTION_INVOCATION("SliderUInt8V")
     auto label = receiveString();
@@ -8215,7 +8233,7 @@ v = vP;
   }
   }
   break;
-case 0x00000251:
+case 0x00000252:
   {
     FFFI_FUNCTION_INVOCATION("SliderUInt8NV")
     auto label = receiveString();
@@ -8239,7 +8257,7 @@ v = vP;
   }
   }
   break;
-case 0x00000252:
+case 0x00000253:
   {
     FFFI_FUNCTION_INVOCATION("SliderUInt8N")
     auto label = receiveString();
@@ -8261,7 +8279,7 @@ v = vP;
   }
   }
   break;
-case 0x00000253:
+case 0x00000254:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerDots")
     auto label = receiveString();
@@ -8278,7 +8296,7 @@ nextdot = nextdotP;;
   }
   }
   break;
-case 0x00000254:
+case 0x00000255:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerDotsV")
     auto label = receiveString();
@@ -8299,7 +8317,7 @@ nextdot = nextdotP;;
   }
   }
   break;
-case 0x00000255:
+case 0x00000256:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerDemos")
     {
@@ -8307,7 +8325,7 @@ case 0x00000255:
   }
   }
   break;
-case 0x00000256:
+case 0x00000257:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRainbow")
     auto label = receiveString();
@@ -8320,7 +8338,7 @@ case 0x00000256:
   }
   }
   break;
-case 0x00000257:
+case 0x00000258:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRainbowV")
     auto label = receiveString();
@@ -8336,7 +8354,7 @@ case 0x00000257:
   }
   }
   break;
-case 0x00000258:
+case 0x00000259:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRainbowMix")
     auto label = receiveString();
@@ -8349,7 +8367,7 @@ case 0x00000258:
   }
   }
   break;
-case 0x00000259:
+case 0x0000025a:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRainbowMixV")
     auto label = receiveString();
@@ -8366,7 +8384,7 @@ case 0x00000259:
   }
   }
   break;
-case 0x0000025a:
+case 0x0000025b:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotatingHeart")
     auto label = receiveString();
@@ -8379,7 +8397,7 @@ case 0x0000025a:
   }
   }
   break;
-case 0x0000025b:
+case 0x0000025c:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotatingHeartV")
     auto label = receiveString();
@@ -8393,7 +8411,7 @@ case 0x0000025b:
   }
   }
   break;
-case 0x0000025c:
+case 0x0000025d:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerAng")
     auto label = receiveString();
@@ -8404,7 +8422,7 @@ case 0x0000025c:
   }
   }
   break;
-case 0x0000025d:
+case 0x0000025e:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerAngV")
     auto label = receiveString();
@@ -8420,7 +8438,7 @@ case 0x0000025d:
   }
   }
   break;
-case 0x0000025e:
+case 0x0000025f:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerAngMix")
     auto label = receiveString();
@@ -8431,7 +8449,7 @@ case 0x0000025e:
   }
   }
   break;
-case 0x0000025f:
+case 0x00000260:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerAngMixV")
     auto label = receiveString();
@@ -8447,7 +8465,7 @@ case 0x0000025f:
   }
   }
   break;
-case 0x00000260:
+case 0x00000261:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerLoadingRing")
     auto label = receiveString();
@@ -8458,7 +8476,7 @@ case 0x00000260:
   }
   }
   break;
-case 0x00000261:
+case 0x00000262:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerLoadingRingV")
     auto label = receiveString();
@@ -8473,7 +8491,7 @@ case 0x00000261:
   }
   }
   break;
-case 0x00000262:
+case 0x00000263:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerClock")
     auto label = receiveString();
@@ -8484,7 +8502,7 @@ case 0x00000262:
   }
   }
   break;
-case 0x00000263:
+case 0x00000264:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerClockV")
     auto label = receiveString();
@@ -8498,7 +8516,7 @@ case 0x00000263:
   }
   }
   break;
-case 0x00000264:
+case 0x00000265:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerPulsar")
     auto label = receiveString();
@@ -8509,7 +8527,7 @@ case 0x00000264:
   }
   }
   break;
-case 0x00000265:
+case 0x00000266:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerPulsarV")
     auto label = receiveString();
@@ -8523,7 +8541,7 @@ case 0x00000265:
   }
   }
   break;
-case 0x00000266:
+case 0x00000267:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTwinPulsar")
     auto label = receiveString();
@@ -8534,7 +8552,7 @@ case 0x00000266:
   }
   }
   break;
-case 0x00000267:
+case 0x00000268:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTwinPulsarV")
     auto label = receiveString();
@@ -8548,7 +8566,7 @@ case 0x00000267:
   }
   }
   break;
-case 0x00000268:
+case 0x00000269:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFadePulsar")
     auto label = receiveString();
@@ -8558,7 +8576,7 @@ case 0x00000268:
   }
   }
   break;
-case 0x00000269:
+case 0x0000026a:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFadePulsarV")
     auto label = receiveString();
@@ -8571,7 +8589,7 @@ case 0x00000269:
   }
   }
   break;
-case 0x0000026a:
+case 0x0000026b:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerCircularLines")
     auto label = receiveString();
@@ -8581,7 +8599,7 @@ case 0x0000026a:
   }
   }
   break;
-case 0x0000026b:
+case 0x0000026c:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerCircularLinesV")
     auto label = receiveString();
@@ -8594,7 +8612,7 @@ case 0x0000026b:
   }
   }
   break;
-case 0x0000026c:
+case 0x0000026d:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerVDots")
     auto label = receiveString();
@@ -8605,7 +8623,7 @@ case 0x0000026c:
   }
   }
   break;
-case 0x0000026d:
+case 0x0000026e:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerVDotsV")
     auto label = receiveString();
@@ -8621,7 +8639,7 @@ case 0x0000026d:
   }
   }
   break;
-case 0x0000026e:
+case 0x0000026f:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBounceDots")
     auto label = receiveString();
@@ -8632,7 +8650,7 @@ case 0x0000026e:
   }
   }
   break;
-case 0x0000026f:
+case 0x00000270:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBounceDotsV")
     auto label = receiveString();
@@ -8647,7 +8665,7 @@ case 0x0000026f:
   }
   }
   break;
-case 0x00000270:
+case 0x00000271:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerZipDots")
     auto label = receiveString();
@@ -8658,7 +8676,7 @@ case 0x00000270:
   }
   }
   break;
-case 0x00000271:
+case 0x00000272:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerZipDotsV")
     auto label = receiveString();
@@ -8672,7 +8690,7 @@ case 0x00000271:
   }
   }
   break;
-case 0x00000272:
+case 0x00000273:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerDotsToPoints")
     auto label = receiveString();
@@ -8684,7 +8702,7 @@ case 0x00000272:
   }
   }
   break;
-case 0x00000273:
+case 0x00000274:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerDotsToPointsV")
     auto label = receiveString();
@@ -8699,7 +8717,7 @@ case 0x00000273:
   }
   }
   break;
-case 0x00000274:
+case 0x00000275:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerDotsToBar")
     auto label = receiveString();
@@ -8711,7 +8729,7 @@ case 0x00000274:
   }
   }
   break;
-case 0x00000275:
+case 0x00000276:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerDotsToBarV")
     auto label = receiveString();
@@ -8726,7 +8744,7 @@ case 0x00000275:
   }
   }
   break;
-case 0x00000276:
+case 0x00000277:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerWaveDots")
     auto label = receiveString();
@@ -8737,7 +8755,7 @@ case 0x00000276:
   }
   }
   break;
-case 0x00000277:
+case 0x00000278:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerWaveDotsV")
     auto label = receiveString();
@@ -8751,7 +8769,7 @@ case 0x00000277:
   }
   }
   break;
-case 0x00000278:
+case 0x00000279:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFadeDots")
     auto label = receiveString();
@@ -8762,7 +8780,7 @@ case 0x00000278:
   }
   }
   break;
-case 0x00000279:
+case 0x0000027a:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFadeDotsV")
     auto label = receiveString();
@@ -8777,7 +8795,7 @@ case 0x00000279:
   }
   }
   break;
-case 0x0000027a:
+case 0x0000027b:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerThreeDots")
     auto label = receiveString();
@@ -8788,7 +8806,7 @@ case 0x0000027a:
   }
   }
   break;
-case 0x0000027b:
+case 0x0000027c:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerThreeDotsV")
     auto label = receiveString();
@@ -8802,7 +8820,7 @@ case 0x0000027b:
   }
   }
   break;
-case 0x0000027c:
+case 0x0000027d:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFiveDots")
     auto label = receiveString();
@@ -8813,7 +8831,7 @@ case 0x0000027c:
   }
   }
   break;
-case 0x0000027d:
+case 0x0000027e:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFiveDotsV")
     auto label = receiveString();
@@ -8827,7 +8845,7 @@ case 0x0000027d:
   }
   }
   break;
-case 0x0000027e:
+case 0x0000027f:
   {
     FFFI_FUNCTION_INVOCATION("Spinner4Caleidospcope")
     auto label = receiveString();
@@ -8838,7 +8856,7 @@ case 0x0000027e:
   }
   }
   break;
-case 0x0000027f:
+case 0x00000280:
   {
     FFFI_FUNCTION_INVOCATION("Spinner4CaleidospcopeV")
     auto label = receiveString();
@@ -8852,7 +8870,7 @@ case 0x0000027f:
   }
   }
   break;
-case 0x00000280:
+case 0x00000281:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerMultiFadeDots")
     auto label = receiveString();
@@ -8863,7 +8881,7 @@ case 0x00000280:
   }
   }
   break;
-case 0x00000281:
+case 0x00000282:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerMultiFadeDotsV")
     auto label = receiveString();
@@ -8877,7 +8895,7 @@ case 0x00000281:
   }
   }
   break;
-case 0x00000282:
+case 0x00000283:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerScaleDots")
     auto label = receiveString();
@@ -8888,7 +8906,7 @@ case 0x00000282:
   }
   }
   break;
-case 0x00000283:
+case 0x00000284:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerScaleDotsV")
     auto label = receiveString();
@@ -8902,7 +8920,7 @@ case 0x00000283:
   }
   }
   break;
-case 0x00000284:
+case 0x00000285:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSquareSpins")
     auto label = receiveString();
@@ -8913,7 +8931,7 @@ case 0x00000284:
   }
   }
   break;
-case 0x00000285:
+case 0x00000286:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSquareSpinsV")
     auto label = receiveString();
@@ -8926,7 +8944,7 @@ case 0x00000285:
   }
   }
   break;
-case 0x00000286:
+case 0x00000287:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerMovingDots")
     auto label = receiveString();
@@ -8937,7 +8955,7 @@ case 0x00000286:
   }
   }
   break;
-case 0x00000287:
+case 0x00000288:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerMovingDotsV")
     auto label = receiveString();
@@ -8951,7 +8969,7 @@ case 0x00000287:
   }
   }
   break;
-case 0x00000288:
+case 0x00000289:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotateDots")
     auto label = receiveString();
@@ -8962,7 +8980,7 @@ case 0x00000288:
   }
   }
   break;
-case 0x00000289:
+case 0x0000028a:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotateDotsV")
     auto label = receiveString();
@@ -8977,7 +8995,7 @@ case 0x00000289:
   }
   }
   break;
-case 0x0000028a:
+case 0x0000028b:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerOrionDots")
     auto label = receiveString();
@@ -8988,7 +9006,7 @@ case 0x0000028a:
   }
   }
   break;
-case 0x0000028b:
+case 0x0000028c:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerOrionDotsV")
     auto label = receiveString();
@@ -9002,7 +9020,7 @@ case 0x0000028b:
   }
   }
   break;
-case 0x0000028c:
+case 0x0000028d:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerGalaxyDots")
     auto label = receiveString();
@@ -9013,7 +9031,7 @@ case 0x0000028c:
   }
   }
   break;
-case 0x0000028d:
+case 0x0000028e:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerGalaxyDotsV")
     auto label = receiveString();
@@ -9027,7 +9045,7 @@ case 0x0000028d:
   }
   }
   break;
-case 0x0000028e:
+case 0x0000028f:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTwinAng")
     auto label = receiveString();
@@ -9039,7 +9057,7 @@ case 0x0000028e:
   }
   }
   break;
-case 0x0000028f:
+case 0x00000290:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTwinAngV")
     auto label = receiveString();
@@ -9055,7 +9073,7 @@ case 0x0000028f:
   }
   }
   break;
-case 0x00000290:
+case 0x00000291:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFilling")
     auto label = receiveString();
@@ -9066,7 +9084,7 @@ case 0x00000290:
   }
   }
   break;
-case 0x00000291:
+case 0x00000292:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFillingV")
     auto label = receiveString();
@@ -9080,7 +9098,7 @@ case 0x00000291:
   }
   }
   break;
-case 0x00000292:
+case 0x00000293:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTopup")
     auto label = receiveString();
@@ -9091,7 +9109,7 @@ case 0x00000292:
   }
   }
   break;
-case 0x00000293:
+case 0x00000294:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTopupV")
     auto label = receiveString();
@@ -9106,7 +9124,7 @@ case 0x00000293:
   }
   }
   break;
-case 0x00000294:
+case 0x00000295:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTwinAng180")
     auto label = receiveString();
@@ -9118,7 +9136,7 @@ case 0x00000294:
   }
   }
   break;
-case 0x00000295:
+case 0x00000296:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTwinAng180V")
     auto label = receiveString();
@@ -9133,7 +9151,7 @@ case 0x00000295:
   }
   }
   break;
-case 0x00000296:
+case 0x00000297:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTwinAng360")
     auto label = receiveString();
@@ -9145,7 +9163,7 @@ case 0x00000296:
   }
   }
   break;
-case 0x00000297:
+case 0x00000298:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTwinAng360V")
     auto label = receiveString();
@@ -9162,7 +9180,7 @@ case 0x00000297:
   }
   }
   break;
-case 0x00000298:
+case 0x00000299:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerIncDots")
     auto label = receiveString();
@@ -9173,7 +9191,7 @@ case 0x00000298:
   }
   }
   break;
-case 0x00000299:
+case 0x0000029a:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerIncDotsV")
     auto label = receiveString();
@@ -9187,7 +9205,7 @@ case 0x00000299:
   }
   }
   break;
-case 0x0000029a:
+case 0x0000029b:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerIncFullDots")
     auto label = receiveString();
@@ -9198,7 +9216,7 @@ case 0x0000029a:
   }
   }
   break;
-case 0x0000029b:
+case 0x0000029c:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerIncFullDotsV")
     auto label = receiveString();
@@ -9212,7 +9230,7 @@ case 0x0000029b:
   }
   }
   break;
-case 0x0000029c:
+case 0x0000029d:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFadeBars")
     auto label = receiveString();
@@ -9222,7 +9240,7 @@ case 0x0000029c:
   }
   }
   break;
-case 0x0000029d:
+case 0x0000029e:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFadeBarsV")
     auto label = receiveString();
@@ -9236,7 +9254,7 @@ case 0x0000029d:
   }
   }
   break;
-case 0x0000029e:
+case 0x0000029f:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFadeTris")
     auto label = receiveString();
@@ -9246,7 +9264,7 @@ case 0x0000029e:
   }
   }
   break;
-case 0x0000029f:
+case 0x000002a0:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFadeTrisV")
     auto label = receiveString();
@@ -9260,7 +9278,7 @@ case 0x0000029f:
   }
   }
   break;
-case 0x000002a0:
+case 0x000002a1:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBarsRotateFade")
     auto label = receiveString();
@@ -9272,7 +9290,7 @@ case 0x000002a0:
   }
   }
   break;
-case 0x000002a1:
+case 0x000002a2:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBarsRotateFadeV")
     auto label = receiveString();
@@ -9287,7 +9305,7 @@ case 0x000002a1:
   }
   }
   break;
-case 0x000002a2:
+case 0x000002a3:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBarsScaleMiddle")
     auto label = receiveString();
@@ -9297,7 +9315,7 @@ case 0x000002a2:
   }
   }
   break;
-case 0x000002a3:
+case 0x000002a4:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBarsScaleMiddleV")
     auto label = receiveString();
@@ -9310,7 +9328,7 @@ case 0x000002a3:
   }
   }
   break;
-case 0x000002a4:
+case 0x000002a5:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerAngTwin")
     auto label = receiveString();
@@ -9322,7 +9340,7 @@ case 0x000002a4:
   }
   }
   break;
-case 0x000002a5:
+case 0x000002a6:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerAngTwinV")
     auto label = receiveString();
@@ -9340,7 +9358,7 @@ case 0x000002a5:
   }
   }
   break;
-case 0x000002a6:
+case 0x000002a7:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerArcRotation")
     auto label = receiveString();
@@ -9351,7 +9369,7 @@ case 0x000002a6:
   }
   }
   break;
-case 0x000002a7:
+case 0x000002a8:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerArcRotationV")
     auto label = receiveString();
@@ -9366,7 +9384,7 @@ case 0x000002a7:
   }
   }
   break;
-case 0x000002a8:
+case 0x000002a9:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerArcFade")
     auto label = receiveString();
@@ -9377,7 +9395,7 @@ case 0x000002a8:
   }
   }
   break;
-case 0x000002a9:
+case 0x000002aa:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerArcFadeV")
     auto label = receiveString();
@@ -9391,7 +9409,7 @@ case 0x000002a9:
   }
   }
   break;
-case 0x000002aa:
+case 0x000002ab:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSimpleArcFade")
     auto label = receiveString();
@@ -9402,7 +9420,7 @@ case 0x000002aa:
   }
   }
   break;
-case 0x000002ab:
+case 0x000002ac:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSimpleArcFadeV")
     auto label = receiveString();
@@ -9415,7 +9433,7 @@ case 0x000002ab:
   }
   }
   break;
-case 0x000002ac:
+case 0x000002ad:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSquareStrokeFade")
     auto label = receiveString();
@@ -9426,7 +9444,7 @@ case 0x000002ac:
   }
   }
   break;
-case 0x000002ad:
+case 0x000002ae:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSquareStrokeFadeV")
     auto label = receiveString();
@@ -9439,7 +9457,7 @@ case 0x000002ad:
   }
   }
   break;
-case 0x000002ae:
+case 0x000002af:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerAsciiSymbolPoints")
     auto label = receiveString();
@@ -9451,7 +9469,7 @@ case 0x000002ae:
   }
   }
   break;
-case 0x000002af:
+case 0x000002b0:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerAsciiSymbolPointsV")
     auto label = receiveString();
@@ -9465,7 +9483,7 @@ case 0x000002af:
   }
   }
   break;
-case 0x000002b0:
+case 0x000002b1:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTextFading")
     auto label = receiveString();
@@ -9477,7 +9495,7 @@ case 0x000002b0:
   }
   }
   break;
-case 0x000002b1:
+case 0x000002b2:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTextFadingV")
     auto label = receiveString();
@@ -9491,7 +9509,7 @@ case 0x000002b1:
   }
   }
   break;
-case 0x000002b2:
+case 0x000002b3:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSevenSegments")
     auto label = receiveString();
@@ -9503,7 +9521,7 @@ case 0x000002b2:
   }
   }
   break;
-case 0x000002b3:
+case 0x000002b4:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSevenSegmentsV")
     auto label = receiveString();
@@ -9517,7 +9535,7 @@ case 0x000002b3:
   }
   }
   break;
-case 0x000002b4:
+case 0x000002b5:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSquareStrokeFill")
     auto label = receiveString();
@@ -9528,7 +9546,7 @@ case 0x000002b4:
   }
   }
   break;
-case 0x000002b5:
+case 0x000002b6:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSquareStrokeFillV")
     auto label = receiveString();
@@ -9541,7 +9559,7 @@ case 0x000002b5:
   }
   }
   break;
-case 0x000002b6:
+case 0x000002b7:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSquareStrokeLoading")
     auto label = receiveString();
@@ -9552,7 +9570,7 @@ case 0x000002b6:
   }
   }
   break;
-case 0x000002b7:
+case 0x000002b8:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSquareStrokeLoadingV")
     auto label = receiveString();
@@ -9565,7 +9583,7 @@ case 0x000002b7:
   }
   }
   break;
-case 0x000002b8:
+case 0x000002b9:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSquareLoading")
     auto label = receiveString();
@@ -9576,7 +9594,7 @@ case 0x000002b8:
   }
   }
   break;
-case 0x000002b9:
+case 0x000002ba:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSquareLoadingV")
     auto label = receiveString();
@@ -9589,7 +9607,7 @@ case 0x000002b9:
   }
   }
   break;
-case 0x000002ba:
+case 0x000002bb:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFilledArcFade")
     auto label = receiveString();
@@ -9599,7 +9617,7 @@ case 0x000002ba:
   }
   }
   break;
-case 0x000002bb:
+case 0x000002bc:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFilledArcFadeV")
     auto label = receiveString();
@@ -9613,7 +9631,7 @@ case 0x000002bb:
   }
   }
   break;
-case 0x000002bc:
+case 0x000002bd:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerPointsArcBounce")
     auto label = receiveString();
@@ -9624,7 +9642,7 @@ case 0x000002bc:
   }
   }
   break;
-case 0x000002bd:
+case 0x000002be:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerPointsArcBounceV")
     auto label = receiveString();
@@ -9640,7 +9658,7 @@ case 0x000002bd:
   }
   }
   break;
-case 0x000002be:
+case 0x000002bf:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFilledArcColor")
     auto label = receiveString();
@@ -9650,7 +9668,7 @@ case 0x000002be:
   }
   }
   break;
-case 0x000002bf:
+case 0x000002c0:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFilledArcColorV")
     auto label = receiveString();
@@ -9664,7 +9682,7 @@ case 0x000002bf:
   }
   }
   break;
-case 0x000002c0:
+case 0x000002c1:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFilledArcRing")
     auto label = receiveString();
@@ -9675,7 +9693,7 @@ case 0x000002c0:
   }
   }
   break;
-case 0x000002c1:
+case 0x000002c2:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFilledArcRingV")
     auto label = receiveString();
@@ -9690,7 +9708,7 @@ case 0x000002c1:
   }
   }
   break;
-case 0x000002c2:
+case 0x000002c3:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerArcWedges")
     auto label = receiveString();
@@ -9700,7 +9718,7 @@ case 0x000002c2:
   }
   }
   break;
-case 0x000002c3:
+case 0x000002c4:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerArcWedgesV")
     auto label = receiveString();
@@ -9713,7 +9731,7 @@ case 0x000002c3:
   }
   }
   break;
-case 0x000002c4:
+case 0x000002c5:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTwinBall")
     auto label = receiveString();
@@ -9726,7 +9744,7 @@ case 0x000002c4:
   }
   }
   break;
-case 0x000002c5:
+case 0x000002c6:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTwinBallV")
     auto label = receiveString();
@@ -9743,7 +9761,7 @@ case 0x000002c5:
   }
   }
   break;
-case 0x000002c6:
+case 0x000002c7:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSolarBalls")
     auto label = receiveString();
@@ -9754,7 +9772,7 @@ case 0x000002c6:
   }
   }
   break;
-case 0x000002c7:
+case 0x000002c8:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSolarBallsV")
     auto label = receiveString();
@@ -9769,7 +9787,7 @@ case 0x000002c7:
   }
   }
   break;
-case 0x000002c8:
+case 0x000002c9:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSolarScaleBalls")
     auto label = receiveString();
@@ -9780,7 +9798,7 @@ case 0x000002c8:
   }
   }
   break;
-case 0x000002c9:
+case 0x000002ca:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSolarScaleBallsV")
     auto label = receiveString();
@@ -9794,7 +9812,7 @@ case 0x000002c9:
   }
   }
   break;
-case 0x000002ca:
+case 0x000002cb:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSolarArcs")
     auto label = receiveString();
@@ -9805,7 +9823,7 @@ case 0x000002ca:
   }
   }
   break;
-case 0x000002cb:
+case 0x000002cc:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSolarArcsV")
     auto label = receiveString();
@@ -9820,7 +9838,7 @@ case 0x000002cb:
   }
   }
   break;
-case 0x000002cc:
+case 0x000002cd:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerMovingArcs")
     auto label = receiveString();
@@ -9831,7 +9849,7 @@ case 0x000002cc:
   }
   }
   break;
-case 0x000002cd:
+case 0x000002ce:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerMovingArcsV")
     auto label = receiveString();
@@ -9845,7 +9863,7 @@ case 0x000002cd:
   }
   }
   break;
-case 0x000002ce:
+case 0x000002cf:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRainbowCircle")
     auto label = receiveString();
@@ -9856,7 +9874,7 @@ case 0x000002ce:
   }
   }
   break;
-case 0x000002cf:
+case 0x000002d0:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRainbowCircleV")
     auto label = receiveString();
@@ -9871,7 +9889,7 @@ case 0x000002cf:
   }
   }
   break;
-case 0x000002d0:
+case 0x000002d1:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBounceBall")
     auto label = receiveString();
@@ -9882,7 +9900,7 @@ case 0x000002d0:
   }
   }
   break;
-case 0x000002d1:
+case 0x000002d2:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBounceBallV")
     auto label = receiveString();
@@ -9897,7 +9915,7 @@ case 0x000002d1:
   }
   }
   break;
-case 0x000002d2:
+case 0x000002d3:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerPulsarBall")
     auto label = receiveString();
@@ -9908,7 +9926,7 @@ case 0x000002d2:
   }
   }
   break;
-case 0x000002d3:
+case 0x000002d4:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerPulsarBallV")
     auto label = receiveString();
@@ -9923,7 +9941,7 @@ case 0x000002d3:
   }
   }
   break;
-case 0x000002d4:
+case 0x000002d5:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerIncScaleDots")
     auto label = receiveString();
@@ -9934,7 +9952,7 @@ case 0x000002d4:
   }
   }
   break;
-case 0x000002d5:
+case 0x000002d6:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerIncScaleDotsV")
     auto label = receiveString();
@@ -9948,7 +9966,7 @@ case 0x000002d5:
   }
   }
   break;
-case 0x000002d6:
+case 0x000002d7:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSomeScaleDots")
     auto label = receiveString();
@@ -9959,7 +9977,7 @@ case 0x000002d6:
   }
   }
   break;
-case 0x000002d7:
+case 0x000002d8:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSomeScaleDotsV")
     auto label = receiveString();
@@ -9974,7 +9992,7 @@ case 0x000002d7:
   }
   }
   break;
-case 0x000002d8:
+case 0x000002d9:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerAngTriple")
     auto label = receiveString();
@@ -9987,7 +10005,7 @@ case 0x000002d8:
   }
   }
   break;
-case 0x000002d9:
+case 0x000002da:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerAngTripleV")
     auto label = receiveString();
@@ -10005,7 +10023,7 @@ case 0x000002d9:
   }
   }
   break;
-case 0x000002da:
+case 0x000002db:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerAngEclipse")
     auto label = receiveString();
@@ -10016,7 +10034,7 @@ case 0x000002da:
   }
   }
   break;
-case 0x000002db:
+case 0x000002dc:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerAngEclipseV")
     auto label = receiveString();
@@ -10030,7 +10048,7 @@ case 0x000002db:
   }
   }
   break;
-case 0x000002dc:
+case 0x000002dd:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerIngYang")
     auto label = receiveString();
@@ -10043,7 +10061,7 @@ case 0x000002dc:
   }
   }
   break;
-case 0x000002dd:
+case 0x000002de:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerIngYangV")
     auto label = receiveString();
@@ -10060,7 +10078,7 @@ case 0x000002dd:
   }
   }
   break;
-case 0x000002de:
+case 0x000002df:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerGooeyBalls")
     auto label = receiveString();
@@ -10072,7 +10090,7 @@ case 0x000002de:
   }
   }
   break;
-case 0x000002df:
+case 0x000002e0:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerGooeyBallsV")
     auto label = receiveString();
@@ -10085,7 +10103,7 @@ case 0x000002df:
   }
   }
   break;
-case 0x000002e0:
+case 0x000002e1:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerDotsLoading")
     auto label = receiveString();
@@ -10099,7 +10117,7 @@ case 0x000002e0:
   }
   }
   break;
-case 0x000002e1:
+case 0x000002e2:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotateGooeyBalls")
     auto label = receiveString();
@@ -10113,7 +10131,7 @@ case 0x000002e1:
   }
   }
   break;
-case 0x000002e2:
+case 0x000002e3:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerHerbertBalls")
     auto label = receiveString();
@@ -10127,7 +10145,7 @@ case 0x000002e2:
   }
   }
   break;
-case 0x000002e3:
+case 0x000002e4:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerHerbertBalls3D")
     auto label = receiveString();
@@ -10140,7 +10158,7 @@ case 0x000002e3:
   }
   }
   break;
-case 0x000002e4:
+case 0x000002e5:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotateTriangles")
     auto label = receiveString();
@@ -10154,7 +10172,7 @@ case 0x000002e4:
   }
   }
   break;
-case 0x000002e5:
+case 0x000002e6:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotateShapes")
     auto label = receiveString();
@@ -10169,7 +10187,7 @@ case 0x000002e5:
   }
   }
   break;
-case 0x000002e6:
+case 0x000002e7:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSinSquares")
     auto label = receiveString();
@@ -10182,7 +10200,7 @@ case 0x000002e6:
   }
   }
   break;
-case 0x000002e7:
+case 0x000002e8:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerMoonLine")
     auto label = receiveString();
@@ -10193,7 +10211,7 @@ case 0x000002e7:
   }
   }
   break;
-case 0x000002e8:
+case 0x000002e9:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerMoonLineV")
     auto label = receiveString();
@@ -10208,7 +10226,7 @@ case 0x000002e8:
   }
   }
   break;
-case 0x000002e9:
+case 0x000002ea:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerCircleDrop")
     auto label = receiveString();
@@ -10220,7 +10238,7 @@ case 0x000002e9:
   }
   }
   break;
-case 0x000002ea:
+case 0x000002eb:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerCircleDropV")
     auto label = receiveString();
@@ -10236,7 +10254,7 @@ case 0x000002ea:
   }
   }
   break;
-case 0x000002eb:
+case 0x000002ec:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSurroundedIndicator")
     auto label = receiveString();
@@ -10247,7 +10265,7 @@ case 0x000002eb:
   }
   }
   break;
-case 0x000002ec:
+case 0x000002ed:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSurroundedIndicatorV")
     auto label = receiveString();
@@ -10261,7 +10279,7 @@ case 0x000002ec:
   }
   }
   break;
-case 0x000002ed:
+case 0x000002ee:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerWifiIndicator")
     auto label = receiveString();
@@ -10272,7 +10290,7 @@ case 0x000002ed:
   }
   }
   break;
-case 0x000002ee:
+case 0x000002ef:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerWifiIndicatorV")
     auto label = receiveString();
@@ -10288,7 +10306,7 @@ case 0x000002ee:
   }
   }
   break;
-case 0x000002ef:
+case 0x000002f0:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTrianglesSelector")
     auto label = receiveString();
@@ -10299,7 +10317,7 @@ case 0x000002ef:
   }
   }
   break;
-case 0x000002f0:
+case 0x000002f1:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTrianglesSelectorV")
     auto label = receiveString();
@@ -10314,7 +10332,7 @@ case 0x000002f0:
   }
   }
   break;
-case 0x000002f1:
+case 0x000002f2:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFlowingGradient")
     auto label = receiveString();
@@ -10325,7 +10343,7 @@ case 0x000002f1:
   }
   }
   break;
-case 0x000002f2:
+case 0x000002f3:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFlowingGradientV")
     auto label = receiveString();
@@ -10340,7 +10358,7 @@ case 0x000002f2:
   }
   }
   break;
-case 0x000002f3:
+case 0x000002f4:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotateSegments")
     auto label = receiveString();
@@ -10351,7 +10369,7 @@ case 0x000002f3:
   }
   }
   break;
-case 0x000002f4:
+case 0x000002f5:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotateSegmentsV")
     auto label = receiveString();
@@ -10366,7 +10384,7 @@ case 0x000002f4:
   }
   }
   break;
-case 0x000002f5:
+case 0x000002f6:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerLemniscate")
     auto label = receiveString();
@@ -10377,7 +10395,7 @@ case 0x000002f5:
   }
   }
   break;
-case 0x000002f6:
+case 0x000002f7:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerLemniscateV")
     auto label = receiveString();
@@ -10391,7 +10409,7 @@ case 0x000002f6:
   }
   }
   break;
-case 0x000002f7:
+case 0x000002f8:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotateGear")
     auto label = receiveString();
@@ -10402,7 +10420,7 @@ case 0x000002f7:
   }
   }
   break;
-case 0x000002f8:
+case 0x000002f9:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotateGearV")
     auto label = receiveString();
@@ -10416,7 +10434,7 @@ case 0x000002f8:
   }
   }
   break;
-case 0x000002f9:
+case 0x000002fa:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotateWheel")
     auto label = receiveString();
@@ -10427,7 +10445,7 @@ case 0x000002f9:
   }
   }
   break;
-case 0x000002fa:
+case 0x000002fb:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotateWheelV")
     auto label = receiveString();
@@ -10442,7 +10460,7 @@ case 0x000002fa:
   }
   }
   break;
-case 0x000002fb:
+case 0x000002fc:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerAtom")
     auto label = receiveString();
@@ -10453,7 +10471,7 @@ case 0x000002fb:
   }
   }
   break;
-case 0x000002fc:
+case 0x000002fd:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerAtomV")
     auto label = receiveString();
@@ -10467,7 +10485,7 @@ case 0x000002fc:
   }
   }
   break;
-case 0x000002fd:
+case 0x000002fe:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerPatternRings")
     auto label = receiveString();
@@ -10478,7 +10496,7 @@ case 0x000002fd:
   }
   }
   break;
-case 0x000002fe:
+case 0x000002ff:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerPatternRingsV")
     auto label = receiveString();
@@ -10492,7 +10510,7 @@ case 0x000002fe:
   }
   }
   break;
-case 0x000002ff:
+case 0x00000300:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerPatternEclipse")
     auto label = receiveString();
@@ -10503,7 +10521,7 @@ case 0x000002ff:
   }
   }
   break;
-case 0x00000300:
+case 0x00000301:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerPatternEclipseV")
     auto label = receiveString();
@@ -10519,7 +10537,7 @@ case 0x00000300:
   }
   }
   break;
-case 0x00000301:
+case 0x00000302:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerPatternSphere")
     auto label = receiveString();
@@ -10530,7 +10548,7 @@ case 0x00000301:
   }
   }
   break;
-case 0x00000302:
+case 0x00000303:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerPatternSphereV")
     auto label = receiveString();
@@ -10544,7 +10562,7 @@ case 0x00000302:
   }
   }
   break;
-case 0x00000303:
+case 0x00000304:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRingSynchronous")
     auto label = receiveString();
@@ -10555,7 +10573,7 @@ case 0x00000303:
   }
   }
   break;
-case 0x00000304:
+case 0x00000305:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRingSynchronousV")
     auto label = receiveString();
@@ -10569,7 +10587,7 @@ case 0x00000304:
   }
   }
   break;
-case 0x00000305:
+case 0x00000306:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRingWatermarks")
     auto label = receiveString();
@@ -10580,7 +10598,7 @@ case 0x00000305:
   }
   }
   break;
-case 0x00000306:
+case 0x00000307:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRingWatermarksV")
     auto label = receiveString();
@@ -10594,7 +10612,7 @@ case 0x00000306:
   }
   }
   break;
-case 0x00000307:
+case 0x00000308:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotatedAtom")
     auto label = receiveString();
@@ -10605,7 +10623,7 @@ case 0x00000307:
   }
   }
   break;
-case 0x00000308:
+case 0x00000309:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotatedAtomV")
     auto label = receiveString();
@@ -10619,7 +10637,7 @@ case 0x00000308:
   }
   }
   break;
-case 0x00000309:
+case 0x0000030a:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRainbowBalls")
     auto label = receiveString();
@@ -10632,7 +10650,7 @@ case 0x00000309:
   }
   }
   break;
-case 0x0000030a:
+case 0x0000030b:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRainbowBallsV")
     auto label = receiveString();
@@ -10646,7 +10664,7 @@ case 0x0000030a:
   }
   }
   break;
-case 0x0000030b:
+case 0x0000030c:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRainbowShot")
     auto label = receiveString();
@@ -10659,7 +10677,7 @@ case 0x0000030b:
   }
   }
   break;
-case 0x0000030c:
+case 0x0000030d:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRainbowShotV")
     auto label = receiveString();
@@ -10673,7 +10691,7 @@ case 0x0000030c:
   }
   }
   break;
-case 0x0000030d:
+case 0x0000030e:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSpiral")
     auto label = receiveString();
@@ -10684,7 +10702,7 @@ case 0x0000030d:
   }
   }
   break;
-case 0x0000030e:
+case 0x0000030f:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSpiralV")
     auto label = receiveString();
@@ -10698,7 +10716,7 @@ case 0x0000030e:
   }
   }
   break;
-case 0x0000030f:
+case 0x00000310:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSpiralEye")
     auto label = receiveString();
@@ -10709,7 +10727,7 @@ case 0x0000030f:
   }
   }
   break;
-case 0x00000310:
+case 0x00000311:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSpiralEyeV")
     auto label = receiveString();
@@ -10722,7 +10740,7 @@ case 0x00000310:
   }
   }
   break;
-case 0x00000311:
+case 0x00000312:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBarChartSine")
     auto label = receiveString();
@@ -10735,7 +10753,7 @@ case 0x00000311:
   }
   }
   break;
-case 0x00000312:
+case 0x00000313:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBarChartSineV")
     auto label = receiveString();
@@ -10750,7 +10768,7 @@ case 0x00000312:
   }
   }
   break;
-case 0x00000313:
+case 0x00000314:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBarChartAdvSine")
     auto label = receiveString();
@@ -10763,7 +10781,7 @@ case 0x00000313:
   }
   }
   break;
-case 0x00000314:
+case 0x00000315:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBarChartAdvSineV")
     auto label = receiveString();
@@ -10777,7 +10795,7 @@ case 0x00000314:
   }
   }
   break;
-case 0x00000315:
+case 0x00000316:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBarChartAdvSineFade")
     auto label = receiveString();
@@ -10790,7 +10808,7 @@ case 0x00000315:
   }
   }
   break;
-case 0x00000316:
+case 0x00000317:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBarChartAdvSineFadeV")
     auto label = receiveString();
@@ -10804,7 +10822,7 @@ case 0x00000316:
   }
   }
   break;
-case 0x00000317:
+case 0x00000318:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBarChartRainbow")
     auto label = receiveString();
@@ -10817,7 +10835,7 @@ case 0x00000317:
   }
   }
   break;
-case 0x00000318:
+case 0x00000319:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBarChartRainbowV")
     auto label = receiveString();
@@ -10831,7 +10849,7 @@ case 0x00000318:
   }
   }
   break;
-case 0x00000319:
+case 0x0000031a:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerBlocks")
     auto label = receiveString();
@@ -10845,7 +10863,7 @@ case 0x00000319:
   }
   }
   break;
-case 0x0000031a:
+case 0x0000031b:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTwinBlocks")
     auto label = receiveString();
@@ -10859,7 +10877,7 @@ case 0x0000031a:
   }
   }
   break;
-case 0x0000031b:
+case 0x0000031c:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSquareRandomDots")
     auto label = receiveString();
@@ -10873,7 +10891,7 @@ case 0x0000031b:
   }
   }
   break;
-case 0x0000031c:
+case 0x0000031d:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerScaleBlocks")
     auto label = receiveString();
@@ -10886,7 +10904,7 @@ case 0x0000031c:
   }
   }
   break;
-case 0x0000031d:
+case 0x0000031e:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerScaleBlocksV")
     auto label = receiveString();
@@ -10900,7 +10918,7 @@ case 0x0000031d:
   }
   }
   break;
-case 0x0000031e:
+case 0x0000031f:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerScaleSquares")
     auto label = receiveString();
@@ -10913,7 +10931,7 @@ case 0x0000031e:
   }
   }
   break;
-case 0x0000031f:
+case 0x00000320:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSquishSquare")
     auto label = receiveString();
@@ -10925,7 +10943,7 @@ case 0x0000031f:
   }
   }
   break;
-case 0x00000320:
+case 0x00000321:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFluid")
     auto label = receiveString();
@@ -10937,7 +10955,7 @@ case 0x00000320:
   }
   }
   break;
-case 0x00000321:
+case 0x00000322:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFluidV")
     auto label = receiveString();
@@ -10950,7 +10968,7 @@ case 0x00000321:
   }
   }
   break;
-case 0x00000322:
+case 0x00000323:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFluidPoints")
     auto label = receiveString();
@@ -10963,7 +10981,7 @@ case 0x00000322:
   }
   }
   break;
-case 0x00000323:
+case 0x00000324:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerFluidPointsV")
     auto label = receiveString();
@@ -10978,7 +10996,7 @@ case 0x00000323:
   }
   }
   break;
-case 0x00000324:
+case 0x00000325:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerArcPolarFade")
     auto label = receiveString();
@@ -10988,7 +11006,7 @@ case 0x00000324:
   }
   }
   break;
-case 0x00000325:
+case 0x00000326:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerArcPolarFadeV")
     auto label = receiveString();
@@ -11001,7 +11019,7 @@ case 0x00000325:
   }
   }
   break;
-case 0x00000326:
+case 0x00000327:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerArcPolarRadius")
     auto label = receiveString();
@@ -11011,7 +11029,7 @@ case 0x00000326:
   }
   }
   break;
-case 0x00000327:
+case 0x00000328:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerArcPolarRadiusV")
     auto label = receiveString();
@@ -11024,7 +11042,7 @@ case 0x00000327:
   }
   }
   break;
-case 0x00000328:
+case 0x00000329:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerCaleidoscope")
     auto label = receiveString();
@@ -11035,7 +11053,7 @@ case 0x00000328:
   }
   }
   break;
-case 0x00000329:
+case 0x0000032a:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerCaleidoscopeV")
     auto label = receiveString();
@@ -11050,7 +11068,7 @@ case 0x00000329:
   }
   }
   break;
-case 0x0000032a:
+case 0x0000032b:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerHboDots")
     auto label = receiveString();
@@ -11061,7 +11079,7 @@ case 0x0000032a:
   }
   }
   break;
-case 0x0000032b:
+case 0x0000032c:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerHboDotsV")
     auto label = receiveString();
@@ -11077,7 +11095,7 @@ case 0x0000032b:
   }
   }
   break;
-case 0x0000032c:
+case 0x0000032d:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerMoonDots")
     auto label = receiveString();
@@ -11090,7 +11108,7 @@ case 0x0000032c:
   }
   }
   break;
-case 0x0000032d:
+case 0x0000032e:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerMoonDotsV")
     auto label = receiveString();
@@ -11104,7 +11122,7 @@ case 0x0000032d:
   }
   }
   break;
-case 0x0000032e:
+case 0x0000032f:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTwinHboDots")
     auto label = receiveString();
@@ -11115,7 +11133,7 @@ case 0x0000032e:
   }
   }
   break;
-case 0x0000032f:
+case 0x00000330:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTwinHboDotsV")
     auto label = receiveString();
@@ -11132,7 +11150,7 @@ case 0x0000032f:
   }
   }
   break;
-case 0x00000330:
+case 0x00000331:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerThreeDotsStar")
     auto label = receiveString();
@@ -11143,7 +11161,7 @@ case 0x00000330:
   }
   }
   break;
-case 0x00000331:
+case 0x00000332:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerThreeDotsStarV")
     auto label = receiveString();
@@ -11159,7 +11177,7 @@ case 0x00000331:
   }
   }
   break;
-case 0x00000332:
+case 0x00000333:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSineArcs")
     auto label = receiveString();
@@ -11170,7 +11188,7 @@ case 0x00000332:
   }
   }
   break;
-case 0x00000333:
+case 0x00000334:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSineArcsV")
     auto label = receiveString();
@@ -11183,7 +11201,7 @@ case 0x00000333:
   }
   }
   break;
-case 0x00000334:
+case 0x00000335:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTrianglesShift")
     auto label = receiveString();
@@ -11194,7 +11212,7 @@ case 0x00000334:
   }
   }
   break;
-case 0x00000335:
+case 0x00000336:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerTrianglesShiftV")
     auto label = receiveString();
@@ -11209,7 +11227,7 @@ case 0x00000335:
   }
   }
   break;
-case 0x00000336:
+case 0x00000337:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerPointsShift")
     auto label = receiveString();
@@ -11220,7 +11238,7 @@ case 0x00000336:
   }
   }
   break;
-case 0x00000337:
+case 0x00000338:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerPointsShiftV")
     auto label = receiveString();
@@ -11235,7 +11253,7 @@ case 0x00000337:
   }
   }
   break;
-case 0x00000338:
+case 0x00000339:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSwingDots")
     auto label = receiveString();
@@ -11246,7 +11264,7 @@ case 0x00000338:
   }
   }
   break;
-case 0x00000339:
+case 0x0000033a:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerSwingDotsV")
     auto label = receiveString();
@@ -11259,7 +11277,7 @@ case 0x00000339:
   }
   }
   break;
-case 0x0000033a:
+case 0x0000033b:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerCircularPoints")
     auto label = receiveString();
@@ -11270,7 +11288,7 @@ case 0x0000033a:
   }
   }
   break;
-case 0x0000033b:
+case 0x0000033c:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerCircularPointsV")
     auto label = receiveString();
@@ -11284,7 +11302,7 @@ case 0x0000033b:
   }
   }
   break;
-case 0x0000033c:
+case 0x0000033d:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerCurvedCircle")
     auto label = receiveString();
@@ -11295,7 +11313,7 @@ case 0x0000033c:
   }
   }
   break;
-case 0x0000033d:
+case 0x0000033e:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerCurvedCircleV")
     auto label = receiveString();
@@ -11309,7 +11327,7 @@ case 0x0000033d:
   }
   }
   break;
-case 0x0000033e:
+case 0x0000033f:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerModCircle")
     auto label = receiveString();
@@ -11320,7 +11338,7 @@ case 0x0000033e:
   }
   }
   break;
-case 0x0000033f:
+case 0x00000340:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerModCircleV")
     auto label = receiveString();
@@ -11335,7 +11353,7 @@ case 0x0000033f:
   }
   }
   break;
-case 0x00000340:
+case 0x00000341:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerDnaDots")
     auto label = receiveString();
@@ -11346,7 +11364,7 @@ case 0x00000340:
   }
   }
   break;
-case 0x00000341:
+case 0x00000342:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerDnaDotsV")
     auto label = receiveString();
@@ -11362,7 +11380,7 @@ case 0x00000341:
   }
   }
   break;
-case 0x00000342:
+case 0x00000343:
   {
     FFFI_FUNCTION_INVOCATION("Spinner3SmuggleDots")
     auto label = receiveString();
@@ -11373,7 +11391,7 @@ case 0x00000342:
   }
   }
   break;
-case 0x00000343:
+case 0x00000344:
   {
     FFFI_FUNCTION_INVOCATION("Spinner3SmuggleDotsV")
     auto label = receiveString();
@@ -11389,7 +11407,7 @@ case 0x00000343:
   }
   }
   break;
-case 0x00000344:
+case 0x00000345:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotateSegmentsPulsar")
     auto label = receiveString();
@@ -11400,7 +11418,7 @@ case 0x00000344:
   }
   }
   break;
-case 0x00000345:
+case 0x00000346:
   {
     FFFI_FUNCTION_INVOCATION("SpinnerRotateSegmentsPulsarV")
     auto label = receiveString();
@@ -11415,7 +11433,7 @@ case 0x00000345:
   }
   }
   break;
-case 0x00000346:
+case 0x00000347:
   {
     FFFI_FUNCTION_INVOCATION("Splitter")
     auto split_vertically = receiveValue<bool>();
@@ -11439,7 +11457,7 @@ case 0x00000346:
   }
   }
   break;
-case 0x00000347:
+case 0x00000348:
   {
     FFFI_FUNCTION_INVOCATION("SplitterV")
     auto split_vertically = receiveValue<bool>();
@@ -11464,7 +11482,7 @@ case 0x00000347:
   }
   }
   break;
-case 0x00000348:
+case 0x00000349:
   {
     FFFI_FUNCTION_INVOCATION("loadStyle")
     auto ptr = receiveValue<uintptr_t>();
@@ -11565,7 +11583,7 @@ case 0x00000348:
   }
   }
   break;
-case 0x00000349:
+case 0x0000034a:
   {
     FFFI_FUNCTION_INVOCATION("GetStyle")
     uintptr_t r;
@@ -11577,7 +11595,7 @@ case 0x00000349:
   }
   }
   break;
-case 0x0000034a:
+case 0x0000034b:
   {
     FFFI_FUNCTION_INVOCATION("dumpStyle")
     auto ptr = receiveValue<uintptr_t>();
@@ -11699,7 +11717,7 @@ case 0x0000034a:
   }
   }
   break;
-case 0x0000034b:
+case 0x0000034c:
   {
     FFFI_FUNCTION_INVOCATION("TableGetSortSpecs")
     bool sort;
@@ -11743,7 +11761,7 @@ case 0x0000034b:
   }
   }
   break;
-case 0x0000034c:
+case 0x0000034d:
   {
     FFFI_FUNCTION_INVOCATION("TableSetSortSpecsDirty")
     auto dirty = receiveValue<bool>();
@@ -11755,7 +11773,7 @@ case 0x0000034c:
   }
   }
   break;
-case 0x0000034d:
+case 0x0000034e:
   {
     FFFI_FUNCTION_INVOCATION("Toggle")
     auto label = receiveString();
@@ -11772,7 +11790,7 @@ valR = val;
   }
   }
   break;
-case 0x0000034e:
+case 0x0000034f:
   {
     FFFI_FUNCTION_INVOCATION("ToggleV")
     auto label = receiveString();
@@ -11794,7 +11812,7 @@ valR = val;
   }
   }
   break;
-case 0x0000034f:
+case 0x00000350:
   {
     FFFI_FUNCTION_INVOCATION("InvisibleButtonP")
     auto str_id = receiveString();
@@ -11804,7 +11822,7 @@ case 0x0000034f:
   }
   }
   break;
-case 0x00000350:
+case 0x00000351:
   {
     FFFI_FUNCTION_INVOCATION("InvisibleButtonVP")
     auto str_id = receiveString();

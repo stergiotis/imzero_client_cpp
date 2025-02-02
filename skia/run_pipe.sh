@@ -4,6 +4,7 @@ rm -f transfer
 mkfifo transfer
 font="./martian/MartianMono-StdRg.ttf"
 font="./SauceCodeProNerdFontMono-Regular.ttf"
+font="/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
 VSYNC="${VSYNC:-on}"
 ./main_go --logFormat console demo --mainFontTTF "$font" --mainFontSizeInPixels 13 "$@" < transfer | \
 	./imgui_exe -ttfFilePath "$font" -fffiInterpreter on -skiaBackendType gl -vsync $VSYNC -backdropFilter off \

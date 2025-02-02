@@ -116,7 +116,7 @@ static void setup_imgui() {
 void render_init(FILE *fdInput,FILE *fdOutput) {
     fdIn = fdInput;
     fdOut = fdOutput;
-    //StyeColorsApp();
+    StyeColorsApp();
     setup_imgui();
 
     ImPlot::CreateContext();
