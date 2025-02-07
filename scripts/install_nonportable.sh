@@ -1,8 +1,10 @@
 #!/bin/bash
 set -ev
+set -o pipefail
 here=$(dirname "$(readlink -f "$BASH_SOURCE")")
 cd "$here"
 
 # linux
 source /etc/os-release
-./"install_${ID}_${VERSION_ID}.sh"
+version_id=$(echo "$VERSION_ID" | grep -o -E "[0-9]+[.][0-9]+")
+."/nonportable/${ID}_${version_id}.sh"
