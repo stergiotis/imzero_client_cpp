@@ -865,7 +865,7 @@ int App::Run(CliOptions &opts) {
     const SDL_DisplayMode *dm = nullptr;
     if(!headless) {
         // Setup SDL
-        if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != SDL_TRUE) {
+        if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS)) {
             fprintf(stderr, "Error: SDL_Init(): %s\n", SDL_GetError());
             return -1;
         }
@@ -912,7 +912,7 @@ int App::Run(CliOptions &opts) {
         // Create window with graphics context
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
         //SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-        Uint32 window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN;
+        Uint32 window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
         dm = SDL_GetDesktopDisplayMode(SDL_GetPrimaryDisplay());
         fWindow = SDL_CreateWindow(opts.appTitle, dm->w, dm->h, window_flags);
         if (fWindow == nullptr) {
@@ -1564,7 +1564,7 @@ void App::dispatchUserInteractionEventsBinary() {
                                     }
                                 }
                                 // use server-side keyboard layout encoded in SDL
-                                keyCodeFB = sdlKeyCodeToImZeroFBKeyCode(SDL_GetKeyFromScancode(static_cast<SDL_Scancode>(scanCode),currentMod,SDL_FALSE), static_cast<SDL_Scancode>(scanCode));
+                                keyCodeFB = sdlKeyCodeToImZeroFBKeyCode(SDL_GetKeyFromScancode(static_cast<SDL_Scancode>(scanCode),currentMod,false), static_cast<SDL_Scancode>(scanCode));
                             } else {
                                 // FIXME
                             }
@@ -1822,7 +1822,6 @@ int App::mainLoopInteractive(CliOptions &opts,SDL_GLContext glContext,ImVec4 con
                     }
                     break;
                 case SDL_EVENT_WINDOW_RESIZED:
-                    fprintf(stderr,"resizing w=%d,h=%d\n",width,height);
                     destroyContext();
                     createContext(clearColor,width,height);
                     break;
