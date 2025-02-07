@@ -1,3 +1,4 @@
+// Modified
 /*MIT License
 
 Copyright (c) 2022 Evan Pezent & ImPlot Community
@@ -21,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-void StyeColorsApp()
+void StyleImPlot()
 {
     static const ImVec4 bg_dark = ImVec4(0.15f, 0.16f, 0.21f, 1.00f);
     static const ImVec4 bg_mid = ImVec4(0.20f, 0.21f, 0.27f, 1.00f);

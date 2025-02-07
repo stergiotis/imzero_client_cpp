@@ -112,11 +112,14 @@ static void setup_imgui() {
     io.ConfigFlags &= ~ImGuiConfigFlags_ViewportsEnable;
 }
 
-#include "style.h"
+#include "implot_style.h"
+#include "adobe_spectrum_style.h"
 void render_init(FILE *fdInput,FILE *fdOutput) {
     fdIn = fdInput;
     fdOut = fdOutput;
-    StyeColorsApp();
+    //StyleImPlot();
+    //StyleAdobeSpectrum();
+    ImGui::StyleColorsDark();
     setup_imgui();
 
     ImPlot::CreateContext();
