@@ -24,6 +24,11 @@ static inline bool isParagraphText(const char *text_begin, const char *text_end)
     }
     return (memchr(text_begin,'\n',text_end-text_begin) != nullptr);
 }
+static inline uint64_t castTextureForTransport(ImTextureID textureId) {
+    // FIXME textures are currently unused
+    //return reinterpret_cast<uint64_t>(reinterpret_cast<intptr_t>(textureId));
+    return 0;
+}
 
 namespace ImGui {
     SkFont skiaFont;
@@ -357,7 +362,7 @@ namespace ImGui {
     void Hooks::ImDrawList::Post::CreateImDrawList(::ImDrawList *draw_list, ImDrawListSharedData *shared_data) {
         ;
     }
-    bool Hooks::ImDrawList::Pre::AddCallback(::ImDrawList *draw_list, void *callback, void *callback_data) {
+    bool Hooks::ImDrawList::Pre::AddCallback(::ImDrawList *draw_list, void *callback, void *userdata, size_t userdata_size) {
         return true;
     }
     bool Hooks::ImDrawList::Pre::AddDrawCmd(::ImDrawList *draw_list) {
@@ -718,7 +723,7 @@ namespace ImGui {
             auto pMaxFb = ImZeroFB::SingleVec2(p_max.x,p_max.y);
             auto uvMinFb = ImZeroFB::SingleVec2(uv_min.x,uv_min.y);
             auto uvMaxFb = ImZeroFB::SingleVec2(uv_max.x,uv_max.y);
-            auto arg = ImZeroFB::CreateCmdImage(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(user_texture_id),&pMinFb,&pMaxFb,&uvMinFb,&uvMaxFb,col);
+            auto arg = ImZeroFB::CreateCmdImage(*draw_list->fbBuilder,castTextureForTransport(user_texture_id),&pMinFb,&pMaxFb,&uvMinFb,&uvMaxFb,col);
             draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdImage,arg.Union());
         IMZERO_DRAWLIST_END
         return true;
@@ -734,7 +739,7 @@ namespace ImGui {
             auto uv2Fb = ImZeroFB::SingleVec2(uv2.x,uv2.y);
             auto uv3Fb = ImZeroFB::SingleVec2(uv3.x,uv3.y);
             auto uv4Fb = ImZeroFB::SingleVec2(uv4.x,uv4.y);
-            auto arg = ImZeroFB::CreateCmdImageQuad(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(user_texture_id),&p1Fb,&p2Fb,&p3Fb,&p4Fb,&uv1Fb,&uv2Fb,&uv3Fb,&uv4Fb,col);
+            auto arg = ImZeroFB::CreateCmdImageQuad(*draw_list->fbBuilder,castTextureForTransport(user_texture_id),&p1Fb,&p2Fb,&p3Fb,&p4Fb,&uv1Fb,&uv2Fb,&uv3Fb,&uv4Fb,col);
             draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdImageQuad,arg.Union());
         IMZERO_DRAWLIST_END
         return true;
@@ -746,7 +751,7 @@ namespace ImGui {
             auto pMaxFb = ImZeroFB::SingleVec2(p_max.x,p_max.y);
             auto uvMinFb = ImZeroFB::SingleVec2(uv_min.x,uv_max.y);
             auto uvMaxFb = ImZeroFB::SingleVec2(uv_min.x,uv_max.y);
-            auto arg = ImZeroFB::CreateCmdImageRounded(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(user_texture_id),&pMinFb,&pMaxFb,&uvMinFb,&uvMaxFb,col,rounding,flags);
+            auto arg = ImZeroFB::CreateCmdImageRounded(*draw_list->fbBuilder,castTextureForTransport(user_texture_id),&pMinFb,&pMaxFb,&uvMinFb,&uvMaxFb,col,rounding,flags);
             draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdImageRounded,arg.Union());
         IMZERO_DRAWLIST_END
         return true;

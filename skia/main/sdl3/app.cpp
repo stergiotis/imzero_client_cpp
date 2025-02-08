@@ -762,7 +762,9 @@ static void build_ImFontAtlas(ImFontAtlas& atlas, SkPaint& fontPaint) {
     auto fontShader = fontImage->makeShader(SkSamplingOptions(SkFilterMode::kLinear), localMatrix);
     fontPaint.setShader(fontShader);
     fontPaint.setColor(SK_ColorWHITE);
-    atlas.TexID = &fontPaint;
+    ImTextureID texId;
+    texId = reinterpret_cast<intptr_t>(&fontPaint);
+    atlas.TexID = texId;
 }
 
 int App::Run(CliOptions &opts) {

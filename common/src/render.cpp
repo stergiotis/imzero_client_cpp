@@ -21,7 +21,6 @@
 
 #include "widgets/common.h"
 #include "widgets/piemenu.h"
-#include "widgets/coloredbutton.h"
 #include "widgets/splitter.h"
 #include "widgets/imgui_knobs/imgui-knobs.h"
 #include "widgets/imgui_toggle/imgui_toggle.h"

@@ -191,7 +191,6 @@ let widgets = let dir = "./src/widgets" in sourceTreePart::{
 	, sources = [
 		, "${dir}/common.cpp"
 		, "${dir}/piemenu.cpp"
-		, "${dir}/coloredbutton.cpp"
 		, "${dir}/splitter.cpp"
 	]
 	, cxxflags = {
