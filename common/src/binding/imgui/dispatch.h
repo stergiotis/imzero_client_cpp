@@ -13808,6 +13808,14 @@ case 0x00000402:
   break;
 case 0x00000403:
   {
+    FFFI_FUNCTION_INVOCATION("TableNextColumnP")
+    {
+    ImGui::TableNextColumn();
+  }
+  }
+  break;
+case 0x00000404:
+  {
     FFFI_FUNCTION_INVOCATION("Toggle")
     auto label = receiveString();
     auto val = receiveValue<bool>();
@@ -13823,7 +13831,7 @@ valR = val;
   }
   }
   break;
-case 0x00000404:
+case 0x00000405:
   {
     FFFI_FUNCTION_INVOCATION("ToggleV")
     auto label = receiveString();
@@ -13845,7 +13853,7 @@ valR = val;
   }
   }
   break;
-case 0x00000405:
+case 0x00000406:
   {
     FFFI_FUNCTION_INVOCATION("InvisibleButtonP")
     auto str_id = receiveString();
@@ -13855,7 +13863,7 @@ case 0x00000405:
   }
   }
   break;
-case 0x00000406:
+case 0x00000407:
   {
     FFFI_FUNCTION_INVOCATION("InvisibleButtonVP")
     auto str_id = receiveString();
