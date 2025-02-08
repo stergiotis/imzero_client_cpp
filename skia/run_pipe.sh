@@ -1,10 +1,14 @@
 #!/bin/bash
 set -ev
+set -o pipefail
+here=$(dirname "$(readlink -f "$BASH_SOURCE")")
+cd "$here"
+
 rm -f transfer
 mkfifo transfer
 font="./martian/MartianMono-StdRg.ttf"
 font="./SauceCodeProNerdFontMono-Regular.ttf"
-font="/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
+font=$(../scripts/find_ttf_font_file.sh "DejaVu Sans:style=Book")
 VSYNC="${VSYNC:-on}"
 ./main_go --logFormat console demo --mainFontTTF "$font" --mainFontSizeInPixels 13 "$@" < transfer | \
 	./imgui_exe -ttfFilePath "$font" -fffiInterpreter on -skiaBackendType gl -vsync $VSYNC -backdropFilter off \

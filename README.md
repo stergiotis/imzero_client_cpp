@@ -34,16 +34,16 @@ SVG:
 4) State-of-the art **hardware accelerated** immediate mode 2D drawing by relying on [Skia](https://skia.org).
 
 ## Running the demo
-Assuming Ubuntu Linux and go >=1.22 installation:
+Assuming a supported release of Linux and go >=1.23 installation:
 ```bash
 git clone https://github.com/stergiotis/imzero_client_cpp
 cd imzero_client_cpp
-./scripts/install.sh
-./scripts/install_ubuntu2204.sh
-./imgui_glfw/build.sh
+./skia/build_ab_initio.sh
 ./scripts/demo.sh
 ```
-Note that this clones the go library <a href="https://github.com/stergiotis/boxer">Boxer</a> and uses a `go.mod` directive to use it in the go build.
+Note: The scripts modify the parent folder!
+
+Note: Clones the go library <a href="https://github.com/stergiotis/boxer">Boxer</a> and uses a `go.mod` directive to use it in the go build.
 This ensures that the generated `dispatch.h` files match the corresponding fffi idl code in boxer.
 
 ## Contributing
