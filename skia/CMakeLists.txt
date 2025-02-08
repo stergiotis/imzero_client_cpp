@@ -165,7 +165,6 @@ add_library(arena OBJECT "${CMAKE_CURRENT_LIST_DIR}/./src/arena/simple/simple.cp
 # widgets
 add_library(widgets OBJECT "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/common.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/piemenu.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./src/widgets/coloredbutton.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/splitter.cpp")
 target_compile_options(widgets PUBLIC -Wno-unused-parameter
 -Wno-unused-variable)
