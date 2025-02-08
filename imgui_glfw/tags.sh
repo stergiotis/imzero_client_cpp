@@ -1,1 +1,0 @@
-build_tags=binary_log,spectrum_color_scheme_dark,spectrum_scale_desktop,spectrum_theme_spectrum,spectrum_theme_none,boxer_enable_profiling
