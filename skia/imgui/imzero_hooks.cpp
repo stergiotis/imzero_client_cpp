@@ -778,6 +778,7 @@ namespace ImGui {
     }
 
     bool Hooks::ImFont::Pre::CalcTextSizeA(const ::ImFont *font, float size, float max_width, float wrap_width, const char* text_begin, const char* text_end, const char** remaining, ImVec2 &retr) { ZoneScoped;
+        IM_ASSERT(font != nullptr && "font is nullptr");
         if (!text_end) {
             text_end = text_begin + strlen(text_begin); // FIXME-OPT: Need to avoid this.
         }
@@ -786,7 +787,7 @@ namespace ImGui {
             *remaining = nullptr;
         }
 
-        if(ImGui::useVectorCmd) {
+        if(useVectorCmd) {
             bool freeAllocatedText = false;
 
             if(isPasswordFont(*font)) {
@@ -798,7 +799,6 @@ namespace ImGui {
                     for(size_t i=0;i<len;i++) {
                         memcpy(const_cast<char*>(&text_begin[i*hiddenPwBufferNBytesPerChar]), hiddenPwBuffer, hiddenPwBufferNBytesPerChar);
                     }
-                    text_end = text_begin + len;
                     freeAllocatedText = true;
                 } else {
                     // fast path, password fits in buffer
@@ -847,6 +847,7 @@ namespace ImGui {
     }
 
     bool Hooks::ImFont::Pre::RenderText(const ::ImFont *font, ::ImDrawList* draw_list, float size, const ImVec2& pos, ImU32 col, const ImVec4& clip_rect, const char* text_begin, const char* text_end, float wrap_width, bool cpu_fine_clip) { ZoneScoped;
+        IM_ASSERT(font != nullptr && "font is nullptr");
         if (!text_end) {
             text_end = text_begin + strlen(text_begin);
         }

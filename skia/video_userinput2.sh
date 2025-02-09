@@ -8,7 +8,7 @@ mkfifo transferUserInteractionEvents
 resW=1920
 resH=1080
 
-./imgui_exe -fffiInterpreter off \
+./imgui_skia_exe -fffiInterpreter off \
             -ttfFilePath ./SauceCodeProNerdFontPropo-Regular.ttf \
             -backdropFilter off \
             -videoRawFramesFile transferRawFrames \
