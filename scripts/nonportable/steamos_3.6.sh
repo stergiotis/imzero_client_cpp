@@ -41,3 +41,6 @@ $pacman libjpeg-turbo libpng libwebp ninja procps-ng python rsync harfbuzz glibc
 
 # note: steam-os uses a non-stock kernel: s/linux-headers/linux-neptune-headers/
 $pacman holo-3.6/linux-headers linux-neptune-headers holo-3.6/linux-lts-headers
+
+# tracy dependencies
+$pacman wayland libglvnd libxkbcommon freetype2 dbus hicolor-icon-theme capstone #intel-tbb
