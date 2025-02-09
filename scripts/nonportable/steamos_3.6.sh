@@ -1,10 +1,10 @@
 #!/bin/bash
 sudo steamos-readonly disable
-sudo steamos-readonly disable
 sudo pacman-key --init
 sudo pacman-key --populate archlinux
-# reinstall missing files
-#sudo pacman -Syu $(pacman -Qk 2>/dev/null | grep -ve ' 0 missing' | grep -ie ^libc -e glibc -e gcc -e clang -e headers -e udev -e systemd | awk -F ':' '{print $1}') --overwrite '*'
+# reinstall missing system files
+missing=$(pacman -Qk 2>/dev/null | grep -ve ' 0 missing' | grep -ie ^libc -e glibc -e gcc -e clang -e headers -e udev -e systemd  | cut -d ":" -f 1)
+sudo pacman -Syu "$missing" --overwrite '*'
 
 pacman="sudo pacman -S --noconfirm"
 if ! [ -x "$(command -v wget)" ]; then
@@ -43,4 +43,6 @@ $pacman libjpeg-turbo libpng libwebp ninja procps-ng python rsync harfbuzz glibc
 $pacman holo-3.6/linux-headers linux-neptune-headers holo-3.6/linux-lts-headers
 
 # tracy dependencies
-$pacman wayland libglvnd libxkbcommon freetype2 dbus hicolor-icon-theme capstone #intel-tbb
+$pacman wayland wayland-protocols libglvnd libxkbcommon freetype2 dbus hicolor-icon-theme capstone libffi brotli holo-3.6/glib2 graphite #intel-tbb
+# tracy missing files on steamos
+$pacman brotli holo-3.6/glib2 graphite pcre2 libsysprof-capture libxau libxdmcp
