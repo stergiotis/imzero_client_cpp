@@ -22,7 +22,6 @@ case 0x00000000:
               checked = v ? 1 : -1;
          }
 ;
-    sendEmptyString();
     sendValueSignMagnitude<int8_t>(checked);
     sendValue<bool>(clicked);
     flushSend();
@@ -40,7 +39,6 @@ case 0x00000001:
     {
     changed = ImGui::ColorEdit3(label,colP,flags);
 col = colP;;
-    sendEmptyString();
     sendArray<float,3>(col);
     sendValue<bool>(changed);
     flushSend();
@@ -58,7 +56,6 @@ case 0x00000002:
     {
     changed = ImGui::ColorEdit4(label,colP,flags);
 col = colP;;
-    sendEmptyString();
     sendArray<float,4>(col);
     sendValue<bool>(changed);
     flushSend();
@@ -71,7 +68,6 @@ case 0x00000003:
     uint16_t status;
     {
     status = GetItemStatus();
-    sendEmptyString();
     sendValue<uint16_t>(status);
     flushSend();
   }
@@ -85,7 +81,6 @@ case 0x00000004:
     uint16_t status;
     {
     status = GetItemStatus(primary, secondary);
-    sendEmptyString();
     sendValue<uint16_t>(status);
     flushSend();
   }
@@ -97,7 +92,6 @@ case 0x00000005:
     float* r;
     {
     auto r = ImGui::GetCurrentWindow()->DC.CursorPos;
-    sendEmptyString();
     sendArray<float,2>(r);
     flushSend();
   }
@@ -117,7 +111,6 @@ case 0x00000006:
          ImVec2 availableRegion;
          visible = BeginCustomWidget((ImDrawList**)&currentWindowDrawList,&pos,&availableRegion,&keyboardNavActive,&seed);
          ;
-    sendEmptyString();
     sendValue<bool>(visible);
     sendValue(currentWindowDrawList);
     sendArray<float,2>(pos);
@@ -143,7 +136,6 @@ case 0x00000008:
     uintptr_t r;
     {
     r = (uintptr_t)(new ImGui::ImCoolBarConfig());
-    sendEmptyString();
     sendValue(r);
     flushSend();
   }
@@ -160,7 +152,6 @@ case 0x00000009:
     uintptr_t r;
     {
     r = (uintptr_t)(new ImGui::ImCoolBarConfig(anchor,normalSize,hoveredSize,animStep,effectStrength));
-    sendEmptyString();
     sendValue(r);
     flushSend();
   }
@@ -193,7 +184,6 @@ hoveredSize = t->hovered_size;
 animStep = t->anim_step;
 effectStrength = t->effect_strength;
 ;
-    sendEmptyString();
     sendArray<float,2>(anchor);
     sendValue<float>(normalSize);
     sendValue<float>(hoveredSize);
@@ -231,7 +221,6 @@ case 0x0000000d:
     bool r;
     {
     r = ImGui::BeginCoolBar(label);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -247,7 +236,6 @@ case 0x0000000e:
     bool r;
     {
     r = ImGui::BeginCoolBar(label, flags, *((ImGui::ImCoolBarConfig*)cfg), windowFlags);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -267,7 +255,6 @@ case 0x00000010:
     bool r;
     {
     r = ImGui::CoolBarItem();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -283,7 +270,6 @@ case 0x00000011:
 width = ImGui::GetCoolBarItemWidth();
 scale = ImGui::GetCoolBarItemScale();
 ;
-    sendEmptyString();
     sendValue<float>(width);
     sendValue<float>(scale);
     flushSend();
@@ -340,7 +326,6 @@ if(l > 0) {
    font_ptr->Scale = saved_scale;
 }
 ;
-    sendEmptyString();
     sendValueSignMagnitude<int>(clickedIndex);
     sendValueSignMagnitude<int>(hoveredIndex);
     flushSend();
@@ -359,7 +344,6 @@ case 0x00000013:
 r = ImGui::DragScalar(label,ImGuiDataType_Float,(void*)&vP);
 v = vP;
 ;
-    sendEmptyString();
     sendValue<float>(v);
     sendValue<bool>(r);
     flushSend();
@@ -383,7 +367,6 @@ case 0x00000014:
 r = ImGui::DragScalar(label,ImGuiDataType_Float,(void*)&vP,v_speed,(const void*)&p_min,(const void*)&p_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendValue<float>(v);
     sendValue<bool>(r);
     flushSend();
@@ -408,7 +391,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::DragScalarN(label,ImGuiDataType_Float,(void*)vP,(int)v_len,v_speed,(const void*)&v_min,(const void*)&v_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<float>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -428,7 +410,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::DragScalarN(label,ImGuiDataType_Float,(void*)vP,(int)v_len);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<float>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -447,7 +428,6 @@ case 0x00000017:
 r = ImGui::DragScalar(label,ImGuiDataType_Double,(void*)&vP);
 v = vP;
 ;
-    sendEmptyString();
     sendValue<double>(v);
     sendValue<bool>(r);
     flushSend();
@@ -471,7 +451,6 @@ case 0x00000018:
 r = ImGui::DragScalar(label,ImGuiDataType_Double,(void*)&vP,v_speed,(const void*)&p_min,(const void*)&p_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendValue<double>(v);
     sendValue<bool>(r);
     flushSend();
@@ -496,7 +475,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::DragScalarN(label,ImGuiDataType_Double,(void*)vP,(int)v_len,v_speed,(const void*)&v_min,(const void*)&v_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<double>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -516,7 +494,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::DragScalarN(label,ImGuiDataType_Double,(void*)vP,(int)v_len);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<double>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -535,7 +512,6 @@ case 0x0000001b:
 r = ImGui::DragScalar(label,ImGuiDataType_S32,(void*)&vP);
 v = vP;
 ;
-    sendEmptyString();
     sendValueSignMagnitude<int>(v);
     sendValue<bool>(r);
     flushSend();
@@ -559,7 +535,6 @@ case 0x0000001c:
 r = ImGui::DragScalar(label,ImGuiDataType_S32,(void*)&vP,v_speed,(const void*)&p_min,(const void*)&p_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendValueSignMagnitude<int>(v);
     sendValue<bool>(r);
     flushSend();
@@ -584,7 +559,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::DragScalarN(label,ImGuiDataType_S32,(void*)vP,(int)v_len,v_speed,(const void*)&v_min,(const void*)&v_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<int>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -604,7 +578,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::DragScalarN(label,ImGuiDataType_S32,(void*)vP,(int)v_len);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<int>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -623,7 +596,6 @@ case 0x0000001f:
 r = ImGui::DragScalar(label,ImGuiDataType_S16,(void*)&vP);
 v = vP;
 ;
-    sendEmptyString();
     sendValueSignMagnitude<int16_t>(v);
     sendValue<bool>(r);
     flushSend();
@@ -647,7 +619,6 @@ case 0x00000020:
 r = ImGui::DragScalar(label,ImGuiDataType_S16,(void*)&vP,v_speed,(const void*)&p_min,(const void*)&p_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendValueSignMagnitude<int16_t>(v);
     sendValue<bool>(r);
     flushSend();
@@ -672,7 +643,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::DragScalarN(label,ImGuiDataType_S16,(void*)vP,(int)v_len,v_speed,(const void*)&v_min,(const void*)&v_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<int16_t>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -692,7 +662,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::DragScalarN(label,ImGuiDataType_S16,(void*)vP,(int)v_len);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<int16_t>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -711,7 +680,6 @@ case 0x00000023:
 r = ImGui::DragScalar(label,ImGuiDataType_S32,(void*)&vP);
 v = vP;
 ;
-    sendEmptyString();
     sendValueSignMagnitude<int32_t>(v);
     sendValue<bool>(r);
     flushSend();
@@ -735,7 +703,6 @@ case 0x00000024:
 r = ImGui::DragScalar(label,ImGuiDataType_S32,(void*)&vP,v_speed,(const void*)&p_min,(const void*)&p_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendValueSignMagnitude<int32_t>(v);
     sendValue<bool>(r);
     flushSend();
@@ -760,7 +727,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::DragScalarN(label,ImGuiDataType_S32,(void*)vP,(int)v_len,v_speed,(const void*)&v_min,(const void*)&v_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<int32_t>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -780,7 +746,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::DragScalarN(label,ImGuiDataType_S32,(void*)vP,(int)v_len);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<int32_t>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -799,7 +764,6 @@ case 0x00000027:
 r = ImGui::DragScalar(label,ImGuiDataType_S8,(void*)&vP);
 v = vP;
 ;
-    sendEmptyString();
     sendValueSignMagnitude<int8_t>(v);
     sendValue<bool>(r);
     flushSend();
@@ -823,7 +787,6 @@ case 0x00000028:
 r = ImGui::DragScalar(label,ImGuiDataType_S8,(void*)&vP,v_speed,(const void*)&p_min,(const void*)&p_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendValueSignMagnitude<int8_t>(v);
     sendValue<bool>(r);
     flushSend();
@@ -848,7 +811,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::DragScalarN(label,ImGuiDataType_S8,(void*)vP,(int)v_len,v_speed,(const void*)&v_min,(const void*)&v_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<int8_t>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -868,7 +830,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::DragScalarN(label,ImGuiDataType_S8,(void*)vP,(int)v_len);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<int8_t>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -887,7 +848,6 @@ case 0x0000002b:
 r = ImGui::DragScalar(label,ImGuiDataType_U32,(void*)&vP);
 v = vP;
 ;
-    sendEmptyString();
     sendValue<unsigned>(v);
     sendValue<bool>(r);
     flushSend();
@@ -911,7 +871,6 @@ case 0x0000002c:
 r = ImGui::DragScalar(label,ImGuiDataType_U32,(void*)&vP,v_speed,(const void*)&p_min,(const void*)&p_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendValue<unsigned>(v);
     sendValue<bool>(r);
     flushSend();
@@ -936,7 +895,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::DragScalarN(label,ImGuiDataType_U32,(void*)vP,(int)v_len,v_speed,(const void*)&v_min,(const void*)&v_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<unsigned>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -956,7 +914,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::DragScalarN(label,ImGuiDataType_U32,(void*)vP,(int)v_len);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<unsigned>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -975,7 +932,6 @@ case 0x0000002f:
 r = ImGui::DragScalar(label,ImGuiDataType_U16,(void*)&vP);
 v = vP;
 ;
-    sendEmptyString();
     sendValue<uint16_t>(v);
     sendValue<bool>(r);
     flushSend();
@@ -999,7 +955,6 @@ case 0x00000030:
 r = ImGui::DragScalar(label,ImGuiDataType_U16,(void*)&vP,v_speed,(const void*)&p_min,(const void*)&p_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendValue<uint16_t>(v);
     sendValue<bool>(r);
     flushSend();
@@ -1024,7 +979,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::DragScalarN(label,ImGuiDataType_U16,(void*)vP,(int)v_len,v_speed,(const void*)&v_min,(const void*)&v_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<uint16_t>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -1044,7 +998,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::DragScalarN(label,ImGuiDataType_U16,(void*)vP,(int)v_len);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<uint16_t>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -1063,7 +1016,6 @@ case 0x00000033:
 r = ImGui::DragScalar(label,ImGuiDataType_U32,(void*)&vP);
 v = vP;
 ;
-    sendEmptyString();
     sendValue<uint32_t>(v);
     sendValue<bool>(r);
     flushSend();
@@ -1087,7 +1039,6 @@ case 0x00000034:
 r = ImGui::DragScalar(label,ImGuiDataType_U32,(void*)&vP,v_speed,(const void*)&p_min,(const void*)&p_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendValue<uint32_t>(v);
     sendValue<bool>(r);
     flushSend();
@@ -1112,7 +1063,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::DragScalarN(label,ImGuiDataType_U32,(void*)vP,(int)v_len,v_speed,(const void*)&v_min,(const void*)&v_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<uint32_t>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -1132,7 +1082,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::DragScalarN(label,ImGuiDataType_U32,(void*)vP,(int)v_len);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<uint32_t>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -1151,7 +1100,6 @@ case 0x00000037:
 r = ImGui::DragScalar(label,ImGuiDataType_U8,(void*)&vP);
 v = vP;
 ;
-    sendEmptyString();
     sendValue<uint8_t>(v);
     sendValue<bool>(r);
     flushSend();
@@ -1175,7 +1123,6 @@ case 0x00000038:
 r = ImGui::DragScalar(label,ImGuiDataType_U8,(void*)&vP,v_speed,(const void*)&p_min,(const void*)&p_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendValue<uint8_t>(v);
     sendValue<bool>(r);
     flushSend();
@@ -1200,7 +1147,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::DragScalarN(label,ImGuiDataType_U8,(void*)vP,(int)v_len,v_speed,(const void*)&v_min,(const void*)&v_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<uint8_t>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -1220,7 +1166,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::DragScalarN(label,ImGuiDataType_U8,(void*)vP,(int)v_len);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<uint8_t>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -1237,7 +1182,6 @@ case 0x0000003b:
     {
     r = ImGui::DragFloat(label, &vP);
 v = vP;;
-    sendEmptyString();
     sendValue<float>(v);
     sendValue<bool>(r);
     flushSend();
@@ -1259,7 +1203,6 @@ case 0x0000003c:
     {
     r = ImGui::DragFloat(label, &vP, v_speed, v_min, v_max, format, flags);
 v = vP;;
-    sendEmptyString();
     sendValue<float>(v);
     sendValue<bool>(r);
     flushSend();
@@ -1276,7 +1219,6 @@ case 0x0000003d:
     {
     r = ImGui::DragFloat2(label, vP);
 v = vP;;
-    sendEmptyString();
     sendArray<float,2>(v);
     sendValue<bool>(r);
     flushSend();
@@ -1298,7 +1240,6 @@ case 0x0000003e:
     {
     r = ImGui::DragFloat2(label, vP, v_speed, v_min, v_max, format, flags);
 v = vP;;
-    sendEmptyString();
     sendArray<float,2>(v);
     sendValue<bool>(r);
     flushSend();
@@ -1315,7 +1256,6 @@ case 0x0000003f:
     {
     r = ImGui::DragFloat3(label, vP);
 v = vP;;
-    sendEmptyString();
     sendArray<float,2>(v);
     sendValue<bool>(r);
     flushSend();
@@ -1337,7 +1277,6 @@ case 0x00000040:
     {
     r = ImGui::DragFloat3(label, vP, v_speed, v_min, v_max, format, flags);
 v = vP;;
-    sendEmptyString();
     sendArray<float,4>(v);
     sendValue<bool>(r);
     flushSend();
@@ -1354,7 +1293,6 @@ case 0x00000041:
     {
     r = ImGui::DragFloat4(label, vP);
 v = vP;;
-    sendEmptyString();
     sendArray<float,4>(v);
     sendValue<bool>(r);
     flushSend();
@@ -1376,7 +1314,6 @@ case 0x00000042:
     {
     r = ImGui::DragFloat4(label, vP, v_speed, v_min, v_max, format, flags);
 v = vP;;
-    sendEmptyString();
     sendArray<float,4>(v);
     sendValue<bool>(r);
     flushSend();
@@ -1393,7 +1330,6 @@ case 0x00000043:
     {
     r = ImGui::DragInt2(label, vP);
 v = vP;;
-    sendEmptyString();
     sendArray<int,2>(v);
     sendValue<bool>(r);
     flushSend();
@@ -1415,7 +1351,6 @@ case 0x00000044:
     {
     r = ImGui::DragInt2(label, vP, v_speed, v_min, v_max, format, flags);
 v = vP;;
-    sendEmptyString();
     sendArray<int,2>(v);
     sendValue<bool>(r);
     flushSend();
@@ -1432,7 +1367,6 @@ case 0x00000045:
     {
     r = ImGui::DragInt3(label, vP);
 v = vP;;
-    sendEmptyString();
     sendArray<int,2>(v);
     sendValue<bool>(r);
     flushSend();
@@ -1454,7 +1388,6 @@ case 0x00000046:
     {
     r = ImGui::DragInt3(label, vP, v_speed, v_min, v_max, format, flags);
 v = vP;;
-    sendEmptyString();
     sendArray<int,4>(v);
     sendValue<bool>(r);
     flushSend();
@@ -1471,7 +1404,6 @@ case 0x00000047:
     {
     r = ImGui::DragInt4(label, vP);
 v = vP;;
-    sendEmptyString();
     sendArray<int,4>(v);
     sendValue<bool>(r);
     flushSend();
@@ -1493,7 +1425,6 @@ case 0x00000048:
     {
     r = ImGui::DragInt4(label, vP, v_speed, v_min, v_max, format, flags);
 v = vP;;
-    sendEmptyString();
     sendArray<int,4>(v);
     sendValue<bool>(r);
     flushSend();
@@ -1512,7 +1443,6 @@ case 0x00000049:
     {
     r = ImGui::SliderFloat(label, &vP, v_min, v_max);
 v = vP;;
-    sendEmptyString();
     sendValue<float>(v);
     sendValue<bool>(r);
     flushSend();
@@ -1533,7 +1463,6 @@ case 0x0000004a:
     {
     r = ImGui::SliderFloat(label, &vP,  v_min, v_max, format, flags);
 v = vP;;
-    sendEmptyString();
     sendValue<float>(v);
     sendValue<bool>(r);
     flushSend();
@@ -1552,7 +1481,6 @@ case 0x0000004b:
     {
     r = ImGui::SliderFloat2(label, vP, v_min, v_max);
 v = vP;;
-    sendEmptyString();
     sendArray<float,2>(v);
     sendValue<bool>(r);
     flushSend();
@@ -1573,7 +1501,6 @@ case 0x0000004c:
     {
     r = ImGui::SliderFloat2(label, vP,  v_min, v_max, format, flags);
 v = vP;;
-    sendEmptyString();
     sendArray<float,2>(v);
     sendValue<bool>(r);
     flushSend();
@@ -1592,7 +1519,6 @@ case 0x0000004d:
     {
     r = ImGui::SliderFloat3(label, vP, v_min, v_max);
 v = vP;;
-    sendEmptyString();
     sendArray<float,2>(v);
     sendValue<bool>(r);
     flushSend();
@@ -1613,7 +1539,6 @@ case 0x0000004e:
     {
     r = ImGui::SliderFloat3(label, vP,  v_min, v_max, format, flags);
 v = vP;;
-    sendEmptyString();
     sendArray<float,4>(v);
     sendValue<bool>(r);
     flushSend();
@@ -1632,7 +1557,6 @@ case 0x0000004f:
     {
     r = ImGui::SliderFloat4(label, vP, v_min, v_max);
 v = vP;;
-    sendEmptyString();
     sendArray<float,4>(v);
     sendValue<bool>(r);
     flushSend();
@@ -1653,7 +1577,6 @@ case 0x00000050:
     {
     r = ImGui::SliderFloat4(label, vP,  v_min, v_max, format, flags);
 v = vP;;
-    sendEmptyString();
     sendArray<float,4>(v);
     sendValue<bool>(r);
     flushSend();
@@ -1672,7 +1595,6 @@ case 0x00000051:
     {
     r = ImGui::SliderInt2(label, vP, v_min, v_max);
 v = vP;;
-    sendEmptyString();
     sendArray<int,2>(v);
     sendValue<bool>(r);
     flushSend();
@@ -1693,7 +1615,6 @@ case 0x00000052:
     {
     r = ImGui::SliderInt2(label, vP,  v_min, v_max, format, flags);
 v = vP;;
-    sendEmptyString();
     sendArray<int,2>(v);
     sendValue<bool>(r);
     flushSend();
@@ -1712,7 +1633,6 @@ case 0x00000053:
     {
     r = ImGui::SliderInt3(label, vP, v_min, v_max);
 v = vP;;
-    sendEmptyString();
     sendArray<int,2>(v);
     sendValue<bool>(r);
     flushSend();
@@ -1733,7 +1653,6 @@ case 0x00000054:
     {
     r = ImGui::SliderInt3(label, vP,  v_min, v_max, format, flags);
 v = vP;;
-    sendEmptyString();
     sendArray<int,4>(v);
     sendValue<bool>(r);
     flushSend();
@@ -1752,7 +1671,6 @@ case 0x00000055:
     {
     r = ImGui::SliderInt4(label, vP, v_min, v_max);
 v = vP;;
-    sendEmptyString();
     sendArray<int,4>(v);
     sendValue<bool>(r);
     flushSend();
@@ -1773,7 +1691,6 @@ case 0x00000056:
     {
     r = ImGui::SliderInt4(label, vP,  v_min, v_max, format, flags);
 v = vP;;
-    sendEmptyString();
     sendArray<int,4>(v);
     sendValue<bool>(r);
     flushSend();
@@ -2470,7 +2387,6 @@ case 0x0000008b:
     uintptr_t r;
     {
     auto r = ((ImDrawList*)foreignptr)->CloneOutput();
-    sendEmptyString();
     sendValue(r);
     flushSend();
   }
@@ -2623,7 +2539,6 @@ case 0x00000099:
     int r;
     {
     auto r = ((ImDrawList*)foreignptr)->_CalcCircleAutoSegmentCount(radius);
-    sendEmptyString();
     sendValueSignMagnitude<int>(r);
     flushSend();
   }
@@ -2742,7 +2657,6 @@ case 0x000000a3:
     uintptr_t font;
     {
     font = (uintptr_t)ImGui::GetFont();;
-    sendEmptyString();
     sendValue(font);
     flushSend();
   }
@@ -2754,7 +2668,6 @@ case 0x000000a4:
     uintptr_t tex;
     {
     tex = (uintptr_t)ImGui::GetIO().Fonts->TexID;
-    sendEmptyString();
     sendValue(tex);
     flushSend();
   }
@@ -2775,7 +2688,6 @@ case 0x000000a6:
     float scale;
     {
     scale = ImGui::GetIO().FontGlobalScale;;
-    sendEmptyString();
     sendValue<float>(scale);
     flushSend();
   }
@@ -2852,7 +2764,6 @@ case 0x000000a7:
      io.Fonts->Build();
   }
 ;
-    sendEmptyString();
     sendValue(font);
     flushSend();
   }
@@ -2945,7 +2856,6 @@ case 0x000000ab:
          }
          remainingBytes = (uintptr_t)end-(uintptr_t)remaining;
 ;
-    sendEmptyString();
     sendArray<float,2>(r);
     sendValue<uint64_t>(remainingBytes);
     flushSend();
@@ -3039,7 +2949,6 @@ case 0x000000b6:
     bool r;
     {
     auto r = ImGui::ShowStyleSelector(label);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -3068,7 +2977,6 @@ case 0x000000b9:
     const char * r;
     {
     auto r = ImGui::GetVersion();
-    sendEmptyString();
     sendString(r);
     flushSend();
   }
@@ -3105,7 +3013,6 @@ case 0x000000bd:
     bool r;
     {
     auto r = ImGui::Begin(name);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -3121,7 +3028,6 @@ case 0x000000be:
     {
     p_open = true; /* see issue #5 */
 auto r = ImGui::Begin(name, &p_open, flags);
-    sendEmptyString();
     sendValue<bool>(r);
     sendValue<bool>(p_open);
     flushSend();
@@ -3143,7 +3049,6 @@ case 0x000000c0:
     bool r;
     {
     auto r = ImGui::BeginChild(str_id);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -3159,7 +3064,6 @@ case 0x000000c1:
     bool r;
     {
     auto r = ImGui::BeginChild(str_id, size, child_flags, window_flags);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -3172,7 +3076,6 @@ case 0x000000c2:
     bool r;
     {
     auto r = ImGui::BeginChild(id);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -3188,7 +3091,6 @@ case 0x000000c3:
     bool r;
     {
     auto r = ImGui::BeginChild(id, size, child_flags, window_flags);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -3208,7 +3110,6 @@ case 0x000000c5:
     bool r;
     {
     auto r = ImGui::IsWindowAppearing();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -3220,7 +3121,6 @@ case 0x000000c6:
     bool r;
     {
     auto r = ImGui::IsWindowCollapsed();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -3232,7 +3132,6 @@ case 0x000000c7:
     bool r;
     {
     auto r = ImGui::IsWindowFocused();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -3245,7 +3144,6 @@ case 0x000000c8:
     bool r;
     {
     auto r = ImGui::IsWindowFocused(flags);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -3257,7 +3155,6 @@ case 0x000000c9:
     bool r;
     {
     auto r = ImGui::IsWindowHovered();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -3270,7 +3167,6 @@ case 0x000000ca:
     bool r;
     {
     auto r = ImGui::IsWindowHovered(flags);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -3282,7 +3178,6 @@ case 0x000000cb:
     uintptr_t r;
     {
     auto r = ImGui::GetWindowDrawList();
-    sendEmptyString();
     sendValue(r);
     flushSend();
   }
@@ -3294,7 +3189,6 @@ case 0x000000cc:
     float r;
     {
     auto r = ImGui::GetWindowDpiScale();
-    sendEmptyString();
     sendValue<float>(r);
     flushSend();
   }
@@ -3306,7 +3200,6 @@ case 0x000000cd:
     float* r;
     {
     auto r = ImGui::GetWindowPos();
-    sendEmptyString();
     sendArray<float,2>(r);
     flushSend();
   }
@@ -3318,7 +3211,6 @@ case 0x000000ce:
     float* r;
     {
     auto r = ImGui::GetWindowSize();
-    sendEmptyString();
     sendArray<float,2>(r);
     flushSend();
   }
@@ -3330,7 +3222,6 @@ case 0x000000cf:
     float r;
     {
     auto r = ImGui::GetWindowWidth();
-    sendEmptyString();
     sendValue<float>(r);
     flushSend();
   }
@@ -3342,7 +3233,6 @@ case 0x000000d0:
     float r;
     {
     auto r = ImGui::GetWindowHeight();
-    sendEmptyString();
     sendValue<float>(r);
     flushSend();
   }
@@ -3538,7 +3428,6 @@ case 0x000000e4:
     float r;
     {
     auto r = ImGui::GetScrollX();
-    sendEmptyString();
     sendValue<float>(r);
     flushSend();
   }
@@ -3550,7 +3439,6 @@ case 0x000000e5:
     float r;
     {
     auto r = ImGui::GetScrollY();
-    sendEmptyString();
     sendValue<float>(r);
     flushSend();
   }
@@ -3580,7 +3468,6 @@ case 0x000000e8:
     float r;
     {
     auto r = ImGui::GetScrollMaxX();
-    sendEmptyString();
     sendValue<float>(r);
     flushSend();
   }
@@ -3592,7 +3479,6 @@ case 0x000000e9:
     float r;
     {
     auto r = ImGui::GetScrollMaxY();
-    sendEmptyString();
     sendValue<float>(r);
     flushSend();
   }
@@ -3822,7 +3708,6 @@ case 0x00000102:
     float r;
     {
     auto r = ImGui::CalcItemWidth();
-    sendEmptyString();
     sendValue<float>(r);
     flushSend();
   }
@@ -3859,7 +3744,6 @@ case 0x00000106:
     float r;
     {
     auto r = ImGui::GetFontSize();
-    sendEmptyString();
     sendValue<float>(r);
     flushSend();
   }
@@ -3871,7 +3755,6 @@ case 0x00000107:
     float* r;
     {
     auto r = ImGui::GetFontTexUvWhitePixel();
-    sendEmptyString();
     sendArray<float,2>(r);
     flushSend();
   }
@@ -3884,7 +3767,6 @@ case 0x00000108:
     uint32_t r;
     {
     auto r = ImGui::GetColorU32(idx);
-    sendEmptyString();
     sendValue<uint32_t>(r);
     flushSend();
   }
@@ -3898,7 +3780,6 @@ case 0x00000109:
     uint32_t r;
     {
     auto r = ImGui::GetColorU32(idx, alpha_mul);
-    sendEmptyString();
     sendValue<uint32_t>(r);
     flushSend();
   }
@@ -3911,7 +3792,6 @@ case 0x0000010a:
     uint32_t r;
     {
     auto r = ImGui::GetColorU32(col);
-    sendEmptyString();
     sendValue<uint32_t>(r);
     flushSend();
   }
@@ -3924,7 +3804,6 @@ case 0x0000010b:
     uint32_t r;
     {
     auto r = ImGui::GetColorU32(col);
-    sendEmptyString();
     sendValue<uint32_t>(r);
     flushSend();
   }
@@ -3938,7 +3817,6 @@ case 0x0000010c:
     uint32_t r;
     {
     auto r = ImGui::GetColorU32(col, alpha_mul);
-    sendEmptyString();
     sendValue<uint32_t>(r);
     flushSend();
   }
@@ -3951,7 +3829,6 @@ case 0x0000010d:
     float* r;
     {
     auto r = ImGui::GetStyleColorVec4(idx);
-    sendEmptyString();
     sendArray<float,4>(r);
     flushSend();
   }
@@ -3963,7 +3840,6 @@ case 0x0000010e:
     float* r;
     {
     auto r = ImGui::GetCursorScreenPos();
-    sendEmptyString();
     sendArray<float,2>(r);
     flushSend();
   }
@@ -3984,7 +3860,6 @@ case 0x00000110:
     float* r;
     {
     auto r = ImGui::GetContentRegionAvail();
-    sendEmptyString();
     sendArray<float,2>(r);
     flushSend();
   }
@@ -3996,7 +3871,6 @@ case 0x00000111:
     float* r;
     {
     auto r = ImGui::GetCursorPos();
-    sendEmptyString();
     sendArray<float,2>(r);
     flushSend();
   }
@@ -4008,7 +3882,6 @@ case 0x00000112:
     float r;
     {
     auto r = ImGui::GetCursorPosX();
-    sendEmptyString();
     sendValue<float>(r);
     flushSend();
   }
@@ -4020,7 +3893,6 @@ case 0x00000113:
     float r;
     {
     auto r = ImGui::GetCursorPosY();
-    sendEmptyString();
     sendValue<float>(r);
     flushSend();
   }
@@ -4059,7 +3931,6 @@ case 0x00000117:
     float* r;
     {
     auto r = ImGui::GetCursorStartPos();
-    sendEmptyString();
     sendArray<float,2>(r);
     flushSend();
   }
@@ -4180,7 +4051,6 @@ case 0x00000125:
     float r;
     {
     auto r = ImGui::GetTextLineHeight();
-    sendEmptyString();
     sendValue<float>(r);
     flushSend();
   }
@@ -4192,7 +4062,6 @@ case 0x00000126:
     float r;
     {
     auto r = ImGui::GetTextLineHeightWithSpacing();
-    sendEmptyString();
     sendValue<float>(r);
     flushSend();
   }
@@ -4204,7 +4073,6 @@ case 0x00000127:
     float r;
     {
     auto r = ImGui::GetFrameHeight();
-    sendEmptyString();
     sendValue<float>(r);
     flushSend();
   }
@@ -4216,7 +4084,6 @@ case 0x00000128:
     float r;
     {
     auto r = ImGui::GetFrameHeightWithSpacing();
-    sendEmptyString();
     sendValue<float>(r);
     flushSend();
   }
@@ -4255,7 +4122,6 @@ case 0x0000012c:
     uint32_t r;
     {
     auto r = ImGui::GetID(str_id);
-    sendEmptyString();
     sendValue<uint32_t>(r);
     flushSend();
   }
@@ -4268,7 +4134,6 @@ case 0x0000012d:
     uint32_t r;
     {
     auto r = ImGui::GetID(int_id);
-    sendEmptyString();
     sendValue<uint32_t>(r);
     flushSend();
   }
@@ -4290,7 +4155,6 @@ case 0x0000012f:
     bool r;
     {
     auto r = ImGui::Button(label);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4304,7 +4168,6 @@ case 0x00000130:
     bool r;
     {
     auto r = ImGui::Button(label, size);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4317,7 +4180,6 @@ case 0x00000131:
     bool r;
     {
     auto r = ImGui::SmallButton(label);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4331,7 +4193,6 @@ case 0x00000132:
     bool r;
     {
     auto r = ImGui::InvisibleButton(str_id, size);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4346,7 +4207,6 @@ case 0x00000133:
     bool r;
     {
     auto r = ImGui::InvisibleButton(str_id, size, flags);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4360,7 +4220,6 @@ case 0x00000134:
     bool r;
     {
     auto r = ImGui::ArrowButton(str_id, ImGuiDir(dir));
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4374,7 +4233,6 @@ case 0x00000135:
     bool r;
     {
     auto r = ImGui::RadioButton(label, active);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4415,7 +4273,6 @@ case 0x00000139:
     bool r;
     {
     auto r = ImGui::TextLink(label);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4473,7 +4330,6 @@ case 0x0000013e:
     bool r;
     {
     auto r = ImGui::ImageButton(str_id, ImTextureID(user_texture_id), image_size);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4492,7 +4348,6 @@ case 0x0000013f:
     bool r;
     {
     auto r = ImGui::ImageButton(str_id, ImTextureID(user_texture_id), image_size, uv0, uv1, bg_col, tint_col);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4506,7 +4361,6 @@ case 0x00000140:
     bool r;
     {
     auto r = ImGui::BeginCombo(label, preview_value);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4521,7 +4375,6 @@ case 0x00000141:
     bool r;
     {
     auto r = ImGui::BeginCombo(label, preview_value, flags);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4543,7 +4396,6 @@ case 0x00000143:
     bool r;
     {
     auto r = ImGui::ColorButton(desc_id, col);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4559,7 +4411,6 @@ case 0x00000144:
     bool r;
     {
     auto r = ImGui::ColorButton(desc_id, col, flags, size);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4581,7 +4432,6 @@ case 0x00000146:
     bool r;
     {
     auto r = ImGui::TreeNode(label);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4594,7 +4444,6 @@ case 0x00000147:
     bool r;
     {
     auto r = ImGui::TreeNodeEx(label);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4608,7 +4457,6 @@ case 0x00000148:
     bool r;
     {
     auto r = ImGui::TreeNodeEx(label, flags);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4637,7 +4485,6 @@ case 0x0000014b:
     float r;
     {
     auto r = ImGui::GetTreeNodeToLabelSpacing();
-    sendEmptyString();
     sendValue<float>(r);
     flushSend();
   }
@@ -4650,7 +4497,6 @@ case 0x0000014c:
     bool r;
     {
     auto r = ImGui::CollapsingHeader(label);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4664,7 +4510,6 @@ case 0x0000014d:
     bool r;
     {
     auto r = ImGui::CollapsingHeader(label, flags);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4705,7 +4550,6 @@ case 0x00000151:
     bool r;
     {
     auto r = ImGui::Selectable(label);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4721,7 +4565,6 @@ case 0x00000152:
     bool r;
     {
     auto r = ImGui::Selectable(label, selected, flags, size);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4733,7 +4576,6 @@ case 0x00000153:
     bool r;
     {
     auto r = ImGui::IsItemToggledSelection();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4746,7 +4588,6 @@ case 0x00000154:
     bool r;
     {
     auto r = ImGui::BeginListBox(label);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4760,7 +4601,6 @@ case 0x00000155:
     bool r;
     {
     auto r = ImGui::BeginListBox(label, size);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4780,7 +4620,6 @@ case 0x00000157:
     bool r;
     {
     auto r = ImGui::BeginMenuBar();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4800,7 +4639,6 @@ case 0x00000159:
     bool r;
     {
     auto r = ImGui::BeginMainMenuBar();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4821,7 +4659,6 @@ case 0x0000015b:
     bool r;
     {
     auto r = ImGui::BeginMenu(label);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4835,7 +4672,6 @@ case 0x0000015c:
     bool r;
     {
     auto r = ImGui::BeginMenu(label, enabled);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4856,7 +4692,6 @@ case 0x0000015e:
     bool r;
     {
     auto r = ImGui::MenuItem(label);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4872,7 +4707,6 @@ case 0x0000015f:
     bool r;
     {
     auto r = ImGui::MenuItem(label, shortcut, selected, enabled);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4884,7 +4718,6 @@ case 0x00000160:
     bool r;
     {
     auto r = ImGui::BeginTooltip();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4904,7 +4737,6 @@ case 0x00000162:
     bool r;
     {
     auto r = ImGui::BeginItemTooltip();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4917,7 +4749,6 @@ case 0x00000163:
     bool r;
     {
     auto r = ImGui::BeginPopup(str_id);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4931,7 +4762,6 @@ case 0x00000164:
     bool r;
     {
     auto r = ImGui::BeginPopup(str_id, flags);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4944,7 +4774,6 @@ case 0x00000165:
     bool r;
     {
     auto r = ImGui::BeginPopupModal(name);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -4960,7 +4789,6 @@ case 0x00000166:
     {
     p_open = true; /* see issue #5 */
 auto r = ImGui::BeginPopupModal(name, &p_open, flags);
-    sendEmptyString();
     sendValue<bool>(r);
     sendValue<bool>(p_open);
     flushSend();
@@ -5045,7 +4873,6 @@ case 0x0000016f:
     bool r;
     {
     auto r = ImGui::BeginPopupContextItem();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -5059,7 +4886,6 @@ case 0x00000170:
     bool r;
     {
     auto r = ImGui::BeginPopupContextItem(str_id, popup_flags);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -5071,7 +4897,6 @@ case 0x00000171:
     bool r;
     {
     auto r = ImGui::BeginPopupContextWindow();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -5085,7 +4910,6 @@ case 0x00000172:
     bool r;
     {
     auto r = ImGui::BeginPopupContextWindow(str_id, popup_flags);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -5097,7 +4921,6 @@ case 0x00000173:
     bool r;
     {
     auto r = ImGui::BeginPopupContextVoid();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -5111,7 +4934,6 @@ case 0x00000174:
     bool r;
     {
     auto r = ImGui::BeginPopupContextVoid(str_id, popup_flags);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -5124,7 +4946,6 @@ case 0x00000175:
     bool r;
     {
     auto r = ImGui::IsPopupOpen(str_id);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -5138,7 +4959,6 @@ case 0x00000176:
     bool r;
     {
     auto r = ImGui::IsPopupOpen(str_id, flags);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -5152,7 +4972,6 @@ case 0x00000177:
     bool r;
     {
     auto r = ImGui::BeginTable(str_id, columns);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -5169,7 +4988,6 @@ case 0x00000178:
     bool r;
     {
     auto r = ImGui::BeginTable(str_id, columns, flags, outer_size, inner_width);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -5207,7 +5025,6 @@ case 0x0000017c:
     bool r;
     {
     auto r = ImGui::TableNextColumn();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -5220,7 +5037,6 @@ case 0x0000017d:
     bool r;
     {
     auto r = ImGui::TableSetColumnIndex(column_n);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -5288,7 +5104,6 @@ case 0x00000184:
     int r;
     {
     auto r = ImGui::TableGetColumnCount();
-    sendEmptyString();
     sendValueSignMagnitude<int>(r);
     flushSend();
   }
@@ -5300,7 +5115,6 @@ case 0x00000185:
     int r;
     {
     auto r = ImGui::TableGetColumnIndex();
-    sendEmptyString();
     sendValueSignMagnitude<int>(r);
     flushSend();
   }
@@ -5312,7 +5126,6 @@ case 0x00000186:
     int r;
     {
     auto r = ImGui::TableGetRowIndex();
-    sendEmptyString();
     sendValueSignMagnitude<int>(r);
     flushSend();
   }
@@ -5324,7 +5137,6 @@ case 0x00000187:
     const char * r;
     {
     auto r = ImGui::TableGetColumnName();
-    sendEmptyString();
     sendString(r);
     flushSend();
   }
@@ -5337,7 +5149,6 @@ case 0x00000188:
     const char * r;
     {
     auto r = ImGui::TableGetColumnName(column_n);
-    sendEmptyString();
     sendString(r);
     flushSend();
   }
@@ -5349,7 +5160,6 @@ case 0x00000189:
     int r;
     {
     auto r = ImGui::TableGetColumnFlags();
-    sendEmptyString();
     sendValueSignMagnitude<int>(r);
     flushSend();
   }
@@ -5362,7 +5172,6 @@ case 0x0000018a:
     int r;
     {
     auto r = ImGui::TableGetColumnFlags(column_n);
-    sendEmptyString();
     sendValueSignMagnitude<int>(r);
     flushSend();
   }
@@ -5384,7 +5193,6 @@ case 0x0000018c:
     int r;
     {
     auto r = ImGui::TableGetHoveredColumn();
-    sendEmptyString();
     sendValueSignMagnitude<int>(r);
     flushSend();
   }
@@ -5444,7 +5252,6 @@ case 0x00000192:
     int r;
     {
     auto r = ImGui::GetColumnIndex();
-    sendEmptyString();
     sendValueSignMagnitude<int>(r);
     flushSend();
   }
@@ -5456,7 +5263,6 @@ case 0x00000193:
     float r;
     {
     auto r = ImGui::GetColumnWidth();
-    sendEmptyString();
     sendValue<float>(r);
     flushSend();
   }
@@ -5469,7 +5275,6 @@ case 0x00000194:
     float r;
     {
     auto r = ImGui::GetColumnWidth(column_index);
-    sendEmptyString();
     sendValue<float>(r);
     flushSend();
   }
@@ -5491,7 +5296,6 @@ case 0x00000196:
     float r;
     {
     auto r = ImGui::GetColumnOffset();
-    sendEmptyString();
     sendValue<float>(r);
     flushSend();
   }
@@ -5504,7 +5308,6 @@ case 0x00000197:
     float r;
     {
     auto r = ImGui::GetColumnOffset(column_index);
-    sendEmptyString();
     sendValue<float>(r);
     flushSend();
   }
@@ -5526,7 +5329,6 @@ case 0x00000199:
     int r;
     {
     auto r = ImGui::GetColumnsCount();
-    sendEmptyString();
     sendValueSignMagnitude<int>(r);
     flushSend();
   }
@@ -5539,7 +5341,6 @@ case 0x0000019a:
     bool r;
     {
     auto r = ImGui::BeginTabBar(str_id);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -5553,7 +5354,6 @@ case 0x0000019b:
     bool r;
     {
     auto r = ImGui::BeginTabBar(str_id, flags);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -5574,7 +5374,6 @@ case 0x0000019d:
     bool r;
     {
     auto r = ImGui::BeginTabItem(label);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -5590,7 +5389,6 @@ case 0x0000019e:
     {
     p_open = true; /* see issue #5 */
 auto r = ImGui::BeginTabItem(label, &p_open, flags);
-    sendEmptyString();
     sendValue<bool>(r);
     sendValue<bool>(p_open);
     flushSend();
@@ -5612,7 +5410,6 @@ case 0x000001a0:
     bool r;
     {
     auto r = ImGui::TabItemButton(label);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -5626,7 +5423,6 @@ case 0x000001a1:
     bool r;
     {
     auto r = ImGui::TabItemButton(label, flags);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -5648,7 +5444,6 @@ case 0x000001a3:
     uint32_t r;
     {
     auto r = ImGui::DockSpace(dockspace_id);
-    sendEmptyString();
     sendValue<uint32_t>(r);
     flushSend();
   }
@@ -5660,7 +5455,6 @@ case 0x000001a4:
     uint32_t r;
     {
     auto r = ImGui::DockSpaceOverViewport();
-    sendEmptyString();
     sendValue<uint32_t>(r);
     flushSend();
   }
@@ -5691,7 +5485,6 @@ case 0x000001a7:
     uint32_t r;
     {
     auto r = ImGui::GetWindowDockID();
-    sendEmptyString();
     sendValue<uint32_t>(r);
     flushSend();
   }
@@ -5703,7 +5496,6 @@ case 0x000001a8:
     bool r;
     {
     auto r = ImGui::IsWindowDocked();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -5783,7 +5575,6 @@ case 0x000001b1:
     bool r;
     {
     auto r = ImGui::BeginDragDropSource();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -5796,7 +5587,6 @@ case 0x000001b2:
     bool r;
     {
     auto r = ImGui::BeginDragDropSource(flags);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -5816,7 +5606,6 @@ case 0x000001b4:
     bool r;
     {
     auto r = ImGui::BeginDragDropTarget();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -5922,7 +5711,6 @@ case 0x000001c0:
     bool r;
     {
     auto r = ImGui::IsItemHovered();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -5935,7 +5723,6 @@ case 0x000001c1:
     bool r;
     {
     auto r = ImGui::IsItemHovered(flags);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -5947,7 +5734,6 @@ case 0x000001c2:
     bool r;
     {
     auto r = ImGui::IsItemActive();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -5959,7 +5745,6 @@ case 0x000001c3:
     bool r;
     {
     auto r = ImGui::IsItemFocused();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -5971,7 +5756,6 @@ case 0x000001c4:
     bool r;
     {
     auto r = ImGui::IsItemClicked();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -5984,7 +5768,6 @@ case 0x000001c5:
     bool r;
     {
     auto r = ImGui::IsItemClicked(mouse_button);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -5996,7 +5779,6 @@ case 0x000001c6:
     bool r;
     {
     auto r = ImGui::IsItemVisible();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -6008,7 +5790,6 @@ case 0x000001c7:
     bool r;
     {
     auto r = ImGui::IsItemEdited();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -6020,7 +5801,6 @@ case 0x000001c8:
     bool r;
     {
     auto r = ImGui::IsItemActivated();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -6032,7 +5812,6 @@ case 0x000001c9:
     bool r;
     {
     auto r = ImGui::IsItemDeactivated();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -6044,7 +5823,6 @@ case 0x000001ca:
     bool r;
     {
     auto r = ImGui::IsItemDeactivatedAfterEdit();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -6056,7 +5834,6 @@ case 0x000001cb:
     bool r;
     {
     auto r = ImGui::IsItemToggledOpen();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -6068,7 +5845,6 @@ case 0x000001cc:
     bool r;
     {
     auto r = ImGui::IsAnyItemHovered();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -6080,7 +5856,6 @@ case 0x000001cd:
     bool r;
     {
     auto r = ImGui::IsAnyItemActive();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -6092,7 +5867,6 @@ case 0x000001ce:
     bool r;
     {
     auto r = ImGui::IsAnyItemFocused();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -6104,7 +5878,6 @@ case 0x000001cf:
     uint32_t r;
     {
     auto r = ImGui::GetItemID();
-    sendEmptyString();
     sendValue<uint32_t>(r);
     flushSend();
   }
@@ -6116,7 +5889,6 @@ case 0x000001d0:
     float* r;
     {
     auto r = ImGui::GetItemRectMin();
-    sendEmptyString();
     sendArray<float,2>(r);
     flushSend();
   }
@@ -6128,7 +5900,6 @@ case 0x000001d1:
     float* r;
     {
     auto r = ImGui::GetItemRectMax();
-    sendEmptyString();
     sendArray<float,2>(r);
     flushSend();
   }
@@ -6140,7 +5911,6 @@ case 0x000001d2:
     float* r;
     {
     auto r = ImGui::GetItemRectSize();
-    sendEmptyString();
     sendArray<float,2>(r);
     flushSend();
   }
@@ -6152,7 +5922,6 @@ case 0x000001d3:
     uintptr_t r;
     {
     auto r = ImGui::GetBackgroundDrawList();
-    sendEmptyString();
     sendValue(r);
     flushSend();
   }
@@ -6164,7 +5933,6 @@ case 0x000001d4:
     uintptr_t r;
     {
     auto r = ImGui::GetForegroundDrawList();
-    sendEmptyString();
     sendValue(r);
     flushSend();
   }
@@ -6177,7 +5945,6 @@ case 0x000001d5:
     bool r;
     {
     auto r = ImGui::IsRectVisible(size);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -6191,7 +5958,6 @@ case 0x000001d6:
     bool r;
     {
     auto r = ImGui::IsRectVisible(rect_min, rect_max);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -6203,7 +5969,6 @@ case 0x000001d7:
     double r;
     {
     auto r = ImGui::GetTime();
-    sendEmptyString();
     sendValue<double>(r);
     flushSend();
   }
@@ -6215,7 +5980,6 @@ case 0x000001d8:
     int r;
     {
     auto r = ImGui::GetFrameCount();
-    sendEmptyString();
     sendValueSignMagnitude<int>(r);
     flushSend();
   }
@@ -6228,7 +5992,6 @@ case 0x000001d9:
     const char * r;
     {
     auto r = ImGui::GetStyleColorName(idx);
-    sendEmptyString();
     sendString(r);
     flushSend();
   }
@@ -6241,7 +6004,6 @@ case 0x000001da:
     float* r;
     {
     auto r = ImGui::ColorConvertU32ToFloat4(in);
-    sendEmptyString();
     sendArray<float,4>(r);
     flushSend();
   }
@@ -6254,7 +6016,6 @@ case 0x000001db:
     uint32_t r;
     {
     auto r = ImGui::ColorConvertFloat4ToU32(in);
-    sendEmptyString();
     sendValue<uint32_t>(r);
     flushSend();
   }
@@ -6267,7 +6028,6 @@ case 0x000001dc:
     bool r;
     {
     auto r = ImGui::IsKeyDown(ImGuiKey(key));
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -6280,7 +6040,6 @@ case 0x000001dd:
     bool r;
     {
     auto r = ImGui::IsKeyPressed(ImGuiKey(key));
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -6294,7 +6053,6 @@ case 0x000001de:
     bool r;
     {
     auto r = ImGui::IsKeyPressed(ImGuiKey(key), repeat);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -6307,7 +6065,6 @@ case 0x000001df:
     bool r;
     {
     auto r = ImGui::IsKeyReleased(ImGuiKey(key));
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -6322,7 +6079,6 @@ case 0x000001e0:
     int r;
     {
     auto r = ImGui::GetKeyPressedAmount(ImGuiKey(key), repeat_delay, rate);
-    sendEmptyString();
     sendValueSignMagnitude<int>(r);
     flushSend();
   }
@@ -6335,7 +6091,6 @@ case 0x000001e1:
     const char * r;
     {
     auto r = ImGui::GetKeyName(ImGuiKey(key));
-    sendEmptyString();
     sendString(r);
     flushSend();
   }
@@ -6366,7 +6121,6 @@ case 0x000001e4:
     bool r;
     {
     auto r = ImGui::IsMouseDown(button);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -6379,7 +6133,6 @@ case 0x000001e5:
     bool r;
     {
     auto r = ImGui::IsMouseClicked(button);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -6393,7 +6146,6 @@ case 0x000001e6:
     bool r;
     {
     auto r = ImGui::IsMouseClicked(button, repeat);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -6406,7 +6158,6 @@ case 0x000001e7:
     bool r;
     {
     auto r = ImGui::IsMouseReleased(button);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -6419,7 +6170,6 @@ case 0x000001e8:
     bool r;
     {
     auto r = ImGui::IsMouseDoubleClicked(button);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -6433,7 +6183,6 @@ case 0x000001e9:
     bool r;
     {
     auto r = ImGui::IsMouseReleasedWithDelay(button, delay);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -6446,7 +6195,6 @@ case 0x000001ea:
     int r;
     {
     auto r = ImGui::GetMouseClickedCount(button);
-    sendEmptyString();
     sendValueSignMagnitude<int>(r);
     flushSend();
   }
@@ -6460,7 +6208,6 @@ case 0x000001eb:
     bool r;
     {
     auto r = ImGui::IsMouseHoveringRect(r_min, r_max);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -6475,7 +6222,6 @@ case 0x000001ec:
     bool r;
     {
     auto r = ImGui::IsMouseHoveringRect(r_min, r_max, clip);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -6487,7 +6233,6 @@ case 0x000001ed:
     bool r;
     {
     auto r = ImGui::IsMousePosValid();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -6499,7 +6244,6 @@ case 0x000001ee:
     float* r;
     {
     auto r = ImGui::GetMousePos();
-    sendEmptyString();
     sendArray<float,2>(r);
     flushSend();
   }
@@ -6511,7 +6255,6 @@ case 0x000001ef:
     float* r;
     {
     auto r = ImGui::GetMousePosOnOpeningCurrentPopup();
-    sendEmptyString();
     sendArray<float,2>(r);
     flushSend();
   }
@@ -6524,7 +6267,6 @@ case 0x000001f0:
     bool r;
     {
     auto r = ImGui::IsMouseDragging(button);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -6538,7 +6280,6 @@ case 0x000001f1:
     bool r;
     {
     auto r = ImGui::IsMouseDragging(button, lock_threshold);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -6550,7 +6291,6 @@ case 0x000001f2:
     float* r;
     {
     auto r = ImGui::GetMouseDragDelta();
-    sendEmptyString();
     sendArray<float,2>(r);
     flushSend();
   }
@@ -6564,7 +6304,6 @@ case 0x000001f3:
     float* r;
     {
     auto r = ImGui::GetMouseDragDelta(button, lock_threshold);
-    sendEmptyString();
     sendArray<float,2>(r);
     flushSend();
   }
@@ -6593,7 +6332,6 @@ case 0x000001f6:
     int r;
     {
     auto r = ImGui::GetMouseCursor();
-    sendEmptyString();
     sendValueSignMagnitude<int>(r);
     flushSend();
   }
@@ -6623,7 +6361,6 @@ case 0x000001f9:
     const char * r;
     {
     auto r = ImGui::GetClipboardText();
-    sendEmptyString();
     sendString(r);
     flushSend();
   }
@@ -6681,7 +6418,6 @@ case 0x000001ff:
     const char * r;
     {
     auto r = ImGui::SaveIniSettingsToMemory();
-    sendEmptyString();
     sendString(r);
     flushSend();
   }
@@ -6726,7 +6462,6 @@ case 0x00000203:
     bool r;
     {
     auto r = ImGui::DebugCheckVersionAndDataLayout(version_str, sz_io, sz_style, sz_vec2, sz_vec4, sz_drawvert, sz_drawidx);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -6762,7 +6497,6 @@ case 0x00000207:
     float* r;
     {
     auto r = ImGui::GetContentRegionMax();
-    sendEmptyString();
     sendArray<float,2>(r);
     flushSend();
   }
@@ -6774,7 +6508,6 @@ case 0x00000208:
     float* r;
     {
     auto r = ImGui::GetWindowContentRegionMin();
-    sendEmptyString();
     sendArray<float,2>(r);
     flushSend();
   }
@@ -6786,7 +6519,6 @@ case 0x00000209:
     float* r;
     {
     auto r = ImGui::GetWindowContentRegionMax();
-    sendEmptyString();
     sendArray<float,2>(r);
     flushSend();
   }
@@ -6923,7 +6655,6 @@ case 0x00000219:
     uint32_t r;
     {
     auto r = ImGui::GetHoveredID();
-    sendEmptyString();
     sendValue<uint32_t>(r);
     flushSend();
   }
@@ -6973,7 +6704,6 @@ case 0x0000021e:
     uint32_t r;
     {
     auto r = ImGui::GetIDWithSeed(n, seed);
-    sendEmptyString();
     sendValue<uint32_t>(r);
     flushSend();
   }
@@ -7007,7 +6737,6 @@ case 0x00000221:
     float* r;
     {
     auto r = ImGui::CalcItemSize(size, default_w, default_h);
-    sendEmptyString();
     sendArray<float,2>(r);
     flushSend();
   }
@@ -7021,7 +6750,6 @@ case 0x00000222:
     float r;
     {
     auto r = ImGui::CalcWrapWidthForPos(pos, wrap_pos_x);
-    sendEmptyString();
     sendValue<float>(r);
     flushSend();
   }
@@ -7101,7 +6829,6 @@ case 0x0000022a:
     bool r;
     {
     auto r = ImGui::BeginChildEx(name, id, size_arg, child_flags, window_flags);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -7115,7 +6842,6 @@ case 0x0000022b:
     bool r;
     {
     auto r = ImGui::BeginPopupEx(id, extra_window_flags);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -7166,7 +6892,6 @@ case 0x00000230:
     bool r;
     {
     auto r = ImGui::IsPopupOpen(id, popup_flags);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -7180,7 +6905,6 @@ case 0x00000231:
     bool r;
     {
     auto r = ImGui::BeginTooltipEx(tooltip_flags, extra_window_flags);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -7192,7 +6916,6 @@ case 0x00000232:
     bool r;
     {
     auto r = ImGui::BeginTooltipHidden();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -7206,7 +6929,6 @@ case 0x00000233:
     bool r;
     {
     auto r = ImGui::BeginMenuEx(label, icon);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -7221,7 +6943,6 @@ case 0x00000234:
     bool r;
     {
     auto r = ImGui::BeginMenuEx(label, icon, enabled);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -7235,7 +6956,6 @@ case 0x00000235:
     bool r;
     {
     auto r = ImGui::MenuItemEx(label, icon);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -7252,7 +6972,6 @@ case 0x00000236:
     bool r;
     {
     auto r = ImGui::MenuItemEx(label, icon, shortcut, selected, enabled);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -7264,7 +6983,6 @@ case 0x00000237:
     bool r;
     {
     auto r = ImGui::BeginComboPreview();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -7292,7 +7010,6 @@ case 0x0000023a:
     bool r;
     {
     auto r = ImGui::NavMoveRequestButNoResultYet();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -7396,7 +7113,6 @@ case 0x00000245:
     bool r;
     {
     auto r = ImGui::IsMouseDragPastThreshold(button);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -7410,7 +7126,6 @@ case 0x00000246:
     bool r;
     {
     auto r = ImGui::IsMouseDragPastThreshold(button, lock_threshold);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -7426,7 +7141,6 @@ case 0x00000247:
     float* r;
     {
     auto r = ImGui::GetKeyMagnitude2d(ImGuiKey(key_left), ImGuiKey(key_right), ImGuiKey(key_up), ImGuiKey(key_down));
-    sendEmptyString();
     sendArray<float,2>(r);
     flushSend();
   }
@@ -7442,7 +7156,6 @@ case 0x00000248:
     int r;
     {
     auto r = ImGui::CalcTypematicRepeatAmount(t0, t1, repeat_delay, repeat_rate);
-    sendEmptyString();
     sendValueSignMagnitude<int>(r);
     flushSend();
   }
@@ -7472,7 +7185,6 @@ case 0x0000024b:
     uint32_t r;
     {
     auto r = ImGui::GetKeyOwner(ImGuiKey(key));
-    sendEmptyString();
     sendValue<uint32_t>(r);
     flushSend();
   }
@@ -7517,7 +7229,6 @@ case 0x0000024f:
     bool r;
     {
     auto r = ImGui::TestKeyOwner(ImGuiKey(key), owner_id);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -7531,7 +7242,6 @@ case 0x00000250:
     bool r;
     {
     auto r = ImGui::IsKeyDown(ImGuiKey(key), owner_id);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -7545,7 +7255,6 @@ case 0x00000251:
     bool r;
     {
     auto r = ImGui::IsKeyPressed(ImGuiKey(key), flags);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -7560,7 +7269,6 @@ case 0x00000252:
     bool r;
     {
     auto r = ImGui::IsKeyPressed(ImGuiKey(key), flags, owner_id);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -7574,7 +7282,6 @@ case 0x00000253:
     bool r;
     {
     auto r = ImGui::IsKeyReleased(ImGuiKey(key), owner_id);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -7588,7 +7295,6 @@ case 0x00000254:
     bool r;
     {
     auto r = ImGui::IsMouseDown(button, owner_id);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -7602,7 +7308,6 @@ case 0x00000255:
     bool r;
     {
     auto r = ImGui::IsMouseClicked(button, flags);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -7617,7 +7322,6 @@ case 0x00000256:
     bool r;
     {
     auto r = ImGui::IsMouseClicked(button, flags, owner_id);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -7631,7 +7335,6 @@ case 0x00000257:
     bool r;
     {
     auto r = ImGui::IsMouseReleased(button, owner_id);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -7645,7 +7348,6 @@ case 0x00000258:
     bool r;
     {
     auto r = ImGui::IsMouseDoubleClicked(button, owner_id);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -7675,7 +7377,6 @@ case 0x0000025b:
     uint32_t r;
     {
     auto r = ImGui::DockBuilderAddNode();
-    sendEmptyString();
     sendValue<uint32_t>(r);
     flushSend();
   }
@@ -7689,7 +7390,6 @@ case 0x0000025c:
     uint32_t r;
     {
     auto r = ImGui::DockBuilderAddNode(node_id, flags);
-    sendEmptyString();
     sendValue<uint32_t>(r);
     flushSend();
   }
@@ -7794,7 +7494,6 @@ case 0x00000267:
     bool r;
     {
     auto r = ImGui::IsDragDropActive();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -7814,7 +7513,6 @@ case 0x00000269:
     bool r;
     {
     auto r = ImGui::IsDragDropPayloadBeingAccepted();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -7882,7 +7580,6 @@ case 0x00000270:
     uint32_t r;
     {
     auto r = ImGui::GetColumnsID(str_id, count);
-    sendEmptyString();
     sendValue<uint32_t>(r);
     flushSend();
   }
@@ -7932,7 +7629,6 @@ case 0x00000275:
     int r;
     {
     auto r = ImGui::TableGetHoveredRow();
-    sendEmptyString();
     sendValueSignMagnitude<int>(r);
     flushSend();
   }
@@ -7944,7 +7640,6 @@ case 0x00000276:
     float r;
     {
     auto r = ImGui::TableGetHeaderRowHeight();
-    sendEmptyString();
     sendValue<float>(r);
     flushSend();
   }
@@ -7956,7 +7651,6 @@ case 0x00000277:
     float r;
     {
     auto r = ImGui::TableGetHeaderAngledMaxLabelWidth();
-    sendEmptyString();
     sendValue<float>(r);
     flushSend();
   }
@@ -7987,7 +7681,6 @@ case 0x0000027a:
     bool r;
     {
     auto r = ImGui::BeginTableEx(name, id, columns_count);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -8005,7 +7698,6 @@ case 0x0000027b:
     bool r;
     {
     auto r = ImGui::BeginTableEx(name, id, columns_count, flags, outer_size, inner_width);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -8046,7 +7738,6 @@ case 0x0000027f:
     float* r;
     {
     auto r = ImGui::TabItemCalcSize(label, has_close_button_or_unsaved_marker);
-    sendEmptyString();
     sendArray<float,2>(r);
     flushSend();
   }
@@ -8221,7 +7912,6 @@ case 0x0000028d:
     bool r;
     {
     auto r = ImGui::ButtonEx(label);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -8236,7 +7926,6 @@ case 0x0000028e:
     bool r;
     {
     auto r = ImGui::ButtonEx(label, size_arg, flags);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -8251,7 +7940,6 @@ case 0x0000028f:
     bool r;
     {
     auto r = ImGui::ArrowButtonEx(str_id, ImGuiDir(dir), size_arg);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -8267,7 +7955,6 @@ case 0x00000290:
     bool r;
     {
     auto r = ImGui::ArrowButtonEx(str_id, ImGuiDir(dir), size_arg, flags);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -8286,7 +7973,6 @@ case 0x00000291:
     bool r;
     {
     auto r = ImGui::ImageButtonEx(id, ImTextureID(user_texture_id), image_size, uv0, uv1, bg_col, tint_col);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -8306,7 +7992,6 @@ case 0x00000292:
     bool r;
     {
     auto r = ImGui::ImageButtonEx(id, ImTextureID(user_texture_id), image_size, uv0, uv1, bg_col, tint_col, flags);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -8339,7 +8024,6 @@ case 0x00000295:
     bool r;
     {
     auto r = ImGui::CloseButton(id, pos);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -8361,7 +8045,6 @@ case 0x00000297:
     bool r;
     {
     auto r = ImGui::TreeNodeGetOpen(storage_id);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -8385,7 +8068,6 @@ case 0x00000299:
     bool r;
     {
     auto r = ImGui::TreeNodeUpdateNextOpen(storage_id, flags);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -8461,7 +8143,6 @@ case 0x0000029f:
     bool r;
     {
     auto r = ImGui::ErrorLog(msg);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -8489,7 +8170,6 @@ case 0x000002a2:
     bool r;
     {
     auto r = ImGui::BeginErrorTooltip();
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -8596,7 +8276,6 @@ case 0x000002ae:
     bool r;
     {
     auto r = ImGui::DebugBreakButton(label, description_of_location);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -8627,7 +8306,6 @@ case 0x000002b1:
     uintptr_t r;
     {
     r = (uintptr_t)(new HexEditor());
-    sendEmptyString();
     sendValue(r);
     flushSend();
   }
@@ -8677,7 +8355,6 @@ ASSIGN(footerExtraHeight, t->OptFooterExtraHeight);
 ASSIGN(highlightColor, t->HighlightColor);
 #undef ASSIGN
 ;
-    sendEmptyString();
     sendValue<bool>(readOnly);
     sendValueSignMagnitude<int>(cols);
     sendValue<bool>(showOptions);
@@ -8835,7 +8512,6 @@ auto e = ((HexEditor*)foreignptr);
 auto data = (const uint8_t*)e->data;
 auto data_len = e->data_length;
 ;
-    sendEmptyString();
     sendSlice<uint8_t>(data,data_len);
     flushSend();
   }
@@ -8875,7 +8551,6 @@ case 0x000002bf:
     float dt;
     {
     dt = ImGui::GetIO().DeltaTime;
-    sendEmptyString();
     sendValue<float>(dt);
     flushSend();
   }
@@ -8888,7 +8563,6 @@ case 0x000002c0:
     float* r;
     {
     auto r = ImGui::CalcTextSize(text,text+getStringLength(text));
-    sendEmptyString();
     sendArray<float,2>(r);
     flushSend();
   }
@@ -8903,7 +8577,6 @@ case 0x000002c1:
     float* r;
     {
     auto r = ImGui::CalcTextSize(text,text+getStringLength(text),hideTextAfterDoubleHash,floatWrapWidth);
-    sendEmptyString();
     sendArray<float,2>(r);
     flushSend();
   }
@@ -8924,7 +8597,6 @@ memcpy(textOut,textIn,getStringLength(textIn)+1);
 changed = ImGui::InputText(label,textOut,maxLength);
 auto textOut_len = strlen(textOut);
 ;
-    sendEmptyString();
     sendString(textOut);
     sendValue<bool>(changed);
     flushSend();
@@ -8947,7 +8619,6 @@ memcpy(textOut,textIn,getStringLength(textIn)+1);
 changed = ImGui::InputText(label,textOut,maxLength,flags);
 auto textOut_len = strlen(textOut);
 ;
-    sendEmptyString();
     sendString(textOut);
     sendValue<bool>(changed);
     flushSend();
@@ -8970,7 +8641,6 @@ memcpy(textOut,textIn,getStringLength(textIn)+1);
 changed = ImGui::InputTextWithHint(label,hint,textOut,maxLength);
 auto textOut_len = strlen(textOut);
 ;
-    sendEmptyString();
     sendString(textOut);
     sendValue<bool>(changed);
     flushSend();
@@ -8994,7 +8664,6 @@ memcpy(textOut,textIn,getStringLength(textIn)+1);
 changed = ImGui::InputTextWithHint(label,hint,textOut,maxLength,flags);
 auto textOut_len = strlen(textOut);
 ;
-    sendEmptyString();
     sendString(textOut);
     sendValue<bool>(changed);
     flushSend();
@@ -9020,7 +8689,6 @@ case 0x000002c7:
 	hoveredId = g.HoveredIdPreviousFrame;
 	activeId = g.ActiveId;
 ;
-    sendEmptyString();
     sendValue<uint32_t>(hoveredId);
     sendValue<uint32_t>(activeId);
     flushSend();
@@ -9039,7 +8707,6 @@ case 0x000002c8:
     {
     r = ImGuiKnobs::Knob(label,&valueP,v_min,v_max);
          value = valueP;
-    sendEmptyString();
     sendValue<float>(value);
     sendValue<bool>(r);
     flushSend();
@@ -9064,7 +8731,6 @@ case 0x000002c9:
     {
     r = ImGuiKnobs::Knob(label,&valueP,v_min,v_max,speed,format,variant,size,flags,steps);
          value = valueP;
-    sendEmptyString();
     sendValue<float>(value);
     sendValue<bool>(r);
     flushSend();
@@ -9083,7 +8749,6 @@ case 0x000002ca:
     {
     r = ImGuiKnobs::KnobInt(label,&valueP,v_min,v_max);
          value = valueP;
-    sendEmptyString();
     sendValueSignMagnitude<int>(value);
     sendValue<bool>(r);
     flushSend();
@@ -9108,7 +8773,6 @@ case 0x000002cb:
     {
     r = ImGuiKnobs::KnobInt(label,&valueP,v_min,v_max,speed,format,variant,size,flags,steps);
          value = valueP;
-    sendEmptyString();
     sendValueSignMagnitude<int>(value);
     sendValue<bool>(r);
     flushSend();
@@ -9122,7 +8786,6 @@ case 0x000002cc:
     bool r;
     {
     r = ImGui::BeginPiePopup(name);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -9136,7 +8799,6 @@ case 0x000002cd:
     bool r;
     {
     r = ImGui::BeginPiePopup(name,iMouseButton);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -9157,7 +8819,6 @@ case 0x000002cf:
     bool r;
     {
     r = ImGui::PieMenuItem(name);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -9171,7 +8832,6 @@ case 0x000002d0:
     bool r;
     {
     r = ImGui::PieMenuItem(name,bEnabled);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -9184,7 +8844,6 @@ case 0x000002d1:
     bool r;
     {
     r = ImGui::BeginPieMenu(name);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -9198,7 +8857,6 @@ case 0x000002d2:
     bool r;
     {
     r = ImGui::BeginPieMenu(name,bEnabled);
-    sendEmptyString();
     sendValue<bool>(r);
     flushSend();
   }
@@ -9226,7 +8884,6 @@ case 0x000002d4:
 r = ImGui::SliderScalar(label,ImGuiDataType_Float,(void*)&vP,(const void*)&p_min,(const void*)&p_max);
 v = vP;
 ;
-    sendEmptyString();
     sendValue<float>(v);
     sendValue<bool>(r);
     flushSend();
@@ -9249,7 +8906,6 @@ case 0x000002d5:
 r = ImGui::SliderScalar(label,ImGuiDataType_Float,(void*)&vP,(const void*)&p_min,(const void*)&p_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendValue<float>(v);
     sendValue<bool>(r);
     flushSend();
@@ -9273,7 +8929,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::SliderScalarN(label,ImGuiDataType_Float,(void*)vP,(int)v_len,(const void*)&v_min,(const void*)&v_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<float>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -9295,7 +8950,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::SliderScalarN(label,ImGuiDataType_Float,(void*)vP,(int)v_len,(const void*)&v_min,(const void*)&v_max);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<float>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -9316,7 +8970,6 @@ case 0x000002d8:
 r = ImGui::SliderScalar(label,ImGuiDataType_Double,(void*)&vP,(const void*)&p_min,(const void*)&p_max);
 v = vP;
 ;
-    sendEmptyString();
     sendValue<double>(v);
     sendValue<bool>(r);
     flushSend();
@@ -9339,7 +8992,6 @@ case 0x000002d9:
 r = ImGui::SliderScalar(label,ImGuiDataType_Double,(void*)&vP,(const void*)&p_min,(const void*)&p_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendValue<double>(v);
     sendValue<bool>(r);
     flushSend();
@@ -9363,7 +9015,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::SliderScalarN(label,ImGuiDataType_Double,(void*)vP,(int)v_len,(const void*)&v_min,(const void*)&v_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<double>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -9385,7 +9036,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::SliderScalarN(label,ImGuiDataType_Double,(void*)vP,(int)v_len,(const void*)&v_min,(const void*)&v_max);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<double>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -9406,7 +9056,6 @@ case 0x000002dc:
 r = ImGui::SliderScalar(label,ImGuiDataType_S32,(void*)&vP,(const void*)&p_min,(const void*)&p_max);
 v = vP;
 ;
-    sendEmptyString();
     sendValueSignMagnitude<int>(v);
     sendValue<bool>(r);
     flushSend();
@@ -9429,7 +9078,6 @@ case 0x000002dd:
 r = ImGui::SliderScalar(label,ImGuiDataType_S32,(void*)&vP,(const void*)&p_min,(const void*)&p_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendValueSignMagnitude<int>(v);
     sendValue<bool>(r);
     flushSend();
@@ -9453,7 +9101,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::SliderScalarN(label,ImGuiDataType_S32,(void*)vP,(int)v_len,(const void*)&v_min,(const void*)&v_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<int>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -9475,7 +9122,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::SliderScalarN(label,ImGuiDataType_S32,(void*)vP,(int)v_len,(const void*)&v_min,(const void*)&v_max);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<int>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -9496,7 +9142,6 @@ case 0x000002e0:
 r = ImGui::SliderScalar(label,ImGuiDataType_S16,(void*)&vP,(const void*)&p_min,(const void*)&p_max);
 v = vP;
 ;
-    sendEmptyString();
     sendValueSignMagnitude<int16_t>(v);
     sendValue<bool>(r);
     flushSend();
@@ -9519,7 +9164,6 @@ case 0x000002e1:
 r = ImGui::SliderScalar(label,ImGuiDataType_S16,(void*)&vP,(const void*)&p_min,(const void*)&p_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendValueSignMagnitude<int16_t>(v);
     sendValue<bool>(r);
     flushSend();
@@ -9543,7 +9187,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::SliderScalarN(label,ImGuiDataType_S16,(void*)vP,(int)v_len,(const void*)&v_min,(const void*)&v_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<int16_t>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -9565,7 +9208,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::SliderScalarN(label,ImGuiDataType_S16,(void*)vP,(int)v_len,(const void*)&v_min,(const void*)&v_max);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<int16_t>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -9586,7 +9228,6 @@ case 0x000002e4:
 r = ImGui::SliderScalar(label,ImGuiDataType_S32,(void*)&vP,(const void*)&p_min,(const void*)&p_max);
 v = vP;
 ;
-    sendEmptyString();
     sendValueSignMagnitude<int32_t>(v);
     sendValue<bool>(r);
     flushSend();
@@ -9609,7 +9250,6 @@ case 0x000002e5:
 r = ImGui::SliderScalar(label,ImGuiDataType_S32,(void*)&vP,(const void*)&p_min,(const void*)&p_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendValueSignMagnitude<int32_t>(v);
     sendValue<bool>(r);
     flushSend();
@@ -9633,7 +9273,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::SliderScalarN(label,ImGuiDataType_S32,(void*)vP,(int)v_len,(const void*)&v_min,(const void*)&v_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<int32_t>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -9655,7 +9294,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::SliderScalarN(label,ImGuiDataType_S32,(void*)vP,(int)v_len,(const void*)&v_min,(const void*)&v_max);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<int32_t>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -9676,7 +9314,6 @@ case 0x000002e8:
 r = ImGui::SliderScalar(label,ImGuiDataType_S8,(void*)&vP,(const void*)&p_min,(const void*)&p_max);
 v = vP;
 ;
-    sendEmptyString();
     sendValueSignMagnitude<int8_t>(v);
     sendValue<bool>(r);
     flushSend();
@@ -9699,7 +9336,6 @@ case 0x000002e9:
 r = ImGui::SliderScalar(label,ImGuiDataType_S8,(void*)&vP,(const void*)&p_min,(const void*)&p_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendValueSignMagnitude<int8_t>(v);
     sendValue<bool>(r);
     flushSend();
@@ -9723,7 +9359,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::SliderScalarN(label,ImGuiDataType_S8,(void*)vP,(int)v_len,(const void*)&v_min,(const void*)&v_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<int8_t>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -9745,7 +9380,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::SliderScalarN(label,ImGuiDataType_S8,(void*)vP,(int)v_len,(const void*)&v_min,(const void*)&v_max);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<int8_t>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -9766,7 +9400,6 @@ case 0x000002ec:
 r = ImGui::SliderScalar(label,ImGuiDataType_U32,(void*)&vP,(const void*)&p_min,(const void*)&p_max);
 v = vP;
 ;
-    sendEmptyString();
     sendValue<unsigned>(v);
     sendValue<bool>(r);
     flushSend();
@@ -9789,7 +9422,6 @@ case 0x000002ed:
 r = ImGui::SliderScalar(label,ImGuiDataType_U32,(void*)&vP,(const void*)&p_min,(const void*)&p_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendValue<unsigned>(v);
     sendValue<bool>(r);
     flushSend();
@@ -9813,7 +9445,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::SliderScalarN(label,ImGuiDataType_U32,(void*)vP,(int)v_len,(const void*)&v_min,(const void*)&v_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<unsigned>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -9835,7 +9466,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::SliderScalarN(label,ImGuiDataType_U32,(void*)vP,(int)v_len,(const void*)&v_min,(const void*)&v_max);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<unsigned>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -9856,7 +9486,6 @@ case 0x000002f0:
 r = ImGui::SliderScalar(label,ImGuiDataType_U16,(void*)&vP,(const void*)&p_min,(const void*)&p_max);
 v = vP;
 ;
-    sendEmptyString();
     sendValue<uint16_t>(v);
     sendValue<bool>(r);
     flushSend();
@@ -9879,7 +9508,6 @@ case 0x000002f1:
 r = ImGui::SliderScalar(label,ImGuiDataType_U16,(void*)&vP,(const void*)&p_min,(const void*)&p_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendValue<uint16_t>(v);
     sendValue<bool>(r);
     flushSend();
@@ -9903,7 +9531,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::SliderScalarN(label,ImGuiDataType_U16,(void*)vP,(int)v_len,(const void*)&v_min,(const void*)&v_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<uint16_t>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -9925,7 +9552,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::SliderScalarN(label,ImGuiDataType_U16,(void*)vP,(int)v_len,(const void*)&v_min,(const void*)&v_max);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<uint16_t>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -9946,7 +9572,6 @@ case 0x000002f4:
 r = ImGui::SliderScalar(label,ImGuiDataType_U32,(void*)&vP,(const void*)&p_min,(const void*)&p_max);
 v = vP;
 ;
-    sendEmptyString();
     sendValue<uint32_t>(v);
     sendValue<bool>(r);
     flushSend();
@@ -9969,7 +9594,6 @@ case 0x000002f5:
 r = ImGui::SliderScalar(label,ImGuiDataType_U32,(void*)&vP,(const void*)&p_min,(const void*)&p_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendValue<uint32_t>(v);
     sendValue<bool>(r);
     flushSend();
@@ -9993,7 +9617,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::SliderScalarN(label,ImGuiDataType_U32,(void*)vP,(int)v_len,(const void*)&v_min,(const void*)&v_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<uint32_t>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -10015,7 +9638,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::SliderScalarN(label,ImGuiDataType_U32,(void*)vP,(int)v_len,(const void*)&v_min,(const void*)&v_max);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<uint32_t>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -10036,7 +9658,6 @@ case 0x000002f8:
 r = ImGui::SliderScalar(label,ImGuiDataType_U8,(void*)&vP,(const void*)&p_min,(const void*)&p_max);
 v = vP;
 ;
-    sendEmptyString();
     sendValue<uint8_t>(v);
     sendValue<bool>(r);
     flushSend();
@@ -10059,7 +9680,6 @@ case 0x000002f9:
 r = ImGui::SliderScalar(label,ImGuiDataType_U8,(void*)&vP,(const void*)&p_min,(const void*)&p_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendValue<uint8_t>(v);
     sendValue<bool>(r);
     flushSend();
@@ -10083,7 +9703,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::SliderScalarN(label,ImGuiDataType_U8,(void*)vP,(int)v_len,(const void*)&v_min,(const void*)&v_max,format,flags);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<uint8_t>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -10105,7 +9724,6 @@ size_t v_len = getSliceLength(vP);
 r = ImGui::SliderScalarN(label,ImGuiDataType_U8,(void*)vP,(int)v_len,(const void*)&v_min,(const void*)&v_max);
 v = vP;
 ;
-    sendEmptyString();
     sendSlice<uint8_t>(v,v_len);
     sendValue<bool>(r);
     flushSend();
@@ -10123,7 +9741,6 @@ case 0x000002fc:
     {
     ImSpinner::SpinnerDots(label, &nextdotP, radius, thickness);
 nextdot = nextdotP;;
-    sendEmptyString();
     sendValue<float>(nextdot);
     flushSend();
   }
@@ -10144,7 +9761,6 @@ case 0x000002fd:
     {
     ImSpinner::SpinnerDots(label, &nextdotP, radius, thickness, color, speed, dots, minth);
 nextdot = nextdotP;;
-    sendEmptyString();
     sendValue<float>(nextdot);
     flushSend();
   }
@@ -13482,7 +13098,6 @@ case 0x000003fc:
     r = ImGui::Splitter(split_vertically, thickness, &size1P, &size2P, min_size1, min_size2);
          size1 = size1P;
          size2 = size2P;;
-    sendEmptyString();
     sendValue<bool>(r);
     sendValue<float>(size1);
     sendValue<float>(size2);
@@ -13507,7 +13122,6 @@ case 0x000003fd:
     r = ImGui::Splitter(split_vertically, thickness, &size1P, &size2P, min_size1, min_size2, splitter_long_axis);
          size1 = size1P;
          size2 = size2P;;
-    sendEmptyString();
     sendValue<bool>(r);
     sendValue<float>(size1);
     sendValue<float>(size2);
@@ -13622,7 +13236,6 @@ case 0x000003ff:
     uintptr_t r;
     {
     r = (uintptr_t)&ImGui::GetStyle();
-    sendEmptyString();
     sendValue(r);
     flushSend();
   }
@@ -13739,7 +13352,6 @@ case 0x00000400:
    hovers[i++] = s->HoverFlagsForTooltipMouse;
    hovers[i++] = s->HoverFlagsForTooltipNav;
 ;
-    sendEmptyString();
     sendSlice<bool>(bs,bs_len);
     sendSlice<float>(fs,fs_len);
     sendSlice<float>(vec2s,vec2s_len);
@@ -13784,7 +13396,6 @@ case 0x00000401:
             }
         }
 ;
-    sendEmptyString();
     sendValue<bool>(sort);
     sendValue<bool>(dirty);
     sendSlice<uint32_t>(userIds,userIds_len);
@@ -13824,7 +13435,6 @@ case 0x00000404:
     {
     changed = ImGui::Toggle(label,&val);
 valR = val;
-    sendEmptyString();
     sendValue<bool>(valR);
     sendValue<bool>(changed);
     flushSend();
@@ -13846,7 +13456,6 @@ case 0x00000405:
     {
     changed = ImGui::Toggle(label,&val,flags,animationDuration,frameRounding,knobRounding,size);
 valR = val;
-    sendEmptyString();
     sendValue<bool>(valR);
     sendValue<bool>(changed);
     flushSend();
