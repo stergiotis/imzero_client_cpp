@@ -18,8 +18,8 @@ static void getParagraphTextLayout(ImZeroFB::TextAlignFlags &align,ImZeroFB::Tex
 static inline bool isParagraphText(const char *text_begin, const char *text_end) {
     if(!ImGui::isParagraphTextStack.empty()) {
         switch(ImGui::isParagraphTextStack.back()) {
-            case 0: return false;
-            case 1: return true;
+        case ImZeroFB::IsParagraphText_Never: return false;
+        case ImZeroFB::IsParagraphText_Always: return true;
         }
     }
     return (memchr(text_begin,'\n',text_end-text_begin) != nullptr);
@@ -823,12 +823,33 @@ namespace ImGui {
 
             { ZoneScoped;
                 auto f = ImGui::skiaFont.makeWithSize(SkScalar(size));
-                SkScalar advanceWidth = f.measureText(text_begin,text_end-text_begin,SkTextEncoding::kUTF8, nullptr);
+                SkRect r;
+                SkScalar advanceWidth = f.measureText(text_begin,text_end-text_begin,SkTextEncoding::kUTF8, &r);
                 if(freeAllocatedText) {
                     IM_FREE(const_cast<char*>(text_begin));
                 }
-                retr.x = SkScalarToFloat(advanceWidth);
-                retr.y = size;
+
+                if(!ImGui::textMeasureModeXStack.empty()) {
+                    switch(ImGui::textMeasureModeXStack.back()) {
+                    case ImZeroFB::TextMeasureModeX_AdvanceWidth:
+                        retr.x = SkScalarToFloat(advanceWidth);
+                        break;
+                    case ImZeroFB::TextMeasureModeX_BondingBox:
+                        retr.x = r.width();
+                        break;
+                    }
+                    switch(ImGui::textMeasureModeYStack.back()) {
+                    case ImZeroFB::TextMeasureModeY_FontSize:
+                        retr.y = size;
+                        break;
+                    case ImZeroFB::TextMeasureModeY_BondingBox:
+                        retr.y = r.height();
+                        break;
+                    }
+                } else {
+                    retr.x = SkScalarToFloat(advanceWidth);
+                    retr.y = size;
+                }
                 return false;
             }
         }

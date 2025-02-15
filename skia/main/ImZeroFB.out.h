@@ -331,6 +331,66 @@ inline const char *EnumNameIsParagraphText(IsParagraphText e) {
   return EnumNamesIsParagraphText()[index];
 }
 
+enum TextMeasureModeX : uint8_t {
+  TextMeasureModeX_AdvanceWidth = 0,
+  TextMeasureModeX_BondingBox = 1,
+  TextMeasureModeX_MIN = TextMeasureModeX_AdvanceWidth,
+  TextMeasureModeX_MAX = TextMeasureModeX_BondingBox
+};
+
+inline const TextMeasureModeX (&EnumValuesTextMeasureModeX())[2] {
+  static const TextMeasureModeX values[] = {
+    TextMeasureModeX_AdvanceWidth,
+    TextMeasureModeX_BondingBox
+  };
+  return values;
+}
+
+inline const char * const *EnumNamesTextMeasureModeX() {
+  static const char * const names[3] = {
+    "AdvanceWidth",
+    "BondingBox",
+    nullptr
+  };
+  return names;
+}
+
+inline const char *EnumNameTextMeasureModeX(TextMeasureModeX e) {
+  if (::flatbuffers::IsOutRange(e, TextMeasureModeX_AdvanceWidth, TextMeasureModeX_BondingBox)) return "";
+  const size_t index = static_cast<size_t>(e);
+  return EnumNamesTextMeasureModeX()[index];
+}
+
+enum TextMeasureModeY : uint8_t {
+  TextMeasureModeY_FontSize = 0,
+  TextMeasureModeY_BondingBox = 1,
+  TextMeasureModeY_MIN = TextMeasureModeY_FontSize,
+  TextMeasureModeY_MAX = TextMeasureModeY_BondingBox
+};
+
+inline const TextMeasureModeY (&EnumValuesTextMeasureModeY())[2] {
+  static const TextMeasureModeY values[] = {
+    TextMeasureModeY_FontSize,
+    TextMeasureModeY_BondingBox
+  };
+  return values;
+}
+
+inline const char * const *EnumNamesTextMeasureModeY() {
+  static const char * const names[3] = {
+    "FontSize",
+    "BondingBox",
+    nullptr
+  };
+  return names;
+}
+
+inline const char *EnumNameTextMeasureModeY(TextMeasureModeY e) {
+  if (::flatbuffers::IsOutRange(e, TextMeasureModeY_FontSize, TextMeasureModeY_BondingBox)) return "";
+  const size_t index = static_cast<size_t>(e);
+  return EnumNamesTextMeasureModeY()[index];
+}
+
 enum TextAlignFlags : uint8_t {
   TextAlignFlags_Left = 0,
   TextAlignFlags_Right = 1,
@@ -6400,6 +6460,42 @@ inline const ::flatbuffers::TypeTable *IsParagraphTextTypeTable() {
   };
   static const ::flatbuffers::TypeTable tt = {
     ::flatbuffers::ST_ENUM, 3, type_codes, type_refs, nullptr, nullptr, names
+  };
+  return &tt;
+}
+
+inline const ::flatbuffers::TypeTable *TextMeasureModeXTypeTable() {
+  static const ::flatbuffers::TypeCode type_codes[] = {
+    { ::flatbuffers::ET_UCHAR, 0, 0 },
+    { ::flatbuffers::ET_UCHAR, 0, 0 }
+  };
+  static const ::flatbuffers::TypeFunction type_refs[] = {
+    ImZeroFB::TextMeasureModeXTypeTable
+  };
+  static const char * const names[] = {
+    "AdvanceWidth",
+    "BondingBox"
+  };
+  static const ::flatbuffers::TypeTable tt = {
+    ::flatbuffers::ST_ENUM, 2, type_codes, type_refs, nullptr, nullptr, names
+  };
+  return &tt;
+}
+
+inline const ::flatbuffers::TypeTable *TextMeasureModeYTypeTable() {
+  static const ::flatbuffers::TypeCode type_codes[] = {
+    { ::flatbuffers::ET_UCHAR, 0, 0 },
+    { ::flatbuffers::ET_UCHAR, 0, 0 }
+  };
+  static const ::flatbuffers::TypeFunction type_refs[] = {
+    ImZeroFB::TextMeasureModeYTypeTable
+  };
+  static const char * const names[] = {
+    "FontSize",
+    "BondingBox"
+  };
+  static const ::flatbuffers::TypeTable tt = {
+    ::flatbuffers::ST_ENUM, 2, type_codes, type_refs, nullptr, nullptr, names
   };
   return &tt;
 }

@@ -12,6 +12,12 @@ namespace ImGui {
     void PopParagraphTextLayout();
     void DrawSerializedImZeroFB(ImDrawList *drawList,const uint8_t *buf,size_t bufSize);
 
+    void PushTextMeasureMode(ImZeroFB::TextMeasureModeX modeX,ImZeroFB::TextMeasureModeY modeY);
+    void PopTextMeasureMode();
+
     extern std::vector<uint8_t> isParagraphTextStack;
     extern std::vector<uint16_t> paragraphTextLayoutStack;
+
+    extern std::vector<uint8_t> textMeasureModeXStack;
+    extern std::vector<uint8_t> textMeasureModeYStack;
 }

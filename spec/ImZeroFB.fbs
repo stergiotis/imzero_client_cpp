@@ -212,6 +212,14 @@ enum IsParagraphText:uint8 {
     Always = 1,
     Auto = 2,
 }
+enum TextMeasureModeX:uint8 {
+    AdvanceWidth = 0,
+    BondingBox = 1
+}
+enum TextMeasureModeY:uint8 {
+    FontSize = 0,
+    BondingBox = 1
+}
 enum TextAlignFlags:uint8 {
     Left = 0,
     Right = 1,

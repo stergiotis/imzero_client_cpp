@@ -4,6 +4,8 @@
 namespace ImGui {
     std::vector<uint8_t> isParagraphTextStack{};
     std::vector<uint16_t> paragraphTextLayoutStack{};
+    std::vector<uint8_t> textMeasureModeXStack{};
+    std::vector<uint8_t> textMeasureModeYStack{};
 }
 
 void ImGui::PushIsParagraphText(ImZeroFB::IsParagraphText isParagraph) {
@@ -27,4 +29,13 @@ void ImGui::DrawSerializedImZeroFB(ImDrawList *drawList,const uint8_t *buf,size_
     auto const bufVec = drawList->fbBuilder->CreateVector<uint8_t>(buf,bufSize);
     auto const cmd = ImZeroFB::CreateCmdWrappedDrawList(*drawList->fbBuilder,bufVec);
     drawList->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdWrappedDrawList,cmd.Union());
+}
+void ImGui::PushTextMeasureMode(ImZeroFB::TextMeasureModeX modeX, ImZeroFB::TextMeasureModeY modeY) {
+    ImGui::textMeasureModeXStack.push_back(modeX);
+    ImGui::textMeasureModeYStack.push_back(modeY);
+}
+void ImGui::PopTextMeasureMode() {
+    //IM_ASSERT(!ImGui::textMeasureModeXStack.empty() && "unbalanced PushTextMeasureMode() and PopTextMeasureMode()");
+    ImGui::textMeasureModeXStack.pop_back();
+    ImGui::textMeasureModeYStack.pop_back();
 }

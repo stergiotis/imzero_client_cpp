@@ -21,14 +21,22 @@ ItemStatusE GetItemStatus(ImGuiHoveredFlags primary, ImGuiHoveredFlags secondary
     return r;
 }
 
-bool BeginCustomWidget(ImDrawList **dlOut,ImVec2 *posOut, ImVec2 *avail, bool *keyboardNavActive,ImGuiID *seed) {
-    ImGuiContext& g = *GImGui;
+bool BeginCustomWidget(ImDrawList **dlOut,ImVec2 *posOut, ImVec2 *avail, bool *keyboardNavActive,ImGuiID *seed)
+{
+    const ImGuiContext& g = *GImGui;
 
     ImGuiWindow* window = ImGui::GetCurrentWindow();
     *dlOut = window->DrawList;
     *posOut = window->DC.CursorPos;
     *avail = ImGui::GetContentRegionAvail();
-    *keyboardNavActive = g.IO.NavVisible;
+    if(g.IO.NavVisible && !window->DC.NavHideHighlightOneFrame) {
+        const ImGuiID id = window->IDStack.back();
+        // see ImGui::RenderNavHighlight
+        *keyboardNavActive = (id == g.NavId) && !(id == g.LastItemData.ID && (g.LastItemData.ItemFlags & ImGuiItemFlags_NoNav) != 0);
+    } else {
+        *keyboardNavActive = false;
+    }
+
     *seed = window->IDStack.back();
     return !(window->SkipItems);
 }
