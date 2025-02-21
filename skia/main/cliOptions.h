@@ -8,6 +8,7 @@ struct CliOptions {
     const char *fffiInFile = nullptr;
     const char *fffiOutFile = nullptr;
     const char *appTitle = "ImZeroClient";
+    bool fullscreen = false;
     bool backdropFilter = false;
     bool sketchFilter = false;
     bool fffiInterpreter = false;
@@ -16,6 +17,7 @@ struct CliOptions {
     bool imguiNavGamepad = false;
     bool imguiDocking = true;
     bool vectorCmd = true;
+    bool coreDump = true;
     const char *fontManager = nullptr;
     const char *fontManagerArg = nullptr;
     const char *skiaBackendType = "gl";

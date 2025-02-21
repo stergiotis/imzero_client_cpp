@@ -37,6 +37,8 @@ void operator delete(void* ptr) noexcept {
 #endif
 #endif
 
+#include <sys/prctl.h>
+
 int main(int argc, char** argv) {
 #ifdef TRACY_ENABLE
     ImGui::SetAllocatorFunctions(imZeroMemAlloc,imZeroMemFree,nullptr);
@@ -44,6 +46,11 @@ int main(int argc, char** argv) {
 
     CliOptions opts{};
     opts.parse(argc, argv, stderr);
+
+    if (0 > prctl(PR_SET_DUMPABLE, opts.coreDump ? 1 : 0)) {
+        perror("unable to set prctl(PR_SET_DUMPABLE)");
+        return 1;
+    }
 
     App app{};
     return app.Run(opts);

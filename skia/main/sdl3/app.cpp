@@ -766,8 +766,22 @@ static void build_ImFontAtlas(ImFontAtlas& atlas, SkPaint& fontPaint) {
     texId = reinterpret_cast<intptr_t>(&fontPaint);
     atlas.TexID = texId;
 }
+#include "imconfig.h"
+static void printColorMode(FILE *fd) {
+    if (fd == nullptr) { return; }
+    fprintf(fd,"IM_COL32_R_SHIFT=%d\n", IM_COL32_R_SHIFT);
+    fprintf(fd,"IM_COL32_G_SHIFT=%d\n", IM_COL32_G_SHIFT);
+    fprintf(fd,"IM_COL32_B_SHIFT=%d\n", IM_COL32_B_SHIFT);
+    fprintf(fd,"IM_COL32_A_SHIFT=%d\n", IM_COL32_A_SHIFT);
+#ifdef IMGUI_USE_BGRA_PACKED_COLOR
+    fprintf(stderr,"IMGUI_USE_BGRA_PACKED_COLOR set\n");
+#else
+    fprintf(fd,"IMGUI_USE_BGRA_PACKED_COLOR not set\n");
+#endif
+}
 
 int App::Run(CliOptions &opts) {
+    printColorMode(stderr);
     // prevent SIGPIPE when writing frames or reading user interaction events
     //signal(SIGPIPE, SIG_IGN);
 
@@ -925,7 +939,9 @@ int App::Run(CliOptions &opts) {
         glContext = SDL_GL_CreateContext(fWindow);
         SDL_GL_MakeCurrent(fWindow, glContext);
         SDL_GL_SetSwapInterval(opts.vsync ? 1 : 0); // Enable vsync //SDL_SetWindowSurfaceVSync()
-        // SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+        if (opts.fullscreen) {
+            SDL_SetWindowFullscreen(fWindow, SDL_WINDOW_FULLSCREEN);
+        }
         SDL_ShowWindow(fWindow);
     }
 

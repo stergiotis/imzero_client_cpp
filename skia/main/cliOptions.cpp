@@ -66,6 +66,8 @@ void CliOptions::usage(const char *name, FILE *file) const {
 
     fprintf(file,"general flags:\n");
     fprintf(file,"    -appTitle [title:%s]\n", appTitle);
+    fprintf(file,"    -fullscreen [bool:%s]\n", fullscreen ? "on" : "off");
+    fprintf(file,"    -coreDump [bool:%s]\n", coreDump ? "on" : "off");
 
     fprintf(file,"graphics flags:\n");
     fprintf(file,"    -skiaBackendType [type:%s]    choices: raster,gl,vulkan\n",skiaBackendType);
@@ -117,6 +119,7 @@ void CliOptions::parse(int argc,char **argv,FILE *logChannel) {
     fffiInFile = findFlagValueDefault(logChannel,u, argc, argv, "-fffiInFile", fffiInFile);
     fffiOutFile = findFlagValueDefault(logChannel,u, argc, argv, "-fffiOutFile", fffiOutFile);
     appTitle = findFlagValueDefault(logChannel,u, argc, argv, "-appTitle", appTitle);
+    fullscreen = getBoolFlagValue(logChannel, u, argc, argv, "-fullscreen", fullscreen);
     skiaBackendType = findFlagValueDefault(logChannel,u, argc, argv, "-skiaBackendType", skiaBackendType);
     backgroundColorRGBA = findFlagValueDefault(logChannel, u, argc, argv, "-backgroundColorRGBA", backgroundColorRGBA);
     if(strlen(backgroundColorRGBA) != 8) {
@@ -140,6 +143,7 @@ void CliOptions::parse(int argc,char **argv,FILE *logChannel) {
     imguiNavGamepad = getBoolFlagValue(logChannel,u, argc, argv, "-imguiNavGamepad",imguiNavGamepad);
     imguiDocking = getBoolFlagValue(logChannel,u, argc, argv, "-imguiDocking",imguiDocking);
     vectorCmd = getBoolFlagValue(logChannel,u, argc, argv, "-vectorCmd",vectorCmd);
+    coreDump = getBoolFlagValue(logChannel,u, argc, argv, "-coreDump",coreDump);
     videoUserInteractionEventsAreBinary = getBoolFlagValue(logChannel,u,argc,argv,"-videoUserInteractionEventsAreBinary",videoUserInteractionEventsAreBinary);
 
     videoRawFramesFile = findFlagValueDefault(logChannel,u, argc, argv,"-videoRawFramesFile",videoRawFramesFile);
