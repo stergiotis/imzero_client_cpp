@@ -17,6 +17,7 @@ class Paragraph {
         ~Paragraph();
 
         SkScalar getMaxWidth();
+        SkScalar getMaxIntrinsicWidth();
         SkScalar getHeight();
         void build(const char *text,size_t len);
         void layout(SkScalar width);
@@ -32,12 +33,13 @@ class Paragraph {
         void paint(SkCanvas &canvas, SkScalar x, SkScalar y);
         void setForegroundPaint(SkPaint &paint);
 
-        void getCacheStatistics(int &count);
+        void getCacheStatistics(int &count) const;
         void setCacheEnable(bool enable);
         void resetCache();
         void setFontSize(SkScalar size);
         void setLetterSpacing(SkScalar sp);
         void setTextLayout(skia::textlayout::TextAlign align,skia::textlayout::TextDirection dir);
+        void setMaxLines(int n);
 
         sk_sp<SkTypeface> getDefaultTypeface();
         void enableFontFallback();

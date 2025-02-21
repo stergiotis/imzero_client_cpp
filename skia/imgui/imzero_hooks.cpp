@@ -15,7 +15,7 @@ static void getParagraphTextLayout(ImZeroFB::TextAlignFlags &align,ImZeroFB::Tex
         dir = static_cast<ImZeroFB::TextDirection>(v & 0xff);
     }
 }
-static inline bool isParagraphText(const char *text_begin, const char *text_end) {
+static bool isParagraphText(const char *text_begin, const char *text_end) {
     if(!ImGui::isParagraphTextStack.empty()) {
         switch(ImGui::isParagraphTextStack.back()) {
         case ImZeroFB::IsParagraphText_Never: return false;
@@ -43,7 +43,7 @@ inline bool isPasswordFont(const ImFont &font);
 inline void initHiddenPwBuffer(const ImFont &font);
 void fbAddPointsToVector(
         flatbuffers::Offset<flatbuffers::Vector<float>> &xs, flatbuffers::Offset<flatbuffers::Vector<float>> &ys,
-        flatbuffers::FlatBufferBuilder &builder, const ImVec2 *points, const int points_count);
+        flatbuffers::FlatBufferBuilder &builder, const ImVec2 *points, int points_count);
 
 template<typename T,typename U, typename V>
 T copyFlag(V val, U flag1,T flag2) {
@@ -85,15 +85,32 @@ inline void initHiddenPwBuffer(const ImFont &font) {
         }
     }
 }
+static bool populatePasswordText(const ::ImFont &font, const char **text_begin, const char **text_end, size_t len) {
+    auto freeAllocatedText = false;
+    initHiddenPwBuffer(font);
+    if(len > hiddenPwBufferNChars) { ZoneScopedN("slow path password text allocation");
+        *text_begin = static_cast<char *>(IM_ALLOC(len*hiddenPwBufferNBytesPerChar));
+        // slow path, very long or high codepoints password
+        for(size_t i=0;i<len;i++) {
+            memcpy(const_cast<char*>(&(*text_begin)[i*hiddenPwBufferNBytesPerChar]), hiddenPwBuffer, hiddenPwBufferNBytesPerChar);
+        }
+        freeAllocatedText = true;
+    } else {
+        // fast path, password fits in buffer
+        (*text_begin) = hiddenPwBuffer;
+    }
+    (*text_end) = (*text_begin) + len;
+    return freeAllocatedText;
+}
 void fbAddPointsToVector(
         flatbuffers::Offset<flatbuffers::Vector<float>> &xs, flatbuffers::Offset<flatbuffers::Vector<float>> &ys,
         flatbuffers::FlatBufferBuilder &builder, const ImVec2 *points, const int points_count) {
     // FIXME use fbBuilder.StartVector and EndVector to eliminate the lambda
-    xs = builder.CreateVector<float>(size_t(points_count),[&points](size_t i) -> float { return points[i].x; });
-    ys = builder.CreateVector<float>(size_t(points_count),[&points](size_t i) -> float { return points[i].y; });
+    xs = builder.CreateVector<float>(static_cast<size_t>(points_count),[&points](const size_t i) -> float { return points[i].x; });
+    ys = builder.CreateVector<float>(static_cast<size_t>(points_count),[&points](const size_t i) -> float { return points[i].y; });
 }
 bool ImDrawList::addVerticesAsVectorCmd() {
-    auto sz = CmdBuffer.Size;
+    const auto sz = CmdBuffer.Size;
     if(sz >= 2) {
         _TryMergeDrawCmds();
     }
@@ -160,8 +177,6 @@ flatbuffers::Offset<ImZeroFB::DrawList> createVectorCmdFBDrawList(ImDrawList &dr
         auto &idxBuffer = drawList.IdxBuffer;
         indices = fbBuilder.CreateVector<uint16_t>(static_cast<size_t>(idxBuffer.size()),[&idxBuffer](size_t i) -> float { return idxBuffer[i]; });
         vertices = ImZeroFB::CreateVertexData(fbBuilder,posXYs,texUVs,cols,indices);
-    } else {
-        vertices = 0;
     }
     return ImZeroFB::CreateDrawList(fbBuilder,f,name,vertices,cmds);
 }
@@ -183,6 +198,61 @@ namespace ImGui {
         shouldAdd = shouldAdd || !draw_list->_FbCmds->empty();
     }
     bool Hooks::Global::Pre::RenderDimmedBackdgroundBehindWindow(::ImGuiWindow *window, ImU32 col) {
+        return false;
+    }
+    bool Hooks::Global::Pre::InputTextCalcTextSize(::ImVec2 &out, ::ImGuiContext* ctx, const char* text_begin, const char* text_end, const char** remaining, ImVec2* out_offset, bool stop_on_new_line) {
+        if (!ImGui::useVectorCmd) {
+           return true;
+        }
+
+        const ::ImGuiContext& g = *ctx;
+        ::ImFont *font = g.Font;
+        out = ImVec2(0, 0);
+        fprintf(stderr, "%s text='%s' size=%f\n",__func__,text_begin,g.FontSize);
+
+        if (stop_on_new_line) { // TODO use skia paragraph max line feature
+            auto const lineEnd =  static_cast<const char*>(memchr(text_begin, '\n', text_end - text_begin));
+            if (lineEnd != nullptr) {
+                text_end = lineEnd-1;
+                if (remaining) {
+                    *remaining = lineEnd;
+                }
+            }
+        }
+
+        const auto wrap_width = ImGui::GetContentRegionAvail().x;
+        if(wrap_width <= 0.0) {
+            return false;
+        }
+
+        auto freeAllocatedText = false;
+        if(isPasswordFont(*font)) {
+            // assumes passwords are rendered on a single line
+            freeAllocatedText = populatePasswordText(*font, &text_begin, &text_end, static_cast<size_t>(text_end-text_begin));
+        }
+
+        paragraph->setFontSize(SkFloatToScalar(g.FontSize));
+        paragraph->build(text_begin,static_cast<size_t>(text_end-text_begin));
+        paragraph->layout(SkScalarToFloat(wrap_width));
+        out.x = paragraph->getMaxIntrinsicWidth();
+        out.y = SkScalarToFloat(paragraph->getHeight());
+        auto aaa = font->CalcTextSizeA(g.FontSize,wrap_width,-1.0f, text_begin,text_end);
+        fprintf(stderr, "out.x=%f, aaa.x=%f\n",out.x,aaa.x);
+        out.x = aaa.x;
+
+        if (out_offset) {
+            const auto nLines = paragraph->getNumberOfLines();
+            bool found;
+            const auto bb = paragraph->boundingRect(nLines-1,found);
+            IM_ASSERT(!found && "last line not found in paragraph");
+            auto line_height = out.y / static_cast<float>(nLines);
+            *out_offset = ImVec2(bb.width(), out.y + line_height);
+        }
+
+        if (freeAllocatedText) {
+            IM_FREE(const_cast<char*>(text_begin));
+        }
+
         return false;
     }
 
@@ -761,6 +831,7 @@ namespace ImGui {
         if(!ImGui::useVectorCmd) {
             return true;
         }
+        IM_ASSERT(font != nullptr && "font is nullptr");
 
         uint32_t tmp;
         if(font->Glyphs.empty()) {
@@ -769,7 +840,7 @@ namespace ImGui {
         } else {
             tmp = c;
         }
-        auto const f = ImGui::skiaFont.makeWithSize(SkScalar(font->FontSize));
+        auto const f = ImGui::skiaFont.makeWithSize(SkFloatToScalar(font->FontSize));
         auto const glyph = f.unicharToGlyph(SkUnichar(tmp));
         SkScalar advanceX;
         f.getWidths(&glyph,1,&advanceX);
@@ -778,7 +849,11 @@ namespace ImGui {
     }
 
     bool Hooks::ImFont::Pre::CalcTextSizeA(const ::ImFont *font, float size, float max_width, float wrap_width, const char* text_begin, const char* text_end, const char** remaining, ImVec2 &retr) { ZoneScoped;
+        if(!useVectorCmd) {
+            return true;
+        }
         IM_ASSERT(font != nullptr && "font is nullptr");
+
         if (!text_end) {
             text_end = text_begin + strlen(text_begin); // FIXME-OPT: Need to avoid this.
         }
@@ -787,73 +862,58 @@ namespace ImGui {
             *remaining = nullptr;
         }
 
-        if(useVectorCmd) {
-            bool freeAllocatedText = false;
+        bool freeAllocatedText = false;
 
-            if(isPasswordFont(*font)) {
-                initHiddenPwBuffer(*font);
-                auto const len = static_cast<size_t>(text_end-text_begin);
-                if(len > hiddenPwBufferNChars) { ZoneScopedN("slow path password text allocation");
-                    text_begin = static_cast<char *>(IM_ALLOC(len*hiddenPwBufferNBytesPerChar));
-                    // slow path, very long or high codepoints password
-                    for(size_t i=0;i<len;i++) {
-                        memcpy(const_cast<char*>(&text_begin[i*hiddenPwBufferNBytesPerChar]), hiddenPwBuffer, hiddenPwBufferNBytesPerChar);
-                    }
-                    freeAllocatedText = true;
-                } else {
-                    // fast path, password fits in buffer
-                    text_begin = hiddenPwBuffer;
-                }
-                text_end = text_begin + len;
-            } else if(wrap_width > 0.0f || isParagraphText(text_begin,text_end)) { ZoneScoped;
-                if(wrap_width <= 0.0f) {
-                    wrap_width = ImGui::GetContentRegionAvail().x;
-                }
-                if(wrap_width <= 0.0) {
-                    retr.x = 0.0f;
-                    retr.y = size;
-                    return false;
-                }
-                ImGui::paragraph->build(text_begin,static_cast<size_t>(text_end-text_begin));
-                ImGui::paragraph->layout(SkScalar(wrap_width));
-                retr.x = std::max(wrap_width,SkScalarToFloat(ImGui::paragraph->getMaxWidth()));
-                retr.y = SkScalarToFloat(ImGui::paragraph->getHeight());
+        if(isPasswordFont(*font)) {
+            // assumes passwords are rendered on a single line
+            freeAllocatedText = populatePasswordText(*font, &text_begin, &text_end, static_cast<size_t>(text_end-text_begin));
+        } else if(wrap_width > 0.0f || isParagraphText(text_begin,text_end)) { ZoneScoped;
+            if(wrap_width <= 0.0f) {
+                wrap_width = ImGui::GetContentRegionAvail().x;
+            }
+            if(wrap_width <= 0.0) {
+                retr.x = 0.0f;
+                retr.y = size;
                 return false;
             }
+            paragraph->build(text_begin,static_cast<size_t>(text_end-text_begin));
+            ImGui::paragraph->layout(SkFloatToScalar(wrap_width));
+            retr.x = SkScalarToFloat(ImGui::paragraph->getMaxIntrinsicWidth());
+            retr.y = SkScalarToFloat(ImGui::paragraph->getHeight());
+            return false;
+        }
 
-            { ZoneScoped;
-                auto f = ImGui::skiaFont.makeWithSize(SkScalar(size));
-                SkRect r;
-                SkScalar advanceWidth = f.measureText(text_begin,text_end-text_begin,SkTextEncoding::kUTF8, &r);
-                if(freeAllocatedText) {
-                    IM_FREE(const_cast<char*>(text_begin));
-                }
+        { ZoneScoped;
+            const auto f = ImGui::skiaFont.makeWithSize(SkFloatToScalar(size));
+            SkRect r;
+            const SkScalar advanceWidth = f.measureText(text_begin,text_end-text_begin,SkTextEncoding::kUTF8, &r);
+            if(freeAllocatedText) {
+                IM_FREE(const_cast<char*>(text_begin));
+            }
 
-                if(!ImGui::textMeasureModeXStack.empty()) {
-                    switch(ImGui::textMeasureModeXStack.back()) {
-                    case ImZeroFB::TextMeasureModeX_AdvanceWidth:
-                        retr.x = SkScalarToFloat(advanceWidth);
-                        break;
-                    case ImZeroFB::TextMeasureModeX_BondingBox:
-                        retr.x = r.width();
-                        break;
-                    }
-                    switch(ImGui::textMeasureModeYStack.back()) {
-                    case ImZeroFB::TextMeasureModeY_FontSize:
-                        retr.y = size;
-                        break;
-                    case ImZeroFB::TextMeasureModeY_BondingBox:
-                        retr.y = r.height();
-                        break;
-                    }
-                } else {
+            if(!ImGui::textMeasureModeXStack.empty()) {
+                switch(ImGui::textMeasureModeXStack.back()) {
+                case ImZeroFB::TextMeasureModeX_AdvanceWidth:
                     retr.x = SkScalarToFloat(advanceWidth);
-                    retr.y = size;
+                    break;
+                case ImZeroFB::TextMeasureModeX_BondingBox:
+                    retr.x = r.width();
+                    break;
                 }
-                return false;
+                switch(ImGui::textMeasureModeYStack.back()) {
+                case ImZeroFB::TextMeasureModeY_FontSize:
+                    retr.y = size;
+                    break;
+                case ImZeroFB::TextMeasureModeY_BondingBox:
+                    retr.y = r.height();
+                    break;
+                }
+            } else {
+                retr.x = SkScalarToFloat(advanceWidth);
+                retr.y = size;
             }
         }
-        return true;
+        return false;
     }
 
     bool Hooks::ImFont::Pre::RenderChar(const ::ImFont *font, ::ImDrawList* draw_list, float size, const ImVec2& pos, ImU32 col, ImWchar c) { ZoneScoped;
@@ -868,221 +928,191 @@ namespace ImGui {
     }
 
     bool Hooks::ImFont::Pre::RenderText(const ::ImFont *font, ::ImDrawList* draw_list, float size, const ImVec2& pos, ImU32 col, const ImVec4& clip_rect, const char* text_begin, const char* text_end, float wrap_width, bool cpu_fine_clip) { ZoneScoped;
+        if(!ImGui::useVectorCmd) {
+            return true;
+        }
         IM_ASSERT(font != nullptr && "font is nullptr");
+
         if (!text_end) {
             text_end = text_begin + strlen(text_begin);
         }
 
-        if(ImGui::useVectorCmd) {
-            auto const len = static_cast<size_t>(text_end-text_begin);
-            if(pos.y > clip_rect.w) {
-                return false;
-            }
-
-            auto posFb = ImZeroFB::SingleVec2(pos.x,pos.y);
-            auto clipRectFb = ImZeroFB::SingleVec4(clip_rect.x,clip_rect.y,clip_rect.z,clip_rect.w);
-            flatbuffers::Offset<flatbuffers::String> textFb;
-            if(isPasswordFont(*font)) {
-                initHiddenPwBuffer(*font);
-                if(hiddenPwBufferNChars == 0) {
-                    unsigned int cp = ImGui::skiaPasswordDefaultCharacter;
-                    if(font->FallbackGlyph != nullptr && font->FallbackGlyph->Codepoint > 0) {
-                        cp = static_cast<unsigned int>(font->FallbackGlyph->Codepoint);
-                    }
-                    if(cp < 0x7f) {
-                        // fast path: single byte character
-                        hiddenPwBufferNChars = sizeof(hiddenPwBuffer);
-                        memset(hiddenPwBuffer,static_cast<int>(cp),hiddenPwBufferNChars);
-                        hiddenPwBufferNBytesPerChar = 1;
-                    } else {
-                        // slow path: multibyte character
-                        ImTextCharToUtf8(hiddenPwBuffer, cp);
-                        hiddenPwBufferNBytesPerChar = strnlen(hiddenPwBuffer, sizeof(hiddenPwBuffer));
-                        hiddenPwBufferNChars = sizeof(hiddenPwBufferNChars)/hiddenPwBufferNBytesPerChar;
-                        for(size_t i=1;i<hiddenPwBufferNChars;i++) {
-                            memcpy(&hiddenPwBuffer[i * hiddenPwBufferNBytesPerChar], hiddenPwBuffer, hiddenPwBufferNBytesPerChar);
-                        }
-                    }
-                }
-
-                if(len > hiddenPwBufferNChars) {
-                    auto bufferLong = static_cast<char *>(IM_ALLOC(len*hiddenPwBufferNBytesPerChar));
-                    // slow path, very long or high codepoints password
-                    for(size_t i=0;i<len;i++) {
-                        memcpy(&bufferLong[i*hiddenPwBufferNBytesPerChar], hiddenPwBuffer, hiddenPwBufferNBytesPerChar);
-                    }
-                    textFb = draw_list->fbBuilder->CreateString(bufferLong,len*hiddenPwBufferNBytesPerChar);
-                    IM_FREE(bufferLong);
-                } else {
-                    // fast path, password fits in buffer
-                    textFb = draw_list->fbBuilder->CreateString(hiddenPwBuffer, len*hiddenPwBufferNBytesPerChar);
-                }
-
-                auto const arg = ImZeroFB::CreateCmdRenderText(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(font),size,&posFb,col,&clipRectFb,textFb);
-                draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdRenderText,arg.Union());
-            } else {
-                textFb = draw_list->fbBuilder->CreateString(text_begin,len);
-                auto isParagraph = wrap_width > 0.0f || isParagraphText(text_begin,text_end);
-                if(isParagraph && wrap_width <= 0.0f) {
-                    wrap_width = ImGui::GetContentRegionAvail().x;
-                    if(wrap_width <= 0.0f) {
-                        // skip text, not visible
-                        return false;
-                    }
-                }
-                if(isParagraph) {
-//#define IMZERO_DRAWLIST_PARAGRAPH_AS_PATH
-#ifdef IMZERO_DRAWLIST_PARAGRAPH_AS_PATH
-                    const bool renderAsParagraph = IMZERO_DRAWLIST_PARAGRAPH_AS_PATH;
-#else
-                    constexpr bool renderAsParagraph = true;
-#endif
-                    if(renderAsParagraph) {
-                        ImZeroFB::TextAlignFlags align;
-                        ImZeroFB::TextDirection dir;
-                        getParagraphTextLayout(align,dir);
-                        auto const arg = ImZeroFB::CreateCmdRenderParagraph(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(font),size,&posFb,col,&clipRectFb,textFb,wrap_width,0.0f,align, dir);
-                        draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdRenderParagraph,arg.Union());
-                    } else { ZoneScopedN("paragraphAsPath");
-#ifdef IMZERO_DRAWLIST_PARAGRAPH_AS_PATH
-                        auto const clipRectSkia = SkRect::MakeLTRB(SkScalar(clip_rect.x),SkScalar(clip_rect.y),SkScalar(clip_rect.z),SkScalar(clip_rect.w));
-                auto const clipRectSkiaTrans = clipRectSkia.makeOffset(-pos.x,-pos.y);
-
-                ImGui::paragraph->setFontSize(SkScalar(size));
-                ImGui::paragraph->build(text_begin,static_cast<size_t>(text_end-text_begin));
-                ImGui::paragraph->layout(SkScalar(wrap_width));
-                for(int lineNumber=0;;lineNumber++) {
-                    bool found;
-                    auto bounds = ImGui::paragraph->boundingRect(lineNumber,found);
-                    if(!found) {
-                        break;
-                    }
-                    if(!bounds.intersect(clipRectSkiaTrans)) {
-                        // clipped
-                        continue;
-                    }
-
-                    //draw_list->AddRect(ImVec2(pos.x+ SkScalarToFloat(bounds.top()), pos.y+SkScalarToFloat(bounds.left())),
-                    //                         ImVec2(pos.x+SkScalarToFloat(bounds.right()), pos.y+SkScalarToFloat(bounds.bottom())),
-                    //                         0xaa1199ff,0.0f,0,2.0f);
-
-                    SkPath p;
-                    auto unrenderedGlyphs = ImGui::paragraph->getPath(lineNumber,p);
-                    /*
-                    // example data
-                    p.lineTo(1.0f,2.0f);
-                    p.conicTo(3.0f,4.0f,5.0f,6.0f,7.0f);
-                    p.cubicTo(8.0f,9.0f,10.0f,11.0f,12.0f,13.0f);
-                    p.quadTo(14.0f,15.0f,16.0f,18.0f);
-
-                    // output
-                    auto stream = SkFILEStream(stderr);
-                    p.dump((SkWStream*)&stream,true);
-                    p.dump(nullptr,true);
-
-                    // should produce the following output
-                    path.setFillType(SkPathFillType::kWinding);
-                    path.moveTo(SkBits2Float(0x00000000), SkBits2Float(0x00000000));  // 0, 0
-                    path.lineTo(SkBits2Float(0x3f800000), SkBits2Float(0x40000000));  // 1, 2
-                    path.conicTo(SkBits2Float(0x40400000), SkBits2Float(0x40800000), SkBits2Float(0x40a00000), SkBits2Float(0x40c00000), SkBits2Float(0x40e00000));  // 3, 4, 5, 6, 7
-                    path.cubicTo(SkBits2Float(0x41000000), SkBits2Float(0x41100000), SkBits2Float(0x41200000), SkBits2Float(0x41300000), SkBits2Float(0x41400000), SkBits2Float(0x41500000));  // 8, 9, 10, 11, 12, 13
-                    path.quadTo(SkBits2Float(0x41600000), SkBits2Float(0x41700000), SkBits2Float(0x41800000), SkBits2Float(0x41900000));  // 14, 15, 16, 18
-                    */
-#if 0
-                    p.offset(SkScalar(pos.x),SkScalar(pos.y));
-                auto svg = SkParsePath::ToSVGString(p);
-                auto svgFb = draw_list->fbBuilder->CreateString(svg.data(),svg.size());
-                auto arg = ImZeroFB::CreateCmdSvgPathSubset(*draw_list->fbBuilder,svgFb,col,true);
-                draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdSvgPathSubset,arg.Union());
-#else
-                    static_assert(static_cast<int64_t>(ImZeroFB::PathFillType_evenOdd) == static_cast<int64_t>(SkPathFillType::kEvenOdd));
-                    static_assert(static_cast<int64_t>(ImZeroFB::PathFillType_winding) == static_cast<int64_t>(SkPathFillType::kWinding));
-                    static_assert(static_cast<int64_t>(ImZeroFB::PathFillType_inverseEvenOdd) == static_cast<int64_t>(SkPathFillType::kInverseEvenOdd));
-                    static_assert(static_cast<int64_t>(ImZeroFB::PathFillType_inverseWinding) == static_cast<int64_t>(SkPathFillType::kInverseWinding));
-                    static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_move) == static_cast<int64_t>( SkPath::Verb::kMove_Verb));
-                    static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_line) == static_cast<int64_t>( SkPath::Verb::kLine_Verb));
-                    static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_quad) == static_cast<int64_t>( SkPath::Verb::kQuad_Verb));
-                    static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_conic) == static_cast<int64_t>( SkPath::Verb::kConic_Verb));
-                    static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_cubic) == static_cast<int64_t>( SkPath::Verb::kCubic_Verb));
-                    static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_close) == static_cast<int64_t>( SkPath::Verb::kClose_Verb));
-                    static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_done) == static_cast<int64_t>( SkPath::Verb::kDone_Verb));
-                    static_assert(sizeof(ImZeroFB::PathVerb) == 1);
-
-                    auto const nVerbs = p.countVerbs();
-                    draw_list->fPathVerbBuffer.resize(0);
-                    draw_list->fPathVerbBuffer.reserve(nVerbs);
-                    draw_list->fPathWeightBuffer.resize(0);
-                    draw_list->fPathWeightBuffer.reserve(nVerbs); // upper bound, only needed for conic
-                    auto const nPoints = p.countPoints();
-                    draw_list->fPathPointBuffer.resize(0);
-                    draw_list->fPathPointBuffer.reserve(nPoints*2);
-                    static_assert(sizeof(SkPoint) == 2*sizeof(float));
-
-                    SkPath::Iter iter(p, false);
-                    SkPoint pts[4];
-                    SkPath::Verb verb;
-                    static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_move) == 0);
-                    static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_line) == 1);
-                    static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_quad) == 2);
-                    static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_conic) == 3);
-                    static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_cubic) == 4);
-                    static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_close) == 5);
-                    static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_done) == 6);
-                    constexpr int nPointsLU[SkPath::kDone_Verb+1] = {1, /* move */
-                                                                     1, /* line */
-                                                                     2, /* quad */
-                                                                     2, /* conic */
-                                                                     3, /* cubic */
-                                                                     0, /* close */
-                                                                     0 /* done */
-                    };
-
-                    // NOTE: iter seems to be the only method to get conic weights.
-                    // live would be much easier if methods p.getWeight(),p.getWeights() and p.getWeightCounts()
-                    // would exist --> skia pull request?
-                    while ((verb = iter.next(pts)) != SkPath::kDone_Verb) {
-                        draw_list->fPathVerbBuffer.push_back(verb);
-                        const int o = verb == SkPath::kMove_Verb ? 0 : 1;
-                        // TODO optionally use SkPath::ConvertConicToQuads() to approximate conics (hyperbolic,elliptic,parabolic) using quadratic bezier curves
-                        for(int i=0;i<nPointsLU[verb];i++) {
-                            draw_list->fPathPointBuffer.push_back(pts[o+i].x());
-                            draw_list->fPathPointBuffer.push_back(pts[o+i].y());
-                        }
-                        if(verb == SkPath::kConic_Verb) {
-                            draw_list->fPathWeightBuffer.push_back(iter.conicWeight());
-                        }
-                        pts[0] = SkPoint::Make(-2.0f,-2.0f);
-                        pts[1] = SkPoint::Make(-2.0f,-2.0f);
-                        pts[2] = SkPoint::Make(-2.0f,-2.0f);
-                        pts[3] = SkPoint::Make(-2.0f,-2.0f);
-                    }
-
-                    auto const pointXYs = draw_list->fbBuilder->CreateVector<float>(draw_list->fPathPointBuffer.Data,nPoints*2);
-                    auto const verbs = draw_list->fbBuilder->CreateVector<uint8_t>(draw_list->fPathVerbBuffer.Data,nVerbs);
-                    auto const weights = draw_list->fbBuilder->CreateVector<float>(draw_list->fPathWeightBuffer.Data,draw_list->fPathWeightBuffer.Size);
-
-                    auto arg = ImZeroFB::CreateCmdPath(*draw_list->fbBuilder,
-                                                          &posFb,
-                                                          verbs,
-                                                          pointXYs,
-                                                          weights,
-                                                          col,
-                                                          false,
-                                                          true,
-                                                          static_cast<ImZeroFB::PathFillType>(p.getFillType()));
-                    draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdPath,arg.Union());
-#endif
-
-                }
-#endif
-                    }
-                } else {
-                    auto const arg = ImZeroFB::CreateCmdRenderText(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(font),size,&posFb,col,&clipRectFb,textFb);
-                    draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdRenderText,arg.Union());
-                }
-            }
+        auto const len = static_cast<size_t>(text_end-text_begin);
+        if(pos.y > clip_rect.w) {
             return false;
         }
-        return true;
+
+        auto posFb = ImZeroFB::SingleVec2(pos.x,pos.y);
+        auto clipRectFb = ImZeroFB::SingleVec4(clip_rect.x,clip_rect.y,clip_rect.z,clip_rect.w);
+        flatbuffers::Offset<flatbuffers::String> textFb;
+        if(isPasswordFont(*font)) {
+            initHiddenPwBuffer(*font);
+            bool freeAllocatedText = populatePasswordText(*font,&text_begin,&text_end,text_end-text_begin);
+
+            auto const arg = ImZeroFB::CreateCmdRenderText(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(font),size,&posFb,col,&clipRectFb,textFb);
+            draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdRenderText,arg.Union());
+            IM_FREE(const_cast<char*>(text_begin));
+        } else {
+            textFb = draw_list->fbBuilder->CreateString(text_begin,len);
+            auto isParagraph = wrap_width > 0.0f || isParagraphText(text_begin,text_end);
+            if(isParagraph && wrap_width <= 0.0f) {
+                wrap_width = ImGui::GetContentRegionAvail().x;
+                if(wrap_width <= 0.0f) {
+                    // skip text, not visible
+                    return false;
+                }
+            }
+            if(isParagraph) {
+//#define IMZERO_DRAWLIST_PARAGRAPH_AS_PATH
+#ifdef IMZERO_DRAWLIST_PARAGRAPH_AS_PATH
+                const bool renderAsParagraph = IMZERO_DRAWLIST_PARAGRAPH_AS_PATH;
+#else
+                constexpr bool renderAsParagraph = true;
+#endif
+                if(renderAsParagraph) {
+                    ImZeroFB::TextAlignFlags align;
+                    ImZeroFB::TextDirection dir;
+                    getParagraphTextLayout(align,dir);
+                    auto const arg = ImZeroFB::CreateCmdRenderParagraph(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(font),size,&posFb,col,&clipRectFb,textFb,wrap_width,0.0f,align, dir);
+                    draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdRenderParagraph,arg.Union());
+                } else { ZoneScopedN("paragraphAsPath");
+#ifdef IMZERO_DRAWLIST_PARAGRAPH_AS_PATH
+                    auto const clipRectSkia = SkRect::MakeLTRB(SkScalar(clip_rect.x),SkScalar(clip_rect.y),SkScalar(clip_rect.z),SkScalar(clip_rect.w));
+            auto const clipRectSkiaTrans = clipRectSkia.makeOffset(-pos.x,-pos.y);
+
+            ImGui::paragraph->setFontSize(SkScalar(size));
+            ImGui::paragraph->build(text_begin,static_cast<size_t>(text_end-text_begin));
+            ImGui::paragraph->layout(SkScalar(wrap_width));
+            for(int lineNumber=0;;lineNumber++) {
+                bool found;
+                auto bounds = ImGui::paragraph->boundingRect(lineNumber,found);
+                if(!found) {
+                    break;
+                }
+                if(!bounds.intersect(clipRectSkiaTrans)) {
+                    // clipped
+                    continue;
+                }
+
+                //draw_list->AddRect(ImVec2(pos.x+ SkScalarToFloat(bounds.top()), pos.y+SkScalarToFloat(bounds.left())),
+                //                         ImVec2(pos.x+SkScalarToFloat(bounds.right()), pos.y+SkScalarToFloat(bounds.bottom())),
+                //                         0xaa1199ff,0.0f,0,2.0f);
+
+                SkPath p;
+                auto unrenderedGlyphs = ImGui::paragraph->getPath(lineNumber,p);
+                /*
+                // example data
+                p.lineTo(1.0f,2.0f);
+                p.conicTo(3.0f,4.0f,5.0f,6.0f,7.0f);
+                p.cubicTo(8.0f,9.0f,10.0f,11.0f,12.0f,13.0f);
+                p.quadTo(14.0f,15.0f,16.0f,18.0f);
+
+                // output
+                auto stream = SkFILEStream(stderr);
+                p.dump((SkWStream*)&stream,true);
+                p.dump(nullptr,true);
+
+                // should produce the following output
+                path.setFillType(SkPathFillType::kWinding);
+                path.moveTo(SkBits2Float(0x00000000), SkBits2Float(0x00000000));  // 0, 0
+                path.lineTo(SkBits2Float(0x3f800000), SkBits2Float(0x40000000));  // 1, 2
+                path.conicTo(SkBits2Float(0x40400000), SkBits2Float(0x40800000), SkBits2Float(0x40a00000), SkBits2Float(0x40c00000), SkBits2Float(0x40e00000));  // 3, 4, 5, 6, 7
+                path.cubicTo(SkBits2Float(0x41000000), SkBits2Float(0x41100000), SkBits2Float(0x41200000), SkBits2Float(0x41300000), SkBits2Float(0x41400000), SkBits2Float(0x41500000));  // 8, 9, 10, 11, 12, 13
+                path.quadTo(SkBits2Float(0x41600000), SkBits2Float(0x41700000), SkBits2Float(0x41800000), SkBits2Float(0x41900000));  // 14, 15, 16, 18
+                */
+#if 0
+                p.offset(SkScalar(pos.x),SkScalar(pos.y));
+            auto svg = SkParsePath::ToSVGString(p);
+            auto svgFb = draw_list->fbBuilder->CreateString(svg.data(),svg.size());
+            auto arg = ImZeroFB::CreateCmdSvgPathSubset(*draw_list->fbBuilder,svgFb,col,true);
+            draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdSvgPathSubset,arg.Union());
+#else
+                static_assert(static_cast<int64_t>(ImZeroFB::PathFillType_evenOdd) == static_cast<int64_t>(SkPathFillType::kEvenOdd));
+                static_assert(static_cast<int64_t>(ImZeroFB::PathFillType_winding) == static_cast<int64_t>(SkPathFillType::kWinding));
+                static_assert(static_cast<int64_t>(ImZeroFB::PathFillType_inverseEvenOdd) == static_cast<int64_t>(SkPathFillType::kInverseEvenOdd));
+                static_assert(static_cast<int64_t>(ImZeroFB::PathFillType_inverseWinding) == static_cast<int64_t>(SkPathFillType::kInverseWinding));
+                static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_move) == static_cast<int64_t>( SkPath::Verb::kMove_Verb));
+                static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_line) == static_cast<int64_t>( SkPath::Verb::kLine_Verb));
+                static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_quad) == static_cast<int64_t>( SkPath::Verb::kQuad_Verb));
+                static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_conic) == static_cast<int64_t>( SkPath::Verb::kConic_Verb));
+                static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_cubic) == static_cast<int64_t>( SkPath::Verb::kCubic_Verb));
+                static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_close) == static_cast<int64_t>( SkPath::Verb::kClose_Verb));
+                static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_done) == static_cast<int64_t>( SkPath::Verb::kDone_Verb));
+                static_assert(sizeof(ImZeroFB::PathVerb) == 1);
+
+                auto const nVerbs = p.countVerbs();
+                draw_list->fPathVerbBuffer.resize(0);
+                draw_list->fPathVerbBuffer.reserve(nVerbs);
+                draw_list->fPathWeightBuffer.resize(0);
+                draw_list->fPathWeightBuffer.reserve(nVerbs); // upper bound, only needed for conic
+                auto const nPoints = p.countPoints();
+                draw_list->fPathPointBuffer.resize(0);
+                draw_list->fPathPointBuffer.reserve(nPoints*2);
+                static_assert(sizeof(SkPoint) == 2*sizeof(float));
+
+                SkPath::Iter iter(p, false);
+                SkPoint pts[4];
+                SkPath::Verb verb;
+                static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_move) == 0);
+                static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_line) == 1);
+                static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_quad) == 2);
+                static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_conic) == 3);
+                static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_cubic) == 4);
+                static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_close) == 5);
+                static_assert(static_cast<int64_t>(ImZeroFB::PathVerb_done) == 6);
+                constexpr int nPointsLU[SkPath::kDone_Verb+1] = {1, /* move */
+                                                                 1, /* line */
+                                                                 2, /* quad */
+                                                                 2, /* conic */
+                                                                 3, /* cubic */
+                                                                 0, /* close */
+                                                                 0 /* done */
+                };
+
+                // NOTE: iter seems to be the only method to get conic weights.
+                // live would be much easier if methods p.getWeight(),p.getWeights() and p.getWeightCounts()
+                // would exist --> skia pull request?
+                while ((verb = iter.next(pts)) != SkPath::kDone_Verb) {
+                    draw_list->fPathVerbBuffer.push_back(verb);
+                    const int o = verb == SkPath::kMove_Verb ? 0 : 1;
+                    // TODO optionally use SkPath::ConvertConicToQuads() to approximate conics (hyperbolic,elliptic,parabolic) using quadratic bezier curves
+                    for(int i=0;i<nPointsLU[verb];i++) {
+                        draw_list->fPathPointBuffer.push_back(pts[o+i].x());
+                        draw_list->fPathPointBuffer.push_back(pts[o+i].y());
+                    }
+                    if(verb == SkPath::kConic_Verb) {
+                        draw_list->fPathWeightBuffer.push_back(iter.conicWeight());
+                    }
+                    pts[0] = SkPoint::Make(-2.0f,-2.0f);
+                    pts[1] = SkPoint::Make(-2.0f,-2.0f);
+                    pts[2] = SkPoint::Make(-2.0f,-2.0f);
+                    pts[3] = SkPoint::Make(-2.0f,-2.0f);
+                }
+
+                auto const pointXYs = draw_list->fbBuilder->CreateVector<float>(draw_list->fPathPointBuffer.Data,nPoints*2);
+                auto const verbs = draw_list->fbBuilder->CreateVector<uint8_t>(draw_list->fPathVerbBuffer.Data,nVerbs);
+                auto const weights = draw_list->fbBuilder->CreateVector<float>(draw_list->fPathWeightBuffer.Data,draw_list->fPathWeightBuffer.Size);
+
+                auto arg = ImZeroFB::CreateCmdPath(*draw_list->fbBuilder,
+                                                      &posFb,
+                                                      verbs,
+                                                      pointXYs,
+                                                      weights,
+                                                      col,
+                                                      false,
+                                                      true,
+                                                      static_cast<ImZeroFB::PathFillType>(p.getFillType()));
+                draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdPath,arg.Union());
+#endif
+
+            }
+#endif
+                }
+            } else {
+                auto const arg = ImZeroFB::CreateCmdRenderText(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(font),size,&posFb,col,&clipRectFb,textFb);
+                draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdRenderText,arg.Union());
+            }
+        }
+        return false;
     }
 }

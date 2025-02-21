@@ -45,7 +45,7 @@ sk_sp<SkTypeface> Paragraph::getDefaultTypeface() {
     return fDefaultTypeface;
     //return fFontMgr->matchFamilyStyle(nullptr,SkFontStyle()); // FIXME returns empty typeface
 }
-void Paragraph::getCacheStatistics(int &count) {
+void Paragraph::getCacheStatistics(int &count) const {
     const auto cache = fTlFontCollection->getParagraphCache();
     if(cache == nullptr) {
         count = 0;
@@ -72,6 +72,9 @@ void Paragraph::resetCache() {
 SkScalar Paragraph::getMaxWidth() {
     return fPara->getMaxWidth();
 }
+SkScalar Paragraph::getMaxIntrinsicWidth() {
+    return fPara->getMaxIntrinsicWidth();
+}
 SkScalar Paragraph::getHeight() {
     return fPara->getHeight();
 }
@@ -97,6 +100,7 @@ SkRect Paragraph::boundingRect(int lineNumber, bool &found) {
 int Paragraph::getPath(int lineNumber, SkPath &dest) {
     return fPara->getPath(lineNumber,&dest);
 }
+
 void Paragraph::setForegroundPaint(SkPaint &paint) {
     fTlTextStyle.setForegroundPaint(paint);
 }
