@@ -133,8 +133,6 @@ void render_init(FILE *fdInput,FILE *fdOutput) {
 
 
 void render_render() {
-    ImGui::DockSpaceOverViewport();    
-
     interpretCommands();
     //EmitDrawList(stdout);
 }
