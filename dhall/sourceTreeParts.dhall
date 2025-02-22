@@ -433,8 +433,7 @@ let skiaShared =
 			, "-lX11"
 			, "-lGLU"
 			, "-lGL"
-		    , "-L${skiaSharedBaseDir}/out/Shared"
-		    , "-Wl,-rpath,${skiaSharedBaseDir}/out/Shared"
+			, "-L${skiaSharedBaseDir}/out/Shared"
 			, "-lskparagraph"
 			, "-lskia"
 			, "-lskunicode"
@@ -551,7 +550,6 @@ sourceTreePart::{
 	}
 	, ldflags = { global = [
 		, "-L${sdlDir}/build"
-		, "-Wl,-rpath,${sdlDir}/build"
 		, "-Wl,--enable-new-dtags"
 		, "-lSDL3"
 	 ] : List Text }

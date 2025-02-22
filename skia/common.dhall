@@ -62,7 +62,7 @@ let common =
 	--	, linker
 		] : List Text
 	--let stdlibFlags = ["-stdlib=libc++"] : List Text
-	let ldflags = if debug then ldflagsDebug else ldflagsRelease
+	let ldflags = ["-Wl,-rpath,'$ORIGIN/../lib' -Wl,-z,origin"] # (if debug then ldflagsDebug else ldflagsRelease)
 	let stdlibFlags = [] : List Text
 	let linker = cxx
 	in {

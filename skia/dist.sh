@@ -1,20 +1,17 @@
 #!/bin/bash
 set -ev
+here=$(dirname "$(readlink -f "$BASH_SOURCE")")
+cd "$here"
 version=$(git log -1  --pretty=format:"%H" | tr -d "\n")
+extra=""
 if [[ $(git diff --stat) != '' ]]; then
-   version+="_dirty"
+   extra+="_dirty"
 fi
-arch=$(uname -p)
-fn="dist/imzero_client_skia_${version:0:8}_${arch}"
+arch=$(uname --machine) # TODO use output of file or env variable?
+fn="dist/imzero_client_skia_${version:0:8}${extra}_${arch}"
 echo "dist=${fn}"
-rm -rf "$fn"
+rm -rf "dist"
 mkdir -p "$fn"
-find . -maxdepth 1 -name "*exe*" -type f -exec cp -v {} "$fn" \;
-cp -v ../../contrib/sdl/build/libSDL3.so.0 "$fn"
-cp -v ../../contrib/skia/out/Shared/libskparagraph.so "$fn"
-cp -v ../../contrib/skia/out/Shared/libskia.so "$fn"
-cp -v ../../contrib/skia/out/Shared/libskunicode.so "$fn"
-cp -v ../../contrib/skia/out/Shared/libbentleyottmann.so "$fn"
-cp -v ../../contrib/skia/out/Shared/libskshaper.so "$fn"
-
+cp -rv bin "$fn"
+cp -rv lib "$fn"
 tar cvfJ "${fn}.tar.xz" "$fn"
