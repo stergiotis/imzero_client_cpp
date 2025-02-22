@@ -37,6 +37,7 @@ Paragraph::Paragraph(sk_sp<SkFontMgr> fontMgr,sk_sp<SkTypeface> defaultTypeface)
     fParaBuilderJustifyRTL = skia::textlayout::ParagraphBuilder::make(paraStyleRtl, fTlFontCollection);
 
     fParaBuilder = fParaBuilderLeftLTR.get();
+    fTlTextStyle.setTypeface(defaultTypeface);
 
     fDefaultTypeface = defaultTypeface;
 }
