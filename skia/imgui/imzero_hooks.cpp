@@ -208,7 +208,6 @@ namespace ImGui {
         const ::ImGuiContext& g = *ctx;
         ::ImFont *font = g.Font;
         out = ImVec2(0, 0);
-        fprintf(stderr, "%s text='%s' size=%f\n",__func__,text_begin,g.FontSize);
 
         if (stop_on_new_line) { // TODO use skia paragraph max line feature
             auto const lineEnd =  static_cast<const char*>(memchr(text_begin, '\n', text_end - text_begin));
@@ -231,14 +230,20 @@ namespace ImGui {
             freeAllocatedText = populatePasswordText(*font, &text_begin, &text_end, static_cast<size_t>(text_end-text_begin));
         }
 
+#if 0
+        paragraph->disableFontFallback();
         paragraph->setFontSize(SkFloatToScalar(g.FontSize));
         paragraph->build(text_begin,static_cast<size_t>(text_end-text_begin));
         paragraph->layout(SkScalarToFloat(wrap_width));
-        out.x = paragraph->getMaxIntrinsicWidth();
+        paragraph->enableFontFallback();
+        out.x = SkScalarToFloat(paragraph->getMaxIntrinsicWidth());
         out.y = SkScalarToFloat(paragraph->getHeight());
-        auto aaa = font->CalcTextSizeA(g.FontSize,wrap_width,-1.0f, text_begin,text_end);
-        fprintf(stderr, "out.x=%f, aaa.x=%f\n",out.x,aaa.x);
-        out.x = aaa.x;
+#else
+        const auto f = ImGui::skiaFont.makeWithSize(SkFloatToScalar(g.FontSize));
+        const SkScalar advanceWidth = f.measureText(text_begin,text_end-text_begin,SkTextEncoding::kUTF8, nullptr);
+        out.x = advanceWidth;
+        out.y = g.FontSize;
+#endif
 
         if (out_offset) {
             const auto nLines = paragraph->getNumberOfLines();
@@ -876,10 +881,11 @@ namespace ImGui {
                 retr.y = size;
                 return false;
             }
+            paragraph->setFontSize(size);
             paragraph->build(text_begin,static_cast<size_t>(text_end-text_begin));
-            ImGui::paragraph->layout(SkFloatToScalar(wrap_width));
-            retr.x = SkScalarToFloat(ImGui::paragraph->getMaxIntrinsicWidth());
-            retr.y = SkScalarToFloat(ImGui::paragraph->getHeight());
+            paragraph->layout(SkFloatToScalar(wrap_width));
+            retr.x = SkScalarToFloat(paragraph->getMaxIntrinsicWidth());
+            retr.y = SkScalarToFloat(paragraph->getHeight());
             return false;
         }
 
@@ -891,8 +897,8 @@ namespace ImGui {
                 IM_FREE(const_cast<char*>(text_begin));
             }
 
-            if(!ImGui::textMeasureModeXStack.empty()) {
-                switch(ImGui::textMeasureModeXStack.back()) {
+            if(!textMeasureModeXStack.empty()) {
+                switch(textMeasureModeXStack.back()) {
                 case ImZeroFB::TextMeasureModeX_AdvanceWidth:
                     retr.x = SkScalarToFloat(advanceWidth);
                     break;
@@ -900,7 +906,7 @@ namespace ImGui {
                     retr.x = r.width();
                     break;
                 }
-                switch(ImGui::textMeasureModeYStack.back()) {
+                switch(textMeasureModeYStack.back()) {
                 case ImZeroFB::TextMeasureModeY_FontSize:
                     retr.y = size;
                     break;
