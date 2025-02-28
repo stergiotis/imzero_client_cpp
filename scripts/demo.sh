@@ -8,7 +8,7 @@ rm -f transfer
 mkfifo transfer
 font=$(./scripts/find_ttf_font_file.sh "DejaVu Sans:style=Book")
 ./imzero --logFormat console demo --mainFontTTF "$font" --mainFontSizeInPixels 13 "$@" < transfer | \
-        ./skia/imgui_exe -ttfFilePath "$font" -fffiInterpreter on -skiaBackendType gl -vsync on -backdropFilter off \
+        ./skia/bin/imgui_skia_exe -ttfFilePath "$font" -fffiInterpreter on -skiaBackendType gl -vsync on -backdropFilter off \
                     -vectorCmd on \
                     -fontManager fontconfig -imguiNavKeyboard on > transfer
 rm -f transfer
