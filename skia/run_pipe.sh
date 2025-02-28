@@ -11,7 +11,7 @@ font="./SauceCodeProNerdFontMono-Regular.ttf"
 font=$(../scripts/find_ttf_font_file.sh "DejaVu Sans:style=Book")
 VSYNC="${VSYNC:-on}"
 ./main_go --logFormat console demo --mainFontTTF "$font" --mainFontSizeInPixels 13 "$@" < transfer | \
-	./imgui_skia_exe -ttfFilePath "$font" -fffiInterpreter on -skiaBackendType gl -vsync $VSYNC -backdropFilter off \
+	./bin/imgui_skia_exe -ttfFilePath "$font" -fffiInterpreter on -skiaBackendType gl -vsync $VSYNC -backdropFilter off \
 	            -vectorCmd on \
 		    -fontManager fontconfig -imguiNavKeyboard on > transfer
 rm -f transfer
