@@ -36,7 +36,6 @@ SK_BUILD_FOR_UNIX
 )
 include_directories("${CMAKE_CURRENT_LIST_DIR}/./contrib/flatbuffers"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui"
-"${CMAKE_CURRENT_LIST_DIR}/./src/arena/simple"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/skia"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public"
 )
@@ -48,7 +47,7 @@ add_compile_options(-std=c++20
 -fno-omit-frame-pointer
 -O3
 # sdl3Shared
--I/home/deck/repo/imzero_client_cpp/skia/./../../contrib/sdl/include
+-I/home/deck/repo/imzero_client_cpp/skia_minimal/./../../contrib/sdl/include
 # skiaShared
 -ffp-contract=off
 # skiaShared
@@ -71,7 +70,7 @@ add_compile_options(-std=c++20
 link_libraries(-Wl,-rpath,'$ORIGIN/../lib' -Wl,-z,origin
 -DNDEBUG
 # sdl3Shared
--L/home/deck/repo/imzero_client_cpp/skia/./../../contrib/sdl/build
+-L/home/deck/repo/imzero_client_cpp/skia_minimal/./../../contrib/sdl/build
 # sdl3Shared
 -Wl,--enable-new-dtags
 # sdl3Shared
@@ -99,7 +98,7 @@ link_libraries(-Wl,-rpath,'$ORIGIN/../lib' -Wl,-z,origin
 # skiaShared
 -lGL
 # skiaShared
--L/home/deck/repo/imzero_client_cpp/skia/./../../contrib/skia/out/Shared
+-L/home/deck/repo/imzero_client_cpp/skia_minimal/./../../contrib/skia/out/Shared
 # skiaShared
 -lskparagraph
 # skiaShared
@@ -143,60 +142,6 @@ add_library(imguiWithSkia OBJECT "${CMAKE_CURRENT_LIST_DIR}/./imgui/imzero_hooks
 "${CMAKE_CURRENT_LIST_DIR}/./imgui/imgui_tables.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui/imgui_widgets.cpp")
 
-# render
-add_library(render OBJECT "${CMAKE_CURRENT_LIST_DIR}/./src/render.cpp")
-target_include_directories(render PUBLIC "${CMAKE_CURRENT_LIST_DIR}/./src"
-"${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_implot"
-"${CMAKE_CURRENT_LIST_DIR}/./imcolortextedit")
-
-# marshalling
-add_library(marshalling OBJECT "${CMAKE_CURRENT_LIST_DIR}/./src/marshalling/receive.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./src/marshalling/send.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./src/marshalling/helper.cpp")
-target_include_directories(marshalling PUBLIC "${CMAKE_CURRENT_LIST_DIR}/./src/marshalling"
-"${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_implot")
-
-# arena
-add_library(arena OBJECT "${CMAKE_CURRENT_LIST_DIR}/./src/arena/simple/simple.cpp")
-
-# widgets
-add_library(widgets OBJECT "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/common.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./src/widgets/piemenu.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./src/widgets/splitter.cpp")
-target_compile_options(widgets PUBLIC -Wno-unused-parameter
--Wno-unused-variable)
-
-# imguiToggle
-add_library(imguiToggle OBJECT "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_toggle/imgui_toggle.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_toggle/imgui_toggle_palette.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_toggle/imgui_toggle_presets.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_toggle/imgui_toggle_renderer.cpp")
-target_compile_options(imguiToggle PUBLIC -Wno-unused-parameter
--Wno-unused-variable)
-
-# imguiImplot
-add_library(imguiImplot OBJECT "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_implot/implot.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_implot/implot_demo.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_implot/implot_items.cpp")
-
-# imguiKnobs
-add_library(imguiKnobs OBJECT "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_knobs/imgui-knobs.cpp")
-
-# imguiCoolbar
-add_library(imguiCoolbar OBJECT "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_coolbar/ImCoolbar.cpp")
-
-# imguiFlamegraph
-add_library(imguiFlamegraph OBJECT "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_flamegraph/imgui_widget_flamegraph.cpp")
-target_include_directories(imguiFlamegraph PUBLIC "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_flamegraph"
-"${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_flamegraph")
-
-# imguiTextedit
-add_library(imguiTextedit OBJECT "${CMAKE_CURRENT_LIST_DIR}/./imcolortextedit/TextEditor.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./imcolortextedit/LanguageDefinitions.cpp")
-target_compile_options(imguiTextedit PUBLIC -Wno-unused-variable)
-
-# binding
-
 # sdl3Shared
 
 # skiaShared
@@ -218,16 +163,6 @@ target_include_directories(mainSkiaSdl3 PUBLIC "${CMAKE_CURRENT_LIST_DIR}/./main
 # tracyDisabled
 add_library(tracyDisabled OBJECT "${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public/TracyClient.cpp")
 add_executable(imgui_skia_exe $<TARGET_OBJECTS:imguiWithSkia>
-$<TARGET_OBJECTS:render>
-$<TARGET_OBJECTS:marshalling>
-$<TARGET_OBJECTS:arena>
-$<TARGET_OBJECTS:widgets>
-$<TARGET_OBJECTS:imguiToggle>
-$<TARGET_OBJECTS:imguiImplot>
-$<TARGET_OBJECTS:imguiKnobs>
-$<TARGET_OBJECTS:imguiCoolbar>
-$<TARGET_OBJECTS:imguiFlamegraph>
-$<TARGET_OBJECTS:imguiTextedit>
 $<TARGET_OBJECTS:mainSkiaSdl3>
 $<TARGET_OBJECTS:tracyDisabled>)
 

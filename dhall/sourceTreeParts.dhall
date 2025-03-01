@@ -73,50 +73,6 @@ let imgui = let dir = "./imgui" in sourceTreePart::{
 		, global = [] : List Text
 		}
 }
-let imguiBackendGlfw = let dir = "./imgui" in sourceTreePart::{
-	, name = "imguiBackendGlfw"
-	, dir = dir
-	, sources = [
-		, "${dir}/imgui_impl_glfw.cpp"
-		, "${dir}/imgui_impl_opengl3.cpp"
-	]
-	, cxxflags = {
-		, global = [
-		] : List Text
-		, local = [
-			, env:PKG_CONFIG_OUTPUT_CFLAGS_GLFW3 as Text
-		] : List Text
-	}
-	, ldflags = {
-		, global = [
-			, "-lGL"
-			, env:PKG_CONFIG_OUTPUT_LIBS_GLFW3 as Text
-		]
-	}
-}
-let imguiFreetype = let dir = "./imgui/misc/freetype" in sourceTreePart::{
-	, name = "imguiFreetype"
-	, dir = dir
-	, defines = { 
-		, local = [] : List Text
-		, global = [ "IMGUI_ENABLE_FREETYPE" ]
-	}
-	, sources = [
-		, "${dir}/imgui_freetype.cpp"
-	]
-	, cxxflags = {
-		, global = [
-		] : List Text
-		, local = [
-			, env:PKG_CONFIG_OUTPUT_CFLAGS_FREETYPE2 as Text
-		] : List Text
-	}
-	, ldflags = {
-		, global = [
-			, env:PKG_CONFIG_OUTPUT_LIBS_FREETYPE2 as Text
-		] : List Text
-	}
-}
 let imguiImplot = let dir = "./src/widgets/imgui_implot" in sourceTreePart::{
 	, name = "imguiImplot"
 	, dir = dir
@@ -455,12 +411,10 @@ let mainSkiaSdl3 =
 		, "${dir}/main.cpp"
 		, "${dir}/app.cpp"
 
-		, "${dir}/../bmpEncoder.cpp"
 		, "${dir}/../paragraph.cpp"
 		, "${dir}/../cliOptions.cpp"
 		, "${dir}/../setupUI.cpp"
 		, "${dir}/../vectorCmdSkiaRenderer.cpp"
-		, "${dir}/../skiaTracyTracer.cpp"
 	]
 	, includeDirs = {
 		, local = [
@@ -590,8 +544,6 @@ in
 	, flatbuffers
 	, imgui
 	, imguiWithSkia
-	, imguiBackendGlfw
-	, imguiFreetype
 	, render
 	, marshalling
 	, arena

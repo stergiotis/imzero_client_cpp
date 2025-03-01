@@ -1,0 +1,9 @@
+*.ttf
+cmake-build-*
+build
+.idea
+.vscode
+main_go
+dist
+lib
+bin

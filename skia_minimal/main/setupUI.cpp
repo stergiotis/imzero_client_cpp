@@ -3,14 +3,6 @@
 #include "imgui_internal.h"
 #include "tracy/Tracy.hpp"
 
-#ifdef IMZERO_SKIA_TRACING
-#include "src/core/SkATrace.h"
-#include "tools/trace/SkDebugfTracer.h"
-#include "tools/trace/ChromeTracingTracer.h"
-#endif
-#include "implot.h"
-#include "buildinfo.gen.h"
-
 ImZeroSkiaSetupUI::ImZeroSkiaSetupUI() {
     fontMetricsText[0] = 'H';
     fontMetricsText[1] = 'f';
@@ -52,7 +44,6 @@ void ImZeroSkiaSetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &v
                                size_t skpBytes, size_t svgBytes, size_t pngBytes, int windowW, int windowH,
                                SkFontMgr *fontMgr
                                ) { ZoneScoped;
-    ImGui::Text("gitCommit=\"%s\",dirty=%s",buildinfo::gitCommit,buildinfo::gitDirty ? "yes" : "no");
     {
         struct timeval tv;
         struct timezone tz;
@@ -62,7 +53,7 @@ void ImZeroSkiaSetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &v
         char buf[sizeof "9999-12-31T23:59:59.999+0000000"];
         size_t bufsize = sizeof buf;
         size_t off = 0;
-        struct tm *local = localtime(&tv.tv_sec);
+        tm *local = localtime(&tv.tv_sec);
         off = strftime(buf, bufsize, "%FT%T", local); // same as "%Y-%m-%dT%H:%M:%S"
         off += snprintf(buf+off, bufsize-off, ".%06ld", tv.tv_usec);
         off += strftime(buf+off, bufsize-off, "%z", local);

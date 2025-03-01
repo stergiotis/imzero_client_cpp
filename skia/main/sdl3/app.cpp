@@ -32,6 +32,7 @@
 #include "include/encode/SkJpegEncoder.h"
 #include "include/encode/SkWebpEncoder.h"
 #include "../bmpEncoder.h"
+#include "../bmpEncoder.cpp"
 #if defined(__linux__)
 #include "include/gpu/gl/glx/GrGLMakeGLXInterface.h"
 #endif
@@ -52,7 +53,7 @@
 
 #include "flatbuffers/minireflect.h"
 #include "flatbuffers/util.h"
-#include "../ImZeroFB.fbs.gen.h"
+#include "../ImZeroFB.out.h"
 
 #define QOI_IMPLEMENTATION
 #define QOI_NO_STDIO
