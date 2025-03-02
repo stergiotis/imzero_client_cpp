@@ -1,7 +1,6 @@
 #pragma once
 #include "imgui.h"
-#include "vectorCmdSkiaRenderer.h"
-#include "include/utils/SkEventTracer.h"
+#include "imgui_skia_imzero_cmd_render.h"
 
 typedef int SaveFormatE;
 enum SaveFormatE_ {

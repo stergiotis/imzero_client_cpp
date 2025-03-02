@@ -6,10 +6,11 @@ let common =
 	let sourceTreePartsRepo = ../dhall/sourceTreeParts.dhall
 	let sourceTreeParts = [
 		, sourceTreePartsRepo.flatbuffers
-		, sourceTreePartsRepo.imguiWithSkia
+		, sourceTreePartsRepo.imgui
+		, sourceTreePartsRepo.imguiSkia
 		, sourceTreePartsRepo.sdl3Shared
 		, sourceTreePartsRepo.skiaShared
-		, sourceTreePartsRepo.mainSkiaSdl3
+		, sourceTreePartsRepo.mainSkiaSdl3Minimal
 	] 
     # (if debug then [ , sourceTreePartsRepo.tracyEnabled ] else [ ,sourceTreePartsRepo.tracyDisabled ] : List lib.sourceTreePart.Type )
     let cxx = "clang++"

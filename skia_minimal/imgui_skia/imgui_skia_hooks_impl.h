@@ -4,13 +4,13 @@
 #include <cassert>
 #include <cstdlib>
 
-#include "imzero_config.h"
+#include "imgui_skia_config.h"
 #include "include/core/SkSurface.h"
 #include "include/core/SkFontMgr.h"
 #include "include/core/SkFont.h"
-#include "../main/ImZeroFB.out.h"
-#include "../main/paragraph.h"
-#include "../main/imzero_assert.h"
+#include "ImZeroFB.out.h"
+#include "imgui_skia_paragraph.h"
+//#include "imzero_assert.h"
 
 
 // NOTE: part of ImDrawChannel as std::vector and FlatBufferBuilder are not trivially default constructible

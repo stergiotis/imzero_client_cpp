@@ -1,6 +1,6 @@
 #pragma once
 #include <cstdint>
-#include "../main/ImZeroFB.out.h"
+#include "ImZeroFB.out.h"
 
 struct ImDrawList;
 

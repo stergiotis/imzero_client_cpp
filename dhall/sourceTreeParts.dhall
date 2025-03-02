@@ -73,6 +73,33 @@ let imgui = let dir = "./imgui" in sourceTreePart::{
 		, global = [] : List Text
 		}
 }
+let imguiSkia = let dir = "./imgui_skia" in sourceTreePart::{
+	, name = "imguiSkia"
+	, dir = dir
+	, sources = [
+		, "${dir}/imgui_skia_extensions.cpp"
+		, "${dir}/imgui_skia_hooks_impl.cpp"
+		, "${dir}/imgui_skia_paragraph.cpp"
+		, "${dir}/imgui_skia_imzero_cmd_render.cpp"
+	]
+	, includeDirs = {
+		, local = [] : List Text
+		, global = ["${dir}"] : List Text
+	}
+	, cxxflags = {
+		, global = [
+		] : List Text
+		, local = [] : List Text
+	}
+	, ldflags = {
+		, global = [
+		] : List Text
+	}
+	, defines = {
+		, local = [] : List Text
+		, global = [] : List Text
+		}
+}
 let imguiImplot = let dir = "./src/widgets/imgui_implot" in sourceTreePart::{
 	, name = "imguiImplot"
 	, dir = dir
@@ -401,6 +428,54 @@ let skiaShared =
 	}
 	, nonSourceObjs = [] : List Text
 }
+let mainSkiaSdl3Minimal = 
+    let dir = "./main/sdl3"
+    in sourceTreePart::{
+	, name = "mainSkiaSdl3Minimal"
+	, dir = dir
+	, sources = [
+		, "${dir}/../../imgui/imgui_impl_sdl3.cpp"
+		, "${dir}/main.cpp"
+		, "${dir}/app.cpp"
+		, "${dir}/../cliOptions.cpp"
+		, "${dir}/../setupUI.cpp"
+	]
+	, includeDirs = {
+		, local = [
+			, imgui.dir
+			, imguiImplot.dir
+			, render.dir
+                        , "${dir}/.."
+			]
+		, global = [] : List Text
+	}
+	, defines = {, local = [] : List Text, global = [
+		--, "IMGUI_USE_BGRA_PACKED_COLOR"
+	] : List Text}
+	, cxxflags = {
+		, global = [
+		] : List Text
+		, local = [
+		, "-Wno-unused-parameter"
+		] : List Text
+	}
+	, ldflags = {
+		, global = [
+			, "-ldl"
+			, "-lpthread"
+			, "-lfreetype"
+			, "-lz"
+			, "-lfontconfig"
+			, "-lwebpmux"
+			, "-lwebpdemux"
+			, "-lX11"
+			, "-lGLU"
+			, "-lGL"
+			--, "-Wl,--verbose"
+		] : List Text
+	}
+	, nonSourceObjs = [ ] : List Text
+}
 let mainSkiaSdl3 = 
     let dir = "./main/sdl3"
     in sourceTreePart::{
@@ -421,6 +496,7 @@ let mainSkiaSdl3 =
 			, imgui.dir
 			, imguiImplot.dir
 			, render.dir
+                        , "${dir}/.."
 			]
 		, global = [] : List Text
 	}
@@ -543,6 +619,7 @@ in
 {
 	, flatbuffers
 	, imgui
+	, imguiSkia
 	, imguiWithSkia
 	, render
 	, marshalling
@@ -556,6 +633,7 @@ in
 	, imguiTextedit
 	, binding
 	, mainSkiaSdl3
+	, mainSkiaSdl3Minimal
 	, tracyEnabled
 	, tracyDisabled
 	, sdl3Shared

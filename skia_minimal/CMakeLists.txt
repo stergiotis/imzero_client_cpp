@@ -36,6 +36,7 @@ SK_BUILD_FOR_UNIX
 )
 include_directories("${CMAKE_CURRENT_LIST_DIR}/./contrib/flatbuffers"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui"
+"${CMAKE_CURRENT_LIST_DIR}/./imgui_skia"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/skia"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public"
 )
@@ -109,60 +110,64 @@ link_libraries(-Wl,-rpath,'$ORIGIN/../lib' -Wl,-z,origin
 -lbentleyottmann
 # skiaShared
 -lskshaper
-# mainSkiaSdl3
+# mainSkiaSdl3Minimal
 -ldl
-# mainSkiaSdl3
+# mainSkiaSdl3Minimal
 -lpthread
-# mainSkiaSdl3
+# mainSkiaSdl3Minimal
 -lfreetype
-# mainSkiaSdl3
+# mainSkiaSdl3Minimal
 -lz
-# mainSkiaSdl3
+# mainSkiaSdl3Minimal
 -lfontconfig
-# mainSkiaSdl3
+# mainSkiaSdl3Minimal
 -lwebpmux
-# mainSkiaSdl3
+# mainSkiaSdl3Minimal
 -lwebpdemux
-# mainSkiaSdl3
+# mainSkiaSdl3Minimal
 -lX11
-# mainSkiaSdl3
+# mainSkiaSdl3Minimal
 -lGLU
-# mainSkiaSdl3
+# mainSkiaSdl3Minimal
 -lGL
 )
 
 # flatbuffers
 
-# imguiWithSkia
-add_library(imguiWithSkia OBJECT "${CMAKE_CURRENT_LIST_DIR}/./imgui/imzero_hooks.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./imgui/imzero_extensions.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./imgui/imgui.cpp"
+# imgui
+add_library(imgui OBJECT "${CMAKE_CURRENT_LIST_DIR}/./imgui/imgui.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui/imgui_demo.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui/imgui_draw.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui/imgui_tables.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui/imgui_widgets.cpp")
 
+# imguiSkia
+add_library(imguiSkia OBJECT "${CMAKE_CURRENT_LIST_DIR}/./imgui_skia/imgui_skia_extensions.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./imgui_skia/imgui_skia_hooks_impl.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./imgui_skia/imgui_skia_paragraph.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./imgui_skia/imgui_skia_imzero_cmd_render.cpp")
+
 # sdl3Shared
 
 # skiaShared
 
-# mainSkiaSdl3
-add_library(mainSkiaSdl3 OBJECT "${CMAKE_CURRENT_LIST_DIR}/./main/sdl3/../../imgui/imgui_impl_sdl3.cpp"
+# mainSkiaSdl3Minimal
+add_library(mainSkiaSdl3Minimal OBJECT "${CMAKE_CURRENT_LIST_DIR}/./main/sdl3/../../imgui/imgui_impl_sdl3.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./main/sdl3/main.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./main/sdl3/app.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./main/sdl3/../paragraph.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./main/sdl3/../cliOptions.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./main/sdl3/../setupUI.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./main/sdl3/../vectorCmdSkiaRenderer.cpp")
-target_compile_options(mainSkiaSdl3 PUBLIC -Wno-unused-parameter)
-target_include_directories(mainSkiaSdl3 PUBLIC "${CMAKE_CURRENT_LIST_DIR}/./main/sdl3"
+"${CMAKE_CURRENT_LIST_DIR}/./main/sdl3/../setupUI.cpp")
+target_compile_options(mainSkiaSdl3Minimal PUBLIC -Wno-unused-parameter)
+target_include_directories(mainSkiaSdl3Minimal PUBLIC "${CMAKE_CURRENT_LIST_DIR}/./main/sdl3"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui"
 "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_implot"
-"${CMAKE_CURRENT_LIST_DIR}/./src")
+"${CMAKE_CURRENT_LIST_DIR}/./src"
+"${CMAKE_CURRENT_LIST_DIR}/./main/sdl3/..")
 
 # tracyDisabled
 add_library(tracyDisabled OBJECT "${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public/TracyClient.cpp")
-add_executable(imgui_skia_exe $<TARGET_OBJECTS:imguiWithSkia>
-$<TARGET_OBJECTS:mainSkiaSdl3>
+add_executable(imgui_skia_exe $<TARGET_OBJECTS:imgui>
+$<TARGET_OBJECTS:imguiSkia>
+$<TARGET_OBJECTS:mainSkiaSdl3Minimal>
 $<TARGET_OBJECTS:tracyDisabled>)
 

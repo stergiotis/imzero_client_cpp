@@ -1,4 +1,4 @@
-#include "vectorCmdSkiaRenderer.h"
+#include "imgui_skia_imzero_cmd_render.h"
 
 #include "include/core/SkPoint.h"
 #include "tools/sk_app/Window.h"
@@ -99,7 +99,14 @@ RenderModeE VectorCmdSkiaRenderer::getRenderMode() const {
 
 static SkColor convertColor(uint32_t col) {
 #ifdef IMGUI_USE_BGRA_PACKED_COLOR
-    return SkColor(col);
+    if constexpr (std::endian::native == std::endian::big) {
+        // TODO correct?
+        return static_cast<SkColor>(col);
+    } else if constexpr (std::endian::native == std::endian::little) {
+        return static_cast<SkColor>(col);
+    } else {
+        static_assert("unknown/unhandled endianness");
+    }
 #else
     return  SkColorSetARGB(
         (col >> IM_COL32_A_SHIFT) & 0xff,
@@ -108,7 +115,7 @@ static SkColor convertColor(uint32_t col) {
         (col >> IM_COL32_B_SHIFT) & 0xff);
 #endif
 }
-VectorCmdSkiaRenderer::VectorCmdSkiaRenderer() : fVertexPaint(nullptr),fRenderMode(RenderModeE_Normal), backdropFilter(nullptr) {
+VectorCmdSkiaRenderer::VectorCmdSkiaRenderer() : fVertexPaint(nullptr),fRenderMode(RenderModeE_Normal) {
 #ifdef RENDER_MODE_BACKDROP_FILTER_ENABLED
     backdropFilter = SkImageFilters::Blur(8, 8, SkTileMode::kClamp, nullptr);
 #if 0
@@ -123,7 +130,7 @@ VectorCmdSkiaRenderer::VectorCmdSkiaRenderer() : fVertexPaint(nullptr),fRenderMo
         SkIntToScalar( 1), SkIntToScalar( 2), SkIntToScalar( 1),
     };
     SkISize kernelSize = SkISize::Make(3, 3);
-    SkScalar gain = SkScalar(1.0f/16.0f);
+    SkScalar gain = SkScalarToFloat(1.0f/16.0f);
     SkScalar bias = 0;
     backdropFilter = SkImageFilters::MatrixConvolution(kernelSize,kernel,gain, bias,SkIPoint::Make(1,1),SkTileMode::kClamp,false,nullptr);
 #endif
@@ -163,10 +170,10 @@ static void decorateWindowRRect(SkRRect const &rrect,SkCanvas &canvas,sk_sp<SkIm
     canvas.drawColor(windowDecorationBlurFilterDrawColor);
 }
 void VectorCmdSkiaRenderer::setupWindowRectPaint(SkPaint &paint, ImZeroFB::DrawListFlags dlFlags, uint32_t col) { ZoneScoped;
-    constexpr uint8_t windowBgColorA = 172;
     prepareFillPaint(paint,dlFlags);
     auto color = convertColor(col);
     if((fRenderMode & RenderModeE_SVG) == 0) {
+        constexpr uint8_t windowBgColorA = 172;
         color =  SkColorSetA(color, windowBgColorA);
     }
     paint.setColor(color);
@@ -275,8 +282,7 @@ void VectorCmdSkiaRenderer::drawVectorCmdsFBDrawList(const ImZeroFB::DrawList *d
     }
 }
 void VectorCmdSkiaRenderer::drawVectorCmdFB(const ImZeroFB::SingleVectorCmdDto *cmdUnion, SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
-    auto t = cmdUnion->arg_type();
-    switch(t) {
+    switch(cmdUnion->arg_type()) {
         case ImZeroFB::VectorCmdArg_CmdPolyline:
             drawCmdPolylineFB(*cmdUnion->arg_as_CmdPolyline(),canvas,dlFlags);
             break;
@@ -391,18 +397,18 @@ static inline void drawCmdPolyline_(const T &cmd,SkCanvas &canvas,SkPaint &paint
     if(n == 0) {
         return;
     }
-    auto x0 = SkScalar(xs->Get(0));
-    auto y0 = SkScalar(ys->Get(0));
+    auto x0 = SkScalarToFloat(xs->Get(0));
+    auto y0 = SkScalarToFloat(ys->Get(0));
     pa.moveTo(x0,y0);
     for(int i = 1;i<n;i++) {
-        pa.lineTo(SkScalar(xs->Get(i)),SkScalar(ys->Get(i)));
+        pa.lineTo(SkScalarToFloat(xs->Get(i)),SkScalarToFloat(ys->Get(i)));
     }
     canvas.drawPath(pa,paint);
 }
 void VectorCmdSkiaRenderer::drawCmdPolylineFB(const ImZeroFB::CmdPolyline &cmd,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;
     prepareOutlinePaint(paint,dlFlags);
-    paint.setStrokeWidth(SkScalar(cmd.thickness()));
+    paint.setStrokeWidth(SkScalarToFloat(cmd.thickness()));
     drawCmdPolyline_(cmd,canvas,paint);
 }
 void VectorCmdSkiaRenderer::drawCmdConvexPolylineFilledFB(const ImZeroFB::CmdConvexPolyFilled &cmd,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
@@ -423,7 +429,7 @@ static inline void drawCmdNgon_(const T &cmd,SkCanvas &canvas,SkPaint &paint) { 
     auto const n = cmd.num_segments();
     auto const r =  cmd.radius();
     SkPath pa;
-    pa.moveTo(ce + SkPoint::Make(SkScalar(r),SkScalar(0.0)));
+    pa.moveTo(ce + SkPoint::Make(SkScalarToFloat(r),SkScalarToFloat(0.0)));
     for (int i = 1; i <= n; i++) {
         SkScalar angle = 2 * SK_ScalarPI * static_cast<float>(i) / n;
         SkPoint p = { SkScalarCos(angle), SkScalarSin(angle) };
@@ -437,7 +443,7 @@ static inline void drawCmdNgon_(const T &cmd,SkCanvas &canvas,SkPaint &paint) { 
 void VectorCmdSkiaRenderer::drawCmdNgonFB(const ImZeroFB::CmdNgon &cmd,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;
     prepareOutlinePaint(paint,dlFlags);
-    paint.setStrokeWidth(SkScalar(cmd.thickness()));
+    paint.setStrokeWidth(SkScalarToFloat(cmd.thickness()));
     drawCmdNgon_(cmd,canvas,paint);
 }
 void VectorCmdSkiaRenderer::drawCmdNgonFilledFB(const ImZeroFB::CmdNgonFilled &cmd,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
@@ -449,7 +455,7 @@ void VectorCmdSkiaRenderer::drawCmdLineFB(const ImZeroFB::CmdLine &cmd,SkCanvas 
     SkPaint paint;
     prepareOutlinePaint(paint,dlFlags);
     paint.setColor(convertColor(cmd.col()));
-    paint.setStrokeWidth(SkScalar(cmd.thickness()));
+    paint.setStrokeWidth(SkScalarToFloat(cmd.thickness()));
     canvas.drawLine(SkPoint::Make(cmd.p1()->x(),cmd.p1()->y()),SkPoint::Make(cmd.p2()->x(),cmd.p2()->y()),paint);
 }
 
@@ -527,7 +533,7 @@ void VectorCmdSkiaRenderer::drawCmdRectFilledMultiColorFB(const ImZeroFB::CmdRec
                       {cmd.p_max()->x(), cmd.p_max()->y()} };
     SkColor colors1[] = {convertColor(cmd.col_upr_left()), convertColor(cmd.col_bot_left())};
     SkColor colors2[] = {convertColor(cmd.col_bot_left()), convertColor(cmd.col_bot_right())};
-    SkScalar pos[] = {SkScalar(0.0f), SkScalar(1.0f)};
+    SkScalar pos[] = {SkScalarToFloat(0.0f), SkScalarToFloat(1.0f)};
     auto sh1 = SkGradientShader::MakeLinear(pts1,colors1,pos,2,SkTileMode::kDecal);
     auto sh2 = SkGradientShader::MakeLinear(pts2,colors2,pos,2,SkTileMode::kDecal);
     SkPaint paint;
@@ -541,7 +547,7 @@ void VectorCmdSkiaRenderer::drawCmdRectFilledMultiColorFB(const ImZeroFB::CmdRec
         paint);
 }
 void VectorCmdSkiaRenderer::registerFont(const ImZeroFB::CmdRegisterFont &cmd,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
-    const auto name  = cmd.name();
+    //const auto name  = cmd.name();
     const auto url = cmd.url();
     const auto urlLen = url->size();
     const auto urlCStr = url->c_str();
@@ -633,7 +639,7 @@ void VectorCmdSkiaRenderer::drawCmdPath(const ImZeroFB::CmdPath &cmd,SkCanvas &c
     static_assert(static_cast<int64_t>(ImZeroFB::PathFillType_Winding) == static_cast<int64_t>(SkPathFillType::kWinding));
     static_assert(static_cast<int64_t>(ImZeroFB::PathFillType_InverseEvenOdd) == static_cast<int64_t>(SkPathFillType::kInverseEvenOdd));
     static_assert(static_cast<int64_t>(ImZeroFB::PathFillType_InverseWinding) == static_cast<int64_t>(SkPathFillType::kInverseWinding));
-    static_assert(std::is_same<SkScalar,float>::value);
+    static_assert(std::is_same_v<SkScalar,float>);
 #if 1
     SkTDArray<SkPoint> pointsXYVec;
     int nPoints = pointsXYFb->size()/2;
@@ -659,14 +665,14 @@ void VectorCmdSkiaRenderer::drawCmdPath(const ImZeroFB::CmdPath &cmd,SkCanvas &c
             {
                 auto x0= pointsXY[p]; p++;
                 auto y0 = pointsXY[p]; p++;
-                pa.moveTo(SkScalar(x0),SkScalar(y0));
+                pa.moveTo(SkScalarToFloat(x0),SkScalarToFloat(y0));
                 break;
             }
             case ImZeroFB::PathVerb_line:
             {
                 auto x0 = pointsXY[p]; p++;
                 auto y0 = pointsXY[p]; p++;
-                pa.lineTo(SkScalar(x0),SkScalar(y0));
+                pa.lineTo(SkScalarToFloat(x0),SkScalarToFloat(y0));
                 break;
             }
             case ImZeroFB::PathVerb_quad:
@@ -675,7 +681,7 @@ void VectorCmdSkiaRenderer::drawCmdPath(const ImZeroFB::CmdPath &cmd,SkCanvas &c
                 auto y0 = pointsXY[p]; p++;
                 auto x1 = pointsXY[p]; p++;
                 auto y1 = pointsXY[p]; p++;
-                pa.quadTo(SkScalar(x0),SkScalar(y0),SkScalar(x1),SkScalar(y1));
+                pa.quadTo(SkScalarToFloat(x0),SkScalarToFloat(y0),SkScalarToFloat(x1),SkScalarToFloat(y1));
                 break;
             }
             case ImZeroFB::PathVerb_conic:
@@ -685,7 +691,7 @@ void VectorCmdSkiaRenderer::drawCmdPath(const ImZeroFB::CmdPath &cmd,SkCanvas &c
                 auto x1 = pointsXY[p]; p++;
                 auto y1 = pointsXY[p]; p++;
                 auto w = weights[pw]; pw++;
-                pa.conicTo(SkScalar(x0),SkScalar(y0),SkScalar(x1),SkScalar(y1),SkScalar(w));
+                pa.conicTo(SkScalarToFloat(x0),SkScalarToFloat(y0),SkScalarToFloat(x1),SkScalarToFloat(y1),SkScalarToFloat(w));
                 break;
             }
             case ImZeroFB::PathVerb_cubic:
@@ -696,7 +702,7 @@ void VectorCmdSkiaRenderer::drawCmdPath(const ImZeroFB::CmdPath &cmd,SkCanvas &c
                 auto y1 = pointsXY[p]; p++;
                 auto x2 = pointsXY[p]; p++;
                 auto y2 = pointsXY[p]; p++;
-                pa.cubicTo(SkScalar(x0),SkScalar(y0),SkScalar(x1),SkScalar(y1),SkScalar(x2),SkScalar(y2));
+                pa.cubicTo(SkScalarToFloat(x0),SkScalarToFloat(y0),SkScalarToFloat(x1),SkScalarToFloat(y1),SkScalarToFloat(x2),SkScalarToFloat(y2));
                 break;
             }
             case ImZeroFB::PathVerb_close:
@@ -713,11 +719,13 @@ void VectorCmdSkiaRenderer::drawCmdPath(const ImZeroFB::CmdPath &cmd,SkCanvas &c
     //pa.dump((SkWStream*)&stream,true);
     //pa.dump(nullptr,true);
 
-    pa.offset(SkScalar(offset->x()),SkScalar(offset->y()));
+    pa.offset(SkScalarToFloat(offset->x()),SkScalarToFloat(offset->y()));
 
     canvas.drawPath(pa,paint);
 }
-void VectorCmdSkiaRenderer::drawCmdSimpleVertexDraw(const ImZeroFB::CmdSimpleVertexDraw &cmd,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
+void VectorCmdSkiaRenderer::drawCmdSimpleVertexDraw(const ImZeroFB::CmdSimpleVertexDraw &cmd,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags)
+{
+    ZoneScoped;
     auto cr = cmd.clip_rect();
     auto const crRect = SkRect::MakeLTRB(cr->x(), cr->y(), cr->z(), cr->w());
 
@@ -727,12 +735,12 @@ void VectorCmdSkiaRenderer::drawCmdSimpleVertexDraw(const ImZeroFB::CmdSimpleVer
     constexpr auto blendMode = SkBlendMode::kDst;
 
 #ifdef RENDER_MODE_SVG_ENABLED
-    SkCanvas *rasterCanvas;
+    SkCanvas *rasterCanvas = nullptr;
     sk_sp<SkSurface> rasterSurface;
-    const auto dx = SkScalar(cr->x());
-    const auto dy = SkScalar(cr->y());
+    const auto dx = SkScalarToFloat(cr->x());
+    const auto dy = SkScalarToFloat(cr->y());
     if(fRenderMode & RenderModeE_SVG) {
-        const auto s = SkSize::Make(SkScalar(cr->z())-dx,SkScalar(cr->w())-dy);
+        const auto s = SkSize::Make(SkScalarToFloat(cr->z())-dx,SkScalarToFloat(cr->w())-dy);
         const auto c = SkColorInfo(kRGBA_8888_SkColorType, kPremul_SkAlphaType, SkColorSpace::MakeSRGB());
         rasterSurface = SkSurfaces::Raster(SkImageInfo::Make(s.toCeil(), c));
         rasterCanvas = rasterSurface->getCanvas();
@@ -761,7 +769,7 @@ void VectorCmdSkiaRenderer::drawCmdSimpleVertexDraw(const ImZeroFB::CmdSimpleVer
 #endif
 
 #ifdef RENDER_MODE_SVG_ENABLED
-    if(fRenderMode & RenderModeE_SVG) {
+    if(rasterCanvas) {
         rasterCanvas->setMatrix(SkMatrix::Translate(-dx,-dy));
         rasterCanvas->drawVertices(vertices, blendMode, paint);
         sk_sp<SkImage> img(rasterSurface->makeImageSnapshot());
@@ -771,7 +779,7 @@ void VectorCmdSkiaRenderer::drawCmdSimpleVertexDraw(const ImZeroFB::CmdSimpleVer
 #endif
 
     SkAutoCanvasRestore acr(&canvas, true); // FIXME necessary
-    //canvas.clipRect(crRect);
+    canvas.clipRect(crRect);
     canvas.drawVertices(vertices, blendMode, paint);
 }
 void VectorCmdSkiaRenderer::drawCmdVertexDraw(const ImZeroFB::CmdVertexDraw &cmd,SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
@@ -786,12 +794,12 @@ void VectorCmdSkiaRenderer::drawCmdVertexDraw(const ImZeroFB::CmdVertexDraw &cmd
     constexpr auto blendMode = SkBlendMode::kModulate;
 
 #ifdef RENDER_MODE_SVG_ENABLED
-    SkCanvas *rasterCanvas;
+    SkCanvas *rasterCanvas = nullptr;
     sk_sp<SkSurface> rasterSurface;
-    const auto dx = SkScalar(cr->x());
-    const auto dy = SkScalar(cr->y());
+    const auto dx = SkScalarToFloat(cr->x());
+    const auto dy = SkScalarToFloat(cr->y());
     if(fRenderMode & RenderModeE_SVG) {
-        const auto s = SkSize::Make(SkScalar(cr->z())-dx,SkScalar(cr->w())-dy);
+        const auto s = SkSize::Make(SkScalarToFloat(cr->z())-dx,SkScalarToFloat(cr->w())-dy);
         const auto c = SkColorInfo(kRGBA_8888_SkColorType, kPremul_SkAlphaType, SkColorSpace::MakeSRGB());
         rasterSurface = SkSurfaces::Raster(SkImageInfo::Make(s.toCeil(), c));
         rasterCanvas = rasterSurface->getCanvas();
@@ -808,7 +816,7 @@ void VectorCmdSkiaRenderer::drawCmdVertexDraw(const ImZeroFB::CmdVertexDraw &cmd
 
 
 #ifdef RENDER_MODE_SVG_ENABLED
-    if(fRenderMode & RenderModeE_SVG) {
+    if(rasterCanvas) {
         rasterCanvas->setMatrix(SkMatrix::Translate(-dx,-dy));
         rasterCanvas->drawVertices(vertices, blendMode, *fVertexPaint);
         sk_sp<SkImage> img(rasterSurface->makeImageSnapshot());
@@ -882,11 +890,11 @@ void VectorCmdSkiaRenderer::drawCmdRenderParagraphFB(const ImZeroFB::CmdRenderPa
     auto size = cmd.size();
     const auto text = cmd.text();
 
-    fParagraph->setFontSize(SkScalar(size));
+    fParagraph->setFontSize(SkScalarToFloat(size));
     fParagraph->setForegroundPaint(paint);
     fParagraph->setLetterSpacing(cmd.letter_spacing());
     {
-        skia::textlayout::TextAlign a;
+        auto a = skia::textlayout::TextAlign::kLeft;
         switch(cmd.text_align()) {
             case ImZeroFB::TextAlignFlags_Left: a = skia::textlayout::TextAlign::kLeft; break;
             case ImZeroFB::TextAlignFlags_Right: a = skia::textlayout::TextAlign::kRight; break;
@@ -895,7 +903,7 @@ void VectorCmdSkiaRenderer::drawCmdRenderParagraphFB(const ImZeroFB::CmdRenderPa
             default:
                 assert("unhandled text align option for paragraph");
         }
-        skia::textlayout::TextDirection d;
+        auto d = skia::textlayout::TextDirection::kLtr;
         switch(cmd.text_direction()) {
             case ImZeroFB::TextDirection_Ltr: d = skia::textlayout::TextDirection::kLtr; break;
             case ImZeroFB::TextDirection_Rtl: d = skia::textlayout::TextDirection::kRtl; break;
@@ -907,8 +915,8 @@ void VectorCmdSkiaRenderer::drawCmdRenderParagraphFB(const ImZeroFB::CmdRenderPa
     fParagraph->build(text->data(), text->size());
     const auto ww = cmd.wrap_width();
     assert(ww > 0.0f && "wrap width is expected to be positive for paragraphs");
-    fParagraph->layout(SkScalar(ww));
-    fParagraph->paint(canvas, SkScalar(cmd.pos()->x()), SkScalar(cmd.pos()->y()));
+    fParagraph->layout(SkScalarToFloat(ww));
+    fParagraph->paint(canvas, SkScalarToFloat(cmd.pos()->x()), SkScalarToFloat(cmd.pos()->y()));
 
     canvas.restore();
 }
@@ -921,7 +929,7 @@ void VectorCmdSkiaRenderer::drawCmdRenderTextFB(const ImZeroFB::CmdRenderText &c
 
     paint.setColor(convertColor(cmd.col()));
     auto size = cmd.size();
-    auto font = fFont.makeWithSize(SkScalar(size));
+    auto font = fFont.makeWithSize(SkScalarToFloat(size));
     const auto text = cmd.text();
 
     float dy;
@@ -944,10 +952,10 @@ void VectorCmdSkiaRenderer::drawCmdRenderUnicodeCodepointFB(const ImZeroFB::CmdR
     SkPaint paint;
     paint.setColor(convertColor(cmd.col()));
     auto size = cmd.size();
-    auto font = fFont.makeWithSize(SkScalar(size));
+    auto font = fFont.makeWithSize(SkScalarToFloat(size));
     auto const cp = cmd.codepoint();
 
-    auto const glyph =  font.unicharToGlyph(SkUnichar(cp));
+    auto const glyph =  font.unicharToGlyph(static_cast<SkUnichar>(cp));
 
     float dy;
     { ZoneScoped;
@@ -961,19 +969,19 @@ void VectorCmdSkiaRenderer::drawCmdRenderUnicodeCodepointFB(const ImZeroFB::CmdR
 template <typename T>
 void drawCmdCircle_(const T &cmd,SkCanvas &canvas,SkPaint &paint) { ZoneScoped;
     paint.setColor(convertColor(cmd.col()));
-    canvas.drawCircle(SkScalar(cmd.center()->x()),SkScalar(cmd.center()->y()),SkScalar(cmd.radius()),paint);
+    canvas.drawCircle(SkScalarToFloat(cmd.center()->x()),SkScalarToFloat(cmd.center()->y()),SkScalarToFloat(cmd.radius()),paint);
 }
 template <typename T>
 void drawCmdCircleAsPath_(const T &cmd,SkCanvas &canvas,SkPaint &paint) { ZoneScoped;
     paint.setColor(convertColor(cmd.col()));
     SkPath pa;
-    pa.addCircle(SkScalar(cmd.center()->x()),SkScalar(cmd.center()->y()),SkScalar(cmd.radius()));
+    pa.addCircle(SkScalarToFloat(cmd.center()->x()),SkScalarToFloat(cmd.center()->y()),SkScalarToFloat(cmd.radius()));
     canvas.drawPath(pa,paint);
 }
 void VectorCmdSkiaRenderer::drawCmdCircleFB(const ImZeroFB::CmdCircle &cmd, SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;
     prepareOutlinePaint(paint,dlFlags);
-    paint.setStrokeWidth(SkScalar(cmd.thickness()));
+    paint.setStrokeWidth(SkScalarToFloat(cmd.thickness()));
 #if defined (RENDER_MODE_SKETCH_ENABLED) || defined (RENDER_MODE_SVG_ENABLED)
     if(fRenderMode & (RenderModeE_Sketch | RenderModeE_SVG)) {
         drawCmdCircleAsPath_(cmd,canvas,paint);
@@ -1044,20 +1052,20 @@ void VectorCmdSkiaRenderer::handleCmdPopClipRect(const ImZeroFB::CmdPopClipRect 
 template <typename T>
 void drawCmdEllipse_(const T &cmd,SkCanvas &canvas,SkPaint &paint) {
     paint.setColor(convertColor(cmd.col()));
-    auto const x = SkScalar(cmd.center()->x());
-    auto const y = SkScalar(cmd.center()->y());
-    auto const r = SkRadiansToDegrees(SkScalar(cmd.rot()));
+    auto const x = SkScalarToFloat(cmd.center()->x());
+    auto const y = SkScalarToFloat(cmd.center()->y());
+    auto const r = SkRadiansToDegrees(SkScalarToFloat(cmd.rot()));
     canvas.rotate(r,x,y);
 
-    auto const radius_x = SkScalar(cmd.radius()->x());
-    auto const radius_y = SkScalar(cmd.radius()->y());
+    auto const radius_x = SkScalarToFloat(cmd.radius()->x());
+    auto const radius_y = SkScalarToFloat(cmd.radius()->y());
     canvas.drawOval(SkRect::MakeLTRB(x-radius_x,y-radius_y,x+radius_x,y+radius_y),paint);
     canvas.rotate(-r,x,y);
 }
 void VectorCmdSkiaRenderer::drawCmdEllipseFB(const ImZeroFB::CmdEllipse &cmd, SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;
     prepareOutlinePaint(paint,dlFlags);
-    paint.setStrokeWidth(SkScalar(cmd.thickness()));
+    paint.setStrokeWidth(SkScalarToFloat(cmd.thickness()));
     drawCmdEllipse_(cmd,canvas,paint);
 }
 void VectorCmdSkiaRenderer::drawCmdEllipseFilledFB(const ImZeroFB::CmdEllipseFilled &cmd, SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
@@ -1069,23 +1077,23 @@ void VectorCmdSkiaRenderer::drawCmdBezierCubicFB(const ImZeroFB::CmdBezierCubic 
     SkPaint paint;
     prepareOutlinePaint(paint,dlFlags);
     paint.setColor(convertColor(cmd.col()));
-    paint.setStrokeWidth(SkScalar(cmd.thickness()));
+    paint.setStrokeWidth(SkScalarToFloat(cmd.thickness()));
     SkPath pa;
-    pa.moveTo(SkScalar(cmd.p1()->x()),SkScalar(cmd.p1()->y()));
-    pa.cubicTo(SkScalar(cmd.p2()->x()),SkScalar(cmd.p2()->y()),
-               SkScalar(cmd.p3()->x()),SkScalar(cmd.p3()->y()),
-               SkScalar(cmd.p4()->x()),SkScalar(cmd.p4()->y()));
+    pa.moveTo(SkScalarToFloat(cmd.p1()->x()),SkScalarToFloat(cmd.p1()->y()));
+    pa.cubicTo(SkScalarToFloat(cmd.p2()->x()),SkScalarToFloat(cmd.p2()->y()),
+               SkScalarToFloat(cmd.p3()->x()),SkScalarToFloat(cmd.p3()->y()),
+               SkScalarToFloat(cmd.p4()->x()),SkScalarToFloat(cmd.p4()->y()));
     canvas.drawPath(pa,paint);
 }
 void VectorCmdSkiaRenderer::drawCmdBezierQuadraticFB(const ImZeroFB::CmdBezierQuadratic &cmd, SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;
     prepareOutlinePaint(paint,dlFlags);
     paint.setColor(convertColor(cmd.col()));
-    paint.setStrokeWidth(SkScalar(cmd.thickness()));
+    paint.setStrokeWidth(SkScalarToFloat(cmd.thickness()));
     SkPath pa;
-    pa.moveTo(SkScalar(cmd.p1()->x()),SkScalar(cmd.p1()->y()));
-    pa.conicTo(SkPoint::Make(SkScalar(cmd.p2()->x()),SkScalar(cmd.p2()->y())),
-               SkPoint::Make(SkScalar(cmd.p3()->x()),SkScalar(cmd.p3()->y())),SkScalar(1.0f));
+    pa.moveTo(SkScalarToFloat(cmd.p1()->x()),SkScalarToFloat(cmd.p1()->y()));
+    pa.conicTo(SkPoint::Make(SkScalarToFloat(cmd.p2()->x()),SkScalarToFloat(cmd.p2()->y())),
+               SkPoint::Make(SkScalarToFloat(cmd.p3()->x()),SkScalarToFloat(cmd.p3()->y())),SkScalarToFloat(1.0f));
     canvas.drawPath(pa,paint);
 }
 void VectorCmdSkiaRenderer::prepareForDrawing() {

@@ -1,6 +1,7 @@
 #include "imgui.h"
 #include "tracy/Tracy.hpp"
 #include "imgui_internal.h"
+#include "ImZeroFB.out.h"
 
 #define IMZERO_DRAWLIST_BEGIN if(ImGui::useVectorCmd) {
 #define IMZERO_DRAWLIST_END return false; }
@@ -655,7 +656,7 @@ namespace ImGui {
     bool Hooks::ImDrawList::Pre::AddRectFilledMultiColor(::ImDrawList *draw_list, const ImVec2& p_min, const ImVec2& p_max, ImU32 col_upr_left, ImU32 col_upr_right, ImU32 col_bot_right, ImU32 col_bot_left) { ZoneScoped;
         IMZERO_DRAWLIST_BEGIN
             return true;
-            if(false){ // FIXME
+            if constexpr (false){ // FIXME
                 auto pMinFb = ImZeroFB::SingleVec2(p_min.x,p_min.y);
                 auto pMaxFb = ImZeroFB::SingleVec2(p_max.x,p_max.y);
                 auto arg = ImZeroFB::CreateCmdRectFilledMultiColor(*draw_list->fbBuilder,&pMinFb,&pMaxFb,col_upr_left,col_upr_right,col_bot_right,col_bot_left);
@@ -1122,9 +1123,9 @@ namespace ImGui {
                 auto const arg = ImZeroFB::CreateCmdRenderText(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(font),size,&posFb,col,&clipRectFb,textFb);
                 draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdRenderText,arg.Union());
             }
-            if (freeAllocatedText) {
-                IM_FREE(const_cast<char*>(text_begin));
-            }
+        }
+        if (freeAllocatedText) {
+            IM_FREE(const_cast<char*>(text_begin));
         }
         return false;
     }

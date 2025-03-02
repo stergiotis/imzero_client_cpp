@@ -1,34 +1,24 @@
 #pragma once
-#include "include/core/SkBlendMode.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
-#include "include/core/SkImage.h"
-#include "include/core/SkImageInfo.h"
-#include "include/core/SkPixmap.h"
 #include "include/core/SkRect.h"
 #include "include/core/SkRefCnt.h"
-#include "include/core/SkSamplingOptions.h"
 #include "include/core/SkShader.h"
-#include "include/core/SkSurface.h"
-#include "include/core/SkSwizzle.h"
 #include "include/core/SkVertices.h"
-#include "src/core/SkClipStack.h"
+#include "include/core/SkRRect.h"
 #include "include/private/base/SkTDArray.h"
-#include "src/base/SkTime.h"
-#include "tools/skui/InputState.h"
-#include "tools/skui/Key.h"
 #include "include/core/SkPictureRecorder.h"
 #include "include/core/SkPicture.h"
 #include "include/core/SkStream.h"
 
-#include "flatbuffers/flatbuffers.h"
 #include "ImZeroFB.out.h"
 #include "modules/skparagraph/include/Paragraph.h"
 #include "modules/skparagraph/src/ParagraphBuilderImpl.h"
-#include "paragraph.h"
+#include "imgui_skia_paragraph.h"
 #include <memory>
 
-#include "imzeroSkiaRenderConfig.h"
+#include "imgui_skia_imzero_cmd_render_config.h"
+#include "imgui_skia_paragraph.h"
 
 #include <cstdint>
 

@@ -5,8 +5,8 @@
 #include <cstdio>
 #include <cstring>
 
-#include "../../imgui/imgui_impl_sdl3.h"
-#include "../../imgui/imgui_internal.h"
+#include "imgui_impl_sdl3.h"
+#include "imgui_internal.h"
 
 #include <SDL3/SDL_main.h>
 #if defined(IMGUI_IMPL_OPENGL_ES2)
@@ -17,36 +17,34 @@
 
 #endif
 
-#include "../../contrib/skia/include/core/SkGraphics.h"
-#include "../../contrib/skia/include/ports/SkFontMgr_data.h"
+#include "include/core/SkGraphics.h"
+#include "include/ports/SkFontMgr_data.h"
 #if defined(SK_FONTMGR_FONTCONFIG_AVAILABLE)
-#include "../../contrib/skia/include/ports/SkFontMgr_fontconfig.h"
+#include "include/ports/SkFontMgr_fontconfig.h"
 #endif
 #if defined(SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE)
-#include "../../contrib/skia/include/ports/SkFontMgr_directory.h"
+#include "include/ports/SkFontMgr_directory.h"
 #endif
-#include "../../contrib/skia/include/core/SkSpan.h"
-#include "../../contrib/skia/include/svg/SkSVGCanvas.h"
-#include "../../contrib/skia/include/core/SkColorSpace.h"
-#include "../../contrib/skia/include/encode/SkPngEncoder.h"
-#include "../../contrib/skia/include/encode/SkJpegEncoder.h"
-#include "../../contrib/skia/include/encode/SkWebpEncoder.h"
+#include "include/core/SkSpan.h"
+#include "include/svg/SkSVGCanvas.h"
+#include "include/core/SkColorSpace.h"
+#include "include/encode/SkPngEncoder.h"
+#include "include/encode/SkJpegEncoder.h"
+#include "include/encode/SkWebpEncoder.h"
 #if defined(__linux__)
-#include "../../contrib/skia/include/gpu/gl/glx/GrGLMakeGLXInterface.h"
+#include "include/gpu/gl/glx/GrGLMakeGLXInterface.h"
 #endif
 
-#include "../../contrib/skia/include/gpu/ganesh/gl/GrGLDirectContext.h"
-#include "../../contrib/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
-#include "../../contrib/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h"
-#include "../../contrib/skia/src/gpu/ganesh/gl/GrGLDefines.h"
-#include "../../contrib/skia/src/gpu/ganesh/gl/GrGLUtil.h"
-//#include "SkBitmap.h"
+#include "include/gpu/ganesh/gl/GrGLDirectContext.h"
+#include "include/gpu/ganesh/SkSurfaceGanesh.h"
+#include "include/gpu/ganesh/gl/GrGLBackendSurface.h"
+#include "src/gpu/ganesh/gl/GrGLDefines.h"
+#include "src/gpu/ganesh/gl/GrGLUtil.h"
 
 #include "tracy/Tracy.hpp"
 
-#include "../../contrib/flatbuffers/flatbuffers/minireflect.h"
-#include "../../contrib/flatbuffers/flatbuffers/util.h"
-#include "../ImZeroFB.out.h"
+#include "flatbuffers/util.h"
+#include "ImZeroFB.out.h"
 
 template <typename T>
 static void applyFlag(int &flag,T val,bool v) {

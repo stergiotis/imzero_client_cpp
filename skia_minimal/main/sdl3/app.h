@@ -2,9 +2,9 @@
 
 #include <SDL3/SDL_video.h>
 #include "include/core/SkSurface.h"
-#include "../cliOptions.h"
-#include "../vectorCmdSkiaRenderer.h"
-#include "../setupUI.h"
+#include "cliOptions.h"
+#include "imgui_skia_imzero_cmd_render.h"
+#include "setupUI.h"
 #include "include/gpu/gl/GrGLInterface.h"
 #include "include/gpu/GrDirectContext.h"
 

@@ -1,6 +1,5 @@
 #pragma once
 
-
 // enable runtime-dispatch for sketch-mode rendering, disable for maximum performance
 #define RENDER_MODE_SKETCH_ENABLED
 // enable runtime-dispatch for svg rendering, disable for maximum performance

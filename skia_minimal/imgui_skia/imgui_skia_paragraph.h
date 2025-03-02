@@ -5,10 +5,8 @@
 #include "include/core/SkFontMgr.h"
 #include "include/core/SkTypeface.h"
 
-#include "src/gpu/ganesh/GrEagerVertexAllocator.h"
 #include "src/gpu/ganesh/geometry/GrPathUtils.h"
 #include "src/gpu/ganesh/geometry/GrTriangulator.h"
-#include "include/core/SkSpan.h"
 #include "modules/skparagraph/include/ParagraphBuilder.h"
 
 class Paragraph {
