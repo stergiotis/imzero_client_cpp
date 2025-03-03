@@ -25,10 +25,11 @@ static bool isParagraphText(const char *text_begin, const char *text_end) {
     }
     return (memchr(text_begin,'\n',text_end-text_begin) != nullptr);
 }
-static inline uint64_t castTextureForTransport(ImTextureID textureId) {
-    // FIXME textures are currently unused
-    //return reinterpret_cast<uint64_t>(reinterpret_cast<intptr_t>(textureId));
-    return 0;
+static uint64_t castTextureForTransport(ImTextureID textureId) {
+    static_assert(sizeof(textureId) == sizeof(uint64_t));
+    //static_assert(std::is_same_v<ImTextureID,uint64_t>);
+    const uint64_t result = textureId;
+    return result;
 }
 
 namespace ImGui {

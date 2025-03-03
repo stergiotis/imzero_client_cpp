@@ -343,7 +343,9 @@ void VectorCmdSkiaRenderer::drawVectorCmdFB(const ImZeroFB::SingleVectorCmdDto *
         case ImZeroFB::VectorCmdArg_CmdBezierQuadratic:
             drawCmdBezierQuadraticFB(*cmdUnion->arg_as_CmdBezierQuadratic(),canvas,dlFlags);
             break;
-        case ImZeroFB::VectorCmdArg_CmdImage: break;
+        case ImZeroFB::VectorCmdArg_CmdImage:
+            drawCmdImage(*cmdUnion->arg_as_CmdImage(), canvas, dlFlags);
+            break;
         case ImZeroFB::VectorCmdArg_CmdImageQuad: break;
         case ImZeroFB::VectorCmdArg_CmdImageRounded: break;
         case ImZeroFB::VectorCmdArg_CmdPushClipRect:
@@ -1084,6 +1086,28 @@ void VectorCmdSkiaRenderer::drawCmdBezierCubicFB(const ImZeroFB::CmdBezierCubic 
                SkScalarToFloat(cmd.p3()->x()),SkScalarToFloat(cmd.p3()->y()),
                SkScalarToFloat(cmd.p4()->x()),SkScalarToFloat(cmd.p4()->y()));
     canvas.drawPath(pa,paint);
+}
+void VectorCmdSkiaRenderer::drawCmdImage(const ImZeroFB::CmdImage &cmd, SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) {
+    ZoneScoped;
+    switch (1) {
+        case 0:
+            {
+                const auto img = reinterpret_cast<SkPicture*>(cmd.user_texture_id());
+                auto p_min = cmd.p_min();
+                canvas.save();
+                canvas.translate(SkScalarToFloat(p_min->x()),SkScalarToFloat(p_min->y()));
+                canvas.drawPicture(img);
+                canvas.restore();
+            }
+            break;
+        case 1:
+            {
+                const auto img = reinterpret_cast<SkSurface*>(cmd.user_texture_id());
+                auto p_min = cmd.p_min();
+                img->draw(&canvas,SkFloatToScalar(p_min->x()),SkFloatToScalar(p_min->y()),nullptr);
+            }
+            break;
+    }
 }
 void VectorCmdSkiaRenderer::drawCmdBezierQuadraticFB(const ImZeroFB::CmdBezierQuadratic &cmd, SkCanvas &canvas,ImZeroFB::DrawListFlags dlFlags) { ZoneScoped;
     SkPaint paint;

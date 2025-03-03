@@ -28,4 +28,6 @@ private:
     float fontMetricsSize;
     ImVec4 colSize,colAscent,colDescent,colLeading,colXHeight,colCapHeight;
     ImZeroFB::TextAlignFlags fTextAlign = ImZeroFB::TextAlignFlags_Left;
+    sk_sp<SkPicture> fSamplePicture;
+    sk_sp<SkSurface> fSampleSurface;
 };

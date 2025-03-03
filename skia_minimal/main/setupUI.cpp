@@ -1,4 +1,6 @@
 #include "setupUI.h"
+
+#include <include/core/SkColorSpace.h>
 #include <sys/time.h>
 #include "imgui_internal.h"
 #include "tracy/Tracy.hpp"
@@ -18,6 +20,32 @@ ImZeroSkiaSetupUI::ImZeroSkiaSetupUI() {
     colLeading = ImVec4(1.0f,1.0f,1.0f,1.0f);
     colXHeight = ImVec4(1.0f,1.0f,1.0f,1.0f);
     colCapHeight = ImVec4(1.0f,1.0f,1.0f,1.0f);
+
+    {
+        // chromium --enable-gpu-benchmarking --no-sandbox
+        // javascript: chrome.gpuBenchmarking.printToSkPicture("/tmp/out.skp")
+        auto const stream = SkStream::MakeFromFile("/tmp/out.skp/layer_0.skp");
+        if(stream.get()) {
+            fSamplePicture = SkPicture::MakeFromStream(stream.get());
+        } else {
+            fSamplePicture = nullptr;
+        }
+    }
+
+    {
+        if (fSamplePicture.get()) {
+            const auto s = SkISize::Make(1000, 1000);
+            const auto c = SkColorInfo(kRGBA_8888_SkColorType, kPremul_SkAlphaType, SkColorSpace::MakeSRGB());
+            fSampleSurface = SkSurfaces::Raster(SkImageInfo::Make(s, c));
+            auto canvas = fSampleSurface->getCanvas();
+            canvas->drawPicture(fSamplePicture);
+        } else {
+            const auto s = SkISize::Make(100, 100);
+            const auto c = SkColorInfo(kRGBA_8888_SkColorType, kPremul_SkAlphaType, SkColorSpace::MakeSRGB());
+            fSampleSurface = SkSurfaces::Raster(SkImageInfo::Make(s, c));
+            //auto canvas = fSampleSurface->getCanvas();
+        }
+    }
 }
 ImZeroSkiaSetupUI::~ImZeroSkiaSetupUI() = default;
 
@@ -59,6 +87,11 @@ void ImZeroSkiaSetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &v
         off += strftime(buf+off, bufsize-off, "%z", local);
 
         ImGui::TextUnformatted(buf);
+    }
+
+    if (ImGui::CollapsingHeader("Image")) {
+        //ImGui::Image(reinterpret_cast<ImTextureID>(fSamplePicture.get()),ImVec2(0.0f,0.0f));
+        ImGui::Image(reinterpret_cast<ImTextureID>(fSampleSurface.get()),ImVec2(0.0f,0.0f));
     }
 
     if(ImGui::CollapsingHeader("Skia Backend")) {
