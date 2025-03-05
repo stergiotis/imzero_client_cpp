@@ -13,10 +13,10 @@ enum SaveFormatE_ {
     SaveFormatE_Disabled = 6,
 };
 
-class ImZeroSkiaSetupUI {
+class SetupUI {
 public:
-    ImZeroSkiaSetupUI();
-    ~ImZeroSkiaSetupUI();
+    SetupUI();
+    ~SetupUI();
 
     void render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &vectorCmdSkiaRenderer,bool &useVectorCmd,
                 size_t totalVectorCmdSerializedSize, size_t fTotalFffiSz,

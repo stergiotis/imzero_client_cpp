@@ -1,17 +1,8 @@
 #pragma once
 
-#include <cstdio>
-#include <cassert>
-#include <cstdlib>
-
 #include "imgui_skia_config.h"
-#include "include/core/SkSurface.h"
-#include "include/core/SkFontMgr.h"
 #include "include/core/SkFont.h"
-#include "ImZeroFB.out.h"
 #include "imgui_skia_paragraph.h"
-//#include "imzero_assert.h"
-
 
 // NOTE: part of ImDrawChannel as std::vector and FlatBufferBuilder are not trivially default constructible
 #define IM_DRAW_LIST_SPLITTER_CLASS_EXTRA  ImVector<std::vector<flatbuffers::Offset<ImZeroFB::SingleVectorCmdDto>>*> _ChannelsFbCmds; \

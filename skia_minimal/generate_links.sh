@@ -1,6 +1,7 @@
 #!/bin/bash
+set -ev
 here=$(dirname "$(readlink -f "$BASH_SOURCE")")
-cd "$here"
+cd "$here" || exit
 source "../common/lib.sh"
 
 link ../common/contrib/imgui/imgui.cpp ./imgui_w_hooks_1.91.9_wip/imgui.cpp

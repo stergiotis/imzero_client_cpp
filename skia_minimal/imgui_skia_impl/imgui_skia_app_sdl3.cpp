@@ -1,6 +1,5 @@
 #include <fcntl.h>
-#include <csignal>
-#include "app.h"
+#include "imgui_skia_app_sdl3.h"
 
 #include <cstdio>
 #include <cstring>
@@ -218,8 +217,8 @@ int App::Run(CliOptions &opts) {
     sk_sp<SkData> ttfData = nullptr;
     { // setup skia/imgui shared objects
 
-        if (opts.backgroundColorRGBA != nullptr && strlen(opts.backgroundColorRGBA) == 8) {
-            auto const n = static_cast<uint32_t>(strtoul(opts.backgroundColorRGBA, nullptr, 16));
+        if (opts.fBackgroundColorRGBA != nullptr && strlen(opts.fBackgroundColorRGBA) == 8) {
+            auto const n = static_cast<uint32_t>(strtoul(opts.fBackgroundColorRGBA, nullptr, 16));
             uint8_t a = n & 0xff;
             uint8_t b = (n >> 8) & 0xff;
             uint8_t g = (n >> 16) & 0xff;
@@ -227,47 +226,47 @@ int App::Run(CliOptions &opts) {
             fBackgroundColor = SkColorSetARGB(a, r, g, b);
         }
 
-        fUseVectorCmd = opts.vectorCmd;
+        fUseVectorCmd = opts.fVectorCmd;
         ImGui::useVectorCmd = fUseVectorCmd;
 
         {
-            ttfData = SkData::MakeFromFileName(opts.ttfFilePath);
+            ttfData = SkData::MakeFromFileName(opts.fTtfFilePath);
             if (ttfData == nullptr || ttfData->isEmpty()) {
-                fprintf(stderr, "unable to open ttf file %s\n", opts.ttfFilePath);
+                fprintf(stderr, "unable to open ttf file %s\n", opts.fTtfFilePath);
                 exit(1);
             }
         }
         {
             fFontMgr = nullptr;
 
-            if (opts.fontManager != nullptr && strcmp(opts.fontManager, "fontconfig") == 0) {
+            if (opts.fFontManager != nullptr && strcmp(opts.fFontManager, "fontconfig") == 0) {
 #if defined(SK_FONTMGR_FONTCONFIG_AVAILABLE)
                 fFontMgr = SkFontMgr_New_FontConfig(nullptr);
 #else
                 fprintf(stderr,"SK_FONTMGR_FONTCONFIG_AVAILABLE is not defined, font manager %s not supported\n",opts.fontManager);
 #endif
             }
-            if (opts.fontManager != nullptr && strcmp(opts.fontManager, "directory") == 0) {
+            if (opts.fFontManager != nullptr && strcmp(opts.fFontManager, "directory") == 0) {
 #if defined(SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE)
-                fFontMgr = SkFontMgr_New_Custom_Directory(opts.fontManagerArg);
+                fFontMgr = SkFontMgr_New_Custom_Directory(opts.fFontManagerArg);
 #else
                 fprintf(stderr,"SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE is not defined, font manager %s not supported\n",opts.fontManager);
 #endif
             }
             if (fFontMgr == nullptr) {
                 // fallback
-                fprintf(stderr, "using fallback font manager (opt=%s,arg=%s)\n", opts.fontManager, opts.fontManagerArg);
+                fprintf(stderr, "using fallback font manager (opt=%s,arg=%s)\n", opts.fFontManager, opts.fFontManagerArg);
                 fFontMgr = SkFontMgr_New_Custom_Data(SkSpan(&ttfData, 1));
             }
         }
         typeface = fFontMgr->makeFromData(ttfData);
         ////auto const typeface = fontMgr->matchFamilyStyle(nullptr,SkFontStyle());
         if (typeface == nullptr || fFontMgr->countFamilies() <= 0) {
-            fprintf(stderr, "unable to initialize font manager with supplied ttf font file %s\n", opts.ttfFilePath);
+            fprintf(stderr, "unable to initialize font manager with supplied ttf font file %s\n", opts.fTtfFilePath);
             return (1);
         }
 
-        ImGui::skiaFontDyFudge = opts.fontDyFudge;
+        ImGui::skiaFontDyFudge = opts.fFontDyFudge;
         ImGui::paragraph = std::make_shared<Paragraph>(fFontMgr, typeface);
         ImGui::paragraph->enableFontFallback();
         ImGui::skiaFont = SkFont(typeface);
@@ -275,10 +274,10 @@ int App::Run(CliOptions &opts) {
         fVectorCmdSkiaRenderer.setVertexDrawPaint(&fFontPaint);
         fVectorCmdSkiaRenderer.setParagraphHandler(ImGui::paragraph);
         RenderModeE mode = 0;
-        if (opts.backdropFilter) {
+        if (opts.fBackdropFilter) {
             mode |= RenderModeE_BackdropBlur;
         }
-        if (opts.sketchFilter) {
+        if (opts.fSketchFilter) {
             mode |= RenderModeE_Sketch;
         }
         fVectorCmdSkiaRenderer.changeRenderMode(mode);
@@ -336,7 +335,7 @@ int App::Run(CliOptions &opts) {
     //SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     Uint32 window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
     dm = SDL_GetDesktopDisplayMode(SDL_GetPrimaryDisplay());
-    fWindow = SDL_CreateWindow(opts.appTitle, dm->w, dm->h, window_flags);
+    fWindow = SDL_CreateWindow(opts.fAppTitle, dm->w, dm->h, window_flags);
     if (fWindow == nullptr) {
         fprintf(stderr, "Error: SDL_CreateWindow(): %s\n", SDL_GetError());
         exit(1);
@@ -344,8 +343,8 @@ int App::Run(CliOptions &opts) {
     SDL_SetWindowPosition(fWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
     glContext = SDL_GL_CreateContext(fWindow);
     SDL_GL_MakeCurrent(fWindow, glContext);
-    SDL_GL_SetSwapInterval(opts.vsync ? 1 : 0); // Enable vsync //SDL_SetWindowSurfaceVSync()
-    if (opts.fullscreen) {
+    SDL_GL_SetSwapInterval(opts.fVsync ? 1 : 0); // Enable vsync //SDL_SetWindowSurfaceVSync()
+    if (opts.fFullscreen) {
         SDL_SetWindowFullscreen(fWindow, SDL_WINDOW_FULLSCREEN);
     }
     SDL_ShowWindow(fWindow);
@@ -356,9 +355,9 @@ int App::Run(CliOptions &opts) {
     ImVec4 clearColor;
     ImGuiIO &io = ImGui::GetIO();
     {
-        applyFlag(io.ConfigFlags, ImGuiConfigFlags_NavEnableKeyboard, opts.imguiNavKeyboard);
-        applyFlag(io.ConfigFlags, ImGuiConfigFlags_NavEnableGamepad, opts.imguiNavGamepad);
-        applyFlag(io.ConfigFlags, ImGuiConfigFlags_DockingEnable, opts.imguiDocking);
+        applyFlag(io.ConfigFlags, ImGuiConfigFlags_NavEnableKeyboard, opts.fImguiNavKeyboard);
+        applyFlag(io.ConfigFlags, ImGuiConfigFlags_NavEnableGamepad, opts.fImguiNavGamepad);
+        applyFlag(io.ConfigFlags, ImGuiConfigFlags_DockingEnable, opts.fImguiDocking);
 
         io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset; // FIXME remove ?
         if (true) {
@@ -487,6 +486,7 @@ App::App() {
     fBackgroundColor = SK_ColorRED;
     fUseVectorCmd = false;
     fFontMgr = nullptr;
+    fFontPaint = SkPaint();
 }
 
 void App::createContext(ImVec4 const &clearColor,int width,int height) {
@@ -511,8 +511,8 @@ void App::createContext(ImVec4 const &clearColor,int width,int height) {
 }
 sk_sp<SkSurface> App::getSurfaceRaster(int w, int h) {
     if(fSurface == nullptr) {
-        SkColorType colorType = kRGBA_8888_SkColorType;
-        SkAlphaType alphaType = kPremul_SkAlphaType;
+        constexpr SkColorType colorType = kRGBA_8888_SkColorType;
+        constexpr SkAlphaType alphaType = kPremul_SkAlphaType;
         sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
         const auto c = SkColorInfo(colorType, alphaType, colorSpace);
         fSurface = SkSurfaces::Raster(SkImageInfo::Make(SkISize::Make(w,h), c));
@@ -530,7 +530,7 @@ sk_sp<SkSurface> App::getSurfaceGL() {
         SkColorType colorType;
 
         // TODO: the windowFormat is never any of these?
-        auto windowFormat = SDL_GetWindowPixelFormat(fWindow);
+        auto const windowFormat = SDL_GetWindowPixelFormat(fWindow);
         int contextType;
         SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &contextType);
         if (windowFormat == SDL_PIXELFORMAT_RGBA8888) {
@@ -581,4 +581,7 @@ void App::destroyContext() {
     }
 
     fContext.reset(nullptr);
+}
+void App::render() {
+
 }

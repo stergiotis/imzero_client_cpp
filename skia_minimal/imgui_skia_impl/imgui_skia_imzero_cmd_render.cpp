@@ -1,7 +1,8 @@
 #include "imgui_skia_imzero_cmd_render.h"
 
+#include "include/core/SkSurface.h"
 #include "include/core/SkPoint.h"
-#include "tools/sk_app/Window.h"
+//#include "tools/sk_app/Window.h"
 
 #include "include/core/SkPathEffect.h"
 #include "include/effects/SkDiscretePathEffect.h"

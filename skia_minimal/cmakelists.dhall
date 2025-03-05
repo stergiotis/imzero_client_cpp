@@ -2,7 +2,7 @@
 let prelude = ../dhall/prelude.dhall
 let lib = ../dhall/lib.dhall
 let cmake = ../dhall/cmakelists.dhall
-let sourceTreePartsRepo = ../dhall/sourceTreeParts.dhall
+let sourceTreePartsRepo = ./dhall/sourceTreeParts.dhall
 let common = ./common.dhall
 in 
 cmake.cmakelistsToText cmake.cmakelists::{

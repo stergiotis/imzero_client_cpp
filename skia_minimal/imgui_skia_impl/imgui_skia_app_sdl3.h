@@ -2,9 +2,9 @@
 
 #include <SDL3/SDL_video.h>
 #include "include/core/SkSurface.h"
-#include "cliOptions.h"
+#include "imgui_skia_cli_options.h"
 #include "imgui_skia_imzero_cmd_render.h"
-#include "setupUI.h"
+#include "imgui_skia_setup_ui.h"
 #include "include/gpu/gl/GrGLInterface.h"
 #include "include/gpu/GrDirectContext.h"
 
@@ -13,7 +13,9 @@ public:
     App();
     ~App();
     int Run(CliOptions &opts);
-private:
+
+protected:
+	virtual void render();
     void paint(SkSurface* surface, int width, int height);
     void drawImGuiVectorCmdsFB(SkCanvas &canvas);
     void createContext(ImVec4 const &clearColor, int width, int height);
@@ -28,7 +30,7 @@ private:
     size_t fSkpBytesWritten = 0;
     size_t fSvgBytesWritten = 0;
     size_t fPngBytesWritten = 0;
-    ImZeroSkiaSetupUI fImZeroSkiaSetupUi;
+    SetupUI fImZeroSkiaSetupUi;
     SkColor fBackgroundColor;
     bool fUseVectorCmd = false;
 

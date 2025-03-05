@@ -2,7 +2,7 @@
 set -ev
 here=$(dirname "$(readlink -f "$BASH_SOURCE")")
 cd "$here"
-export IMZERO_CLIENT_CPP_ROOT="$(realpath "$here")"
+export IMGUI_SKIA_CPP_ROOT="$(realpath "$here")"
 ./copy_libs.sh
 ./build_cpp.sh
 rm -rf bin

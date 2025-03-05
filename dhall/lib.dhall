@@ -1,3 +1,4 @@
+let prelude = ./prelude.dhall
 let vsCodeConfiguration = let T = {
 		, name : Text
 		, compilerPath: Text
@@ -57,9 +58,16 @@ let sourceTreePart = let T = {
 		, defines = {, local = [] : List Text, global = [] : List Text}
 	}}
 	in schema
+let locationToString = \(loc : prelude.Location.Type) -> (merge {
+	, Environment = \(t : Text) -> "UNDEFINED LOCATION"
+	, Local = \(t : Text) -> t
+	, Missing = "MISSING LOCATION"
+	, Remote = \(t : Text) -> "REMOTE LOCATION"
+} loc)
 in
 {
 	, vsCodeProperties
 	, vsCodeConfiguration
 	, sourceTreePart
+        , locationToString
 }

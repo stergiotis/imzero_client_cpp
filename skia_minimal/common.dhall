@@ -3,7 +3,7 @@ let common =
 	let debug = True
 	let asan = True
 	let ubsan = False
-	let sourceTreePartsRepo = ../dhall/sourceTreeParts.dhall
+	let sourceTreePartsRepo = ./dhall/sourceTreeParts.dhall
 	let sourceTreeParts = [
 		, sourceTreePartsRepo.flatbuffers
 		, sourceTreePartsRepo.imguiWithHooks1919Wip sourceTreePartsRepo.ImGuiAppHelper.SDL3
@@ -31,7 +31,7 @@ let common =
 		, "-Wextra"
 		, "-Wno-unused-parameter"
 		, "-O1"
-		, "-DIMZERO_DEBUG_BUILD"
+		, "-DIMGUI_SKIA_DEBUG_BUILD"
 		--, "-fno-optimize-sibling-calls" -- no tail calls for better stacktraces
 	]
 	let cxxflags = (if debug then cxxflagsDebug else cxxflagsRelease)

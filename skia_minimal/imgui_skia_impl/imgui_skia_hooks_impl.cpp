@@ -3,8 +3,8 @@
 #include "imgui_internal.h"
 #include "ImZeroFB.out.h"
 
-#define IMZERO_DRAWLIST_BEGIN if(ImGui::useVectorCmd) {
-#define IMZERO_DRAWLIST_END return false; }
+#define IMGUI_SKIA_DRAWLIST_BEGIN if(ImGui::useVectorCmd) {
+#define IMGUI_SKIA_DRAWLIST_END return false; }
 
 static void getParagraphTextLayout(ImZeroFB::TextAlignFlags &align,ImZeroFB::TextDirection &dir) {
     if(ImGui::paragraphTextLayoutStack.empty()) {
@@ -374,7 +374,7 @@ namespace ImGui {
             delete draw_list->_FbCmds;
             draw_list->_FbCmds = nullptr;
         }
-#ifdef IMZERO_DRAWLIST_PARAGRAPH_AS_PATH
+#ifdef IMGUI_SKIA_DRAWLIST_PARAGRAPH_AS_PATH
         draw_list->fPathVerbBuffer.clear();
         draw_list->fPathPointBuffer.clear();
         draw_list->fPathWeightBuffer.clear();
@@ -385,7 +385,7 @@ namespace ImGui {
     bool Hooks::ImDrawList::Pre::CloneOutput(::ImDrawList *draw_list,::ImDrawList *dst) { ZoneScoped;
         dst->fbBuilder = draw_list->fbBuilder;
         dst->_FbCmds = draw_list->_FbCmds;
-#ifdef IMZERO_DRAWLIST_PARAGRAPH_AS_PATH
+#ifdef IMGUI_SKIA_DRAWLIST_PARAGRAPH_AS_PATH
         dst->fPathVerbBuffer = draw_list->fPathVerbBuffer;
         dst->fPathPointBuffer = draw_list->fPathPointBuffer;
         dst->fPathWeightBuffer = draw_list->fPathWeightBuffer;
@@ -503,7 +503,7 @@ namespace ImGui {
 
 
     bool Hooks::ImDrawList::Pre::AddPolyline(::ImDrawList *draw_list, const ImVec2* points, const int points_count, ImU32 col, ImDrawFlags flags, float thickness) { ZoneScoped;
-        IMZERO_DRAWLIST_BEGIN
+        IMGUI_SKIA_DRAWLIST_BEGIN
             {
                 flatbuffers::Offset<flatbuffers::Vector<float>> xs, ys;
                 fbAddPointsToVector(xs,ys,*draw_list->fbBuilder,points,points_count);
@@ -512,29 +512,29 @@ namespace ImGui {
                 draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdPolyline,arg.Union());
                 return false;
             }
-        IMZERO_DRAWLIST_END
+        IMGUI_SKIA_DRAWLIST_END
         return true;
     }
 
     bool Hooks::ImDrawList::Pre::AddConvexPolyFilled(::ImDrawList *draw_list,const ImVec2* points, const int points_count, ImU32 col) { ZoneScoped;
-        IMZERO_DRAWLIST_BEGIN
+        IMGUI_SKIA_DRAWLIST_BEGIN
             flatbuffers::Offset<flatbuffers::Vector<float>> xs, ys;
             fbAddPointsToVector(xs,ys,*draw_list->fbBuilder,points,points_count);
             auto p = ImZeroFB::CreateArrayOfVec2(*draw_list->fbBuilder,xs,ys);
             auto arg = ImZeroFB::CreateCmdConvexPolyFilled(*draw_list->fbBuilder,p,col);
             draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdConvexPolyFilled,arg.Union());
-        IMZERO_DRAWLIST_END
+        IMGUI_SKIA_DRAWLIST_END
         return true;
     }
     bool Hooks::ImDrawList::Pre::AddConcavePolyFilled(::ImDrawList *draw_list, const ImVec2 *points, int num_points, ImU32 col) {
         ZoneScoped;
-        IMZERO_DRAWLIST_BEGIN
+        IMGUI_SKIA_DRAWLIST_BEGIN
             flatbuffers::Offset<flatbuffers::Vector<float>> xs, ys;
             fbAddPointsToVector(xs,ys,*draw_list->fbBuilder,points,num_points);
             auto p = ImZeroFB::CreateArrayOfVec2(*draw_list->fbBuilder,xs,ys);
             auto arg = ImZeroFB::CreateCmdConcavePolyFilled(*draw_list->fbBuilder,p,col);
             draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdConcavePolyFilled,arg.Union());
-        IMZERO_DRAWLIST_END
+        IMGUI_SKIA_DRAWLIST_END
         return true;
     }
 
@@ -588,17 +588,17 @@ namespace ImGui {
     }
 
     bool Hooks::ImDrawList::Pre::AddLine(::ImDrawList *draw_list, const ImVec2& p1, const ImVec2& p2, ImU32 col, float thickness) { ZoneScoped;
-        IMZERO_DRAWLIST_BEGIN
+        IMGUI_SKIA_DRAWLIST_BEGIN
             auto p1Fb = ImZeroFB::SingleVec2(p1.x,p1.y);
             auto p2Fb = ImZeroFB::SingleVec2(p2.x,p2.y);
             auto arg = ImZeroFB::CreateCmdLine(*draw_list->fbBuilder,&p1Fb,&p2Fb,col,thickness);
             draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdLine,arg.Union());
-        IMZERO_DRAWLIST_END
+        IMGUI_SKIA_DRAWLIST_END
         return true;
     }
 
     bool Hooks::ImDrawList::Pre::AddRect(::ImDrawList *draw_list, const ImVec2& p_min, const ImVec2& p_max, ImU32 col, float rounding, ImDrawFlags flags, float thickness) { ZoneScoped;
-        IMZERO_DRAWLIST_BEGIN
+        IMGUI_SKIA_DRAWLIST_BEGIN
             auto pMinFb = ImZeroFB::SingleVec2(p_min.x,p_min.y);
             auto pMaxFb = ImZeroFB::SingleVec2(p_max.x,p_max.y);
             if (rounding >= 0.5f) {
@@ -621,12 +621,12 @@ namespace ImGui {
                 auto arg = ImZeroFB::CreateCmdRectRoundedCorners(*draw_list->fbBuilder,&pMinFb,&pMaxFb,col,rounding_tl,rounding_tr,rounding_br,rounding_bl,thickness);
                 draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdRectRoundedCorners,arg.Union());
             }
-        IMZERO_DRAWLIST_END
+        IMGUI_SKIA_DRAWLIST_END
         return true;
     }
 
     bool Hooks::ImDrawList::Pre::AddRectFilled(::ImDrawList *draw_list, const ImVec2& p_min, const ImVec2& p_max, ImU32 col, float rounding, ImDrawFlags flags) { ZoneScoped;
-        IMZERO_DRAWLIST_BEGIN
+        IMGUI_SKIA_DRAWLIST_BEGIN
             auto pMinFb = ImZeroFB::SingleVec2(p_min.x,p_min.y);
             auto pMaxFb = ImZeroFB::SingleVec2(p_max.x,p_max.y);
             if (rounding >= 0.5f) {
@@ -650,12 +650,12 @@ namespace ImGui {
                 auto arg = ImZeroFB::CreateCmdRectRoundedCornersFilled(*draw_list->fbBuilder,&pMinFb,&pMaxFb,col,rounding_tl,rounding_tr,rounding_br,rounding_bl);
                 draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdRectRoundedCornersFilled,arg.Union());
             }
-        IMZERO_DRAWLIST_END
+        IMGUI_SKIA_DRAWLIST_END
         return true;
     }
 
     bool Hooks::ImDrawList::Pre::AddRectFilledMultiColor(::ImDrawList *draw_list, const ImVec2& p_min, const ImVec2& p_max, ImU32 col_upr_left, ImU32 col_upr_right, ImU32 col_bot_right, ImU32 col_bot_left) { ZoneScoped;
-        IMZERO_DRAWLIST_BEGIN
+        IMGUI_SKIA_DRAWLIST_BEGIN
             return true;
             if constexpr (false){ // FIXME
                 auto pMinFb = ImZeroFB::SingleVec2(p_min.x,p_min.y);
@@ -663,151 +663,151 @@ namespace ImGui {
                 auto arg = ImZeroFB::CreateCmdRectFilledMultiColor(*draw_list->fbBuilder,&pMinFb,&pMaxFb,col_upr_left,col_upr_right,col_bot_right,col_bot_left);
                 draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdRectFilledMultiColor,arg.Union());
             }
-        IMZERO_DRAWLIST_END
+        IMGUI_SKIA_DRAWLIST_END
         return true;
     }
 
     bool Hooks::ImDrawList::Pre::AddQuad(::ImDrawList *draw_list, const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, const ImVec2& p4, ImU32 col, float thickness) { ZoneScoped;
-        IMZERO_DRAWLIST_BEGIN
+        IMGUI_SKIA_DRAWLIST_BEGIN
             auto p1Fb = ImZeroFB::SingleVec2(p1.x,p1.y);
             auto p2Fb = ImZeroFB::SingleVec2(p2.x,p2.y);
             auto p3Fb = ImZeroFB::SingleVec2(p3.x,p3.y);
             auto p4Fb = ImZeroFB::SingleVec2(p4.x,p4.y);
             auto arg = ImZeroFB::CreateCmdQuad(*draw_list->fbBuilder,&p1Fb,&p2Fb,&p3Fb,&p4Fb,col,thickness);
             draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdQuad,arg.Union());
-        IMZERO_DRAWLIST_END
+        IMGUI_SKIA_DRAWLIST_END
 
         return true;
     }
 
     bool Hooks::ImDrawList::Pre::AddQuadFilled(::ImDrawList *draw_list, const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, const ImVec2& p4, ImU32 col) { ZoneScoped;
-        IMZERO_DRAWLIST_BEGIN
+        IMGUI_SKIA_DRAWLIST_BEGIN
             auto p1Fb = ImZeroFB::SingleVec2(p1.x,p1.y);
             auto p2Fb = ImZeroFB::SingleVec2(p2.x,p2.y);
             auto p3Fb = ImZeroFB::SingleVec2(p3.x,p3.y);
             auto p4Fb = ImZeroFB::SingleVec2(p4.x,p4.y);
             auto arg = ImZeroFB::CreateCmdQuadFilled(*draw_list->fbBuilder,&p1Fb,&p2Fb,&p3Fb,&p4Fb,col);
             draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdQuadFilled,arg.Union());
-        IMZERO_DRAWLIST_END
+        IMGUI_SKIA_DRAWLIST_END
         return true;
     }
 
     bool Hooks::ImDrawList::Pre::AddTriangle(::ImDrawList *draw_list, const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, ImU32 col, float thickness) { ZoneScoped;
-        IMZERO_DRAWLIST_BEGIN
+        IMGUI_SKIA_DRAWLIST_BEGIN
             auto p1Fb = ImZeroFB::SingleVec2(p1.x,p1.y);
             auto p2Fb = ImZeroFB::SingleVec2(p2.x,p2.y);
             auto p3Fb = ImZeroFB::SingleVec2(p3.x,p3.y);
             auto arg = ImZeroFB::CreateCmdTriangle(*draw_list->fbBuilder,&p1Fb,&p2Fb,&p3Fb,col);
             draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdTriangle,arg.Union());
-        IMZERO_DRAWLIST_END
+        IMGUI_SKIA_DRAWLIST_END
         return true;
     }
 
     bool Hooks::ImDrawList::Pre::AddTriangleFilled(::ImDrawList *draw_list, const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, ImU32 col) { ZoneScoped;
-        IMZERO_DRAWLIST_BEGIN
+        IMGUI_SKIA_DRAWLIST_BEGIN
             auto p1Fb = ImZeroFB::SingleVec2(p1.x,p1.y);
             auto p2Fb = ImZeroFB::SingleVec2(p2.x,p2.y);
             auto p3Fb = ImZeroFB::SingleVec2(p3.x,p3.y);
             auto arg = ImZeroFB::CreateCmdTriangleFilled(*draw_list->fbBuilder,&p1Fb,&p2Fb,&p3Fb,col);
             draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdTriangleFilled,arg.Union());
-        IMZERO_DRAWLIST_END
+        IMGUI_SKIA_DRAWLIST_END
 
         return true;
     }
 
     bool Hooks::ImDrawList::Pre::AddCircle(::ImDrawList *draw_list, const ImVec2& center, float radius, ImU32 col, int num_segments, float thickness) { ZoneScoped;
-        IMZERO_DRAWLIST_BEGIN
+        IMGUI_SKIA_DRAWLIST_BEGIN
             auto centerFb = ImZeroFB::SingleVec2(center.x,center.y);
             auto arg = ImZeroFB::CreateCmdCircle(*draw_list->fbBuilder,&centerFb,radius,col,num_segments,thickness);
             draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdCircle,arg.Union());
-        IMZERO_DRAWLIST_END
+        IMGUI_SKIA_DRAWLIST_END
         return true;
     }
 
     bool Hooks::ImDrawList::Pre::AddCircleFilled(::ImDrawList *draw_list, const ImVec2& center, float radius, ImU32 col, int num_segments) { ZoneScoped;
-        IMZERO_DRAWLIST_BEGIN
+        IMGUI_SKIA_DRAWLIST_BEGIN
             auto centerFb = ImZeroFB::SingleVec2(center.x,center.y);
             auto arg = ImZeroFB::CreateCmdCircleFilled(*draw_list->fbBuilder,&centerFb,radius,col);
             draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdCircleFilled,arg.Union());
-        IMZERO_DRAWLIST_END
+        IMGUI_SKIA_DRAWLIST_END
         return true;
     }
 
     bool Hooks::ImDrawList::Pre::AddNgon(::ImDrawList *draw_list, const ImVec2& center, float radius, ImU32 col, int num_segments, float thickness) { ZoneScoped;
-        IMZERO_DRAWLIST_BEGIN
+        IMGUI_SKIA_DRAWLIST_BEGIN
             auto centerFb = ImZeroFB::SingleVec2(center.x,center.y);
             auto arg = ImZeroFB::CreateCmdNgon(*draw_list->fbBuilder,&centerFb,radius,col,num_segments,thickness);
             draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdNgon,arg.Union());
-        IMZERO_DRAWLIST_END
+        IMGUI_SKIA_DRAWLIST_END
         return true;
     }
 
     bool Hooks::ImDrawList::Pre::AddNgonFilled(::ImDrawList *draw_list, const ImVec2& center, float radius, ImU32 col, int num_segments) { ZoneScoped;
-        IMZERO_DRAWLIST_BEGIN
+        IMGUI_SKIA_DRAWLIST_BEGIN
             auto centerFb = ImZeroFB::SingleVec2(center.x,center.y);
             auto arg = ImZeroFB::CreateCmdNgonFilled(*draw_list->fbBuilder,&centerFb,radius,col,num_segments);
             draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdNgonFilled,arg.Union());
-        IMZERO_DRAWLIST_END
+        IMGUI_SKIA_DRAWLIST_END
         return true;
     }
 
     bool Hooks::ImDrawList::Pre::AddEllipse(::ImDrawList *draw_list, const ImVec2& center, const ImVec2& radius, ImU32 col, float rot, int num_segments, float thickness) { ZoneScoped;
-        IMZERO_DRAWLIST_BEGIN
+        IMGUI_SKIA_DRAWLIST_BEGIN
             auto centerFb = ImZeroFB::SingleVec2(center.x,center.y);
             auto radiusFb = ImZeroFB::SingleVec2(radius.x,radius.y);
             auto arg = ImZeroFB::CreateCmdEllipse(*draw_list->fbBuilder,&centerFb,&radiusFb,col,rot,num_segments,thickness);
             draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdEllipse,arg.Union());
-        IMZERO_DRAWLIST_END
+        IMGUI_SKIA_DRAWLIST_END
         return true;
     }
 
     bool Hooks::ImDrawList::Pre::AddEllipseFilled(::ImDrawList *draw_list, const ImVec2& center, const ImVec2& radius, ImU32 col, float rot, int num_segments) { ZoneScoped;
-        IMZERO_DRAWLIST_BEGIN
+        IMGUI_SKIA_DRAWLIST_BEGIN
             auto centerFb = ImZeroFB::SingleVec2(center.x,center.y);
             auto radiusFb = ImZeroFB::SingleVec2(radius.x,radius.y);
             auto arg = ImZeroFB::CreateCmdEllipseFilled(*draw_list->fbBuilder,&centerFb,&radiusFb,col,rot,num_segments);
             draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdEllipseFilled,arg.Union());
-        IMZERO_DRAWLIST_END
+        IMGUI_SKIA_DRAWLIST_END
         return true;
     }
 
     bool Hooks::ImDrawList::Pre::AddBezierCubic(::ImDrawList *draw_list, const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, const ImVec2& p4, ImU32 col, float thickness, int num_segments) { ZoneScoped;
-        IMZERO_DRAWLIST_BEGIN
+        IMGUI_SKIA_DRAWLIST_BEGIN
             auto p1Fb = ImZeroFB::SingleVec2(p1.x,p1.y);
             auto p2Fb = ImZeroFB::SingleVec2(p2.x,p2.y);
             auto p3Fb = ImZeroFB::SingleVec2(p3.x,p3.y);
             auto p4Fb = ImZeroFB::SingleVec2(p4.x,p4.y);
             auto arg = ImZeroFB::CreateCmdBezierCubic(*draw_list->fbBuilder,&p1Fb,&p2Fb,&p3Fb,&p4Fb,col,thickness,num_segments);
             draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdBezierCubic,arg.Union());
-        IMZERO_DRAWLIST_END
+        IMGUI_SKIA_DRAWLIST_END
         return true;
     }
 
     bool Hooks::ImDrawList::Pre::AddBezierQuadratic(::ImDrawList *draw_list, const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, ImU32 col, float thickness, int num_segments) { ZoneScoped;
-        IMZERO_DRAWLIST_BEGIN
+        IMGUI_SKIA_DRAWLIST_BEGIN
             auto p1Fb = ImZeroFB::SingleVec2(p1.x,p1.y);
             auto p2Fb = ImZeroFB::SingleVec2(p2.x,p2.y);
             auto p3Fb = ImZeroFB::SingleVec2(p3.x,p3.y);
             auto arg = ImZeroFB::CreateCmdBezierQuadratic(*draw_list->fbBuilder,&p1Fb,&p2Fb,&p3Fb,col,thickness,num_segments);
             draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdBezierQuadratic,arg.Union());
-        IMZERO_DRAWLIST_END
+        IMGUI_SKIA_DRAWLIST_END
         return true;
     }
 
     bool Hooks::ImDrawList::Pre::AddImage(::ImDrawList *draw_list, ImTextureID user_texture_id, const ImVec2& p_min, const ImVec2& p_max, const ImVec2& uv_min, const ImVec2& uv_max, ImU32 col) { ZoneScoped;
-        IMZERO_DRAWLIST_BEGIN
+        IMGUI_SKIA_DRAWLIST_BEGIN
             auto pMinFb = ImZeroFB::SingleVec2(p_min.x,p_min.y);
             auto pMaxFb = ImZeroFB::SingleVec2(p_max.x,p_max.y);
             auto uvMinFb = ImZeroFB::SingleVec2(uv_min.x,uv_min.y);
             auto uvMaxFb = ImZeroFB::SingleVec2(uv_max.x,uv_max.y);
             auto arg = ImZeroFB::CreateCmdImage(*draw_list->fbBuilder,castTextureForTransport(user_texture_id),&pMinFb,&pMaxFb,&uvMinFb,&uvMaxFb,col);
             draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdImage,arg.Union());
-        IMZERO_DRAWLIST_END
+        IMGUI_SKIA_DRAWLIST_END
         return true;
     }
 
     bool Hooks::ImDrawList::Pre::AddImageQuad(::ImDrawList *draw_list, ImTextureID user_texture_id, const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, const ImVec2& p4, const ImVec2& uv1, const ImVec2& uv2, const ImVec2& uv3, const ImVec2& uv4, ImU32 col) { ZoneScoped;
-        IMZERO_DRAWLIST_BEGIN
+        IMGUI_SKIA_DRAWLIST_BEGIN
             auto p1Fb = ImZeroFB::SingleVec2(p1.x,p1.y);
             auto p2Fb = ImZeroFB::SingleVec2(p2.x,p2.y);
             auto p3Fb = ImZeroFB::SingleVec2(p3.x,p3.y);
@@ -818,19 +818,19 @@ namespace ImGui {
             auto uv4Fb = ImZeroFB::SingleVec2(uv4.x,uv4.y);
             auto arg = ImZeroFB::CreateCmdImageQuad(*draw_list->fbBuilder,castTextureForTransport(user_texture_id),&p1Fb,&p2Fb,&p3Fb,&p4Fb,&uv1Fb,&uv2Fb,&uv3Fb,&uv4Fb,col);
             draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdImageQuad,arg.Union());
-        IMZERO_DRAWLIST_END
+        IMGUI_SKIA_DRAWLIST_END
         return true;
     }
 
     bool Hooks::ImDrawList::Pre::AddImageRounded(::ImDrawList *draw_list, ImTextureID user_texture_id, const ImVec2& p_min, const ImVec2& p_max, const ImVec2& uv_min, const ImVec2& uv_max, ImU32 col, float rounding, ImDrawFlags flags) { ZoneScoped;
-        IMZERO_DRAWLIST_BEGIN
+        IMGUI_SKIA_DRAWLIST_BEGIN
             auto pMinFb = ImZeroFB::SingleVec2(p_min.x,p_min.y);
             auto pMaxFb = ImZeroFB::SingleVec2(p_max.x,p_max.y);
             auto uvMinFb = ImZeroFB::SingleVec2(uv_min.x,uv_max.y);
             auto uvMaxFb = ImZeroFB::SingleVec2(uv_min.x,uv_max.y);
             auto arg = ImZeroFB::CreateCmdImageRounded(*draw_list->fbBuilder,castTextureForTransport(user_texture_id),&pMinFb,&pMaxFb,&uvMinFb,&uvMaxFb,col,rounding,flags);
             draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdImageRounded,arg.Union());
-        IMZERO_DRAWLIST_END
+        IMGUI_SKIA_DRAWLIST_END
         return true;
     }
 
@@ -975,9 +975,9 @@ namespace ImGui {
                 }
             }
             if(isParagraph) {
-//#define IMZERO_DRAWLIST_PARAGRAPH_AS_PATH
-#ifdef IMZERO_DRAWLIST_PARAGRAPH_AS_PATH
-                const bool renderAsParagraph = IMZERO_DRAWLIST_PARAGRAPH_AS_PATH;
+//#define IMGUI_SKIA_DRAWLIST_PARAGRAPH_AS_PATH
+#ifdef IMGUI_SKIA_DRAWLIST_PARAGRAPH_AS_PATH
+                const bool renderAsParagraph = IMGUI_SKIA_DRAWLIST_PARAGRAPH_AS_PATH;
 #else
                 constexpr bool renderAsParagraph = true;
 #endif
@@ -988,7 +988,7 @@ namespace ImGui {
                     auto const arg = ImZeroFB::CreateCmdRenderParagraph(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(font),size,&posFb,col,&clipRectFb,textFb,wrap_width,0.0f,align, dir);
                     draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdRenderParagraph,arg.Union());
                 } else { ZoneScopedN("paragraphAsPath");
-#ifdef IMZERO_DRAWLIST_PARAGRAPH_AS_PATH
+#ifdef IMGUI_SKIA_DRAWLIST_PARAGRAPH_AS_PATH
                     auto const clipRectSkia = SkRect::MakeLTRB(SkScalar(clip_rect.x),SkScalar(clip_rect.y),SkScalar(clip_rect.z),SkScalar(clip_rect.w));
             auto const clipRectSkiaTrans = clipRectSkia.makeOffset(-pos.x,-pos.y);
 

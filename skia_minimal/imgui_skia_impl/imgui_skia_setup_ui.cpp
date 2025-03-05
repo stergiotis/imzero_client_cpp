@@ -1,11 +1,13 @@
-#include "setupUI.h"
+#include "imgui_skia_setup_ui.h"
 
-#include <include/core/SkColorSpace.h>
+#include "include/core/SkSurface.h"
+
+#include "include/core/SkColorSpace.h"
 #include <sys/time.h>
 #include "imgui_internal.h"
 #include "tracy/Tracy.hpp"
 
-ImZeroSkiaSetupUI::ImZeroSkiaSetupUI() {
+SetupUI::SetupUI() {
     fontMetricsText[0] = 'H';
     fontMetricsText[1] = 'f';
     fontMetricsText[2] = 'm';
@@ -34,20 +36,20 @@ ImZeroSkiaSetupUI::ImZeroSkiaSetupUI() {
 
     {
         if (fSamplePicture.get()) {
-            const auto s = SkISize::Make(1000, 1000);
+            constexpr auto s = SkISize::Make(1000, 1000);
             const auto c = SkColorInfo(kRGBA_8888_SkColorType, kPremul_SkAlphaType, SkColorSpace::MakeSRGB());
             fSampleSurface = SkSurfaces::Raster(SkImageInfo::Make(s, c));
-            auto canvas = fSampleSurface->getCanvas();
+            const auto canvas = fSampleSurface->getCanvas();
             canvas->drawPicture(fSamplePicture);
         } else {
-            const auto s = SkISize::Make(100, 100);
+            constexpr auto s = SkISize::Make(100, 100);
             const auto c = SkColorInfo(kRGBA_8888_SkColorType, kPremul_SkAlphaType, SkColorSpace::MakeSRGB());
             fSampleSurface = SkSurfaces::Raster(SkImageInfo::Make(s, c));
             //auto canvas = fSampleSurface->getCanvas();
         }
     }
 }
-ImZeroSkiaSetupUI::~ImZeroSkiaSetupUI() = default;
+SetupUI::~SetupUI() = default;
 
 static void ResetImGuiFramerateMovingAverage() {
     // Credits: Copied from https://github.com/ocornut/imgui/issues/5236
@@ -67,7 +69,7 @@ static void helpMarker(const char* desc)
         ImGui::EndTooltip();
     }
 }
-void ImZeroSkiaSetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &vectorCmdSkiaRenderer, bool &useVectorCmd,
+void SetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &vectorCmdSkiaRenderer, bool &useVectorCmd,
                                size_t totalVectorCmdSerializedSz, size_t totalFffiSz,
                                size_t skpBytes, size_t svgBytes, size_t pngBytes, int windowW, int windowH,
                                SkFontMgr *fontMgr
@@ -123,7 +125,7 @@ void ImZeroSkiaSetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &v
     if(saveFormat != SaveFormatE_Disabled) {
         saveFormat = SaveFormatE_None;
         if(ImGui::CollapsingHeader("(Vector) Screenshots")) {
-            ImGui::Text("serialized flatbuffer verctor cmd size: %d Bytes", static_cast<int>(totalVectorCmdSerializedSz));
+            ImGui::Text("serialized flatbuffer vector cmd size: %d Bytes", static_cast<int>(totalVectorCmdSerializedSz));
             ImGui::Text("fffi cmd size: %d Bytes",static_cast<int>(totalFffiSz));
             ImGui::Separator();
 
@@ -183,12 +185,12 @@ void ImZeroSkiaSetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &v
         ImGui::SameLine();
         helpMarker("This application can not be profiled using trace (see github.com/wolfpld/tracy).");
 #endif
-#ifdef IMZERO_DEBUG_BUILD
-        ImGui::TextUnformatted("IMZERO_DEBUG_BUILD is set");
+#ifdef IMGUI_SKIA_DEBUG_BUILD
+        ImGui::TextUnformatted("IMGUI_SKIA_DEBUG_BUILD is set");
         ImGui::SameLine();
         helpMarker("This application may performed sub-par to the release build.");
 #else
-        ImGui::TextUnformatted("IMZERO_DEBUG_BUILD is not set");
+        ImGui::TextUnformatted("IMGUI_SKIA_DEBUG_BUILD is not set");
         ImGui::SameLine();
         helpMarker("This application is a release build and may not be suitable for debugging your application");
 #endif
