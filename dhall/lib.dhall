@@ -28,6 +28,7 @@ let vsCodeProperties = let T = {
 	let schema = {Type = T, default = {=}}
 	in schema
 let sourceTreePart = let T = {
+	, executable : Bool
 	, dir : Text
 	, name : Text
 	, sources : List Text
@@ -50,6 +51,7 @@ let sourceTreePart = let T = {
 	, nonSourceObjs : List Text
 }
 	let schema = {Type = T, default = {
+		, executable = False
 		, additionalDependants = [] : List Text
 		, cxxflags = {local = [] : List Text, global = [] : List Text}
 		, ldflags = {global = [] : List Text}

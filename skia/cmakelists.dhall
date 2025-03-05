@@ -8,7 +8,10 @@ in
 cmake.cmakelistsToText cmake.cmakelists::{
 	, cxx = common.cxx
 	, linker = common.linker
-	, exe = "imgui_skia_exe"
+	, output = {
+             , exe = Some "imgui_skia_exe"
+             , staticLib = None Text
+           }
 	, projectName = "imgui_skia_exe"
 	, cxxflags = ["-std=c++${Natural/show common.cppstd}" ] # common.cxxflags # common.stdlibFlags
 	, ldflags = common.ldflags # common.stdlibFlags

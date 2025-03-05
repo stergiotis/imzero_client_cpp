@@ -51,90 +51,55 @@ add_compile_options(-std=c++20
 -I/home/deck/repo/imzero_client_cpp/skia/./../../contrib/sdl/include
 # skiaShared
 -ffp-contract=off
-# skiaShared
 -fstrict-aliasing
-# skiaShared
 -fPIC
-# skiaShared
 -fvisibility=hidden
-# skiaShared
 -fdata-sections
-# skiaShared
 -ffunction-sections
-# skiaShared
 -fvisibility-inlines-hidden
-# skiaShared
 -fno-exceptions
-# skiaShared
 -fno-rtti
 )
 link_libraries(-Wl,-rpath,'$ORIGIN/../lib' -Wl,-z,origin
 -DNDEBUG
 # sdl3Shared
 -L/home/deck/repo/imzero_client_cpp/skia/./../../contrib/sdl/build
-# sdl3Shared
 -Wl,--enable-new-dtags
-# sdl3Shared
 -lSDL3
 # skiaShared
 -ldl
-# skiaShared
 -lpthread
-# skiaShared
 -lfreetype
-# skiaShared
 -lz
-# skiaShared
 -lglfw
-# skiaShared
 -lfontconfig
-# skiaShared
 -lwebpmux
-# skiaShared
 -lwebpdemux
-# skiaShared
 -lX11
-# skiaShared
 -lGLU
-# skiaShared
 -lGL
-# skiaShared
 -L/home/deck/repo/imzero_client_cpp/skia/./../../contrib/skia/out/Shared
-# skiaShared
 -lskparagraph
-# skiaShared
 -lskia
-# skiaShared
 -lskunicode
-# skiaShared
 -lbentleyottmann
-# skiaShared
 -lskshaper
 # mainSkiaSdl3
 -ldl
-# mainSkiaSdl3
 -lpthread
-# mainSkiaSdl3
 -lfreetype
-# mainSkiaSdl3
 -lz
-# mainSkiaSdl3
 -lfontconfig
-# mainSkiaSdl3
 -lwebpmux
-# mainSkiaSdl3
 -lwebpdemux
-# mainSkiaSdl3
 -lX11
-# mainSkiaSdl3
 -lGLU
-# mainSkiaSdl3
 -lGL
 )
 
-# flatbuffers
+# empty target flatbuffers
 
-# imguiWithSkia
+# begin imguiWithSkia
 add_library(imguiWithSkia OBJECT "${CMAKE_CURRENT_LIST_DIR}/./imgui/imzero_hooks.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui/imzero_extensions.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui/imgui.cpp"
@@ -142,66 +107,77 @@ add_library(imguiWithSkia OBJECT "${CMAKE_CURRENT_LIST_DIR}/./imgui/imzero_hooks
 "${CMAKE_CURRENT_LIST_DIR}/./imgui/imgui_draw.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui/imgui_tables.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui/imgui_widgets.cpp")
+# end imguiWithSkia
 
-# render
+# begin render
 add_library(render OBJECT "${CMAKE_CURRENT_LIST_DIR}/./src/render.cpp")
 target_include_directories(render PUBLIC "${CMAKE_CURRENT_LIST_DIR}/./src"
 "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_implot"
 "${CMAKE_CURRENT_LIST_DIR}/./imcolortextedit")
+# end render
 
-# marshalling
+# begin marshalling
 add_library(marshalling OBJECT "${CMAKE_CURRENT_LIST_DIR}/./src/marshalling/receive.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./src/marshalling/send.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./src/marshalling/helper.cpp")
 target_include_directories(marshalling PUBLIC "${CMAKE_CURRENT_LIST_DIR}/./src/marshalling"
 "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_implot")
+# end marshalling
 
-# arena
+# begin arena
 add_library(arena OBJECT "${CMAKE_CURRENT_LIST_DIR}/./src/arena/simple/simple.cpp")
+# end arena
 
-# widgets
+# begin widgets
 add_library(widgets OBJECT "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/common.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/piemenu.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/splitter.cpp")
 target_compile_options(widgets PUBLIC -Wno-unused-parameter
 -Wno-unused-variable)
+# end widgets
 
-# imguiToggle
+# begin imguiToggle
 add_library(imguiToggle OBJECT "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_toggle/imgui_toggle.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_toggle/imgui_toggle_palette.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_toggle/imgui_toggle_presets.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_toggle/imgui_toggle_renderer.cpp")
 target_compile_options(imguiToggle PUBLIC -Wno-unused-parameter
 -Wno-unused-variable)
+# end imguiToggle
 
-# imguiImplot
+# begin imguiImplot
 add_library(imguiImplot OBJECT "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_implot/implot.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_implot/implot_demo.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_implot/implot_items.cpp")
+# end imguiImplot
 
-# imguiKnobs
+# begin imguiKnobs
 add_library(imguiKnobs OBJECT "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_knobs/imgui-knobs.cpp")
+# end imguiKnobs
 
-# imguiCoolbar
+# begin imguiCoolbar
 add_library(imguiCoolbar OBJECT "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_coolbar/ImCoolbar.cpp")
+# end imguiCoolbar
 
-# imguiFlamegraph
+# begin imguiFlamegraph
 add_library(imguiFlamegraph OBJECT "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_flamegraph/imgui_widget_flamegraph.cpp")
 target_include_directories(imguiFlamegraph PUBLIC "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_flamegraph"
 "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_flamegraph")
+# end imguiFlamegraph
 
-# imguiTextedit
+# begin imguiTextedit
 add_library(imguiTextedit OBJECT "${CMAKE_CURRENT_LIST_DIR}/./imcolortextedit/TextEditor.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./imcolortextedit/LanguageDefinitions.cpp")
 target_compile_options(imguiTextedit PUBLIC -Wno-unused-variable)
+# end imguiTextedit
 
-# binding
+# empty target binding
 
-# sdl3Shared
+# empty target sdl3Shared
 
-# skiaShared
+# empty target skiaShared
 
-# mainSkiaSdl3
+# begin mainSkiaSdl3
 add_library(mainSkiaSdl3 OBJECT "${CMAKE_CURRENT_LIST_DIR}/./main/sdl3/../../imgui/imgui_impl_sdl3.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./main/sdl3/main.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./main/sdl3/app.cpp"
@@ -215,9 +191,11 @@ target_include_directories(mainSkiaSdl3 PUBLIC "${CMAKE_CURRENT_LIST_DIR}/./main
 "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_implot"
 "${CMAKE_CURRENT_LIST_DIR}/./src"
 "${CMAKE_CURRENT_LIST_DIR}/./main/sdl3/..")
+# end mainSkiaSdl3
 
-# tracyDisabled
+# begin tracyDisabled
 add_library(tracyDisabled OBJECT "${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public/TracyClient.cpp")
+# end tracyDisabled
 add_executable(imgui_skia_exe $<TARGET_OBJECTS:imguiWithSkia>
 $<TARGET_OBJECTS:render>
 $<TARGET_OBJECTS:marshalling>
@@ -231,4 +209,3 @@ $<TARGET_OBJECTS:imguiFlamegraph>
 $<TARGET_OBJECTS:imguiTextedit>
 $<TARGET_OBJECTS:mainSkiaSdl3>
 $<TARGET_OBJECTS:tracyDisabled>)
-

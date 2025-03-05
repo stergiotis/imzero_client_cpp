@@ -55,21 +55,13 @@ add_compile_options(-std=c++20
 -I/home/deck/repo/imzero_client_cpp/skia_minimal/./contrib/sdl/include
 # skiaShared
 -ffp-contract=off
-# skiaShared
 -fstrict-aliasing
-# skiaShared
 -fPIC
-# skiaShared
 -fvisibility=hidden
-# skiaShared
 -fdata-sections
-# skiaShared
 -ffunction-sections
-# skiaShared
 -fvisibility-inlines-hidden
-# skiaShared
 -fno-exceptions
-# skiaShared
 -fno-rtti
 )
 link_libraries(-Wl,-rpath,'$ORIGIN/../lib' -Wl,-z,origin
@@ -77,69 +69,42 @@ link_libraries(-Wl,-rpath,'$ORIGIN/../lib' -Wl,-z,origin
 -fsanitize=undefined
 # sdl3Shared
 -L/home/deck/repo/imzero_client_cpp/skia_minimal/./contrib/sdl/build
-# sdl3Shared
 -Wl,--enable-new-dtags
-# sdl3Shared
 -lSDL3
 # skiaShared
 -ldl
-# skiaShared
 -lpthread
-# skiaShared
 -lfreetype
-# skiaShared
 -lz
-# skiaShared
 -lglfw
-# skiaShared
 -lfontconfig
-# skiaShared
 -lwebpmux
-# skiaShared
 -lwebpdemux
-# skiaShared
 -lX11
-# skiaShared
 -lGLU
-# skiaShared
 -lGL
-# skiaShared
 -L/home/deck/repo/imzero_client_cpp/skia_minimal/./contrib/skia/out/Shared
-# skiaShared
 -lskparagraph
-# skiaShared
 -lskia
-# skiaShared
 -lskunicode
-# skiaShared
 -lbentleyottmann
-# skiaShared
 -lskshaper
 # mainSkiaSdl3Minimal
 -ldl
-# mainSkiaSdl3Minimal
 -lpthread
-# mainSkiaSdl3Minimal
 -lfreetype
-# mainSkiaSdl3Minimal
 -lz
-# mainSkiaSdl3Minimal
 -lfontconfig
-# mainSkiaSdl3Minimal
 -lwebpmux
-# mainSkiaSdl3Minimal
 -lwebpdemux
-# mainSkiaSdl3Minimal
 -lX11
-# mainSkiaSdl3Minimal
 -lGLU
-# mainSkiaSdl3Minimal
 -lGL
 )
 
-# flatbuffers
+# empty target flatbuffers
 
-# imguiWithHooks1919Wip
+# begin imguiWithHooks1919Wip
 add_library(imguiWithHooks1919Wip OBJECT "${CMAKE_CURRENT_LIST_DIR}/./imgui_w_hooks_1.91.9_wip/imgui.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui_w_hooks_1.91.9_wip/imgui_demo.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui_w_hooks_1.91.9_wip/imgui_draw.cpp"
@@ -147,8 +112,9 @@ add_library(imguiWithHooks1919Wip OBJECT "${CMAKE_CURRENT_LIST_DIR}/./imgui_w_ho
 "${CMAKE_CURRENT_LIST_DIR}/./imgui_w_hooks_1.91.9_wip/imgui_widgets.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui_w_hooks_1.91.9_wip/imgui_impl_sdl3.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui_w_hooks_1.91.9_wip/imgui_impl_sdl3.cpp")
+# end imguiWithHooks1919Wip
 
-# imguiSkiaImpl
+# begin imguiSkiaImpl
 add_library(imguiSkiaImpl OBJECT "${CMAKE_CURRENT_LIST_DIR}/./imgui_skia_impl/imgui_skia_app_sdl3.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui_skia_impl/imgui_skia_cli_options.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui_skia_impl/imgui_skia_extensions.cpp"
@@ -157,19 +123,23 @@ add_library(imguiSkiaImpl OBJECT "${CMAKE_CURRENT_LIST_DIR}/./imgui_skia_impl/im
 "${CMAKE_CURRENT_LIST_DIR}/./imgui_skia_impl/imgui_skia_paragraph.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui_skia_impl/imgui_skia_setup_ui.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui_skia_impl/imgui_skia_tracy_support.cpp")
+# end imguiSkiaImpl
 
-# sdl3Shared
+# empty target sdl3Shared
 
-# skiaShared
+# empty target skiaShared
 
-# mainSkiaSdl3Minimal
+# begin mainSkiaSdl3Minimal
 add_library(mainSkiaSdl3Minimal OBJECT "${CMAKE_CURRENT_LIST_DIR}/./main/sdl3/main.cpp")
 target_compile_options(mainSkiaSdl3Minimal PUBLIC -Wno-unused-parameter)
+# end mainSkiaSdl3Minimal
 
-# tracyEnabled
+# begin tracyEnabled
 add_library(tracyEnabled OBJECT "${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public/TracyClient.cpp")
-add_executable(imgui_skia_exe $<TARGET_OBJECTS:imguiWithHooks1919Wip>
+# end tracyEnabled
+add_library(libimgui_skia STATIC $<TARGET_OBJECTS:imguiWithHooks1919Wip>
 $<TARGET_OBJECTS:imguiSkiaImpl>
-$<TARGET_OBJECTS:mainSkiaSdl3Minimal>
 $<TARGET_OBJECTS:tracyEnabled>)
 
+add_executable(imgui_skia_exe $<TARGET_OBJECTS:mainSkiaSdl3Minimal>)
+target_link_libraries(imgui_skia_exe libimgui_skia)

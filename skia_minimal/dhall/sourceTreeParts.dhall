@@ -224,6 +224,7 @@ let skiaShared =
 let mainSkiaSdl3Minimal = 
     let dir = "./main/sdl3"
     in sourceTreePart::{
+	, executable = True
 	, name = "mainSkiaSdl3Minimal"
 	, dir = dir
 	, sources = [
