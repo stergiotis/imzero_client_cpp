@@ -1,13 +1,13 @@
 let common = 
 	let lib = ../dhall/lib.dhall
-	let debug = False
-	let asan = False
+	let debug = True
+	let asan = True
 	let ubsan = False
 	let sourceTreePartsRepo = ../dhall/sourceTreeParts.dhall
 	let sourceTreeParts = [
 		, sourceTreePartsRepo.flatbuffers
-		, sourceTreePartsRepo.imgui
-		, sourceTreePartsRepo.imguiSkia
+		, sourceTreePartsRepo.imguiWithHooks1919Wip sourceTreePartsRepo.ImGuiAppHelper.SDL3
+		, sourceTreePartsRepo.imguiSkiaImpl
 		, sourceTreePartsRepo.sdl3Shared
 		, sourceTreePartsRepo.skiaShared
 		, sourceTreePartsRepo.mainSkiaSdl3Minimal

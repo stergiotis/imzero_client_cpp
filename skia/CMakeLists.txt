@@ -213,7 +213,8 @@ target_compile_options(mainSkiaSdl3 PUBLIC -Wno-unused-parameter)
 target_include_directories(mainSkiaSdl3 PUBLIC "${CMAKE_CURRENT_LIST_DIR}/./main/sdl3"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui"
 "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_implot"
-"${CMAKE_CURRENT_LIST_DIR}/./src")
+"${CMAKE_CURRENT_LIST_DIR}/./src"
+"${CMAKE_CURRENT_LIST_DIR}/./main/sdl3/..")
 
 # tracyDisabled
 add_library(tracyDisabled OBJECT "${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public/TracyClient.cpp")

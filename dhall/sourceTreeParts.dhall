@@ -73,6 +73,67 @@ let imgui = let dir = "./imgui" in sourceTreePart::{
 		, global = [] : List Text
 		}
 }
+let ImGuiAppHelper = <SDL3>
+let imguiWithHooks1919Wip = \(apph : ImGuiAppHelper) -> let dir = "./imgui_w_hooks_1.91.9_wip" in sourceTreePart::{
+	, name = "imguiWithHooks1919Wip"
+	, dir = dir
+	, sources = [
+		, "${dir}/imgui.cpp"
+		, "${dir}/imgui_demo.cpp"
+		, "${dir}/imgui_draw.cpp"
+		, "${dir}/imgui_tables.cpp"
+		, "${dir}/imgui_widgets.cpp"
+		, "${dir}/imgui_impl_sdl3.cpp"
+	] # (merge {
+           SDL3 = [ "${dir}/imgui_impl_sdl3.cpp" ]
+        } apph)
+	, includeDirs = {
+		, local = [] : List Text
+		, global = ["${dir}"] : List Text
+	}
+	, cxxflags = {
+		, global = [
+		] : List Text
+		, local = [] : List Text
+	}
+	, ldflags = {
+		, global = [
+		] : List Text
+	}
+	, defines = {
+		, local = [
+	          -- , "IMGUI_DISABLE_OBSOLETE_FUNCTIONS"
+		] : List Text
+		, global = [] : List Text
+		}
+}
+let imguiSkiaImpl = let dir = "./imgui_skia_impl" in sourceTreePart::{
+	, name = "imguiSkiaImpl"
+	, dir = dir
+	, sources = [
+		, "${dir}/imgui_skia_extensions.cpp"
+		, "${dir}/imgui_skia_hooks_impl.cpp"
+		, "${dir}/imgui_skia_imzero_cmd_render.cpp"
+		, "${dir}/imgui_skia_paragraph.cpp"
+	]
+	, includeDirs = {
+		, local = [] : List Text
+		, global = ["${dir}"] : List Text
+	}
+	, cxxflags = {
+		, global = [
+		] : List Text
+		, local = [] : List Text
+	}
+	, ldflags = {
+		, global = [
+		] : List Text
+	}
+	, defines = {
+		, local = [] : List Text
+		, global = [] : List Text
+		}
+}
 let imguiSkia = let dir = "./imgui_skia" in sourceTreePart::{
 	, name = "imguiSkia"
 	, dir = dir
@@ -434,7 +495,6 @@ let mainSkiaSdl3Minimal =
 	, name = "mainSkiaSdl3Minimal"
 	, dir = dir
 	, sources = [
-		, "${dir}/../../imgui/imgui_impl_sdl3.cpp"
 		, "${dir}/main.cpp"
 		, "${dir}/app.cpp"
 		, "${dir}/../cliOptions.cpp"
@@ -621,6 +681,9 @@ in
 	, imgui
 	, imguiSkia
 	, imguiWithSkia
+	, imguiSkiaImpl
+        , imguiWithHooks1919Wip
+        , ImGuiAppHelper
 	, render
 	, marshalling
 	, arena
