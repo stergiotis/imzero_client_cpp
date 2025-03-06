@@ -137,9 +137,13 @@ target_compile_options(mainSkiaSdl3Minimal PUBLIC -Wno-unused-parameter)
 # begin tracyEnabled
 add_library(tracyEnabled OBJECT "${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public/TracyClient.cpp")
 # end tracyEnabled
-add_library(libimgui_skia STATIC $<TARGET_OBJECTS:imguiWithHooks1919Wip>
+add_library(imgui_skia STATIC $<TARGET_OBJECTS:imguiWithHooks1919Wip>
 $<TARGET_OBJECTS:imguiSkiaImpl>
 $<TARGET_OBJECTS:tracyEnabled>)
 
 add_executable(imgui_skia_exe $<TARGET_OBJECTS:mainSkiaSdl3Minimal>)
-target_link_libraries(imgui_skia_exe libimgui_skia)
+target_link_libraries(imgui_skia_exe imgui_skia)
+add_executable(imgui_skia_exe2 $<TARGET_OBJECTS:mainSkiaSdl3Minimal>)
+add_library(libimgui_skia2 STATIC IMPORTED)
+set_target_properties(libimgui_skia2 PROPERTIES IMPORTED_LOCATION "libimgui_skia.a")
+target_link_libraries(imgui_skia_exe2 libimgui_skia2)
