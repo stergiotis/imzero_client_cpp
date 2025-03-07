@@ -3,7 +3,9 @@
 #include "include/core/SkSurface.h"
 
 #include "include/core/SkColorSpace.h"
+#if defined(linux) || defined(__linux) || defined(__linux__)
 #include <sys/time.h>
+#endif
 #include "imgui_internal.h"
 #include "tracy/Tracy.hpp"
 
@@ -74,6 +76,7 @@ void SetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &vectorCmdSk
                                size_t skpBytes, size_t svgBytes, size_t pngBytes, int windowW, int windowH,
                                SkFontMgr *fontMgr
                                ) { ZoneScoped;
+#if defined(linux) || defined(__linux) || defined(__linux__)
     {
         struct timeval tv;
         struct timezone tz;
@@ -90,6 +93,8 @@ void SetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &vectorCmdSk
 
         ImGui::TextUnformatted(buf);
     }
+#endif
+    // FIXME windows, ...
 
     if (ImGui::CollapsingHeader("Image")) {
         //ImGui::Image(reinterpret_cast<ImTextureID>(fSamplePicture.get()),ImVec2(0.0f,0.0f));

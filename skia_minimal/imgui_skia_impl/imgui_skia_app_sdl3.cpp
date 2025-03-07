@@ -18,6 +18,12 @@
 
 #include "include/core/SkGraphics.h"
 #include "include/ports/SkFontMgr_data.h"
+
+// FIXME find better way to handle cross compiles
+#if defined(SK_FONTMGR_FONTCONFIG_AVAILABLE) && !(defined(linux) || defined(__linux) || defined(__linux__))
+#undef SK_FONTMGR_FONTCONFIG_AVAILABLE
+#endif
+
 #if defined(SK_FONTMGR_FONTCONFIG_AVAILABLE)
 #include "include/ports/SkFontMgr_fontconfig.h"
 #endif
@@ -30,7 +36,7 @@
 #include "include/encode/SkPngEncoder.h"
 #include "include/encode/SkJpegEncoder.h"
 #include "include/encode/SkWebpEncoder.h"
-#if defined(__linux__)
+#if defined(linux) || defined(__linux) || defined(__linux__)
 #include "include/gpu/gl/glx/GrGLMakeGLXInterface.h"
 #endif
 
@@ -62,7 +68,7 @@ void App::drawImGuiVectorCmdsFB(SkCanvas &canvas) { ZoneScoped;
     for (int i = 0; i < drawData->CmdListsCount; ++i) {
         ImDrawList* drawList = drawData->CmdLists[i];
         const uint8_t *buf;
-        size_t sz;
+        std::size_t sz;
         drawList->serializeFB(buf,sz);
         fTotalVectorCmdSerializedSize += sz;
         fVectorCmdSkiaRenderer.prepareForDrawing();
@@ -175,7 +181,7 @@ void App::paint(SkSurface* surface, int width, int height) { ZoneScoped;
                 for (int i = 0; i < drawData->CmdListsCount; ++i) {
                     ImDrawList* drawList = drawData->CmdLists[i];
                     const uint8_t *buf;
-                    size_t sz;
+                    std::size_t sz;
                     drawList->serializeFB(buf,sz);
                     stream.write(buf,sz);
                 }
@@ -213,8 +219,8 @@ int App::Run(CliOptions &opts) {
     // prevent SIGPIPE when writing frames or reading user interaction events
     //signal(SIGPIPE, SIG_IGN);
 
-    sk_sp<SkTypeface> typeface = nullptr;
-    sk_sp<SkData> ttfData = nullptr;
+    sk_sp<SkTypeface> typeface{nullptr};
+    sk_sp<SkData> ttfData{nullptr};
     { // setup skia/imgui shared objects
 
         if (opts.fBackgroundColorRGBA != nullptr && strlen(opts.fBackgroundColorRGBA) == 8) {
@@ -243,7 +249,7 @@ int App::Run(CliOptions &opts) {
 #if defined(SK_FONTMGR_FONTCONFIG_AVAILABLE)
                 fFontMgr = SkFontMgr_New_FontConfig(nullptr);
 #else
-                fprintf(stderr,"SK_FONTMGR_FONTCONFIG_AVAILABLE is not defined, font manager %s not supported\n",opts.fontManager);
+                fprintf(stderr,"SK_FONTMGR_FONTCONFIG_AVAILABLE is not defined, font manager %s not supported\n",opts.fFontManager);
 #endif
             }
             if (opts.fFontManager != nullptr && strcmp(opts.fFontManager, "directory") == 0) {
@@ -495,7 +501,10 @@ void App::createContext(ImVec4 const &clearColor,int width,int height) {
     glClearStencil(0);
     glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
+    fNativeInterface = nullptr;
+#if defined(linux) || defined(__linux) || defined(__linux__)
     fNativeInterface = GrGLInterfaces::MakeGLX();
+#endif
     //nativeInterface->checkAndResetOOMed();
     if(fNativeInterface == nullptr || !fNativeInterface->validate()) {
         fprintf(stderr, "unable to create skia GrGLInterface (GLX): nativeInterface=%p (%s)\n",

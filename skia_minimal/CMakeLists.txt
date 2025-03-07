@@ -1,8 +1,9 @@
 # generated using cmakelists.dhall
 cmake_minimum_required(VERSION 3.24)
 project(imgui_skia_exe)
-set(CMAKE_LINKER clang++)
+set(CMAKE_LINKER lld-link)
 set(CMAKE_CXX_COMPILER clang++)
+set(CMAKE_TOOLCHAIN_FILE $ENV{CMAKE_TOOLCHAIN_FILE})
 
 add_compile_definitions(SK_RELEASE
 SK_GAMMA_APPLY_TO_A8
@@ -51,12 +52,20 @@ add_compile_options(-std=c++20
 -O1
 -DIMGUI_SKIA_DEBUG_BUILD
 -fsanitize=address
+--target=x86_64-pc-windows-msvc
+-isystem/home/deck/repo/imzero_client_cpp/skia_minimal/.xwin-cache/splat/crt/include
+-isystem/home/deck/repo/imzero_client_cpp/skia_minimal/.xwin-cache/splat/sdk/Include/ucrt
+-isystem/home/deck/repo/imzero_client_cpp/skia_minimal/.xwin-cache/splat/sdk/include/ucrt
+-isystem/home/deck/repo/imzero_client_cpp/skia_minimal/.xwin-cache/splat/sdk/Include/shared
+-isystem/home/deck/repo/imzero_client_cpp/skia_minimal/.xwin-cache/splat/sdk/Include/um
+-Xclang
+--dependent-lib=msvcrt
+-fuse-ld=lld-link
 # sdl3Shared
 -I/home/deck/repo/imzero_client_cpp/skia_minimal/./contrib/sdl/include
 # skiaShared
 -ffp-contract=off
 -fstrict-aliasing
--fPIC
 -fvisibility=hidden
 -fdata-sections
 -ffunction-sections
@@ -67,6 +76,14 @@ add_compile_options(-std=c++20
 link_libraries(-Wl,-rpath,'$ORIGIN/../lib' -Wl,-z,origin
 -fsanitize=address
 -fsanitize=undefined
+--target=x86_64-pc-windows-msvc
+-L/home/deck/repo/imzero_client_cpp/skia_minimal/.xwin-cache/splat/crt/lib/x64
+-L/home/deck/repo/imzero_client_cpp/skia_minimal/.xwin-cache/splat/sdk/Lib/ucrt/x64
+-L/home/deck/repo/imzero_client_cpp/skia_minimal/.xwin-cache/splat/sdk/Lib/um/x64
+-z noexecstack
+-Xclang
+--dependent-lib=msvcrt
+-v
 # sdl3Shared
 -L/home/deck/repo/imzero_client_cpp/skia_minimal/./contrib/sdl/build
 -Wl,--enable-new-dtags
@@ -76,7 +93,6 @@ link_libraries(-Wl,-rpath,'$ORIGIN/../lib' -Wl,-z,origin
 -lpthread
 -lfreetype
 -lz
--lglfw
 -lfontconfig
 -lwebpmux
 -lwebpdemux

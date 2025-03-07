@@ -185,7 +185,7 @@ let skiaShared =
 		, global = [
          , "-ffp-contract=off" -- standard compliant fp processing
          , "-fstrict-aliasing" -- is on for optimization levels larger than O1
-         , "-fPIC"
+         --, "-fPIC"
          , "-fvisibility=hidden"
          , "-fdata-sections"
          , "-ffunction-sections"
@@ -202,7 +202,6 @@ let skiaShared =
 			, "-lpthread"
 			, "-lfreetype"
 			, "-lz"
-			, "-lglfw"
 			, "-lfontconfig"
 			, "-lwebpmux"
 			, "-lwebpdemux"

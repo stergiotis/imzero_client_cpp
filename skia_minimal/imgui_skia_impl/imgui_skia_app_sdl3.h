@@ -11,7 +11,7 @@
 class App {
 public:
     App();
-    ~App();
+    virtual ~App();
     int Run(CliOptions &opts);
 
 protected:
@@ -23,7 +23,7 @@ protected:
     sk_sp<SkSurface> getSurfaceGL();
     sk_sp<SkSurface> getSurfaceRaster(int w, int h);
 
-    sk_sp<SkFontMgr> fFontMgr = nullptr;
+    sk_sp<SkFontMgr> fFontMgr{nullptr};
     SkPaint fFontPaint;
     VectorCmdSkiaRenderer fVectorCmdSkiaRenderer;
     size_t fTotalVectorCmdSerializedSize = 0;
@@ -35,8 +35,8 @@ protected:
     bool fUseVectorCmd = false;
 
     int mainLoop(CliOptions &opts,SDL_GLContext glContext, ImVec4 const &clearColor);
-    sk_sp<const GrGLInterface> fNativeInterface = nullptr;
-    sk_sp<GrDirectContext> fContext = nullptr;
-    sk_sp<SkSurface> fSurface = nullptr;
+    sk_sp<const GrGLInterface> fNativeInterface{nullptr};
+    sk_sp<GrDirectContext> fContext{nullptr};
+    sk_sp<SkSurface> fSurface{nullptr};
     SDL_Window *fWindow = nullptr;
 };

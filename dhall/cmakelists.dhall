@@ -61,6 +61,7 @@ let cmakelistsToText = \(m : cmakelists.Type) ->
 	-- ++ "set(CMAKE_CXX_STANDARD ${Natural/show m.cxxStandard})\n" -- FIXME why does cmake translate CMAKE_CXX_STANDARD=20 to -std=gnu++20
 	++ "set(CMAKE_LINKER ${m.linker})\n"
 	++ "set(CMAKE_CXX_COMPILER ${m.cxx})\n"
+        ++ "set(CMAKE_TOOLCHAIN_FILE $ENV{CMAKE_TOOLCHAIN_FILE})\n"
 	++ "\n"
 	++ "add_compile_definitions(${prelude.Text.concatSep "\n" gDefines}\n)\n"
 	++ "include_directories(${composePathList gIncludeDirs}\n)\n"
