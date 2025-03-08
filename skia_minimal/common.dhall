@@ -1,7 +1,7 @@
 let common = 
     let lib = ../dhall/lib.dhall
     let debug = True
-    let asan = True
+    let asan = False
     let ubsan = False
     let sourceTreePartsRepo = ./dhall/sourceTreeParts.dhall
     let sourceTreeParts = [
