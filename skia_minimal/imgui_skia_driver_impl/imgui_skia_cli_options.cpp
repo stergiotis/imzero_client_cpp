@@ -5,9 +5,9 @@
 #include <cmath>
 #include "imgui_skia_cli_options.h"
 
-static const char *findFlagValueDefault(FILE *logChannel, uint64_t &markUsed, int argc, char **argv,const char *flag,const char *defaultValue) {
+const char *ImGuiSkia::Driver::findFlagValueDefault(FILE *logChannel, uint64_t &markUsed, int argc, const char **argv,const char *flag,const char *defaultValue) {
     for(int i=1;i<argc;i++) {
-        auto t = static_cast<uint64_t>(1) << (i);
+        auto const t = static_cast<uint64_t>(1) << (i);
         if(((markUsed & t) == 0) && strcmp(argv[i],flag) == 0) {
             if(i == argc) {
                 fprintf(logChannel, "expecting argument for flag %s\n", flag);
@@ -21,10 +21,10 @@ static const char *findFlagValueDefault(FILE *logChannel, uint64_t &markUsed, in
     }
     return defaultValue;
 }
-static float findFlagValueDefaultFloat(FILE *logChannel, uint64_t &markUsed, int argc, char **argv,const char *flag,const char *defaultValue) {
+float ImGuiSkia::Driver::findFlagValueDefaultFloat(FILE *logChannel, uint64_t &markUsed, int argc, const char **argv,const char *flag,const char *defaultValue) {
     const char *v = findFlagValueDefault(logChannel, markUsed,argc,argv,flag,defaultValue);
     char *end;
-    auto f = strtof(v, &end);
+    const auto f = strtof(v, &end);
     if(f == 0.0f && end == v) {
         fprintf(stderr,"unable to parse argument for flag %s as float", flag);
         exit(1);
@@ -35,10 +35,10 @@ static float findFlagValueDefaultFloat(FILE *logChannel, uint64_t &markUsed, int
     }
     return f;
 }
-static int64_t findFlagValueDefaultInt(FILE *logChannel, uint64_t &markUsed, int argc, char **argv,const char *flag,const char *defaultValue) {
+int64_t ImGuiSkia::Driver::findFlagValueDefaultInt(FILE *logChannel, uint64_t &markUsed, int argc, const char **argv,const char *flag,const char *defaultValue) {
     const char *v = findFlagValueDefault(logChannel, markUsed,argc,argv,flag,defaultValue);
     char *end;
-    auto f = strtol(v, &end,0);
+    const auto f = strtol(v, &end,0);
     if(f == 0 && end == v) {
         fprintf(stderr,"unable to parse argument for flag %s as integer", flag);
         exit(1);
@@ -49,10 +49,10 @@ static int64_t findFlagValueDefaultInt(FILE *logChannel, uint64_t &markUsed, int
     }
     return f;
 }
-static bool getBoolFlagValue(FILE *logChannel, uint64_t &markUsed, int argc, char **argv,const char *flag,bool defaultValue) {
+bool ImGuiSkia::Driver::getBoolFlagValue(FILE *logChannel, uint64_t &markUsed, const int argc, const char **argv,const char *flag, const bool defaultValue) {
     return strcmp(findFlagValueDefault(logChannel, markUsed, argc,argv,flag,defaultValue ? "on" : "off"),"on") == 0;
 }
-void CliOptions::usage(const char *name, FILE *file) const {
+void ImGuiSkia::Driver::CliOptions::usage(const char *name, FILE *file) const {
     fprintf(file,"%s\n", name);
 
     fprintf(file,"info flags:\n");
@@ -85,57 +85,56 @@ void CliOptions::usage(const char *name, FILE *file) const {
     fprintf(file,"    -fontManager [name:%s]\n", fFontManager);
     fprintf(file,"    -fontManagerArg [arg:%s]\n", fFontManagerArg);
 }
-bool CliOptions::hasHelpFlag(const int argc, char **argv) {
+bool ImGuiSkia::Driver::CliOptions::hasHelpFlag(const int argc, const char **argv) {
     return argc > 1 && (strcmp(argv[1],"-help") == 0 || strcmp(argv[1],"--help") == 0);
 }
-void CliOptions::parse(const int argc,char **argv,FILE *logChannel, const bool allowUnhandledFlags) {
+void ImGuiSkia::Driver::CliOptions::parse(const int argc,const char **argv,FILE *logChannel, uint64_t &usedFlags) {
     if(argc > 1) {
         if(strcmp(argv[1],"-help") == 0 || strcmp(argv[1],"--help") == 0) {
             usage(argv[0],stderr);
             exit(0);
         }
     }
-    uint64_t u = 0;
 
     /* general flags */
-    fAppTitle = findFlagValueDefault(logChannel,u, argc, argv, "-appTitle", fAppTitle);
-    fFullscreen = getBoolFlagValue(logChannel, u, argc, argv, "-fullscreen", fFullscreen);
-    fInitialMainWindowWidth = static_cast<int>(findFlagValueDefaultInt(logChannel,u, argc, argv, "-initialMainWindowWidth", "-1"));
-    fInitialMainWindowHeight = static_cast<int>(findFlagValueDefaultInt(logChannel,u, argc, argv, "-initialMainWindowHeight", "-1"));
-    fAllowMainWindowResize = getBoolFlagValue(logChannel,u, argc, argv, "-allowMainWindowResize", fAllowMainWindowResize);
-    fExportBasePath = findFlagValueDefault(logChannel,u, argc, argv, "-exportBasePath", fExportBasePath);
+    fAppTitle = findFlagValueDefault(logChannel,usedFlags, argc, argv, "-appTitle", fAppTitle);
+    fFullscreen = getBoolFlagValue(logChannel, usedFlags, argc, argv, "-fullscreen", fFullscreen);
+    fInitialMainWindowWidth = static_cast<int>(findFlagValueDefaultInt(logChannel,usedFlags, argc, argv, "-initialMainWindowWidth", "-1"));
+    fInitialMainWindowHeight = static_cast<int>(findFlagValueDefaultInt(logChannel,usedFlags, argc, argv, "-initialMainWindowHeight", "-1"));
+    fAllowMainWindowResize = getBoolFlagValue(logChannel,usedFlags, argc, argv, "-allowMainWindowResize", fAllowMainWindowResize);
+    fExportBasePath = findFlagValueDefault(logChannel,usedFlags, argc, argv, "-exportBasePath", fExportBasePath);
 
     /* graphics flags */
-    fSkiaBackendType = findFlagValueDefault(logChannel,u, argc, argv, "-skiaBackendType", fSkiaBackendType);
-    fVsync = getBoolFlagValue(logChannel,u,argc,argv,"-vsync",fVsync);
-    fBackgroundColorRGBA = findFlagValueDefault(logChannel, u, argc, argv, "-backgroundColorRGBA", fBackgroundColorRGBA);
+    fSkiaBackendType = findFlagValueDefault(logChannel,usedFlags, argc, argv, "-skiaBackendType", fSkiaBackendType);
+    fVsync = getBoolFlagValue(logChannel,usedFlags,argc,argv,"-vsync",fVsync);
+    fBackgroundColorRGBA = findFlagValueDefault(logChannel, usedFlags, argc, argv, "-backgroundColorRGBA", fBackgroundColorRGBA);
     if(strlen(fBackgroundColorRGBA) != 8) {
         fprintf(logChannel,"backgroundColorRGBA is not a valid rgba hex color: %s\n", fBackgroundColorRGBA);
         exit(1);
     }
-    fBackdropFilter = getBoolFlagValue(logChannel,u, argc, argv, "-backdropFilter",fBackdropFilter);
-    fSketchFilter = getBoolFlagValue(logChannel,u, argc, argv, "-sketchFilter",fSketchFilter);
-    fVectorCmd = getBoolFlagValue(logChannel,u, argc, argv, "-vectorCmd",fVectorCmd);
+    fBackdropFilter = getBoolFlagValue(logChannel,usedFlags, argc, argv, "-backdropFilter",fBackdropFilter);
+    fSketchFilter = getBoolFlagValue(logChannel,usedFlags, argc, argv, "-sketchFilter",fSketchFilter);
+    fVectorCmd = getBoolFlagValue(logChannel,usedFlags, argc, argv, "-vectorCmd",fVectorCmd);
 
     /* imgui flags */
-    fImguiNavKeyboard = getBoolFlagValue(logChannel,u, argc, argv, "-imguiNavKeyboard",fImguiNavKeyboard);
-    fImguiNavGamepad = getBoolFlagValue(logChannel,u, argc, argv, "-imguiNavGamepad",fImguiNavGamepad);
-    fImguiDocking = getBoolFlagValue(logChannel,u, argc, argv, "-imguiDocking",fImguiDocking);
+    fImguiNavKeyboard = getBoolFlagValue(logChannel,usedFlags, argc, argv, "-imguiNavKeyboard",fImguiNavKeyboard);
+    fImguiNavGamepad = getBoolFlagValue(logChannel,usedFlags, argc, argv, "-imguiNavGamepad",fImguiNavGamepad);
+    fImguiDocking = getBoolFlagValue(logChannel,usedFlags, argc, argv, "-imguiDocking",fImguiDocking);
 
     /* font flags */
-    fTtfFilePath = findFlagValueDefault(logChannel,u, argc, argv,"-ttfFilePath",defaultTtfFilePath);
-    fFontDyFudge = findFlagValueDefaultFloat(logChannel,u, argc, argv, "-fontDyFudge", "0.0");
+    fTtfFilePath = findFlagValueDefault(logChannel,usedFlags, argc, argv,"-ttfFilePath",defaultTtfFilePath);
+    fFontDyFudge = findFlagValueDefaultFloat(logChannel,usedFlags, argc, argv, "-fontDyFudge", "0.0");
     if(std::isnan(fFontDyFudge) || fFontDyFudge < -10000.0f || fFontDyFudge > 10000.0f) {
         fprintf(logChannel,"implausible value for -fontDyFudge: %f\n", fFontDyFudge);
         exit(1);
     }
-    fFontManager = findFlagValueDefault(logChannel,u, argc, argv, "-fontManager", fFontManager);
-    fFontManagerArg = findFlagValueDefault(logChannel,u, argc, argv, "-fontManagerArg", fFontManagerArg);
-
-    /* check consistency */
-    if(!allowUnhandledFlags && std::popcount(u) != (argc-1)) {
+    fFontManager = findFlagValueDefault(logChannel,usedFlags, argc, argv, "-fontManager", fFontManager);
+    fFontManagerArg = findFlagValueDefault(logChannel,usedFlags, argc, argv, "-fontManagerArg", fFontManagerArg);
+}
+void ImGuiSkia::Driver::CliOptions::checkConsistency(const int argc,const char **argv, FILE *logChannel, const uint64_t usedFlags) {
+    if(std::popcount(usedFlags) != (argc-1)) {
         for(int i=1;i<argc;i++) {
-            if(((static_cast<uint64_t>(1) << i) & u) == 0) {
+            if(((static_cast<uint64_t>(1) << i) & usedFlags) == 0) {
                 fprintf(logChannel,"found unhandled flag %s at position %d (1-based)\n",argv[i],i);
             }
         }

@@ -1,6 +1,6 @@
 #include "flatbufferHelpers.h"
 
-void fbAddPointsToVector(
+void ImGuiSkia::fbAddPointsToVector(
     flatbuffers::Offset<flatbuffers::Vector<float>> &xs, flatbuffers::Offset<flatbuffers::Vector<float>> &ys,
     flatbuffers::FlatBufferBuilder &builder, const ImVec2 *points, const int points_count) {
     // FIXME use fbBuilder.StartVector and EndVector to eliminate the lambda

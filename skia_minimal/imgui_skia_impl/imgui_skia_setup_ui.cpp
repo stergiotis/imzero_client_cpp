@@ -1,17 +1,19 @@
 #include "imgui_skia_setup_ui.h"
 
 #include "include/core/SkSurface.h"
+#include "include/core/SkStream.h"
+#include "include/core/SkPicture.h"
 
 #include "include/core/SkColorSpace.h"
 #include <sys/time.h>
 #include "imgui_internal.h"
 #include "tracy/Tracy.hpp"
 
-const char *GetFrameExportFormatName(const FrameExportFormatE format) {
+const char *ImGuiSkia::GetFrameExportFormatName(const FrameExportFormatE format) {
     size_t dummy;
-    return GetFrameExportFormatName(format, dummy);
+    return ImGuiSkia::GetFrameExportFormatName(format, dummy);
 }
-const char *GetFrameExportFormatName(const FrameExportFormatE format, size_t &len) {
+const char *ImGuiSkia::GetFrameExportFormatName(const FrameExportFormatE format, size_t &len) {
     switch (format) {
     case FrameExportFormatE_NoExport: len=strlen("none"); return "none";
     case FrameExportFormatE_SKP: len=strlen("skp"); return "skp";
@@ -25,11 +27,11 @@ const char *GetFrameExportFormatName(const FrameExportFormatE format, size_t &le
         len=strlen("<unknown>"); return "<unknown>";
     }
 }
-const char *GetFrameExportFormatExtension(const FrameExportFormatE format) {
+const char *ImGuiSkia::GetFrameExportFormatExtension(const FrameExportFormatE format) {
     size_t dummy;
-    return GetFrameExportFormatExtension(format, dummy);
+    return ImGuiSkia::GetFrameExportFormatExtension(format, dummy);
 }
-const char *GetFrameExportFormatExtension(const FrameExportFormatE format, size_t &len) {
+const char *ImGuiSkia::GetFrameExportFormatExtension(const FrameExportFormatE format, size_t &len) {
     switch (format) {
     case FrameExportFormatE_NoExport: len=strlen("<none>"); return "<none>";
     case FrameExportFormatE_SKP: len=strlen(".skp"); return ".skp";
@@ -43,7 +45,8 @@ const char *GetFrameExportFormatExtension(const FrameExportFormatE format, size_
         len=strlen("<unknown>"); return "<unknown>";
     }
 }
-SetupUI::SetupUI() {
+
+ImGuiSkia::SetupUI::SetupUI() {
     fFontMetricsText[0] = 'H';
     fFontMetricsText[1] = 'f';
     fFontMetricsText[2] = 'm';
@@ -85,7 +88,8 @@ SetupUI::SetupUI() {
         }
     }
 }
-SetupUI::~SetupUI() = default;
+
+ImGuiSkia::SetupUI::~SetupUI() = default;
 
 static void ResetImGuiFramerateMovingAverage() {
     // Credits: Copied from https://github.com/ocornut/imgui/issues/5236
@@ -105,11 +109,11 @@ static void helpMarker(const char* desc)
         ImGui::EndTooltip();
     }
 }
-void SetupUI::render(FrameExportFormatE &exportFormat, VectorCmdSkiaRenderer &vectorCmdSkiaRenderer, bool &useVectorCmd,
-                               size_t totalVectorCmdSerializedSize, size_t fTotalFffiSz,
-                               size_t skpBytes, size_t fbBytes, size_t svgBytes, size_t pngBytes, size_t jpegBytes, int windowW, int windowH,
-                               SkFontMgr *fontMgr,
-                               const char *basePath) { ZoneScoped;
+void ImGuiSkia::SetupUI::render(FrameExportFormatE &exportFormat, VectorCmdSkiaRenderer &vectorCmdSkiaRenderer, bool &useVectorCmd,
+                                size_t totalVectorCmdSerializedSize, size_t fTotalFffiSz,
+                                size_t skpBytes, size_t fbBytes, size_t svgBytes, size_t pngBytes, size_t jpegBytes, int windowW, int windowH,
+                                SkFontMgr *fontMgr,
+                                const char *basePath) { ZoneScoped;
     {
         struct timeval tv;
         struct timezone tz;

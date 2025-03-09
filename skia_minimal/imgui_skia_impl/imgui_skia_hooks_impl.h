@@ -21,6 +21,6 @@ namespace ImGui {
     extern SkFont skiaFont;
     extern bool useVectorCmd;
     extern float skiaFontDyFudge;
-    extern std::shared_ptr<Paragraph> paragraph;
+    extern std::shared_ptr<ImGuiSkia::Paragraph> paragraph;
     constexpr unsigned int skiaPasswordDefaultCharacter = U'*'; // TODO make this configurable or runtime selectable
 }

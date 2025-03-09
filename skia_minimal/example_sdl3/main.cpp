@@ -1,12 +1,14 @@
 #include "imgui_skia_app_sdl3.h"
 
-int main(int argc, char** argv) {
-    CliOptions opts{};
-    opts.parse(argc, argv, stderr, false);
+int main(int argc, const char** argv) {
+    ImGuiSkia::Driver::CliOptions opts{};
+    uint64_t usedFlags = 0;
+    opts.parse(argc, argv, stderr, usedFlags);
+    opts.checkConsistency(argc, argv, stderr, usedFlags);
 
-    App app{};
+    ImGuiSkia::Driver::App app{};
     app.setup(opts);
-    int r = app.mainLoop();
+    const int r = app.mainLoop();
     app.cleanup();
     return r;
 }

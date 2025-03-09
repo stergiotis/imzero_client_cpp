@@ -30,9 +30,13 @@
 #include "include/encode/SkPngEncoder.h"
 #include "include/encode/SkJpegEncoder.h"
 #include "include/encode/SkWebpEncoder.h"
-#if defined(__linux__)
+#if defined(linux) || defined(linux) || defined(__linux__)
 #include "include/gpu/gl/glx/GrGLMakeGLXInterface.h"
 #endif
+
+#include <include/core/SkStream.h>
+#include <include/core/SkPictureRecorder.h>
+#include <include/core/SkPicture.h>
 
 #include "include/gpu/ganesh/gl/GrGLDirectContext.h"
 #include "include/gpu/ganesh/SkSurfaceGanesh.h"
@@ -55,7 +59,7 @@ static void applyFlag(int &flag,T val,bool v) {
 constexpr int msaaSampleCount = 0; //4;
 constexpr int stencilBits = 8;  // Skia needs 8 stencil bits
 
-void App::drawImGuiVectorCmdsFB(SkCanvas &canvas) { ZoneScoped;
+void ImGuiSkia::Driver::App::drawImGuiVectorCmdsFB(SkCanvas &canvas) { ZoneScoped;
     const ImDrawData* drawData = ImGui::GetDrawData();
     fTotalVectorCmdSerializedSize = 0;
     for (int i = 0; i < drawData->CmdListsCount; ++i) {
@@ -68,10 +72,11 @@ void App::drawImGuiVectorCmdsFB(SkCanvas &canvas) { ZoneScoped;
         fVectorCmdSkiaRenderer.drawSerializedVectorCmdsFB(buf, canvas);
     }
 }
-void App::prePaint(const SkSurface *surface, const int width, const int height) { ZoneScoped;
+void ImGuiSkia::Driver::App::prePaint(const SkSurface *surface, const int width, const int height) { ZoneScoped;
     ImGui::useVectorCmd = fUseVectorCmd && surface != nullptr;
 }
-FrameExportFormatE App::render(SkSurface* surface, const int width, const int height) { ZoneScoped;
+
+ImGuiSkia::FrameExportFormatE ImGuiSkia::Driver::App::render(SkSurface* surface, const int width, const int height) { ZoneScoped;
     ImGui::ShowMetricsWindow();
     ImGui::ShowDemoWindow();
 
@@ -87,7 +92,7 @@ FrameExportFormatE App::render(SkSurface* surface, const int width, const int he
     return frameExportFormat;
 }
 
-void App::postPaint(SkSurface *surface, FrameExportFormatE frameExportFormat, int width, int height) { ZoneScoped;
+void ImGuiSkia::Driver::App::postPaint(SkSurface *surface, FrameExportFormatE frameExportFormat, int width, int height) { ZoneScoped;
     ImGui::End();
     ImGui::Render();
 
@@ -228,7 +233,7 @@ static void build_ImFontAtlas(ImFontAtlas& atlas, SkPaint& fontPaint) {
     atlas.TexID = texId;
 }
 
-void App::setup(CliOptions &opts) {
+void ImGuiSkia::Driver::App::setup(CliOptions &opts) {
     // prevent SIGPIPE when writing frames or reading user interaction events
     //signal(SIGPIPE, SIG_IGN);
 
@@ -442,7 +447,7 @@ void App::setup(CliOptions &opts) {
     createContext(initialWindowWidth, initialWindowHeight);
     build_ImFontAtlas(*((ImGui::GetIO()).Fonts), fFontPaint);
 }
-SkSurface *App::preRender(bool &done, int &width, int &height) {
+SkSurface * ImGuiSkia::Driver::App::preRender(bool &done, int &width, int &height) {
     const ImGuiIO &io = ImGui::GetIO();
     width = static_cast<int>(io.DisplaySize.x);
     height = static_cast<int>(io.DisplaySize.y);
@@ -492,7 +497,7 @@ SkSurface *App::preRender(bool &done, int &width, int &height) {
     prePaint(s,width,height);
     return surface.get();
 }
-void App::postRender(const FrameExportFormatE frameExportFormat, SkSurface *const surface, int const width, int const height) {
+void ImGuiSkia::Driver::App::postRender(const FrameExportFormatE frameExportFormat, SkSurface *const surface, int const width, int const height) {
     const ImGuiIO &io = ImGui::GetIO();
     postPaint(surface,frameExportFormat,width,height); // will call ImGui::Render()
 
@@ -512,8 +517,8 @@ void App::postRender(const FrameExportFormatE frameExportFormat, SkSurface *cons
     SDL_GL_SwapWindow(fWindow);
 }
 
-App::~App() = default;
-int App::mainLoop() {
+ImGuiSkia::Driver::App::~App() = default;
+int ImGuiSkia::Driver::App::mainLoop() {
     bool done = false;
     int width;
     int height;
@@ -527,7 +532,7 @@ int App::mainLoop() {
 
     return 0;
 }
-void App::cleanup() {
+void ImGuiSkia::Driver::App::cleanup() {
     // Cleanup
     ImGui_ImplSDL3_Shutdown();
     ImGui::DestroyContext();
@@ -540,7 +545,7 @@ void App::cleanup() {
     fGlContext = nullptr;
 }
 
-App::App() {
+ImGuiSkia::Driver::App::App() {
     fTotalVectorCmdSerializedSize = 0;
     fSkpBytesWritten = 0;
     fFbBytesWritten = 0;
@@ -552,7 +557,7 @@ App::App() {
     fFontPaint = SkPaint();
 }
 
-void App::createContext(const int width, const int height) {
+void ImGuiSkia::Driver::App::createContext(const int width, const int height) {
     glViewport(0, 0, width, height);
     glClearColor(fClearColor.x * fClearColor.w, fClearColor.y * fClearColor.w, fClearColor.z * fClearColor.w, fClearColor.w);
     glClearStencil(0);
@@ -572,7 +577,7 @@ void App::createContext(const int width, const int height) {
         exit(1);
     }
 }
-sk_sp<SkSurface> App::getSurfaceRaster(const int w, const int h) {
+sk_sp<SkSurface> ImGuiSkia::Driver::App::getSurfaceRaster(const int w, const int h) {
     if(fSurface == nullptr) {
         constexpr SkColorType colorType = kRGBA_8888_SkColorType;
         constexpr SkAlphaType alphaType = kPremul_SkAlphaType;
@@ -582,7 +587,7 @@ sk_sp<SkSurface> App::getSurfaceRaster(const int w, const int h) {
     }
     return fSurface;
 }
-sk_sp<SkSurface> App::getSurfaceGL() {
+sk_sp<SkSurface> ImGuiSkia::Driver::App::getSurfaceGL() {
     if(fSurface == nullptr && fContext != nullptr && fWindow != nullptr && fNativeInterface != nullptr) {
         // Wrap the frame buffer object attached to the screen in a Skia render target so Skia can render to it
         GrGLint buffer = 0;
@@ -635,7 +640,7 @@ sk_sp<SkSurface> App::getSurfaceGL() {
     return fSurface;
 }
 
-void App::destroyContext() {
+void ImGuiSkia::Driver::App::destroyContext() {
     fSurface.reset(nullptr);
 
     if (fContext != nullptr) {

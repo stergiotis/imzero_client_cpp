@@ -36,6 +36,6 @@ void operator delete(void* ptr) noexcept {
 }
 #endif
 
-void SetupImGuiSkiaTracySupportEnabled() {
+void ImGuiSkia::SetupImGuiSkiaTracySupportEnabled() {
     ImGui::SetAllocatorFunctions(imguiSkiaMemAlloc,imguiSkiaMemFree,nullptr);
 }

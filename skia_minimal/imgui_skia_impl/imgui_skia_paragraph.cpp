@@ -1,7 +1,7 @@
 #include <cassert>
 #include "imgui_skia_paragraph.h"
 
-Paragraph::Paragraph(sk_sp<SkFontMgr> fontMgr,sk_sp<SkTypeface> defaultTypeface) {
+ImGuiSkia::Paragraph::Paragraph(sk_sp<SkFontMgr> fontMgr,sk_sp<SkTypeface> defaultTypeface) {
     fTlFontCollection = sk_make_sp<skia::textlayout::FontCollection>();
     skia::textlayout::ParagraphStyle paraStyleLtr;
     skia::textlayout::ParagraphStyle paraStyleRtl;
@@ -41,12 +41,13 @@ Paragraph::Paragraph(sk_sp<SkFontMgr> fontMgr,sk_sp<SkTypeface> defaultTypeface)
 
     fDefaultTypeface = defaultTypeface;
 }
-Paragraph::~Paragraph() = default;
-sk_sp<SkTypeface> Paragraph::getDefaultTypeface() {
+
+ImGuiSkia::Paragraph::~Paragraph() = default;
+sk_sp<SkTypeface> ImGuiSkia::Paragraph::getDefaultTypeface() {
     return fDefaultTypeface;
     //return fFontMgr->matchFamilyStyle(nullptr,SkFontStyle()); // FIXME returns empty typeface
 }
-void Paragraph::getCacheStatistics(int &count) const {
+void ImGuiSkia::Paragraph::getCacheStatistics(int &count) const {
     const auto cache = fTlFontCollection->getParagraphCache();
     if(cache == nullptr) {
         count = 0;
@@ -56,39 +57,39 @@ void Paragraph::getCacheStatistics(int &count) const {
     count = cache->count();
     // TODO: there are more fields in ParagraphCache, but these are private...
 }
-void Paragraph::setCacheEnable(bool enable) {
+void ImGuiSkia::Paragraph::setCacheEnable(bool enable) {
     auto cache = fTlFontCollection->getParagraphCache();
     if(cache == nullptr) {
         return;
     }
     cache->turnOn(enable);
 }
-void Paragraph::resetCache() {
+void ImGuiSkia::Paragraph::resetCache() {
     const auto cache = fTlFontCollection->getParagraphCache();
     if(cache == nullptr) {
         return;
     }
     cache->reset();
 }
-SkScalar Paragraph::getMaxWidth() {
+SkScalar ImGuiSkia::Paragraph::getMaxWidth() {
     return fPara->getMaxWidth();
 }
-SkScalar Paragraph::getMaxIntrinsicWidth() {
+SkScalar ImGuiSkia::Paragraph::getMaxIntrinsicWidth() {
     return fPara->getMaxIntrinsicWidth();
 }
-SkScalar Paragraph::getHeight() {
+SkScalar ImGuiSkia::Paragraph::getHeight() {
     return fPara->getHeight();
 }
-void Paragraph::build(const char *text,size_t len) {
+void ImGuiSkia::Paragraph::build(const char *text,size_t len) {
     fParaBuilder->Reset();
     fParaBuilder->pushStyle(fTlTextStyle);
     fParaBuilder->addText(text,len);
     fPara = fParaBuilder->Build();
 }
-void Paragraph::layout(SkScalar width) {
+void ImGuiSkia::Paragraph::layout(SkScalar width) {
     fPara->layout(width);
 }
-SkRect Paragraph::boundingRect(int lineNumber, bool &found) {
+SkRect ImGuiSkia::Paragraph::boundingRect(int lineNumber, bool &found) {
     skia::textlayout::LineMetrics metrics;
     if(!fPara->getLineMetricsAt(lineNumber,&metrics)) {
         found = false;
@@ -98,25 +99,25 @@ SkRect Paragraph::boundingRect(int lineNumber, bool &found) {
     return SkRect::MakeXYWH(static_cast<float>(metrics.fLeft),static_cast<float>(metrics.fBaseline-metrics.fAscent),
                             static_cast<float>(metrics.fLeft+metrics.fWidth),static_cast<float>(metrics.fBaseline+metrics.fDescent));
 }
-int Paragraph::getPath(int lineNumber, SkPath &dest) {
+int ImGuiSkia::Paragraph::getPath(int lineNumber, SkPath &dest) {
     return fPara->getPath(lineNumber,&dest);
 }
 
-void Paragraph::setForegroundPaint(const SkPaint &paint) {
+void ImGuiSkia::Paragraph::setForegroundPaint(const SkPaint &paint) {
     fTlTextStyle.setForegroundPaint(paint);
 }
-void Paragraph::paint(SkCanvas &canvas, SkScalar x, SkScalar y) {
+void ImGuiSkia::Paragraph::paint(SkCanvas &canvas, SkScalar x, SkScalar y) {
     fPara->paint(&canvas,x,y);
 }
 
-void Paragraph::setFontSize(SkScalar size) {
+void ImGuiSkia::Paragraph::setFontSize(SkScalar size) {
     fTlTextStyle.setFontSize(size);
 }
 
-void Paragraph::setLetterSpacing(SkScalar sp) {
+void ImGuiSkia::Paragraph::setLetterSpacing(SkScalar sp) {
     fTlTextStyle.setLetterSpacing(sp);
 }
-void Paragraph::setTextLayout(skia::textlayout::TextAlign align,skia::textlayout::TextDirection dir) {
+void ImGuiSkia::Paragraph::setTextLayout(skia::textlayout::TextAlign align,skia::textlayout::TextDirection dir) {
     switch(dir) {
         case skia::textlayout::TextDirection::kLtr:
             switch(align) {
@@ -141,27 +142,27 @@ void Paragraph::setTextLayout(skia::textlayout::TextAlign align,skia::textlayout
     }
 }
 
-int Paragraph::getNumberOfLines() {
+int ImGuiSkia::Paragraph::getNumberOfLines() {
     int m = 0;
     fPara->visit([&m](int lineNumber,const skia::textlayout::Paragraph::VisitorInfo *info){
        m = std::max(m, lineNumber);
     });
     return m;
 }
-bool Paragraph::hasLine(int lineNumber) {
+bool ImGuiSkia::Paragraph::hasLine(int lineNumber) {
     return fPara->getLineMetricsAt(lineNumber, nullptr);
 }
 
-void Paragraph::enableFontFallback() {
+void ImGuiSkia::Paragraph::enableFontFallback() {
     fTlFontCollection->enableFontFallback();
 }
 
-void Paragraph::disableFontFallback() {
+void ImGuiSkia::Paragraph::disableFontFallback() {
     fTlFontCollection->disableFontFallback();
 }
 
 #if 0
-void Paragraph::triangulate(int lineNumber,const SkRect &clipBounds,const float *&vertices,size_t &numVertices, int &unrenderedGlyphs) {
+void ImGuiSkia::Paragraph::triangulate(int lineNumber,const SkRect &clipBounds,const float *&vertices,size_t &numVertices, int &unrenderedGlyphs) {
     if(!hasLine(lineNumber)) {
         return;
     }

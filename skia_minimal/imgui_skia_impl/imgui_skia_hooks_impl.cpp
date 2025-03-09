@@ -36,7 +36,7 @@ namespace ImGui {
     SkFont skiaFont;
     bool useVectorCmd = false;
     float skiaFontDyFudge = 0.0f;
-    std::shared_ptr<Paragraph> paragraph = nullptr;
+    std::shared_ptr<ImGuiSkia::Paragraph> paragraph = nullptr;
 }
 
 constexpr bool enableVectorCmdFBVertexDraw = true;

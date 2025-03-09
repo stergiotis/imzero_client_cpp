@@ -1,2 +1,4 @@
 #pragma once
-void SetupImGuiSkiaTracySupportEnabled();
+namespace ImGuiSkia {
+    void SetupImGuiSkiaTracySupportEnabled();
+}

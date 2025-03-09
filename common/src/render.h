@@ -1,3 +1,4 @@
+#pragma once
 #include <cstdio>
 
 void render_init(FILE *fdInput, FILE *fdOutput);
