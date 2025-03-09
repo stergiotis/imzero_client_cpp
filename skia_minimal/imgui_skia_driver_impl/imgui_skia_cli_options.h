@@ -21,7 +21,7 @@ struct CliOptions {
     const char *fFontManagerArg = nullptr;
     const char *fSkiaBackendType = "gl";
     const char *fBackgroundColorRGBA = "000000ff";
-    const char *fOutputBasePath = "/tmp/out";
+    const char *fExportBasePath = "/tmp/out";
 
     CliOptions() = default;
     ~CliOptions() = default;

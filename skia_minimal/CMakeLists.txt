@@ -33,24 +33,21 @@ SK_SHAPER_HARFBUZZ_AVAILABLE
 SK_SHAPER_UNICODE_AVAILABLE
 SK_ENABLE_SVG
 SK_BUILD_FOR_UNIX
-TRACY_ENABLE
 )
 include_directories("${CMAKE_CURRENT_LIST_DIR}/./contrib/flatbuffers/include"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui_w_hooks_1.91.9_wip"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui_skia_impl"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/skia"
+"${CMAKE_CURRENT_LIST_DIR}/./imgui_skia_driver_impl"
 "${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public"
 )
 add_compile_options(-std=c++20
--g
--gdwarf-4
 -Wall
 -Wformat
 -Wextra
 -Wno-unused-parameter
--O1
--DIMGUI_SKIA_DEBUG_BUILD
--fsanitize=address
+-fno-omit-frame-pointer
+-O3
 # sdl3Shared
 -I/home/deck/repo/imzero_client_cpp/skia_minimal/./contrib/sdl/include
 # skiaShared
@@ -65,8 +62,7 @@ add_compile_options(-std=c++20
 -fno-rtti
 )
 link_libraries(-Wl,-rpath,'$ORIGIN/../lib' -Wl,-z,origin
--fsanitize=address
--fsanitize=undefined
+-DNDEBUG
 # sdl3Shared
 -L/home/deck/repo/imzero_client_cpp/skia_minimal/./contrib/sdl/build
 -Wl,--enable-new-dtags
@@ -115,9 +111,7 @@ add_library(imguiWithHooks1919Wip OBJECT "${CMAKE_CURRENT_LIST_DIR}/./imgui_w_ho
 # end imguiWithHooks1919Wip
 
 # begin imguiSkiaImpl
-add_library(imguiSkiaImpl OBJECT "${CMAKE_CURRENT_LIST_DIR}/./imgui_skia_impl/imgui_skia_app_sdl3.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./imgui_skia_impl/imgui_skia_cli_options.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./imgui_skia_impl/imgui_skia_extensions.cpp"
+add_library(imguiSkiaImpl OBJECT "${CMAKE_CURRENT_LIST_DIR}/./imgui_skia_impl/imgui_skia_extensions.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui_skia_impl/imgui_skia_hooks_impl.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui_skia_impl/imgui_skia_imzero_cmd_render.cpp"
 "${CMAKE_CURRENT_LIST_DIR}/./imgui_skia_impl/imgui_skia_paragraph.cpp"
@@ -129,21 +123,28 @@ add_library(imguiSkiaImpl OBJECT "${CMAKE_CURRENT_LIST_DIR}/./imgui_skia_impl/im
 
 # empty target skiaShared
 
+# begin imguiSkiaDriverImpl
+add_library(imguiSkiaDriverImpl OBJECT "${CMAKE_CURRENT_LIST_DIR}/./imgui_skia_driver_impl/imgui_skia_app_sdl3.cpp"
+"${CMAKE_CURRENT_LIST_DIR}/./imgui_skia_driver_impl/imgui_skia_cli_options.cpp")
+# end imguiSkiaDriverImpl
+
 # begin mainSkiaSdl3Minimal
-add_library(mainSkiaSdl3Minimal OBJECT "${CMAKE_CURRENT_LIST_DIR}/./main/sdl3/main.cpp")
+add_library(mainSkiaSdl3Minimal OBJECT "${CMAKE_CURRENT_LIST_DIR}/./example_sdl3/main.cpp")
 target_compile_options(mainSkiaSdl3Minimal PUBLIC -Wno-unused-parameter)
 # end mainSkiaSdl3Minimal
 
-# begin tracyEnabled
-add_library(tracyEnabled OBJECT "${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public/TracyClient.cpp")
-# end tracyEnabled
+# begin tracyDisabled
+add_library(tracyDisabled OBJECT "${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public/TracyClient.cpp")
+# end tracyDisabled
 add_executable(imgui_skia_exe $<TARGET_OBJECTS:imguiWithHooks1919Wip>
 $<TARGET_OBJECTS:imguiSkiaImpl>
+$<TARGET_OBJECTS:imguiSkiaDriverImpl>
 $<TARGET_OBJECTS:mainSkiaSdl3Minimal>
-$<TARGET_OBJECTS:tracyEnabled>)
+$<TARGET_OBJECTS:tracyDisabled>)
 add_library(imgui_skia STATIC $<TARGET_OBJECTS:imguiWithHooks1919Wip>
 $<TARGET_OBJECTS:imguiSkiaImpl>
-$<TARGET_OBJECTS:tracyEnabled>)
+$<TARGET_OBJECTS:imguiSkiaDriverImpl>
+$<TARGET_OBJECTS:tracyDisabled>)
 add_executable(imgui_skia_exe2 $<TARGET_OBJECTS:mainSkiaSdl3Minimal>)
 add_dependencies(imgui_skia_exe2 imgui_skia)
 add_library(libimgui_skia2 STATIC IMPORTED)

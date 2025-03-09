@@ -11,12 +11,12 @@
 class App {
 public:
     App();
-    void postRender(SaveFormatE saveFormat, SkSurface* surface, int width, int height);
+    void postRender(FrameExportFormatE frameExportFormat, SkSurface* surface, int width, int height);
     ~App();
     void prePaint(const SkSurface* surface, int width, int height);
     SkSurface* preRender(bool& done, int& width, int& height);
-    SaveFormatE render(SkSurface* surface, int width, int height);
-    void postPaint(SkSurface* surface, SaveFormatE saveFormat, int width, int height);
+    FrameExportFormatE render(SkSurface* surface, int width, int height);
+    void postPaint(SkSurface* surface, FrameExportFormatE frameExportFormat, int width, int height);
 
     void setup(CliOptions &opts);
     int mainLoop();
@@ -29,13 +29,14 @@ protected:
     sk_sp<SkSurface> getSurfaceGL();
     sk_sp<SkSurface> getSurfaceRaster(int w, int h);
 
-    SkString fSavePath{};
+    SkString fExportBasePath{};
 
     sk_sp<SkFontMgr> fFontMgr = nullptr;
     SkPaint fFontPaint;
     VectorCmdSkiaRenderer fVectorCmdSkiaRenderer;
     size_t fTotalVectorCmdSerializedSize = 0;
     size_t fSkpBytesWritten = 0;
+    size_t fFbBytesWritten = 0;
     size_t fSvgBytesWritten = 0;
     size_t fPngBytesWritten = 0;
     size_t fJpegBytesWritten = 0;

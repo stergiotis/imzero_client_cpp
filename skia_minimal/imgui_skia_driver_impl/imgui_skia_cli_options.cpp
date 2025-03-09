@@ -64,6 +64,7 @@ void CliOptions::usage(const char *name, FILE *file) const {
     fprintf(file,"    -initialMainWindowWidth [int:%d]\n", fInitialMainWindowWidth);
     fprintf(file,"    -initialMainWindowHeight [int:%d]\n", fInitialMainWindowHeight);
     fprintf(file,"    -allowMainWindowResize [bool:%s]\n", fAllowMainWindowResize ? "on" : "off");
+    fprintf(file,"    -exportBasePath [path:%s]\n", fExportBasePath);
 
     fprintf(file,"graphics flags:\n");
     fprintf(file,"    -skiaBackendType [type:%s]    choices: raster,gl,vulkan\n",fSkiaBackendType);
@@ -102,6 +103,7 @@ void CliOptions::parse(const int argc,char **argv,FILE *logChannel, const bool a
     fInitialMainWindowWidth = static_cast<int>(findFlagValueDefaultInt(logChannel,u, argc, argv, "-initialMainWindowWidth", "-1"));
     fInitialMainWindowHeight = static_cast<int>(findFlagValueDefaultInt(logChannel,u, argc, argv, "-initialMainWindowHeight", "-1"));
     fAllowMainWindowResize = getBoolFlagValue(logChannel,u, argc, argv, "-allowMainWindowResize", fAllowMainWindowResize);
+    fExportBasePath = findFlagValueDefault(logChannel,u, argc, argv, "-exportBasePath", fExportBasePath);
 
     /* graphics flags */
     fSkiaBackendType = findFlagValueDefault(logChannel,u, argc, argv, "-skiaBackendType", fSkiaBackendType);

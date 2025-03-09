@@ -4,10 +4,10 @@
 #include <cstdio>
 #include <cstring>
 
-#include "imgui_impl_sdl3.h"
-#include "imgui_internal.h"
+#include "../imgui_w_hooks_1.91.9_wip/imgui_impl_sdl3.h"
+#include "../imgui_w_hooks_1.91.9_wip/imgui_internal.h"
 
-#include <SDL3/SDL_main.h>
+#include <../contrib/sdl/include/SDL3/SDL_main.h>
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <SDL3/SDL_opengles2.h>
 #else
@@ -16,20 +16,20 @@
 
 #endif
 
-#include "include/core/SkGraphics.h"
-#include "include/ports/SkFontMgr_data.h"
+#include "../contrib/skia/include/core/SkGraphics.h"
+#include "../contrib/skia/include/ports/SkFontMgr_data.h"
 #if defined(SK_FONTMGR_FONTCONFIG_AVAILABLE)
 #include "include/ports/SkFontMgr_fontconfig.h"
 #endif
 #if defined(SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE)
 #include "include/ports/SkFontMgr_directory.h"
 #endif
-#include "include/core/SkSpan.h"
-#include "include/svg/SkSVGCanvas.h"
-#include "include/core/SkColorSpace.h"
-#include "include/encode/SkPngEncoder.h"
-#include "include/encode/SkJpegEncoder.h"
-#include "include/encode/SkWebpEncoder.h"
+#include "../contrib/skia/include/core/SkSpan.h"
+#include "../contrib/skia/include/svg/SkSVGCanvas.h"
+#include "../contrib/skia/include/core/SkColorSpace.h"
+#include "../contrib/skia/include/encode/SkPngEncoder.h"
+#include "../contrib/skia/include/encode/SkJpegEncoder.h"
+#include "../contrib/skia/include/encode/SkWebpEncoder.h"
 #if defined(__linux__)
 #include "include/gpu/gl/glx/GrGLMakeGLXInterface.h"
 #endif
@@ -72,23 +72,23 @@ void App::drawImGuiVectorCmdsFB(SkCanvas &canvas) { ZoneScoped;
 void App::prePaint(const SkSurface *surface, const int width, const int height) { ZoneScoped;
     ImGui::useVectorCmd = fUseVectorCmd && surface != nullptr;
 }
-SaveFormatE App::render(SkSurface* surface, const int width, const int height) { ZoneScoped;
+FrameExportFormatE App::render(SkSurface* surface, const int width, const int height) { ZoneScoped;
     ImGui::ShowMetricsWindow();
     ImGui::ShowDemoWindow();
 
-    SaveFormatE saveFormat = SaveFormatE_None;
+    FrameExportFormatE frameExportFormat = FrameExportFormatE_NoExport;
     if(ImGui::Begin("ImZeroSkia Settings")) { ZoneScoped;
-        fImZeroSkiaSetupUi.render(saveFormat, fVectorCmdSkiaRenderer, fUseVectorCmd,
+        fImZeroSkiaSetupUi.render(frameExportFormat, fVectorCmdSkiaRenderer, fUseVectorCmd,
                                   fTotalVectorCmdSerializedSize, 0,
-                                  fSkpBytesWritten, fSvgBytesWritten, fPngBytesWritten, fJpegBytesWritten,
+                                  fSkpBytesWritten, fFbBytesWritten, fSvgBytesWritten, fPngBytesWritten, fJpegBytesWritten,
                                   width, height, fFontMgr.get(),
-                                  fSavePath.data()
+                                  fExportBasePath.data()
         );
     }
-    return saveFormat;
+    return frameExportFormat;
 }
 
-void App::postPaint(SkSurface *surface, SaveFormatE saveFormat, int width, int height) { ZoneScoped;
+void App::postPaint(SkSurface *surface, FrameExportFormatE frameExportFormat, int width, int height) { ZoneScoped;
     ImGui::End();
     ImGui::Render();
 
@@ -96,7 +96,7 @@ void App::postPaint(SkSurface *surface, SaveFormatE saveFormat, int width, int h
         return;
     }
 
-    if(saveFormat == SaveFormatE_None) { ZoneScoped;
+    if(frameExportFormat == FrameExportFormatE_NoExport) { ZoneScoped;
         // displaying on screen
         auto skiaCanvas = surface->getCanvas();
         skiaCanvas->clear(fBackgroundColor);
@@ -105,15 +105,15 @@ void App::postPaint(SkSurface *surface, SaveFormatE saveFormat, int width, int h
         drawImGuiVectorCmdsFB(*skiaCanvas);
         skiaCanvas->restore();
     } else {
-        auto p = fSavePath.size();
+        auto p = fExportBasePath.size();
         size_t extLen;
-        auto ext = GetSaveFormatExtension(saveFormat, extLen);
-        fSavePath.append(ext, extLen);
+        auto ext = GetFrameExportFormatExtension(frameExportFormat, extLen);
+        fExportBasePath.append(ext, extLen);
         {
-            SkFILEWStream outStream(fSavePath.data());
+            SkFILEWStream outStream(fExportBasePath.data());
             auto const renderMode = fVectorCmdSkiaRenderer.getRenderMode();
-            switch(saveFormat) {
-                case SaveFormatE_SKP: { ZoneScoped;
+            switch(frameExportFormat) {
+                case FrameExportFormatE_SKP: { ZoneScoped;
                     SkPictureRecorder skiaRecorder;
                     auto skiaCanvas = skiaRecorder.beginRecording(SkIntToScalar(width),
                                                                   SkIntToScalar(height));
@@ -128,13 +128,13 @@ void App::postPaint(SkSurface *surface, SaveFormatE saveFormat, int width, int h
                     fSkpBytesWritten = outStream.bytesWritten();
                     break;
                 }
-                case SaveFormatE_SVG: // fallthrough
-                case SaveFormatE_SVG_TextAsPath: { ZoneScoped;
+                case FrameExportFormatE_SVG: // fallthrough
+                case FrameExportFormatE_SVG_TextAsPath: { ZoneScoped;
                     SkRect bounds = SkRect::MakeIWH(width, height);
                     fVectorCmdSkiaRenderer.changeRenderMode(renderMode | RenderModeE_SVG);
 
-                    switch(saveFormat) {
-                        case SaveFormatE_SVG:
+                    switch(frameExportFormat) {
+                        case FrameExportFormatE_SVG:
                         {
                             { // svg canvas may buffer commands, extra scope to ensure flush by RAII
                                 constexpr int flags = SkSVGCanvas::kNoPrettyXML_Flag;
@@ -144,7 +144,7 @@ void App::postPaint(SkSurface *surface, SaveFormatE saveFormat, int width, int h
                             fSvgBytesWritten = outStream.bytesWritten();
                         }
                             break;
-                        case SaveFormatE_SVG_TextAsPath:
+                        case FrameExportFormatE_SVG_TextAsPath:
                         {
                             { // svg canvas may buffer commands, extra scope to ensure flush by RAII
                                 constexpr int flags = SkSVGCanvas::kConvertTextToPaths_Flag | SkSVGCanvas::kNoPrettyXML_Flag;
@@ -161,7 +161,7 @@ void App::postPaint(SkSurface *surface, SaveFormatE saveFormat, int width, int h
                     fVectorCmdSkiaRenderer.changeRenderMode(renderMode);
                     break;
                 }
-                case SaveFormatE_PNG: { ZoneScoped;
+                case FrameExportFormatE_PNG: { ZoneScoped;
                     const auto s = SkISize::Make(width, height);
                     const auto c = SkColorInfo(kRGBA_8888_SkColorType, kPremul_SkAlphaType, SkColorSpace::MakeSRGB());
                     sk_sp<SkSurface> rasterSurface = SkSurfaces::Raster(SkImageInfo::Make(s, c));
@@ -177,7 +177,7 @@ void App::postPaint(SkSurface *surface, SaveFormatE saveFormat, int width, int h
                     }
                     break;
                 }
-                case SaveFormatE_JPEG: { ZoneScoped;
+                case FrameExportFormatE_JPEG: { ZoneScoped;
                     const auto s = SkISize::Make(width, height);
                     const auto c = SkColorInfo(kRGBA_8888_SkColorType, kPremul_SkAlphaType, SkColorSpace::MakeSRGB());
                     sk_sp<SkSurface> rasterSurface = SkSurfaces::Raster(SkImageInfo::Make(s, c));
@@ -193,7 +193,7 @@ void App::postPaint(SkSurface *surface, SaveFormatE saveFormat, int width, int h
                     }
                     break;
                 }
-                case SaveFormatE_VECTORCMD: { ZoneScoped;
+                case FrameExportFormatE_VECTORCMD: { ZoneScoped;
                     const ImDrawData* drawData = ImGui::GetDrawData();
                     fTotalVectorCmdSerializedSize = 0;
                     for (int i = 0; i < drawData->CmdListsCount; ++i) {
@@ -204,12 +204,12 @@ void App::postPaint(SkSurface *surface, SaveFormatE saveFormat, int width, int h
                         outStream.write(buf,sz);
                     }
                     outStream.flush();
-                    fSkpBytesWritten = outStream.bytesWritten();
+                    fFbBytesWritten = outStream.bytesWritten();
                     break;
                 }
             }
         }
-        fSavePath.remove(p,extLen);
+        fExportBasePath.remove(p,extLen);
     }
 
     FrameMark;
@@ -232,6 +232,8 @@ static void build_ImFontAtlas(ImFontAtlas& atlas, SkPaint& fontPaint) {
 void App::setup(CliOptions &opts) {
     // prevent SIGPIPE when writing frames or reading user interaction events
     //signal(SIGPIPE, SIG_IGN);
+
+    fExportBasePath = opts.fExportBasePath;
 
     sk_sp<SkTypeface> typeface = nullptr;
     sk_sp<SkData> ttfData = nullptr;
@@ -491,9 +493,9 @@ SkSurface *App::preRender(bool &done, int &width, int &height) {
     prePaint(s,width,height);
     return surface.get();
 }
-void App::postRender(const SaveFormatE saveFormat, SkSurface *const surface, int const width, int const height) {
+void App::postRender(const FrameExportFormatE frameExportFormat, SkSurface *const surface, int const width, int const height) {
     const ImGuiIO &io = ImGui::GetIO();
-    postPaint(surface,saveFormat,width,height); // will call ImGui::Render()
+    postPaint(surface,frameExportFormat,width,height); // will call ImGui::Render()
 
     fContext->flush();
 
@@ -519,8 +521,8 @@ int App::mainLoop() {
     while(!done) {
         auto const surface = preRender(done,width,height);
         if (surface != nullptr) {
-            const auto saveFormat = render(surface,width,height);
-            postRender(saveFormat, surface, width,height);
+            const auto frameExportFormat = render(surface,width,height);
+            postRender(frameExportFormat, surface, width,height);
         }
     }
 
@@ -542,6 +544,7 @@ void App::cleanup() {
 App::App() {
     fTotalVectorCmdSerializedSize = 0;
     fSkpBytesWritten = 0;
+    fFbBytesWritten = 0;
     fSvgBytesWritten = 0;
     fPngBytesWritten = 0;
     fBackgroundColor = SK_ColorRED;

@@ -1,7 +1,7 @@
 let common = 
     let lib = ../dhall/lib.dhall
-    let debug = True
-    let asan = True
+    let debug = False
+    let asan = False
     let ubsan = False
     let sourceTreePartsRepo = ./dhall/sourceTreeParts.dhall
     let sourceTreeParts = [
@@ -10,6 +10,7 @@ let common =
         , sourceTreePartsRepo.imguiSkiaImpl
         , sourceTreePartsRepo.sdl3Shared
         , sourceTreePartsRepo.skiaShared
+        , sourceTreePartsRepo.imguiSkiaDriverImpl
         , sourceTreePartsRepo.mainSkiaSdl3Minimal
     ] 
     # (if debug then [ , sourceTreePartsRepo.tracyEnabled ] else [ ,sourceTreePartsRepo.tracyDisabled ] : List lib.sourceTreePart.Type )

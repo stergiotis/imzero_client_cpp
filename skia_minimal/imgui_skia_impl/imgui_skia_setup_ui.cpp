@@ -7,57 +7,57 @@
 #include "imgui_internal.h"
 #include "tracy/Tracy.hpp"
 
-const char *GetSaveFormatName(const SaveFormatE format) {
+const char *GetFrameExportFormatName(const FrameExportFormatE format) {
     size_t dummy;
-    return GetSaveFormatName(format, dummy);
+    return GetFrameExportFormatName(format, dummy);
 }
-const char *GetSaveFormatName(const SaveFormatE format, size_t &len) {
+const char *GetFrameExportFormatName(const FrameExportFormatE format, size_t &len) {
     switch (format) {
-    case SaveFormatE_None: len=strlen("none"); return "none";
-    case SaveFormatE_SKP: len=strlen("skp"); return "skp";
-    case SaveFormatE_SVG: len=strlen("svg"); return "svg";
-    case SaveFormatE_SVG_TextAsPath: len=strlen("svg-text-as-path"); return "svg-text-as-path";
-    case SaveFormatE_PNG: len=strlen("png"); return "png";
-    case SaveFormatE_JPEG: len=strlen("jpeg"); return "jpeg";
-    case SaveFormatE_VECTORCMD: len=strlen("vectorcmd"); return "vectorcmd";
-    case SaveFormatE_Disabled: len=strlen("disabled"); return "disabled";
+    case FrameExportFormatE_NoExport: len=strlen("none"); return "none";
+    case FrameExportFormatE_SKP: len=strlen("skp"); return "skp";
+    case FrameExportFormatE_SVG: len=strlen("svg"); return "svg";
+    case FrameExportFormatE_SVG_TextAsPath: len=strlen("svg-text-as-path"); return "svg-text-as-path";
+    case FrameExportFormatE_PNG: len=strlen("png"); return "png";
+    case FrameExportFormatE_JPEG: len=strlen("jpeg"); return "jpeg";
+    case FrameExportFormatE_VECTORCMD: len=strlen("vectorcmd"); return "vectorcmd";
+    case FrameExportFormatE_Disabled: len=strlen("disabled"); return "disabled";
     default:
         len=strlen("<unknown>"); return "<unknown>";
     }
 }
-const char *GetSaveFormatExtension(const SaveFormatE format) {
+const char *GetFrameExportFormatExtension(const FrameExportFormatE format) {
     size_t dummy;
-    return GetSaveFormatExtension(format, dummy);
+    return GetFrameExportFormatExtension(format, dummy);
 }
-const char *GetSaveFormatExtension(const SaveFormatE format, size_t &len) {
+const char *GetFrameExportFormatExtension(const FrameExportFormatE format, size_t &len) {
     switch (format) {
-    case SaveFormatE_None: len=strlen("<none>"); return "<none>";
-    case SaveFormatE_SKP: len=strlen(".skp"); return ".skp";
-    case SaveFormatE_SVG:  len=strlen(".svg"); return ".svg";
-    case SaveFormatE_SVG_TextAsPath:  len=strlen(".textAsPath.svg"); return ".textAsPath.svg";
-    case SaveFormatE_PNG:  len=strlen(".png"); return ".png";
-    case SaveFormatE_JPEG:  len=strlen(".jpeg"); return ".jpeg";
-    case SaveFormatE_VECTORCMD:  len=strlen(".vectorcmd.fb"); return ".vectorcmd.fb";
-    case SaveFormatE_Disabled:  len=strlen("<disabled>"); return "<disabled>";
+    case FrameExportFormatE_NoExport: len=strlen("<none>"); return "<none>";
+    case FrameExportFormatE_SKP: len=strlen(".skp"); return ".skp";
+    case FrameExportFormatE_SVG:  len=strlen(".svg"); return ".svg";
+    case FrameExportFormatE_SVG_TextAsPath:  len=strlen(".textAsPath.svg"); return ".textAsPath.svg";
+    case FrameExportFormatE_PNG:  len=strlen(".png"); return ".png";
+    case FrameExportFormatE_JPEG:  len=strlen(".jpeg"); return ".jpeg";
+    case FrameExportFormatE_VECTORCMD:  len=strlen(".vectorcmd.fb"); return ".vectorcmd.fb";
+    case FrameExportFormatE_Disabled:  len=strlen("<disabled>"); return "<disabled>";
     default:
         len=strlen("<unknown>"); return "<unknown>";
     }
 }
 SetupUI::SetupUI() {
-    fontMetricsText[0] = 'H';
-    fontMetricsText[1] = 'f';
-    fontMetricsText[2] = 'm';
-    fontMetricsText[3] = 'x';
-    fontMetricsText[4] = 'c';
-    fontMetricsText[5] = 'j';
-    fontMetricsText[6] = '\0';
-    fontMetricsSize = 200.0f;
-    colSize = ImVec4(1.0f,1.0f,1.0f,1.0f);
-    colAscent = ImVec4(1.0f,1.0f,1.0f,1.0f);
-    colDescent = ImVec4(1.0f,1.0f,1.0f,1.0f);
-    colLeading = ImVec4(1.0f,1.0f,1.0f,1.0f);
-    colXHeight = ImVec4(1.0f,1.0f,1.0f,1.0f);
-    colCapHeight = ImVec4(1.0f,1.0f,1.0f,1.0f);
+    fFontMetricsText[0] = 'H';
+    fFontMetricsText[1] = 'f';
+    fFontMetricsText[2] = 'm';
+    fFontMetricsText[3] = 'x';
+    fFontMetricsText[4] = 'c';
+    fFontMetricsText[5] = 'j';
+    fFontMetricsText[6] = '\0';
+    fFontMetricsSize = 200.0f;
+    fColSize = ImVec4(1.0f,1.0f,1.0f,1.0f);
+    fColAscent = ImVec4(1.0f,1.0f,1.0f,1.0f);
+    fColDescent = ImVec4(1.0f,1.0f,1.0f,1.0f);
+    fColLeading = ImVec4(1.0f,1.0f,1.0f,1.0f);
+    fColXHeight = ImVec4(1.0f,1.0f,1.0f,1.0f);
+    fColCapHeight = ImVec4(1.0f,1.0f,1.0f,1.0f);
 
     {
         // chromium --enable-gpu-benchmarking --no-sandbox
@@ -105,12 +105,11 @@ static void helpMarker(const char* desc)
         ImGui::EndTooltip();
     }
 }
-void SetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &vectorCmdSkiaRenderer, bool &useVectorCmd,
-                               size_t totalVectorCmdSerializedSz, size_t totalFffiSz,
-                               size_t skpBytes, size_t svgBytes, size_t pngBytes, size_t jpegBytes, int windowW, int windowH,
+void SetupUI::render(FrameExportFormatE &exportFormat, VectorCmdSkiaRenderer &vectorCmdSkiaRenderer, bool &useVectorCmd,
+                               size_t totalVectorCmdSerializedSize, size_t fTotalFffiSz,
+                               size_t skpBytes, size_t fbBytes, size_t svgBytes, size_t pngBytes, size_t jpegBytes, int windowW, int windowH,
                                SkFontMgr *fontMgr,
-                               const char *saveBasePath
-                               ) { ZoneScoped;
+                               const char *basePath) { ZoneScoped;
     {
         struct timeval tv;
         struct timezone tz;
@@ -159,46 +158,49 @@ void SetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &vectorCmdSk
         ImGui::TextUnformatted("RENDER_MODE_BACKDROP_FILTER_ENABLED compile time option is not set");
 #endif
     }
-    if(saveFormat != SaveFormatE_Disabled) {
-        saveFormat = SaveFormatE_None;
+    if(exportFormat != FrameExportFormatE_Disabled) {
+        exportFormat = FrameExportFormatE_NoExport;
         if(ImGui::CollapsingHeader("(Vector) Screenshots")) {
-            ImGui::Text("serialized flatbuffer vector cmd size: %d Bytes", static_cast<int>(totalVectorCmdSerializedSz));
-            ImGui::Text("fffi cmd size: %d Bytes",static_cast<int>(totalFffiSz));
-            ImGui::Text("base path: %s", saveBasePath);
+            ImGui::Text("serialized flatbuffer vector cmd size: %d Bytes", static_cast<int>(totalVectorCmdSerializedSize));
+            ImGui::Text("fffi cmd size: %d Bytes",static_cast<int>(fTotalFffiSz));
+            ImGui::Text("base path: %s", basePath);
             ImGui::Separator();
 
             if(ImGui::Button("Save SKP Snapshot")) {
-                saveFormat = SaveFormatE_SKP;
+                exportFormat = FrameExportFormatE_SKP;
             }
             if(ImGui::IsItemHovered()) {
                 ImGui::SetTooltip("%s","Open SKP files with `viewer --skps PATH_TO_SKP --slide SKP_FILE");
             }
             if(skpBytes > 0) {
-                ImGui::Text("skp file size: %d Bytes", static_cast<int>(skpBytes));
+                ImGui::Text("%s file size: %d Bytes", GetFrameExportFormatExtension(FrameExportFormatE_SKP), static_cast<int>(skpBytes));
             }
             if(ImGui::Button("Save SVG Snapshot")) {
-                saveFormat = SaveFormatE_SVG;
+                exportFormat = FrameExportFormatE_SVG;
             }
-            if(ImGui::Button("Save SVG Snapshot")) {
-                saveFormat = SaveFormatE_SVG_TextAsPath;
+            if(ImGui::Button("Save SVG (Text as Path) Snapshot")) {
+                exportFormat = FrameExportFormatE_SVG_TextAsPath;
             }
             if(svgBytes > 0) {
-                ImGui::Text("svg file size: %d Bytes", static_cast<int>(svgBytes));
+                ImGui::Text("%s/%s file size: %d Bytes", GetFrameExportFormatExtension(FrameExportFormatE_SVG), GetFrameExportFormatExtension(FrameExportFormatE_SVG_TextAsPath), static_cast<int>(svgBytes));
             }
             if(ImGui::Button("Save PNG Snapshot")) {
-                saveFormat = SaveFormatE_PNG;
+                exportFormat = FrameExportFormatE_PNG;
             }
             if(pngBytes > 0) {
-                ImGui::Text("png file size: %d Bytes", static_cast<int>(pngBytes));
+                ImGui::Text("%s file size: %d Bytes", GetFrameExportFormatExtension(FrameExportFormatE_PNG), static_cast<int>(pngBytes));
             }
             if(ImGui::Button("Save JPEG Snapshot")) {
-                saveFormat = SaveFormatE_JPEG;
+                exportFormat = FrameExportFormatE_JPEG;
             }
             if(jpegBytes > 0) {
-                ImGui::Text("jpeg file size: %d Bytes", static_cast<int>(jpegBytes));
+                ImGui::Text("%s file size: %d Bytes", GetFrameExportFormatExtension(FrameExportFormatE_JPEG), static_cast<int>(jpegBytes));
             }
             if(ImGui::Button("Save FB Snapshot")) {
-                saveFormat = SaveFormatE_VECTORCMD;
+                exportFormat = FrameExportFormatE_VECTORCMD;
+            }
+            if(fbBytes > 0) {
+                ImGui::Text("%s file size: %d Bytes", GetFrameExportFormatExtension(FrameExportFormatE_VECTORCMD), static_cast<int>(fbBytes));
             }
         }
     }
@@ -250,25 +252,25 @@ void SetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &vectorCmdSk
     }
 
     if(ImGui::CollapsingHeader("Font Metrics")) { ZoneScoped;
-        ImGui::InputText("Text",fontMetricsText,sizeof(fontMetricsText));
+        ImGui::InputText("Text",fFontMetricsText,sizeof(fFontMetricsText));
 
-        ImGui::DragFloat("Size",&fontMetricsSize,1.0f,3.0f,400.0f);
+        ImGui::DragFloat("Size",&fFontMetricsSize,1.0f,3.0f,400.0f);
         ImGui::DragFloat("Global Font Scale",&ImGui::GetIO().FontGlobalScale,0.01f,0.01f,10.0f);
 
-        auto len = strlen(fontMetricsText);
-        if(len > 0 && fontMetricsSize > 1.0f) {
+        auto len = strlen(fFontMetricsText);
+        if(len > 0 && fFontMetricsSize > 1.0f) {
             SkRect bounds;
-            auto f = ImGui::skiaFont.makeWithSize(SkScalarToFloat(fontMetricsSize));
-            SkScalar advanceWidth = f.measureText(fontMetricsText,len,SkTextEncoding::kUTF8, &bounds);
+            auto f = ImGui::skiaFont.makeWithSize(SkScalarToFloat(fFontMetricsSize));
+            SkScalar advanceWidth = f.measureText(fFontMetricsText,len,SkTextEncoding::kUTF8, &bounds);
             SkFontMetrics metrics{};
             f.getMetrics(&metrics);
             bounds.sort();
             auto actualSize = fabs(metrics.fAscent) + fabs(metrics.fDescent);
             //auto dy = fontMetricsSize-SkScalarToFloat(metrics.fDescent);
-            auto dy = fabs(SkScalarToFloat(metrics.fAscent)) + fontMetricsSize*ImGui::skiaFontDyFudge;
+            auto dy = fabs(SkScalarToFloat(metrics.fAscent)) + fFontMetricsSize*ImGui::skiaFontDyFudge;
 
             ImGui::DragFloat("dy fudge",&ImGui::skiaFontDyFudge,0.001f,-1.0f,1.0f);
-            dy += fontMetricsSize*ImGui::skiaFontDyFudge;
+            dy += fFontMetricsSize*ImGui::skiaFontDyFudge;
 
             {
                 auto a = fabs(metrics.fAscent)-fabs(metrics.fCapHeight);
@@ -278,10 +280,10 @@ void SetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &vectorCmdSk
                     ImGui::Text("%f = |ascent|-|capheight| != |descent| = %f   => vertical centering will be hard!", a, metrics.fDescent);
                 }
 
-                if(actualSize == fabs(fontMetricsSize)) {
+                if(actualSize == fabs(fFontMetricsSize)) {
                     ImGui::TextUnformatted("|ascent|+|descent| == |size|   => easy");
                 } else {
-                    ImGui::Text("%f = |ascent|+|descent| != |size| = %f   => hard", fabs(metrics.fAscent)+fabs(metrics.fDescent), fontMetricsSize);
+                    ImGui::Text("%f = |ascent|+|descent| != |size| = %f   => hard", fabs(metrics.fAscent)+fabs(metrics.fDescent), fFontMetricsSize);
                 }
             }
             if(f.isLinearMetrics()) {
@@ -303,13 +305,13 @@ void SetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &vectorCmdSk
                 ImGui::TableNextColumn();
                 ImGui::TextUnformatted("size");
                 ImGui::TableNextColumn();
-                ImGui::Text("%.3f",fontMetricsSize);
+                ImGui::Text("%.3f",fFontMetricsSize);
                 ImGui::TableNextColumn();
                 ImGui::TextUnformatted("font size");
                 ImGui::TableNextColumn();
                 ImGui::TextUnformatted("positive");
                 ImGui::TableNextColumn();
-                ImGui::ColorEdit4("size",&colSize.x);
+                ImGui::ColorEdit4("size",&fColSize.x);
 
                 ImGui::TableNextRow();
                 ImGui::TableNextColumn();
@@ -321,7 +323,7 @@ void SetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &vectorCmdSk
                 ImGui::TableNextColumn();
                 ImGui::TextUnformatted("typically negative");
                 ImGui::TableNextColumn();
-                ImGui::ColorEdit4("ascent",&colAscent.x);
+                ImGui::ColorEdit4("ascent",&fColAscent.x);
 
                 ImGui::TableNextRow();
                 ImGui::TableNextColumn();
@@ -333,7 +335,7 @@ void SetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &vectorCmdSk
                 ImGui::TableNextColumn();
                 ImGui::TextUnformatted("typically positive");
                 ImGui::TableNextColumn();
-                ImGui::ColorEdit4("descent",&colDescent.x);
+                ImGui::ColorEdit4("descent",&fColDescent.x);
 
                 ImGui::TableNextRow();
                 ImGui::TableNextColumn();
@@ -345,7 +347,7 @@ void SetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &vectorCmdSk
                 ImGui::TableNextColumn();
                 ImGui::TextUnformatted("typically positive or zero");
                 ImGui::TableNextColumn();
-                ImGui::ColorEdit4("leading",&colLeading.x);
+                ImGui::ColorEdit4("leading",&fColLeading.x);
 
                 ImGui::TableNextRow();
                 ImGui::TableNextColumn();
@@ -357,7 +359,7 @@ void SetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &vectorCmdSk
                 ImGui::TableNextColumn();
                 ImGui::TextUnformatted("zero if unknown, typically negative");
                 ImGui::TableNextColumn();
-                ImGui::ColorEdit4("x height",&colXHeight.x);
+                ImGui::ColorEdit4("x height",&fColXHeight.x);
 
                 ImGui::TableNextRow();
                 ImGui::TableNextColumn();
@@ -369,7 +371,7 @@ void SetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &vectorCmdSk
                 ImGui::TableNextColumn();
                 ImGui::TextUnformatted("zero if unknown, typically negative");
                 ImGui::TableNextColumn();
-                ImGui::ColorEdit4("cap height",&colCapHeight.x);
+                ImGui::ColorEdit4("cap height",&fColCapHeight.x);
 
                 ImGui::TableNextRow();
                 ImGui::TableNextColumn();
@@ -421,20 +423,20 @@ void SetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &vectorCmdSk
             dl->AddRect(tl+ImVec2(bounds.left(),bounds.top()),tl+ImVec2(bounds.right(),bounds.bottom()),colBlue,0.0f,0,1.0f);
             dl->AddRect(tl+ImVec2(bounds.left(),bounds.top()+dy),tl+ImVec2(bounds.right(),bounds.bottom()+dy),colBlue,0.0f,0,1.0f);
             dl->AddLine(bl,bl+ImVec2(advanceWidth,0.0f),colGreen,1.0f);
-            dl->AddText(nullptr,fontMetricsSize,tl,colBlue,fontMetricsText,fontMetricsText+len);
+            dl->AddText(nullptr,fFontMetricsSize,tl,colBlue,fFontMetricsText,fFontMetricsText+len);
 
             auto dx = 5.0f;
-            dl->AddLine(p0+ImVec2(dx,0.0f),p0+ImVec2(dx,fontMetricsSize),ImColor(colSize),2.0f);
+            dl->AddLine(p0+ImVec2(dx,0.0f),p0+ImVec2(dx,fFontMetricsSize),ImColor(fColSize),2.0f);
             dx += 5.0f;
-            dl->AddLine(bl0+ImVec2(dx,0.0f),bl0+ImVec2(dx,metrics.fAscent),ImColor(colAscent),2.0f);
+            dl->AddLine(bl0+ImVec2(dx,0.0f),bl0+ImVec2(dx,metrics.fAscent),ImColor(fColAscent),2.0f);
             dx += 5.0f;
-            dl->AddLine(bl0+ImVec2(dx,0.0f),bl0+ImVec2(dx,metrics.fDescent),ImColor(colDescent),2.0f);
+            dl->AddLine(bl0+ImVec2(dx,0.0f),bl0+ImVec2(dx,metrics.fDescent),ImColor(fColDescent),2.0f);
             dx += 5.0f;
-            dl->AddLine(bl0+ImVec2(dx,0.0f),bl0+ImVec2(dx,metrics.fLeading),ImColor(colLeading),2.0f);
+            dl->AddLine(bl0+ImVec2(dx,0.0f),bl0+ImVec2(dx,metrics.fLeading),ImColor(fColLeading),2.0f);
             dx += 5.0f;
-            dl->AddLine(bl0+ImVec2(dx,0.0f),bl0+ImVec2(dx,-fabs(metrics.fXHeight)),ImColor(colXHeight),2.0f);
+            dl->AddLine(bl0+ImVec2(dx,0.0f),bl0+ImVec2(dx,-fabs(metrics.fXHeight)),ImColor(fColXHeight),2.0f);
             dx += 5.0f;
-            dl->AddLine(bl0+ImVec2(dx,0.0f),bl0+ImVec2(dx,-fabs(metrics.fCapHeight)),ImColor(colCapHeight),2.0f);
+            dl->AddLine(bl0+ImVec2(dx,0.0f),bl0+ImVec2(dx,-fabs(metrics.fCapHeight)),ImColor(fColCapHeight),2.0f);
             dl->PopClipRect();
         }
     }

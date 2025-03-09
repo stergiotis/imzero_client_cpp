@@ -102,12 +102,35 @@ let imguiWithHooks1919Wip = \(apph : ImGuiAppHelper) -> let dir = "./imgui_w_hoo
 		, global = [] : List Text
 		}
 }
-let imguiSkiaImpl = let dir = "./imgui_skia_impl" in sourceTreePart::{
-	, name = "imguiSkiaImpl"
+let imguiSkiaDriverImpl = let dir = "./imgui_skia_driver_impl" in sourceTreePart::{
+	, name = "imguiSkiaDriverImpl"
 	, dir = dir
 	, sources = [
 		, "${dir}/imgui_skia_app_sdl3.cpp"
 		, "${dir}/imgui_skia_cli_options.cpp"
+	]
+	, includeDirs = {
+		, local = [] : List Text
+		, global = ["${dir}"] : List Text
+	}
+	, cxxflags = {
+		, global = [
+		] : List Text
+		, local = [] : List Text
+	}
+	, ldflags = {
+		, global = [
+		] : List Text
+	}
+	, defines = {
+		, local = [] : List Text
+		, global = [] : List Text
+		}
+}
+let imguiSkiaImpl = let dir = "./imgui_skia_impl" in sourceTreePart::{
+	, name = "imguiSkiaImpl"
+	, dir = dir
+	, sources = [
 		, "${dir}/imgui_skia_extensions.cpp"
 		, "${dir}/imgui_skia_hooks_impl.cpp"
 		, "${dir}/imgui_skia_imzero_cmd_render.cpp"
@@ -221,8 +244,9 @@ let skiaShared =
 	}
 	, nonSourceObjs = [] : List Text
 }
+
 let mainSkiaSdl3Minimal = 
-    let dir = "./main/sdl3"
+    let dir = "./example_sdl3"
     in sourceTreePart::{
 	, executable = True
 	, name = "mainSkiaSdl3Minimal"
@@ -266,8 +290,9 @@ in
 {
 	, flatbuffers
 	, imguiSkiaImpl
-        , imguiWithHooks1919Wip
-        , ImGuiAppHelper
+	, imguiSkiaDriverImpl
+    , imguiWithHooks1919Wip
+    , ImGuiAppHelper
 	, mainSkiaSdl3Minimal
 	, tracyEnabled
 	, tracyDisabled
