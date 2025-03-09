@@ -6,5 +6,7 @@ int main(int argc, char** argv) {
 
     App app{};
     app.setup(opts);
-    return app.mainLoop();
+    int r = app.mainLoop();
+    app.cleanup();
+    return r;
 }

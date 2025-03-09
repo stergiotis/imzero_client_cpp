@@ -69,7 +69,7 @@ void App::drawImGuiVectorCmdsFB(SkCanvas &canvas) { ZoneScoped;
         fVectorCmdSkiaRenderer.drawSerializedVectorCmdsFB(buf, canvas);
     }
 }
-void App::preRender(const SkSurface *surface, const int width, const int height) { ZoneScoped;
+void App::prePaint(const SkSurface *surface, const int width, const int height) { ZoneScoped;
     ImGui::useVectorCmd = fUseVectorCmd && surface != nullptr;
 }
 SaveFormatE App::render(SkSurface* surface, const int width, const int height) { ZoneScoped;
@@ -88,7 +88,7 @@ SaveFormatE App::render(SkSurface* surface, const int width, const int height) {
     return saveFormat;
 }
 
-void App::postRender(SkSurface *surface, SaveFormatE saveFormat, int width, int height) { ZoneScoped;
+void App::postPaint(SkSurface *surface, SaveFormatE saveFormat, int width, int height) { ZoneScoped;
     ImGui::End();
     ImGui::Render();
 
@@ -219,13 +219,13 @@ static void build_ImFontAtlas(ImFontAtlas& atlas, SkPaint& fontPaint) {
     unsigned char* pixels;
     atlas.GetTexDataAsAlpha8(&pixels, &w, &h);
     SkImageInfo info = SkImageInfo::MakeA8(w, h);
-    SkPixmap pmap(info, pixels, info.minRowBytes());
-    SkMatrix localMatrix = SkMatrix::Scale(1.0f / static_cast<float>(w), 1.0f / static_cast<float>(h));
-    auto fontImage = SkImages::RasterFromPixmap(pmap, nullptr, nullptr);
-    auto fontShader = fontImage->makeShader(SkSamplingOptions(SkFilterMode::kLinear), localMatrix);
+    const SkPixmap pmap(info, pixels, info.minRowBytes());
+    const SkMatrix localMatrix = SkMatrix::Scale(1.0f / static_cast<float>(w), 1.0f / static_cast<float>(h));
+    const auto fontImage = SkImages::RasterFromPixmap(pmap, nullptr, nullptr);
+    const auto fontShader = fontImage->makeShader(SkSamplingOptions(SkFilterMode::kLinear), localMatrix);
     fontPaint.setShader(fontShader);
     fontPaint.setColor(SK_ColorWHITE);
-    ImTextureID texId = reinterpret_cast<intptr_t>(&fontPaint);
+    const ImTextureID texId = reinterpret_cast<intptr_t>(&fontPaint);
     atlas.TexID = texId;
 }
 
@@ -361,7 +361,7 @@ void App::setup(CliOptions &opts) {
     //SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     int initialWindowWidth, initialWindowHeight;
     { // init window
-        constexpr Uint32 window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
+        constexpr Uint32 window_flags = SDL_WINDOW_OPENGL;
         initialWindowWidth = opts.fInitialMainWindowWidth;
         initialWindowHeight = opts.fInitialMainWindowHeight;
         if (initialWindowWidth < 0 || initialWindowHeight < 0) {
@@ -441,75 +441,86 @@ void App::setup(CliOptions &opts) {
     createContext(initialWindowWidth, initialWindowHeight);
     build_ImFontAtlas(*((ImGui::GetIO()).Fonts), fFontPaint);
 }
+SkSurface *App::preRender(bool &done, int &width, int &height) {
+    const ImGuiIO &io = ImGui::GetIO();
+    width = static_cast<int>(io.DisplaySize.x);
+    height = static_cast<int>(io.DisplaySize.y);
+    done = false;
+
+    // Poll and handle events (inputs, window resize, etc.)
+    // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
+    // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
+    // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
+    // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
+    SDL_Event event;
+    while (SDL_PollEvent(&event))
+    {
+        ImGui_ImplSDL3_ProcessEvent(&event);
+        switch(event.type) {
+            case SDL_EVENT_QUIT:
+                done = true;
+                break;
+            case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+                // FIXME only necessary for multi-window setting?
+                if(event.window.windowID == SDL_GetWindowID(fWindow)) {
+                    done = true;
+                }
+                break;
+            case SDL_EVENT_WINDOW_RESIZED:
+                destroyContext();
+                createContext(width,height);
+                break;
+        }
+    }
+    while (SDL_GetWindowFlags(fWindow) & SDL_WINDOW_MINIMIZED) {
+        SDL_Delay(10);
+    }
+
+    auto const surface = getSurfaceGL();
+
+    // Start the Dear ImGui frame
+    ImGui_ImplSDL3_NewFrame();
+    ImGui::NewFrame();
+
+    if(width <= 0 || height <= 0) {
+       ImGui::Render();
+        return nullptr;
+    }
+
+    const auto s = surface.get();
+    prePaint(s,width,height);
+    return surface.get();
+}
+void App::postRender(const SaveFormatE saveFormat, SkSurface *const surface, int const width, int const height) {
+    const ImGuiIO &io = ImGui::GetIO();
+    postPaint(surface,saveFormat,width,height); // will call ImGui::Render()
+
+    fContext->flush();
+
+    // Update and Render additional Platform Windows
+    // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
+    //  For this specific demo app we could also call SDL_GL_MakeCurrent(window, gl_context) directly)
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+        SDL_Window* backup_current_window = SDL_GL_GetCurrentWindow();
+        auto const backup_current_context = SDL_GL_GetCurrentContext();
+        ImGui::UpdatePlatformWindows();
+        ImGui::RenderPlatformWindowsDefault();
+        SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
+    }
+
+    SDL_GL_SwapWindow(fWindow);
+}
 
 App::~App() = default;
 int App::mainLoop() {
-    const ImGuiIO &io = ImGui::GetIO();
-
-    // Main loop
     bool done = false;
-    while (!done) {
-        auto const width = static_cast<int>(io.DisplaySize.x);
-        auto const height = static_cast<int>(io.DisplaySize.y);
-
-        // Poll and handle events (inputs, window resize, etc.)
-        // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-        // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
-        // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
-        // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
-        SDL_Event event;
-        while (SDL_PollEvent(&event))
-        {
-            ImGui_ImplSDL3_ProcessEvent(&event);
-            switch(event.type) {
-                case SDL_EVENT_QUIT:
-                    done = true;
-                    break;
-                case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
-                    // FIXME only necessary for multi-window setting?
-                    if(event.window.windowID == SDL_GetWindowID(fWindow)) {
-                        done = true;
-                    }
-                    break;
-                case SDL_EVENT_WINDOW_RESIZED:
-                    destroyContext();
-                    createContext(width,height);
-                    break;
-            }
-        }
-        if(SDL_GetWindowFlags(fWindow) & SDL_WINDOW_MINIMIZED) {
-            SDL_Delay(10);
-            continue;
-        }
-
-        auto const surface = getSurfaceGL();
-
-        // Start the Dear ImGui frame
-        ImGui_ImplSDL3_NewFrame();
-        ImGui::NewFrame();
-
-        if(width <= 0 || height <= 0) {
-           ImGui::Render();
-	    } else {
-	        const auto s = surface.get();
-	        preRender(s,width,height);
-            const auto saveFormat = render(s,width,height);
-	        postRender(s,saveFormat,width,height); // will call ImGui::Render()
-
-            fContext->flush();
-
-            // Update and Render additional Platform Windows
-            // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
-            //  For this specific demo app we could also call SDL_GL_MakeCurrent(window, gl_context) directly)
-            if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-                SDL_Window* backup_current_window = SDL_GL_GetCurrentWindow();
-                auto const backup_current_context = SDL_GL_GetCurrentContext();
-                ImGui::UpdatePlatformWindows();
-                ImGui::RenderPlatformWindowsDefault();
-                SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
-            }
-
-            SDL_GL_SwapWindow(fWindow);
+    int width;
+    int height;
+    while(!done) {
+        auto const surface = preRender(done,width,height);
+        if (surface != nullptr) {
+            const auto saveFormat = render(surface,width,height);
+            postRender(saveFormat, surface, width,height);
         }
     }
 

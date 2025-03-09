@@ -11,16 +11,16 @@
 class App {
 public:
     App();
+    void postRender(SaveFormatE saveFormat, SkSurface* surface, int width, int height);
     ~App();
-    void setup(CliOptions &opts);
-
-    void preRender(const SkSurface* surface, int width, int height);
+    void prePaint(const SkSurface* surface, int width, int height);
+    SkSurface* preRender(bool& done, int& width, int& height);
     SaveFormatE render(SkSurface* surface, int width, int height);
-    void postRender(SkSurface* surface, SaveFormatE saveFormat, int width, int height);
+    void postPaint(SkSurface* surface, SaveFormatE saveFormat, int width, int height);
 
-    void cleanup();
-
+    void setup(CliOptions &opts);
     int mainLoop();
+    void cleanup();
 
 protected:
     void drawImGuiVectorCmdsFB(SkCanvas &canvas);
