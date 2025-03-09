@@ -462,7 +462,7 @@ void VectorCmdSkiaRenderer::drawCmdLineFB(const ImZeroFB::CmdLine &cmd,SkCanvas 
     canvas.drawLine(SkPoint::Make(cmd.p1()->x(),cmd.p1()->y()),SkPoint::Make(cmd.p2()->x(),cmd.p2()->y()),paint);
 }
 
-void VectorCmdSkiaRenderer::drawRectRounded(const SkRect &rect, float r,SkCanvas &canvas,SkPaint &paint) { ZoneScoped;
+void VectorCmdSkiaRenderer::drawRectRounded(const SkRect &rect, float r,SkCanvas &canvas, const SkPaint &paint) { ZoneScoped;
 #if defined (RENDER_MODE_SKETCH_ENABLED) || defined (RENDER_MODE_SVG_ENABLED)
     if(fRenderMode & (RenderModeE_Sketch | RenderModeE_SVG)) {
         SkPath pa;
@@ -481,7 +481,7 @@ void VectorCmdSkiaRenderer::drawRectRounded(const SkRect &rect, float r,SkCanvas
         canvas.drawRect(rect,paint);
     }
 }
-void VectorCmdSkiaRenderer::drawRRect(const SkRRect &rect, SkCanvas &canvas,SkPaint &paint) { ZoneScoped;
+void VectorCmdSkiaRenderer::drawRRect(const SkRRect &rect, SkCanvas &canvas, const SkPaint &paint) { ZoneScoped;
 #if defined (RENDER_MODE_SKETCH_ENABLED) || defined (RENDER_MODE_SVG_ENABLED)
     if(fRenderMode & (RenderModeE_Sketch | RenderModeE_SVG)) {
         SkPath pa;

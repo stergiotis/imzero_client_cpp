@@ -67,7 +67,7 @@ void CliOptions::usage(const char *name, FILE *file) const {
     fprintf(file,"    -exportBasePath [path:%s]\n", fExportBasePath);
 
     fprintf(file,"graphics flags:\n");
-    fprintf(file,"    -skiaBackendType [type:%s]    choices: raster,gl,vulkan\n",fSkiaBackendType);
+    //fprintf(file,"    -skiaBackendType [type:%s]    choices: raster,gl,vulkan\n",fSkiaBackendType); // TODO not implemented
     fprintf(file,"    -vsync [bool:%s]\n",fVsync ? "on" : "off");
     fprintf(file,"    -backgroundColorRGBA [hexrgba:%s]   example: 1199ffaa\n",fBackgroundColorRGBA);
     fprintf(file,"    -backdropFilter [bool:%s]\n", fBackdropFilter ? "on" : "off");

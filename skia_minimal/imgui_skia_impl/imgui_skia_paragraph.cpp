@@ -102,7 +102,7 @@ int Paragraph::getPath(int lineNumber, SkPath &dest) {
     return fPara->getPath(lineNumber,&dest);
 }
 
-void Paragraph::setForegroundPaint(SkPaint &paint) {
+void Paragraph::setForegroundPaint(const SkPaint &paint) {
     fTlTextStyle.setForegroundPaint(paint);
 }
 void Paragraph::paint(SkCanvas &canvas, SkScalar x, SkScalar y) {

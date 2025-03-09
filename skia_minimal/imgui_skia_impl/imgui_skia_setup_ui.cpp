@@ -416,9 +416,9 @@ void SetupUI::render(FrameExportFormatE &exportFormat, VectorCmdSkiaRenderer &ve
             ImVec2 tl = p0+ImVec2(7.0f*5.0f,0.0f);
             auto bl0 = p0+ImVec2(0.0f,dy);
             auto bl = tl+ImVec2(0.0f,dy);
-            const auto colBlue = IM_COL32(0x11,0x99,0xff,0xff);
-            const auto colRed = IM_COL32(0x99,0x11,0x00,0xff);
-            const auto colGreen = IM_COL32(0x00,0x99,0x11,0xff);
+            constexpr auto colBlue = IM_COL32(0x11,0x99,0xff,0xff);
+            constexpr auto colRed = IM_COL32(0x99,0x11,0x00,0xff);
+            constexpr auto colGreen = IM_COL32(0x00,0x99,0x11,0xff);
             dl->AddRect(p0,p1,colRed,0.0f,0,1.0f);
             dl->AddRect(tl+ImVec2(bounds.left(),bounds.top()),tl+ImVec2(bounds.right(),bounds.bottom()),colBlue,0.0f,0,1.0f);
             dl->AddRect(tl+ImVec2(bounds.left(),bounds.top()+dy),tl+ImVec2(bounds.right(),bounds.bottom()+dy),colBlue,0.0f,0,1.0f);

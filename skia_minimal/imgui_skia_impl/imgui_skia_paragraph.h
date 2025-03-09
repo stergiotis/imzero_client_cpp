@@ -29,7 +29,7 @@ class Paragraph {
         SkRect boundingRect(int lineNumber, bool &found);
 
         void paint(SkCanvas &canvas, SkScalar x, SkScalar y);
-        void setForegroundPaint(SkPaint &paint);
+        void setForegroundPaint(const SkPaint &paint);
 
         void getCacheStatistics(int &count) const;
         void setCacheEnable(bool enable);

@@ -4,10 +4,10 @@
 #include <cstdio>
 #include <cstring>
 
-#include "../imgui_w_hooks_1.91.9_wip/imgui_impl_sdl3.h"
-#include "../imgui_w_hooks_1.91.9_wip/imgui_internal.h"
+#include "imgui_impl_sdl3.h"
+#include "imgui_internal.h"
 
-#include <../contrib/sdl/include/SDL3/SDL_main.h>
+#include <SDL3/SDL_main.h>
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <SDL3/SDL_opengles2.h>
 #else
@@ -16,20 +16,20 @@
 
 #endif
 
-#include "../contrib/skia/include/core/SkGraphics.h"
-#include "../contrib/skia/include/ports/SkFontMgr_data.h"
+#include "include/core/SkGraphics.h"
+#include "include/ports/SkFontMgr_data.h"
 #if defined(SK_FONTMGR_FONTCONFIG_AVAILABLE)
 #include "include/ports/SkFontMgr_fontconfig.h"
 #endif
 #if defined(SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE)
 #include "include/ports/SkFontMgr_directory.h"
 #endif
-#include "../contrib/skia/include/core/SkSpan.h"
-#include "../contrib/skia/include/svg/SkSVGCanvas.h"
-#include "../contrib/skia/include/core/SkColorSpace.h"
-#include "../contrib/skia/include/encode/SkPngEncoder.h"
-#include "../contrib/skia/include/encode/SkJpegEncoder.h"
-#include "../contrib/skia/include/encode/SkWebpEncoder.h"
+#include "include/core/SkSpan.h"
+#include "include/svg/SkSVGCanvas.h"
+#include "include/core/SkColorSpace.h"
+#include "include/encode/SkPngEncoder.h"
+#include "include/encode/SkJpegEncoder.h"
+#include "include/encode/SkWebpEncoder.h"
 #if defined(__linux__)
 #include "include/gpu/gl/glx/GrGLMakeGLXInterface.h"
 #endif
@@ -43,7 +43,6 @@
 #include "tracy/Tracy.hpp"
 
 #include "flatbuffers/util.h"
-#include "ImZeroFB.out.h"
 
 template <typename T>
 static void applyFlag(int &flag,T val,bool v) {

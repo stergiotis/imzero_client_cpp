@@ -112,7 +112,7 @@ class VectorCmdSkiaRenderer {
         sk_sp<SkImageFilter> backdropFilter;
         void setupWindowRectPaint(SkPaint &paint, ImZeroFB::DrawListFlags dlFlags, uint32_t col);
 #endif
-        void drawRectRounded(const SkRect &rect, float r,SkCanvas &canvas,SkPaint &paint);
-        void drawRRect(const SkRRect &rect, SkCanvas &canvas,SkPaint &paint);
+        void drawRectRounded(const SkRect &rect, float r,SkCanvas &canvas, const SkPaint &paint);
+        void drawRRect(const SkRRect &rect, SkCanvas &canvas, const SkPaint &paint);
 
 };

@@ -53,7 +53,7 @@ T copyFlag(V val, U flag1,T flag2) {
 }
 ImZeroFB::DrawListFlags getVectorCmdFBFlags(const ImDrawList &drawList);
 flatbuffers::Offset<ImZeroFB::DrawList> createVectorCmdFBDrawList(ImDrawList &drawList, bool inner,
-                                                                  std::vector<flatbuffers::Offset<ImZeroFB::SingleVectorCmdDto>> &fbCmds,
+                                                                  const std::vector<flatbuffers::Offset<ImZeroFB::SingleVectorCmdDto>> &fbCmds,
                                                                   flatbuffers::FlatBufferBuilder &fbBuilder);
 
 inline bool isPasswordFont(const ImFont &font) {
@@ -153,7 +153,7 @@ ImZeroFB::DrawListFlags getVectorCmdFBFlags(const ImDrawList &drawList) {
             copyFlag(flags, ImDrawListFlags_AntiAliasedFill, ImZeroFB::DrawListFlags_AntiAliasedFill));
 }
 flatbuffers::Offset<ImZeroFB::DrawList> createVectorCmdFBDrawList(ImDrawList &drawList, bool inner,
-                                                                  std::vector<flatbuffers::Offset<ImZeroFB::SingleVectorCmdDto>> &fbCmds,
+                                                                  const std::vector<flatbuffers::Offset<ImZeroFB::SingleVectorCmdDto>> &fbCmds,
                                                                   flatbuffers::FlatBufferBuilder &fbBuilder) { ZoneScoped;
     auto cmds = fbBuilder.CreateVector(fbCmds);
     flatbuffers::Offset<flatbuffers::String> name;
@@ -166,18 +166,25 @@ flatbuffers::Offset<ImZeroFB::DrawList> createVectorCmdFBDrawList(ImDrawList &dr
 
     flatbuffers::Offset<ImZeroFB::VertexData> vertices = 0;
     if(enableVectorCmdFBVertexDraw || !ImGui::useVectorCmd) { ZoneScopedN("de-interleaving vertices");
-        flatbuffers::Offset<flatbuffers::Vector<float>> posXYs,texUVs;
-        flatbuffers::Offset<flatbuffers::Vector<uint32_t>> cols;
-        flatbuffers::Offset<flatbuffers::Vector<uint16_t>> indices;
         auto &vtxBuffer = drawList.VtxBuffer;
-        auto n = vtxBuffer.size();
+        const auto n = vtxBuffer.size();
 
         // FIXME use fbBuilder.StartVector and EndVector to eliminate the lambda
-        posXYs = fbBuilder.CreateVector<float>(static_cast<size_t>(n)*2,[&vtxBuffer](size_t i) -> float { return i % 2 == 0 ? vtxBuffer[i/2].pos.x : vtxBuffer[i/2].pos.y; });
-        texUVs = fbBuilder.CreateVector<float>(static_cast<size_t>(n)*2,[&vtxBuffer](size_t i) -> float { return i % 2 == 0 ? vtxBuffer[i/2].uv.x : vtxBuffer[i/2].uv.y; });
-        cols = fbBuilder.CreateVector<uint32_t>(static_cast<size_t>(n),[&vtxBuffer](size_t i) -> uint32_t { return vtxBuffer[i].col; });
+        const auto posXYs = fbBuilder.CreateVector<float>(
+            static_cast<size_t>(n) * 2, [&vtxBuffer](const size_t i) -> float
+            {
+                return i % 2 == 0 ? vtxBuffer[i / 2].pos.x : vtxBuffer[i / 2].pos.y;
+            });
+        const auto texUVs = fbBuilder.CreateVector<float>(
+            static_cast<size_t>(n) * 2, [&vtxBuffer](const size_t i) -> float
+            {
+                return i % 2 == 0 ? vtxBuffer[i / 2].uv.x : vtxBuffer[i / 2].uv.y;
+            });
+        const auto cols = fbBuilder.CreateVector<uint32_t>(
+            static_cast<size_t>(n), [&vtxBuffer](const size_t i) -> uint32_t { return vtxBuffer[i].col; });
         auto &idxBuffer = drawList.IdxBuffer;
-        indices = fbBuilder.CreateVector<uint16_t>(static_cast<size_t>(idxBuffer.size()),[&idxBuffer](size_t i) -> float { return idxBuffer[i]; });
+        const auto indices = fbBuilder.CreateVector<uint16_t>(
+            static_cast<size_t>(idxBuffer.size()), [&idxBuffer](const size_t i) -> float { return idxBuffer[i]; });
         vertices = ImZeroFB::CreateVertexData(fbBuilder,posXYs,texUVs,cols,indices);
     }
     return ImZeroFB::CreateDrawList(fbBuilder,f,name,vertices,cmds);
@@ -202,7 +209,7 @@ namespace ImGui {
     bool Hooks::Global::Pre::RenderDimmedBackdgroundBehindWindow(::ImGuiWindow *window, ImU32 col) {
         return false;
     }
-    bool Hooks::Global::Pre::InputTextCalcTextSize(::ImVec2 &out, ::ImGuiContext* ctx, const char* text_begin, const char* text_end, const char** remaining, ImVec2* out_offset, bool stop_on_new_line) {
+    bool Hooks::Global::Pre::InputTextCalcTextSize(::ImVec2 &out, const ::ImGuiContext* ctx, const char* text_begin, const char* text_end, const char** remaining, ImVec2* out_offset, bool stop_on_new_line) {
         if (!ImGui::useVectorCmd) {
            return true;
         }
@@ -326,7 +333,7 @@ namespace ImGui {
     int Hooks::ImDrawListSplitter::MergeUpdate(::ImDrawListSplitter &splitter,int i,int prev) {
         return prev + static_cast<int>(splitter._ChannelsFbCmds[i]->size());
     }
-    void Hooks::ImDrawListSplitter::MergeReserve(::ImDrawList *drawList,int n) {
+    void Hooks::ImDrawListSplitter::MergeReserve(const ::ImDrawList *drawList, const int n) {
         drawList->_FbCmds->reserve(drawList->_FbCmds->size() + n);
     }
     void Hooks::ImDrawListSplitter::MergeOp(::ImDrawListSplitter &splitter,::ImDrawList *drawList,int i) { ZoneScopedN("serialize and add split draw list");
@@ -848,7 +855,7 @@ namespace ImGui {
             tmp = c;
         }
         auto const f = ImGui::skiaFont.makeWithSize(SkFloatToScalar(font->FontSize));
-        auto const glyph = f.unicharToGlyph(SkUnichar(tmp));
+        auto const glyph = f.unicharToGlyph(static_cast<SkUnichar>(tmp));
         SkScalar advanceX;
         f.getWidths(&glyph,1,&advanceX);
         retr = SkScalarToFloat(advanceX);
