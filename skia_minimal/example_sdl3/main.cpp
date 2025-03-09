@@ -3,6 +3,10 @@
 int main(int argc, const char** argv) {
     ImGuiSkia::Driver::CliOptions opts{};
     uint64_t usedFlags = 0;
+    if(opts.hasHelpFlag(argc, argv)) {
+        opts.usage(argv[0],stderr);
+        return 0;
+    }
     opts.parse(argc, argv, stderr, usedFlags);
     opts.checkConsistency(argc, argv, stderr, usedFlags);
 

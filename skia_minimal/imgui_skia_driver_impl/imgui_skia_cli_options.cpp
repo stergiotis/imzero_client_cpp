@@ -89,13 +89,6 @@ bool ImGuiSkia::Driver::CliOptions::hasHelpFlag(const int argc, const char **arg
     return argc > 1 && (strcmp(argv[1],"-help") == 0 || strcmp(argv[1],"--help") == 0);
 }
 void ImGuiSkia::Driver::CliOptions::parse(const int argc,const char **argv,FILE *logChannel, uint64_t &usedFlags) {
-    if(argc > 1) {
-        if(strcmp(argv[1],"-help") == 0 || strcmp(argv[1],"--help") == 0) {
-            usage(argv[0],stderr);
-            exit(0);
-        }
-    }
-
     /* general flags */
     fAppTitle = findFlagValueDefault(logChannel,usedFlags, argc, argv, "-appTitle", fAppTitle);
     fFullscreen = getBoolFlagValue(logChannel, usedFlags, argc, argv, "-fullscreen", fFullscreen);

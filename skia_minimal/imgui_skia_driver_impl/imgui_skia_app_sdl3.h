@@ -23,6 +23,9 @@ namespace ImGuiSkia::Driver {
         int mainLoop();
         void cleanup();
 
+        VectorCmdSkiaRenderer fVectorCmdSkiaRenderer;
+        bool fUseVectorCmd = false;
+
     protected:
         void drawImGuiVectorCmdsFB(SkCanvas &canvas);
         void createContext(int width, int height);
@@ -34,7 +37,6 @@ namespace ImGuiSkia::Driver {
 
         sk_sp<SkFontMgr> fFontMgr = nullptr;
         SkPaint fFontPaint;
-        VectorCmdSkiaRenderer fVectorCmdSkiaRenderer;
         size_t fTotalVectorCmdSerializedSize = 0;
         size_t fSkpBytesWritten = 0;
         size_t fFbBytesWritten = 0;
@@ -43,7 +45,6 @@ namespace ImGuiSkia::Driver {
         size_t fJpegBytesWritten = 0;
         SetupUI fImZeroSkiaSetupUi;
         SkColor fBackgroundColor;
-        bool fUseVectorCmd = false;
         ImVec4 fClearColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
         SDL_GLContext fGlContext = nullptr;
 
