@@ -7,6 +7,42 @@
 #include "imgui_internal.h"
 #include "tracy/Tracy.hpp"
 
+const char *GetSaveFormatName(const SaveFormatE format) {
+    size_t dummy;
+    return GetSaveFormatName(format, dummy);
+}
+const char *GetSaveFormatName(const SaveFormatE format, size_t &len) {
+    switch (format) {
+    case SaveFormatE_None: len=strlen("none"); return "none";
+    case SaveFormatE_SKP: len=strlen("skp"); return "skp";
+    case SaveFormatE_SVG: len=strlen("svg"); return "svg";
+    case SaveFormatE_SVG_TextAsPath: len=strlen("svg-text-as-path"); return "svg-text-as-path";
+    case SaveFormatE_PNG: len=strlen("png"); return "png";
+    case SaveFormatE_JPEG: len=strlen("jpeg"); return "jpeg";
+    case SaveFormatE_VECTORCMD: len=strlen("vectorcmd"); return "vectorcmd";
+    case SaveFormatE_Disabled: len=strlen("disabled"); return "disabled";
+    default:
+        len=strlen("<unknown>"); return "<unknown>";
+    }
+}
+const char *GetSaveFormatExtension(const SaveFormatE format) {
+    size_t dummy;
+    return GetSaveFormatExtension(format, dummy);
+}
+const char *GetSaveFormatExtension(const SaveFormatE format, size_t &len) {
+    switch (format) {
+    case SaveFormatE_None: len=strlen("<none>"); return "<none>";
+    case SaveFormatE_SKP: len=strlen(".skp"); return ".skp";
+    case SaveFormatE_SVG:  len=strlen(".svg"); return ".svg";
+    case SaveFormatE_SVG_TextAsPath:  len=strlen(".textAsPath.svg"); return ".textAsPath.svg";
+    case SaveFormatE_PNG:  len=strlen(".png"); return ".png";
+    case SaveFormatE_JPEG:  len=strlen(".jpeg"); return ".jpeg";
+    case SaveFormatE_VECTORCMD:  len=strlen(".vectorcmd.fb"); return ".vectorcmd.fb";
+    case SaveFormatE_Disabled:  len=strlen("<disabled>"); return "<disabled>";
+    default:
+        len=strlen("<unknown>"); return "<unknown>";
+    }
+}
 SetupUI::SetupUI() {
     fontMetricsText[0] = 'H';
     fontMetricsText[1] = 'f';
@@ -71,8 +107,9 @@ static void helpMarker(const char* desc)
 }
 void SetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &vectorCmdSkiaRenderer, bool &useVectorCmd,
                                size_t totalVectorCmdSerializedSz, size_t totalFffiSz,
-                               size_t skpBytes, size_t svgBytes, size_t pngBytes, int windowW, int windowH,
-                               SkFontMgr *fontMgr
+                               size_t skpBytes, size_t svgBytes, size_t pngBytes, size_t jpegBytes, int windowW, int windowH,
+                               SkFontMgr *fontMgr,
+                               const char *saveBasePath
                                ) { ZoneScoped;
     {
         struct timeval tv;
@@ -127,9 +164,10 @@ void SetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &vectorCmdSk
         if(ImGui::CollapsingHeader("(Vector) Screenshots")) {
             ImGui::Text("serialized flatbuffer vector cmd size: %d Bytes", static_cast<int>(totalVectorCmdSerializedSz));
             ImGui::Text("fffi cmd size: %d Bytes",static_cast<int>(totalFffiSz));
+            ImGui::Text("base path: %s", saveBasePath);
             ImGui::Separator();
 
-            if(ImGui::Button("Save Snapshot to /tmp/skiaBackend.skp")) {
+            if(ImGui::Button("Save SKP Snapshot")) {
                 saveFormat = SaveFormatE_SKP;
             }
             if(ImGui::IsItemHovered()) {
@@ -138,22 +176,28 @@ void SetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &vectorCmdSk
             if(skpBytes > 0) {
                 ImGui::Text("skp file size: %d Bytes", static_cast<int>(skpBytes));
             }
-            if(ImGui::Button("Save Snapshot to /tmp/skiaBackend.svg")) {
+            if(ImGui::Button("Save SVG Snapshot")) {
                 saveFormat = SaveFormatE_SVG;
             }
-            if(ImGui::Button("Save Snapshot to /tmp/skiaBackend.nofont.svg")) {
+            if(ImGui::Button("Save SVG Snapshot")) {
                 saveFormat = SaveFormatE_SVG_TextAsPath;
             }
             if(svgBytes > 0) {
                 ImGui::Text("svg file size: %d Bytes", static_cast<int>(svgBytes));
             }
-            if(ImGui::Button("Save Snapshot to /tmp/skiaBackend.png")) {
+            if(ImGui::Button("Save PNG Snapshot")) {
                 saveFormat = SaveFormatE_PNG;
             }
             if(pngBytes > 0) {
                 ImGui::Text("png file size: %d Bytes", static_cast<int>(pngBytes));
             }
-            if(ImGui::Button("Save Snapshot to /tmp/skiaBackend.flatbuffers")) {
+            if(ImGui::Button("Save JPEG Snapshot")) {
+                saveFormat = SaveFormatE_JPEG;
+            }
+            if(jpegBytes > 0) {
+                ImGui::Text("jpeg file size: %d Bytes", static_cast<int>(jpegBytes));
+            }
+            if(ImGui::Button("Save FB Snapshot")) {
                 saveFormat = SaveFormatE_VECTORCMD;
             }
         }
@@ -214,7 +258,7 @@ void SetupUI::render(SaveFormatE &saveFormat, VectorCmdSkiaRenderer &vectorCmdSk
         auto len = strlen(fontMetricsText);
         if(len > 0 && fontMetricsSize > 1.0f) {
             SkRect bounds;
-            auto f = ImGui::skiaFont.makeWithSize(SkScalar(fontMetricsSize));
+            auto f = ImGui::skiaFont.makeWithSize(SkScalarToFloat(fontMetricsSize));
             SkScalar advanceWidth = f.measureText(fontMetricsText,len,SkTextEncoding::kUTF8, &bounds);
             SkFontMetrics metrics{};
             f.getMetrics(&metrics);

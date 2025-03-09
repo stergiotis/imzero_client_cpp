@@ -7,6 +7,9 @@ struct CliOptions {
     float fFontDyFudge = 0.0f;
     const char *fAppTitle = "ImGui with Skia Backend";
     bool fFullscreen = false;
+    int fInitialMainWindowWidth = -1;
+    int fInitialMainWindowHeight = -1;
+    bool fAllowMainWindowResize = true;
     bool fBackdropFilter = false;
     bool fSketchFilter = false;
     bool fVsync = true;
@@ -18,6 +21,7 @@ struct CliOptions {
     const char *fFontManagerArg = nullptr;
     const char *fSkiaBackendType = "gl";
     const char *fBackgroundColorRGBA = "000000ff";
+    const char *fOutputBasePath = "/tmp/out";
 
     CliOptions() = default;
     ~CliOptions() = default;

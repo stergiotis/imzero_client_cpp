@@ -12,16 +12,24 @@ class App {
 public:
     App();
     ~App();
-    int Run(CliOptions &opts);
+    void setup(CliOptions &opts);
+
+    void preRender(const SkSurface* surface, int width, int height);
+    SaveFormatE render(SkSurface* surface, int width, int height);
+    void postRender(SkSurface* surface, SaveFormatE saveFormat, int width, int height);
+
+    void cleanup();
+
+    int mainLoop();
 
 protected:
-	virtual void render();
-    void paint(SkSurface* surface, int width, int height);
     void drawImGuiVectorCmdsFB(SkCanvas &canvas);
-    void createContext(ImVec4 const &clearColor, int width, int height);
+    void createContext(int width, int height);
     void destroyContext();
     sk_sp<SkSurface> getSurfaceGL();
     sk_sp<SkSurface> getSurfaceRaster(int w, int h);
+
+    SkString fSavePath{};
 
     sk_sp<SkFontMgr> fFontMgr = nullptr;
     SkPaint fFontPaint;
@@ -30,11 +38,13 @@ protected:
     size_t fSkpBytesWritten = 0;
     size_t fSvgBytesWritten = 0;
     size_t fPngBytesWritten = 0;
+    size_t fJpegBytesWritten = 0;
     SetupUI fImZeroSkiaSetupUi;
     SkColor fBackgroundColor;
     bool fUseVectorCmd = false;
+    ImVec4 fClearColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    SDL_GLContext fGlContext = nullptr;
 
-    int mainLoop(CliOptions &opts,SDL_GLContext glContext, ImVec4 const &clearColor);
     sk_sp<const GrGLInterface> fNativeInterface = nullptr;
     sk_sp<GrDirectContext> fContext = nullptr;
     sk_sp<SkSurface> fSurface = nullptr;

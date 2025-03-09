@@ -5,5 +5,6 @@ int main(int argc, char** argv) {
     opts.parse(argc, argv, stderr, false);
 
     App app{};
-    return app.Run(opts);
+    app.setup(opts);
+    return app.mainLoop();
 }

@@ -69,126 +69,147 @@ void App::drawImGuiVectorCmdsFB(SkCanvas &canvas) { ZoneScoped;
         fVectorCmdSkiaRenderer.drawSerializedVectorCmdsFB(buf, canvas);
     }
 }
-
-void App::paint(SkSurface* surface, int width, int height) { ZoneScoped;
+void App::preRender(const SkSurface *surface, const int width, const int height) { ZoneScoped;
     ImGui::useVectorCmd = fUseVectorCmd && surface != nullptr;
-    auto renderMode = fVectorCmdSkiaRenderer.getRenderMode();
+}
+SaveFormatE App::render(SkSurface* surface, const int width, const int height) { ZoneScoped;
+    ImGui::ShowMetricsWindow();
     ImGui::ShowDemoWindow();
 
     SaveFormatE saveFormat = SaveFormatE_None;
     if(ImGui::Begin("ImZeroSkia Settings")) { ZoneScoped;
         fImZeroSkiaSetupUi.render(saveFormat, fVectorCmdSkiaRenderer, fUseVectorCmd,
                                   fTotalVectorCmdSerializedSize, 0,
-                                  fSkpBytesWritten, fSvgBytesWritten, fPngBytesWritten,
-                                  width, height, fFontMgr.get()
+                                  fSkpBytesWritten, fSvgBytesWritten, fPngBytesWritten, fJpegBytesWritten,
+                                  width, height, fFontMgr.get(),
+                                  fSavePath.data()
         );
     }
-    ImGui::End();
+    return saveFormat;
+}
 
+void App::postRender(SkSurface *surface, SaveFormatE saveFormat, int width, int height) { ZoneScoped;
+    ImGui::End();
     ImGui::Render();
 
     if(surface == nullptr) {
         return;
     }
 
-    if(saveFormat != SaveFormatE_None) {
-        switch(saveFormat) {
-            case SaveFormatE_SKP: { ZoneScoped;
-                constexpr auto path = "/tmp/skiaBackend.skp";
-
-                SkPictureRecorder skiaRecorder;
-                auto skiaCanvas = skiaRecorder.beginRecording(SkIntToScalar(width),
-                                                              SkIntToScalar(height));
-
-                skiaCanvas->clear(fBackgroundColor);
-                skiaCanvas->save();
-                drawImGuiVectorCmdsFB(*skiaCanvas);
-                skiaCanvas->restore();
-
-                sk_sp<SkPicture> picture = skiaRecorder.finishRecordingAsPicture();
-                SkFILEWStream skpStream(path);
-                picture->serialize(&skpStream);
-                fSkpBytesWritten = skpStream.bytesWritten();
-                break;
-            }
-            case SaveFormatE_SVG: // fallthrough
-            case SaveFormatE_SVG_TextAsPath: { ZoneScoped;
-                SkRect bounds = SkRect::MakeIWH(width, height);
-                fVectorCmdSkiaRenderer.changeRenderMode(renderMode | RenderModeE_SVG);
-
-                switch(saveFormat) {
-                    case SaveFormatE_SVG:
-                    {
-                        constexpr auto path1 = "/tmp/skiaBackend.svg";
-                        constexpr int flags1 = SkSVGCanvas::kNoPrettyXML_Flag;
-                        SkFILEWStream svgStream(path1);
-                        { // svg canvas may buffer commands, extra scope to ensure flush by RAII
-                            auto skiaCanvas = SkSVGCanvas::Make(bounds, &svgStream, flags1);
-                            drawImGuiVectorCmdsFB(*skiaCanvas);
-                        }
-                        fSvgBytesWritten = svgStream.bytesWritten();
-                    }
-                        break;
-                    case SaveFormatE_SVG_TextAsPath:
-                    {
-                        constexpr auto path = "/tmp/skiaBackend.nofont.svg";
-                        constexpr int flags = SkSVGCanvas::kConvertTextToPaths_Flag | SkSVGCanvas::kNoPrettyXML_Flag;
-                        SkFILEWStream svgStream(path);
-                        { // svg canvas may buffer commands, extra scope to ensure flush by RAII
-                            auto skiaCanvas = SkSVGCanvas::Make(bounds, &svgStream, flags);
-                            drawImGuiVectorCmdsFB(*skiaCanvas);
-                        }
-                        fSvgBytesWritten = svgStream.bytesWritten();
-                    }
-                        break;
-                    default:
-                        ;
-                }
-
-                fVectorCmdSkiaRenderer.changeRenderMode(renderMode);
-                break;
-            }
-            case SaveFormatE_PNG: { ZoneScoped;
-                constexpr auto path = "/tmp/skiaBackend.png";
-                const auto s = SkISize::Make(width, height);
-                const auto c = SkColorInfo(kRGBA_8888_SkColorType, kPremul_SkAlphaType, SkColorSpace::MakeSRGB());
-                sk_sp<SkSurface> rasterSurface = SkSurfaces::Raster(SkImageInfo::Make(s, c));
-                SkCanvas *rasterCanvas = rasterSurface->getCanvas();
-                drawImGuiVectorCmdsFB(*rasterCanvas);
-                sk_sp<SkImage> img(rasterSurface->makeImageSnapshot());
-                SkFILEWStream pngStream(path);
-                SkPixmap pixmap;
-                fPngBytesWritten = 0;
-                if(img->peekPixels(&pixmap)) {
-                    if (SkPngEncoder::Encode(static_cast<SkWStream *>(&pngStream), pixmap, SkPngEncoder::Options{})) {
-                        fPngBytesWritten = pngStream.bytesWritten();
-                    }
-                }
-                break;
-            }
-            case SaveFormatE_VECTORCMD: { ZoneScoped;
-                constexpr auto path = "/tmp/skiaBackend.flatbuffers";
-                SkFILEWStream stream(path);
-
-                const ImDrawData* drawData = ImGui::GetDrawData();
-                fTotalVectorCmdSerializedSize = 0;
-                for (int i = 0; i < drawData->CmdListsCount; ++i) {
-                    ImDrawList* drawList = drawData->CmdLists[i];
-                    const uint8_t *buf;
-                    size_t sz;
-                    drawList->serializeFB(buf,sz);
-                    stream.write(buf,sz);
-                }
-                break;
-            }
-        }
-    } else { ZoneScoped;
+    if(saveFormat == SaveFormatE_None) { ZoneScoped;
+        // displaying on screen
         auto skiaCanvas = surface->getCanvas();
         skiaCanvas->clear(fBackgroundColor);
 
         skiaCanvas->save();
         drawImGuiVectorCmdsFB(*skiaCanvas);
         skiaCanvas->restore();
+    } else {
+        auto p = fSavePath.size();
+        size_t extLen;
+        auto ext = GetSaveFormatExtension(saveFormat, extLen);
+        fSavePath.append(ext, extLen);
+        {
+            SkFILEWStream outStream(fSavePath.data());
+            auto const renderMode = fVectorCmdSkiaRenderer.getRenderMode();
+            switch(saveFormat) {
+                case SaveFormatE_SKP: { ZoneScoped;
+                    SkPictureRecorder skiaRecorder;
+                    auto skiaCanvas = skiaRecorder.beginRecording(SkIntToScalar(width),
+                                                                  SkIntToScalar(height));
+
+                    skiaCanvas->clear(fBackgroundColor);
+                    skiaCanvas->save();
+                    drawImGuiVectorCmdsFB(*skiaCanvas);
+                    skiaCanvas->restore();
+
+                    sk_sp<SkPicture> picture = skiaRecorder.finishRecordingAsPicture();
+                    picture->serialize(&outStream);
+                    fSkpBytesWritten = outStream.bytesWritten();
+                    break;
+                }
+                case SaveFormatE_SVG: // fallthrough
+                case SaveFormatE_SVG_TextAsPath: { ZoneScoped;
+                    SkRect bounds = SkRect::MakeIWH(width, height);
+                    fVectorCmdSkiaRenderer.changeRenderMode(renderMode | RenderModeE_SVG);
+
+                    switch(saveFormat) {
+                        case SaveFormatE_SVG:
+                        {
+                            { // svg canvas may buffer commands, extra scope to ensure flush by RAII
+                                constexpr int flags = SkSVGCanvas::kNoPrettyXML_Flag;
+                                auto skiaCanvas = SkSVGCanvas::Make(bounds, &outStream, flags);
+                                drawImGuiVectorCmdsFB(*skiaCanvas);
+                            }
+                            fSvgBytesWritten = outStream.bytesWritten();
+                        }
+                            break;
+                        case SaveFormatE_SVG_TextAsPath:
+                        {
+                            { // svg canvas may buffer commands, extra scope to ensure flush by RAII
+                                constexpr int flags = SkSVGCanvas::kConvertTextToPaths_Flag | SkSVGCanvas::kNoPrettyXML_Flag;
+                                auto skiaCanvas = SkSVGCanvas::Make(bounds, &outStream, flags);
+                                drawImGuiVectorCmdsFB(*skiaCanvas);
+                            }
+                            fSvgBytesWritten = outStream.bytesWritten();
+                        }
+                            break;
+                        default:
+                            ;
+                    }
+
+                    fVectorCmdSkiaRenderer.changeRenderMode(renderMode);
+                    break;
+                }
+                case SaveFormatE_PNG: { ZoneScoped;
+                    const auto s = SkISize::Make(width, height);
+                    const auto c = SkColorInfo(kRGBA_8888_SkColorType, kPremul_SkAlphaType, SkColorSpace::MakeSRGB());
+                    sk_sp<SkSurface> rasterSurface = SkSurfaces::Raster(SkImageInfo::Make(s, c));
+                    SkCanvas *rasterCanvas = rasterSurface->getCanvas();
+                    drawImGuiVectorCmdsFB(*rasterCanvas);
+                    sk_sp<SkImage> img(rasterSurface->makeImageSnapshot());
+                    SkPixmap pixmap;
+                    fPngBytesWritten = 0;
+                    if(img->peekPixels(&pixmap)) {
+                        if (SkPngEncoder::Encode(&outStream, pixmap, SkPngEncoder::Options{})) {
+                            fPngBytesWritten = outStream.bytesWritten();
+                        }
+                    }
+                    break;
+                }
+                case SaveFormatE_JPEG: { ZoneScoped;
+                    const auto s = SkISize::Make(width, height);
+                    const auto c = SkColorInfo(kRGBA_8888_SkColorType, kPremul_SkAlphaType, SkColorSpace::MakeSRGB());
+                    sk_sp<SkSurface> rasterSurface = SkSurfaces::Raster(SkImageInfo::Make(s, c));
+                    SkCanvas *rasterCanvas = rasterSurface->getCanvas();
+                    drawImGuiVectorCmdsFB(*rasterCanvas);
+                    sk_sp<SkImage> img(rasterSurface->makeImageSnapshot());
+                    SkPixmap pixmap;
+                    fJpegBytesWritten = 0;
+                    if(img->peekPixels(&pixmap)) {
+                        if (SkJpegEncoder::Encode(&outStream, pixmap, SkJpegEncoder::Options{})) {
+                            fJpegBytesWritten = outStream.bytesWritten();
+                        }
+                    }
+                    break;
+                }
+                case SaveFormatE_VECTORCMD: { ZoneScoped;
+                    const ImDrawData* drawData = ImGui::GetDrawData();
+                    fTotalVectorCmdSerializedSize = 0;
+                    for (int i = 0; i < drawData->CmdListsCount; ++i) {
+                        ImDrawList* drawList = drawData->CmdLists[i];
+                        const uint8_t *buf;
+                        size_t sz;
+                        drawList->serializeFB(buf,sz);
+                        outStream.write(buf,sz);
+                    }
+                    outStream.flush();
+                    fSkpBytesWritten = outStream.bytesWritten();
+                    break;
+                }
+            }
+        }
+        fSavePath.remove(p,extLen);
     }
 
     FrameMark;
@@ -204,12 +225,11 @@ static void build_ImFontAtlas(ImFontAtlas& atlas, SkPaint& fontPaint) {
     auto fontShader = fontImage->makeShader(SkSamplingOptions(SkFilterMode::kLinear), localMatrix);
     fontPaint.setShader(fontShader);
     fontPaint.setColor(SK_ColorWHITE);
-    ImTextureID texId;
-    texId = reinterpret_cast<intptr_t>(&fontPaint);
+    ImTextureID texId = reinterpret_cast<intptr_t>(&fontPaint);
     atlas.TexID = texId;
 }
 
-int App::Run(CliOptions &opts) {
+void App::setup(CliOptions &opts) {
     // prevent SIGPIPE when writing frames or reading user interaction events
     //signal(SIGPIPE, SIG_IGN);
 
@@ -217,13 +237,21 @@ int App::Run(CliOptions &opts) {
     sk_sp<SkData> ttfData = nullptr;
     { // setup skia/imgui shared objects
 
-        if (opts.fBackgroundColorRGBA != nullptr && strlen(opts.fBackgroundColorRGBA) == 8) {
+        if (opts.fBackgroundColorRGBA != nullptr) {
+            if(strlen(opts.fBackgroundColorRGBA) != 8) {
+                fprintf(stderr, "background color has invalid format: expecting 8 hex digits rrggbbaa, got %s", opts.fBackgroundColorRGBA);
+                exit(1);
+            }
             auto const n = static_cast<uint32_t>(strtoul(opts.fBackgroundColorRGBA, nullptr, 16));
-            uint8_t a = n & 0xff;
-            uint8_t b = (n >> 8) & 0xff;
-            uint8_t g = (n >> 16) & 0xff;
-            uint8_t r = (n >> 24) & 0xff;
+            const uint8_t a = n & 0xff;
+            const uint8_t b = (n >> 8) & 0xff;
+            const uint8_t g = (n >> 16) & 0xff;
+            const uint8_t r = (n >> 24) & 0xff;
             fBackgroundColor = SkColorSetARGB(a, r, g, b);
+            fClearColor.x = r / 255.0f;
+            fClearColor.y = g / 255.0f;
+            fClearColor.z = b / 255.0f;
+            fClearColor.z = a / 255.0f;
         }
 
         fUseVectorCmd = opts.fVectorCmd;
@@ -263,7 +291,7 @@ int App::Run(CliOptions &opts) {
         ////auto const typeface = fontMgr->matchFamilyStyle(nullptr,SkFontStyle());
         if (typeface == nullptr || fFontMgr->countFamilies() <= 0) {
             fprintf(stderr, "unable to initialize font manager with supplied ttf font file %s\n", opts.fTtfFilePath);
-            return (1);
+            exit(1);
         }
 
         ImGui::skiaFontDyFudge = opts.fFontDyFudge;
@@ -282,13 +310,11 @@ int App::Run(CliOptions &opts) {
         }
         fVectorCmdSkiaRenderer.changeRenderMode(mode);
     }
-    SDL_GLContext glContext = nullptr;
-    const SDL_DisplayMode *dm = nullptr;
 
     // Setup SDL
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS)) {
         fprintf(stderr, "Error: SDL_Init(): %s\n", SDL_GetError());
-        return -1;
+        exit(1);
     }
 
     // Decide GL+GLSL versions
@@ -322,7 +348,7 @@ int App::Run(CliOptions &opts) {
 
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 
-    if (msaaSampleCount > 0) {
+    if constexpr (msaaSampleCount > 0) {
         SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
         SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, msaaSampleCount);
     }
@@ -333,75 +359,92 @@ int App::Run(CliOptions &opts) {
     // Create window with graphics context
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     //SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-    Uint32 window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
-    dm = SDL_GetDesktopDisplayMode(SDL_GetPrimaryDisplay());
-    fWindow = SDL_CreateWindow(opts.fAppTitle, dm->w, dm->h, window_flags);
-    if (fWindow == nullptr) {
-        fprintf(stderr, "Error: SDL_CreateWindow(): %s\n", SDL_GetError());
+    int initialWindowWidth, initialWindowHeight;
+    { // init window
+        constexpr Uint32 window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
+        initialWindowWidth = opts.fInitialMainWindowWidth;
+        initialWindowHeight = opts.fInitialMainWindowHeight;
+        if (initialWindowWidth < 0 || initialWindowHeight < 0) {
+            auto const dm = SDL_GetDesktopDisplayMode(SDL_GetPrimaryDisplay());
+            if (dm != nullptr) {
+                if (initialWindowWidth < 0) {
+                    initialWindowWidth = dm->w;
+                }
+                if (initialWindowHeight < 0) {
+                    initialWindowHeight = dm->h;
+                }
+            } else {
+                fprintf(stderr, "Error: SDL_GetDesktopDisplayMode(): %s\n", SDL_GetError());
+                exit(1);
+            }
+        }
+        fWindow = SDL_CreateWindow(opts.fAppTitle, initialWindowWidth, initialWindowHeight, window_flags);
+        if (fWindow == nullptr) {
+            fprintf(stderr, "Error: SDL_CreateWindow(): %s\n", SDL_GetError());
+            exit(1);
+        }
+        SDL_SetWindowPosition(fWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+        SDL_SetWindowResizable(fWindow, opts.fAllowMainWindowResize);
+        if (opts.fFullscreen) {
+            SDL_SetWindowFullscreen(fWindow, SDL_WINDOW_FULLSCREEN);
+        }
+    }
+
+    fGlContext = SDL_GL_CreateContext(fWindow);
+    if (fGlContext == nullptr) {
+        fprintf(stderr, "Error: SDL_GL_CreateContext(): %s\n", SDL_GetError());
         exit(1);
     }
-    SDL_SetWindowPosition(fWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-    glContext = SDL_GL_CreateContext(fWindow);
-    SDL_GL_MakeCurrent(fWindow, glContext);
+    SDL_GL_MakeCurrent(fWindow, fGlContext);
     SDL_GL_SetSwapInterval(opts.fVsync ? 1 : 0); // Enable vsync //SDL_SetWindowSurfaceVSync()
-    if (opts.fFullscreen) {
-        SDL_SetWindowFullscreen(fWindow, SDL_WINDOW_FULLSCREEN);
-    }
     SDL_ShowWindow(fWindow);
 
-    // Setup Dear ImGui context
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImVec4 clearColor;
-    ImGuiIO &io = ImGui::GetIO();
+    // setup Dear ImGui context
     {
-        applyFlag(io.ConfigFlags, ImGuiConfigFlags_NavEnableKeyboard, opts.fImguiNavKeyboard);
-        applyFlag(io.ConfigFlags, ImGuiConfigFlags_NavEnableGamepad, opts.fImguiNavGamepad);
-        applyFlag(io.ConfigFlags, ImGuiConfigFlags_DockingEnable, opts.fImguiDocking);
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO &io = ImGui::GetIO();
+        {
+            applyFlag(io.ConfigFlags, ImGuiConfigFlags_NavEnableKeyboard, opts.fImguiNavKeyboard);
+            applyFlag(io.ConfigFlags, ImGuiConfigFlags_NavEnableGamepad, opts.fImguiNavGamepad);
+            applyFlag(io.ConfigFlags, ImGuiConfigFlags_DockingEnable, opts.fImguiDocking);
 
-        io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset; // FIXME remove ?
-        if (true) {
-            io.ConfigFlags &= ~ImGuiConfigFlags_ViewportsEnable;
-        } else {
-            io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
-            io.ConfigViewportsNoAutoMerge = true;
-            io.ConfigViewportsNoTaskBarIcon = true;
+            io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset; // FIXME remove ?
+            if constexpr (true) {
+                io.ConfigFlags &= ~ImGuiConfigFlags_ViewportsEnable;
+            } else {
+                io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
+                io.ConfigViewportsNoAutoMerge = true;
+                io.ConfigViewportsNoTaskBarIcon = true;
+            }
+
+            ImGui::StyleColorsDark();
+            //ImGui::StyleColorsLight();
+
+            // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
+            ImGuiStyle &style = ImGui::GetStyle();
+            if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+                style.WindowRounding = 0.0f;
+                style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+            }
+
+            // Setup Platform/Renderer backends
+            ImGui_ImplSDL3_InitForOpenGL(fWindow, fGlContext);
+
+
+            io.ConfigInputTrickleEventQueue = true;
+            io.ConfigWindowsMoveFromTitleBarOnly = false; // make config option
         }
-
-        ImGui::StyleColorsDark();
-        //ImGui::StyleColorsLight();
-
-        // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
-        ImGuiStyle &style = ImGui::GetStyle();
-        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-            style.WindowRounding = 0.0f;
-            style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-        }
-
-        // Setup Platform/Renderer backends
-        if(glContext != nullptr) {
-            ImGui_ImplSDL3_InitForOpenGL(fWindow, glContext);
-        }
-
-        clearColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
-        io.ConfigInputTrickleEventQueue = true;
-        io.ConfigWindowsMoveFromTitleBarOnly = false; // make config option
     }
 
 
-    if(dm != nullptr) {
-        createContext(clearColor, dm->w, dm->h);
-    }
-
-    build_ImFontAtlas(*io.Fonts, fFontPaint);
-
-    return mainLoop(opts,glContext,clearColor);
+    createContext(initialWindowWidth, initialWindowHeight);
+    build_ImFontAtlas(*((ImGui::GetIO()).Fonts), fFontPaint);
 }
 
 App::~App() = default;
-int App::mainLoop(CliOptions &opts,SDL_GLContext glContext,ImVec4 const &clearColor) {
-    ImGuiIO &io = ImGui::GetIO();
+int App::mainLoop() {
+    const ImGuiIO &io = ImGui::GetIO();
 
     // Main loop
     bool done = false;
@@ -430,7 +473,7 @@ int App::mainLoop(CliOptions &opts,SDL_GLContext glContext,ImVec4 const &clearCo
                     break;
                 case SDL_EVENT_WINDOW_RESIZED:
                     destroyContext();
-                    createContext(clearColor,width,height);
+                    createContext(width,height);
                     break;
             }
         }
@@ -448,8 +491,11 @@ int App::mainLoop(CliOptions &opts,SDL_GLContext glContext,ImVec4 const &clearCo
         if(width <= 0 || height <= 0) {
            ImGui::Render();
 	    } else {
-            ImGui::ShowMetricsWindow();
-            paint(surface.get(),width,height); // will call ImGui::Render();
+	        const auto s = surface.get();
+	        preRender(s,width,height);
+            const auto saveFormat = render(s,width,height);
+	        postRender(s,saveFormat,width,height); // will call ImGui::Render()
+
             fContext->flush();
 
             // Update and Render additional Platform Windows
@@ -457,7 +503,7 @@ int App::mainLoop(CliOptions &opts,SDL_GLContext glContext,ImVec4 const &clearCo
             //  For this specific demo app we could also call SDL_GL_MakeCurrent(window, gl_context) directly)
             if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
                 SDL_Window* backup_current_window = SDL_GL_GetCurrentWindow();
-                SDL_GLContext backup_current_context = SDL_GL_GetCurrentContext();
+                auto const backup_current_context = SDL_GL_GetCurrentContext();
                 ImGui::UpdatePlatformWindows();
                 ImGui::RenderPlatformWindowsDefault();
                 SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
@@ -467,15 +513,19 @@ int App::mainLoop(CliOptions &opts,SDL_GLContext glContext,ImVec4 const &clearCo
         }
     }
 
+    return 0;
+}
+void App::cleanup() {
     // Cleanup
     ImGui_ImplSDL3_Shutdown();
     ImGui::DestroyContext();
     destroyContext();
 
-    SDL_GL_DestroyContext(glContext);
+    SDL_GL_DestroyContext(fGlContext);
     SDL_DestroyWindow(fWindow);
     SDL_Quit();
-    return 0;
+    fWindow = nullptr;
+    fGlContext = nullptr;
 }
 
 App::App() {
@@ -489,9 +539,9 @@ App::App() {
     fFontPaint = SkPaint();
 }
 
-void App::createContext(ImVec4 const &clearColor,int width,int height) {
+void App::createContext(const int width, const int height) {
     glViewport(0, 0, width, height);
-    glClearColor(clearColor.x * clearColor.w, clearColor.y * clearColor.w, clearColor.z * clearColor.w, clearColor.w);
+    glClearColor(fClearColor.x * fClearColor.w, fClearColor.y * fClearColor.w, fClearColor.z * fClearColor.w, fClearColor.w);
     glClearStencil(0);
     glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
@@ -509,11 +559,11 @@ void App::createContext(ImVec4 const &clearColor,int width,int height) {
         exit(1);
     }
 }
-sk_sp<SkSurface> App::getSurfaceRaster(int w, int h) {
+sk_sp<SkSurface> App::getSurfaceRaster(const int w, const int h) {
     if(fSurface == nullptr) {
         constexpr SkColorType colorType = kRGBA_8888_SkColorType;
         constexpr SkAlphaType alphaType = kPremul_SkAlphaType;
-        sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
+        const sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
         const auto c = SkColorInfo(colorType, alphaType, colorSpace);
         fSurface = SkSurfaces::Raster(SkImageInfo::Make(SkISize::Make(w,h), c));
     }
@@ -525,7 +575,7 @@ sk_sp<SkSurface> App::getSurfaceGL() {
         GrGLint buffer = 0;
         GR_GL_GetIntegerv(fNativeInterface.get(), GR_GL_FRAMEBUFFER_BINDING, &buffer);
         GrGLFramebufferInfo info;
-        info.fFBOID = (GrGLuint) buffer;
+        info.fFBOID = static_cast<GrGLuint>(buffer);
 
         SkColorType colorType;
 
@@ -549,8 +599,8 @@ sk_sp<SkSurface> App::getSurfaceGL() {
         SDL_GetWindowSizeInPixels(fWindow, &w, &h);
 
         constexpr bool createProtectedNativeBackend = false;
-        info.fProtected = skgpu::Protected(createProtectedNativeBackend);
-        auto target = GrBackendRenderTargets::MakeGL(w,
+        info.fProtected = static_cast<skgpu::Protected>(createProtectedNativeBackend);
+        const auto target = GrBackendRenderTargets::MakeGL(w,
                                                      h,
                                                      msaaSampleCount,
                                                      stencilBits,
@@ -560,7 +610,7 @@ sk_sp<SkSurface> App::getSurfaceGL() {
         // To use distance field text, use commented out SkSurfaceProps instead
         // SkSurfaceProps props(SkSurfaceProps::kUseDeviceIndependentFonts_Flag,
         //                      SkSurfaceProps::kUnknown_SkPixelGeometry);
-        SkSurfaceProps props;
+        const SkSurfaceProps props;
         fSurface = SkSurfaces::WrapBackendRenderTarget(fContext.get(),
                                                        target,
                                                        kBottomLeft_GrSurfaceOrigin,
@@ -581,7 +631,4 @@ void App::destroyContext() {
     }
 
     fContext.reset(nullptr);
-}
-void App::render() {
-
 }
