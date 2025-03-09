@@ -1,0 +1,11 @@
+imgui_skia_exe
+imgui_video_exe
+*.ttf
+cmake-build-*
+build
+.idea
+.vscode
+main_go
+dist
+lib
+bin
