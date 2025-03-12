@@ -1,8 +1,9 @@
 let lib = ../../dhall/lib.dhall
 let prelude = ../../dhall/prelude.dhall
 let sourceTreePart = lib.sourceTreePart
+let path = \(loc : prelude.Location.Type) -> "${env:IMGUI_SKIA_CPP_ROOT as Text}/skia_minimal/${lib.locationToString loc}"
 
-let flatbuffers = let dir = "./contrib/flatbuffers" in
+let flatbuffers = let dir = path (../contrib/flatbuffers as Location) in
  sourceTreePart::{
 	, dir = dir
 	, name = "flatbuffers"
@@ -13,7 +14,7 @@ let flatbuffers = let dir = "./contrib/flatbuffers" in
 	, sources = [] : List Text
 }
 
-let sdl3Shared = let sdlDir = "${env:IMGUI_SKIA_CPP_ROOT as Text}/${lib.locationToString (../contrib/sdl as Location)}"
+let sdl3Shared = let sdlDir = path (../contrib/sdl as Location)
 in
 sourceTreePart::{
 	, dir = ""
@@ -32,7 +33,7 @@ sourceTreePart::{
 	 ] : List Text }
 }
 
-let tracyEnabled = let dir = "./contrib/tracy/public" in sourceTreePart::{
+let tracyEnabled = let dir = path (../contrib/tracy/public as Location) in sourceTreePart::{
 	, name = "tracyEnabled"
 	, dir = dir
 	, defines = { 
@@ -69,7 +70,7 @@ let tracyDisabled = tracyEnabled // {
 	}
 }
 let ImGuiAppHelper = <SDL3>
-let imguiWithHooks1919Wip = \(apph : ImGuiAppHelper) -> let dir = "./imgui_w_hooks_1.91.9_wip" in sourceTreePart::{
+let imguiWithHooks1919Wip = \(apph : ImGuiAppHelper) -> let dir = path (../imgui_w_hooks_1.91.9_wip as Location) in sourceTreePart::{
 	, name = "imguiWithHooks1919Wip"
 	, dir = dir
 	, sources = [
@@ -102,7 +103,7 @@ let imguiWithHooks1919Wip = \(apph : ImGuiAppHelper) -> let dir = "./imgui_w_hoo
 		, global = [] : List Text
 		}
 }
-let imguiSkiaDriverImpl = let dir = "./imgui_skia_driver_impl" in sourceTreePart::{
+let imguiSkiaDriverImpl = let dir = path (../imgui_skia_driver_impl as Location) in sourceTreePart::{
 	, name = "imguiSkiaDriverImpl"
 	, dir = dir
 	, sources = [
@@ -127,7 +128,7 @@ let imguiSkiaDriverImpl = let dir = "./imgui_skia_driver_impl" in sourceTreePart
 		, global = [] : List Text
 		}
 }
-let imguiSkiaImpl = let dir = "./imgui_skia_impl" in sourceTreePart::{
+let imguiSkiaImpl = let dir = path (../imgui_skia_impl as Location) in sourceTreePart::{
 	, name = "imguiSkiaImpl"
 	, dir = dir
 	, sources = [
@@ -157,10 +158,9 @@ let imguiSkiaImpl = let dir = "./imgui_skia_impl" in sourceTreePart::{
 		}
 }
 let skiaShared = 
-    let skiaSharedBaseDir = "${env:IMGUI_SKIA_CPP_ROOT as Text}/${lib.locationToString (../contrib/skia as Location)}"
-    let dir = "./skia"
-    let contribDir = "./contrib/skia"
-	let objDir = "${contribDir}/out/Shared/obj"
+    let skiaSharedBaseDir = path (../../../contrib/skia as Location)
+    let dir = path (../../../contrib/skia as Location)
+	let objDir = "${dir}/out/Shared/obj"
     in sourceTreePart::{
 	, name = "skiaShared"
 	, dir = dir
@@ -168,7 +168,7 @@ let skiaShared =
 	, includeDirs = {
 		, local = [] : List Text
 		, global = [
-			, "${contribDir}"
+			, "${dir}"
 		] : List Text
 	}
 	, defines = {, local = [] : List Text
@@ -246,7 +246,7 @@ let skiaShared =
 }
 
 let mainSkiaSdl3Minimal = 
-    let dir = "./example_sdl3"
+    let dir = path (../example_sdl3 as Location)
     in sourceTreePart::{
 	, executable = True
 	, name = "mainSkiaSdl3Minimal"

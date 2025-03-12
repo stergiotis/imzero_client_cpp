@@ -4,19 +4,53 @@ project(imgui_skia_exe)
 set(CMAKE_LINKER clang++)
 set(CMAKE_CXX_COMPILER clang++)
 
-add_compile_definitions(
+add_compile_definitions(SK_RELEASE
+SK_GAMMA_APPLY_TO_A8
+SK_ALLOW_STATIC_GLOBAL_INITIALIZERS=1
+SK_TYPEFACE_FACTORY_FREETYPE
+SK_FONTMGR_FREETYPE_EMBEDDED_AVAILABLE
+SK_FONTMGR_FONTCONFIG_AVAILABLE
+SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE
+SK_FONTMGR_FREETYPE_EMPTY_AVAILABLE
+SK_GL
+SK_SUPPORT_PDF
+SK_CODEC_DECODES_JPEG
+SK_CODEC_DECODES_JPEG_GAINMAPS
+SK_XML
+SK_CODEC_DECODES_PNG
+SK_CODEC_DECODES_RAW
+SK_CODEC_DECODES_WEBP
+SK_DEFAULT_TYPEFACE_IS_EMPTY
+SK_DISABLE_LEGACY_DEFAULT_TYPEFACE
+SK_R32_SHIFT=16
+SK_ENABLE_PRECOMPILE
+SK_GANESH
+SK_ENABLE_PARAGRAPH
+SK_UNICODE_AVAILABLE
+SK_UNICODE_ICU_IMPLEMENTATION
+SK_SHAPER_PRIMITIVE_AVAILABLE
+SK_SHAPER_HARFBUZZ_AVAILABLE
+SK_SHAPER_UNICODE_AVAILABLE
+SK_ENABLE_SVG
+SK_BUILD_FOR_UNIX
 )
-include_directories("${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_implot"
-"${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_toggle"
-"${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_knobs"
-"${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_coolbar"
-"${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_flamegraph"
-"${CMAKE_CURRENT_LIST_DIR}/./imcolortextedit"
-"${CMAKE_CURRENT_LIST_DIR}/./src/marshalling"
-"${CMAKE_CURRENT_LIST_DIR}/./src/arena/simple"
-"${CMAKE_CURRENT_LIST_DIR}/./src/widgets"
-"${CMAKE_CURRENT_LIST_DIR}/./src"
-"${CMAKE_CURRENT_LIST_DIR}/./src/binding"
+include_directories(/home/deck/repo/imzero_client_cpp/skia_minimal/./src/widgets/imgui_implot
+/home/deck/repo/imzero_client_cpp/skia_minimal/./src/widgets/imgui_toggle
+/home/deck/repo/imzero_client_cpp/skia_minimal/./src/widgets/imgui_knobs
+/home/deck/repo/imzero_client_cpp/skia_minimal/./src/widgets/imgui_coolbar
+/home/deck/repo/imzero_client_cpp/skia_minimal/./src/widgets/imgui_flamegraph
+/home/deck/repo/imzero_client_cpp/skia_minimal/./imcolortextedit
+/home/deck/repo/imzero_client_cpp/skia_minimal/./src/marshalling
+/home/deck/repo/imzero_client_cpp/skia_minimal/./src/arena/simple
+/home/deck/repo/imzero_client_cpp/skia_minimal/./src/widgets
+/home/deck/repo/imzero_client_cpp/skia_minimal/./src
+/home/deck/repo/imzero_client_cpp/skia_minimal/./src/binding
+/home/deck/repo/imzero_client_cpp/skia2/./../skia_minimal/contrib/flatbuffers/include
+/home/deck/repo/imzero_client_cpp/skia2/./../skia_minimal/imgui_w_hooks_1.91.9_wip
+/home/deck/repo/imzero_client_cpp/skia2/./../skia_minimal/imgui_skia_impl
+/home/deck/repo/imzero_client_cpp/skia2/./../../contrib/skia
+/home/deck/repo/imzero_client_cpp/skia2/./../skia_minimal/imgui_skia_driver_impl
+/home/deck/repo/imzero_client_cpp/skia2/./../skia_minimal/contrib/flatbuffers/include
 )
 add_compile_options(-std=c++20
 -Wall
@@ -25,83 +59,110 @@ add_compile_options(-std=c++20
 -Wno-unused-parameter
 -fno-omit-frame-pointer
 -O3
--I${CMAKE_CURRENT_LIST_DIR}/../skia_minimal/imgui_w_hooks_1.91.9_wip
--I${CMAKE_CURRENT_LIST_DIR}/../skia_minimal/imgui_skia_impl
--I${CMAKE_CURRENT_LIST_DIR}/../skia_minimal/imgui_skia_driver_impl
--I${CMAKE_CURRENT_LIST_DIR}/../../contrib/skia
--I${CMAKE_CURRENT_LIST_DIR}/../../contrib/flatbuffers/include
--I${CMAKE_CURRENT_LIST_DIR}/../../contrib/sdl/include
--I${CMAKE_CURRENT_LIST_DIR}/../../contrib/tracy/public
+# sdl3Shared
+-I/home/deck/repo/imzero_client_cpp/skia2/./../skia_minimal/contrib/sdl/include
+# skiaShared
+-ffp-contract=off
+-fstrict-aliasing
+-fPIC
+-fvisibility=hidden
+-fdata-sections
+-ffunction-sections
+-fvisibility-inlines-hidden
+-fno-exceptions
+-fno-rtti
 )
 link_libraries(-Wl,-rpath,'$ORIGIN/../lib' -Wl,-z,origin
 -DNDEBUG
+# sdl3Shared
+-L/home/deck/repo/imzero_client_cpp/skia2/./../skia_minimal/contrib/sdl/build
+-Wl,--enable-new-dtags
+-lSDL3
+# skiaShared
+-ldl
+-lpthread
+-lfreetype
+-lz
+-lglfw
+-lfontconfig
+-lwebpmux
+-lwebpdemux
+-lX11
+-lGLU
+-lGL
+-L/home/deck/repo/imzero_client_cpp/skia2/./../../contrib/skia/out/Shared
+-lskparagraph
+-lskia
+-lskunicode
+-lbentleyottmann
+-lskshaper
 )
 
 # begin imguiImplot
-add_library(imguiImplot OBJECT "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_implot/implot.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_implot/implot_demo.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_implot/implot_items.cpp")
+add_library(imguiImplot OBJECT /home/deck/repo/imzero_client_cpp/skia_minimal/./src/widgets/imgui_implot/implot.cpp
+/home/deck/repo/imzero_client_cpp/skia_minimal/./src/widgets/imgui_implot/implot_demo.cpp
+/home/deck/repo/imzero_client_cpp/skia_minimal/./src/widgets/imgui_implot/implot_items.cpp)
 # end imguiImplot
 
 # begin imguiToggle
-add_library(imguiToggle OBJECT "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_toggle/imgui_toggle.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_toggle/imgui_toggle_palette.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_toggle/imgui_toggle_presets.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_toggle/imgui_toggle_renderer.cpp")
+add_library(imguiToggle OBJECT /home/deck/repo/imzero_client_cpp/skia_minimal/./src/widgets/imgui_toggle/imgui_toggle.cpp
+/home/deck/repo/imzero_client_cpp/skia_minimal/./src/widgets/imgui_toggle/imgui_toggle_palette.cpp
+/home/deck/repo/imzero_client_cpp/skia_minimal/./src/widgets/imgui_toggle/imgui_toggle_presets.cpp
+/home/deck/repo/imzero_client_cpp/skia_minimal/./src/widgets/imgui_toggle/imgui_toggle_renderer.cpp)
 target_compile_options(imguiToggle PUBLIC -Wno-unused-parameter
 -Wno-unused-variable)
 # end imguiToggle
 
 # begin imguiKnobs
-add_library(imguiKnobs OBJECT "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_knobs/imgui-knobs.cpp")
+add_library(imguiKnobs OBJECT /home/deck/repo/imzero_client_cpp/skia_minimal/./src/widgets/imgui_knobs/imgui-knobs.cpp)
 # end imguiKnobs
 
 # begin imguiCoolbar
-add_library(imguiCoolbar OBJECT "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_coolbar/ImCoolbar.cpp")
+add_library(imguiCoolbar OBJECT /home/deck/repo/imzero_client_cpp/skia_minimal/./src/widgets/imgui_coolbar/ImCoolbar.cpp)
 # end imguiCoolbar
 
 # begin imguiFlamegraph
-add_library(imguiFlamegraph OBJECT "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/imgui_flamegraph/imgui_widget_flamegraph.cpp")
+add_library(imguiFlamegraph OBJECT /home/deck/repo/imzero_client_cpp/skia_minimal/./src/widgets/imgui_flamegraph/imgui_widget_flamegraph.cpp)
 # end imguiFlamegraph
 
 # begin imguiTextedit
-add_library(imguiTextedit OBJECT "${CMAKE_CURRENT_LIST_DIR}/./imcolortextedit/TextEditor.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./imcolortextedit/LanguageDefinitions.cpp")
+add_library(imguiTextedit OBJECT /home/deck/repo/imzero_client_cpp/skia_minimal/./imcolortextedit/TextEditor.cpp
+/home/deck/repo/imzero_client_cpp/skia_minimal/./imcolortextedit/LanguageDefinitions.cpp)
 target_compile_options(imguiTextedit PUBLIC -Wno-unused-variable)
 # end imguiTextedit
 
 # begin marshalling
-add_library(marshalling OBJECT "${CMAKE_CURRENT_LIST_DIR}/./src/marshalling/receive.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./src/marshalling/send.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./src/marshalling/helper.cpp")
+add_library(marshalling OBJECT /home/deck/repo/imzero_client_cpp/skia_minimal/./src/marshalling/receive.cpp
+/home/deck/repo/imzero_client_cpp/skia_minimal/./src/marshalling/send.cpp
+/home/deck/repo/imzero_client_cpp/skia_minimal/./src/marshalling/helper.cpp)
 # end marshalling
 
 # begin arena
-add_library(arena OBJECT "${CMAKE_CURRENT_LIST_DIR}/./src/arena/simple/simple.cpp")
+add_library(arena OBJECT /home/deck/repo/imzero_client_cpp/skia_minimal/./src/arena/simple/simple.cpp)
 # end arena
 
 # begin widgets
-add_library(widgets OBJECT "${CMAKE_CURRENT_LIST_DIR}/./src/widgets/common.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./src/widgets/piemenu.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./src/widgets/splitter.cpp")
+add_library(widgets OBJECT /home/deck/repo/imzero_client_cpp/skia_minimal/./src/widgets/common.cpp
+/home/deck/repo/imzero_client_cpp/skia_minimal/./src/widgets/piemenu.cpp
+/home/deck/repo/imzero_client_cpp/skia_minimal/./src/widgets/splitter.cpp)
 target_compile_options(widgets PUBLIC -Wno-unused-parameter
 -Wno-unused-variable)
 # end widgets
 
 # begin render
-add_library(render OBJECT "${CMAKE_CURRENT_LIST_DIR}/./src/render.cpp")
+add_library(render OBJECT /home/deck/repo/imzero_client_cpp/skia_minimal/./src/render.cpp)
 # end render
 
 # empty target binding
 
 # begin imzeroClientSkiaSdl3Impl
-add_library(imzeroClientSkiaSdl3Impl OBJECT "${CMAKE_CURRENT_LIST_DIR}/./imzero_client_skia_sdl3_impl/main.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./imzero_client_skia_sdl3_impl/imzero_client_skia_sdl3_app.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./imzero_client_skia_sdl3_impl/imzero_client_skia_sdl3_cli_options.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./imzero_client_skia_sdl3_impl/bmp_encoder.cpp")
+add_library(imzeroClientSkiaSdl3Impl OBJECT /home/deck/repo/imzero_client_cpp/skia_minimal/./imzero_client_skia_sdl3_impl/main.cpp
+/home/deck/repo/imzero_client_cpp/skia_minimal/./imzero_client_skia_sdl3_impl/imzero_client_skia_sdl3_app.cpp
+/home/deck/repo/imzero_client_cpp/skia_minimal/./imzero_client_skia_sdl3_impl/imzero_client_skia_sdl3_cli_options.cpp
+/home/deck/repo/imzero_client_cpp/skia_minimal/./imzero_client_skia_sdl3_impl/bmp_encoder.cpp)
 target_compile_options(imzeroClientSkiaSdl3Impl PUBLIC -Wno-unused-parameter)
-target_include_directories(imzeroClientSkiaSdl3Impl PUBLIC "${CMAKE_CURRENT_LIST_DIR}/./imzero_client_skia_sdl3_impl"
-"${CMAKE_CURRENT_LIST_DIR}/./imzero_client_skia_sdl3_impl")
+target_include_directories(imzeroClientSkiaSdl3Impl PUBLIC /home/deck/repo/imzero_client_cpp/skia_minimal/./imzero_client_skia_sdl3_impl
+/home/deck/repo/imzero_client_cpp/skia_minimal/./imzero_client_skia_sdl3_impl)
 # end imzeroClientSkiaSdl3Impl
 add_executable(imgui_skia_exe $<TARGET_OBJECTS:imguiImplot>
 $<TARGET_OBJECTS:imguiToggle>
@@ -117,4 +178,4 @@ $<TARGET_OBJECTS:imzeroClientSkiaSdl3Impl>)
 add_executable(imzero_client_skia_sdl3 $<TARGET_OBJECTS:imzeroClientSkiaSdl3Impl>)
 add_library(libimgui_skia STATIC IMPORTED)
 set_target_properties(libimgui_skia PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_LIST_DIR}/../skia_minimal/build/libimgui_skia.a")
-target_link_libraries(imzero_client_skia_sdl3 imgui_skia)
+target_link_libraries(imzero_client_skia_sdl3 libimgui_skia)

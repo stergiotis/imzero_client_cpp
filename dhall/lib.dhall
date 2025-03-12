@@ -71,5 +71,5 @@ in
 	, vsCodeProperties
 	, vsCodeConfiguration
 	, sourceTreePart
-        , locationToString
+    , locationToString
 }

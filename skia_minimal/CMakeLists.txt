@@ -34,12 +34,12 @@ SK_SHAPER_UNICODE_AVAILABLE
 SK_ENABLE_SVG
 SK_BUILD_FOR_UNIX
 )
-include_directories("${CMAKE_CURRENT_LIST_DIR}/./contrib/flatbuffers/include"
-"${CMAKE_CURRENT_LIST_DIR}/./imgui_w_hooks_1.91.9_wip"
-"${CMAKE_CURRENT_LIST_DIR}/./imgui_skia_impl"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/skia"
-"${CMAKE_CURRENT_LIST_DIR}/./imgui_skia_driver_impl"
-"${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public"
+include_directories(/home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./contrib/flatbuffers/include
+/home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./imgui_w_hooks_1.91.9_wip
+/home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./imgui_skia_impl
+/home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./../../contrib/skia
+/home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./imgui_skia_driver_impl
+/home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./contrib/tracy/public
 )
 add_compile_options(-std=c++20
 -Wall
@@ -49,7 +49,7 @@ add_compile_options(-std=c++20
 -fno-omit-frame-pointer
 -O3
 # sdl3Shared
--I/home/deck/repo/imzero_client_cpp/skia_minimal/./contrib/sdl/include
+-I/home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./contrib/sdl/include
 # skiaShared
 -ffp-contract=off
 -fstrict-aliasing
@@ -64,7 +64,7 @@ add_compile_options(-std=c++20
 link_libraries(-Wl,-rpath,'$ORIGIN/../lib' -Wl,-z,origin
 -DNDEBUG
 # sdl3Shared
--L/home/deck/repo/imzero_client_cpp/skia_minimal/./contrib/sdl/build
+-L/home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./contrib/sdl/build
 -Wl,--enable-new-dtags
 -lSDL3
 # skiaShared
@@ -79,7 +79,7 @@ link_libraries(-Wl,-rpath,'$ORIGIN/../lib' -Wl,-z,origin
 -lX11
 -lGLU
 -lGL
--L/home/deck/repo/imzero_client_cpp/skia_minimal/./contrib/skia/out/Shared
+-L/home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./../../contrib/skia/out/Shared
 -lskparagraph
 -lskia
 -lskunicode
@@ -101,22 +101,22 @@ link_libraries(-Wl,-rpath,'$ORIGIN/../lib' -Wl,-z,origin
 # empty target flatbuffers
 
 # begin imguiWithHooks1919Wip
-add_library(imguiWithHooks1919Wip OBJECT "${CMAKE_CURRENT_LIST_DIR}/./imgui_w_hooks_1.91.9_wip/imgui.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./imgui_w_hooks_1.91.9_wip/imgui_demo.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./imgui_w_hooks_1.91.9_wip/imgui_draw.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./imgui_w_hooks_1.91.9_wip/imgui_tables.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./imgui_w_hooks_1.91.9_wip/imgui_widgets.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./imgui_w_hooks_1.91.9_wip/imgui_impl_sdl3.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./imgui_w_hooks_1.91.9_wip/imgui_impl_sdl3.cpp")
+add_library(imguiWithHooks1919Wip OBJECT /home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./imgui_w_hooks_1.91.9_wip/imgui.cpp
+/home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./imgui_w_hooks_1.91.9_wip/imgui_demo.cpp
+/home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./imgui_w_hooks_1.91.9_wip/imgui_draw.cpp
+/home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./imgui_w_hooks_1.91.9_wip/imgui_tables.cpp
+/home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./imgui_w_hooks_1.91.9_wip/imgui_widgets.cpp
+/home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./imgui_w_hooks_1.91.9_wip/imgui_impl_sdl3.cpp
+/home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./imgui_w_hooks_1.91.9_wip/imgui_impl_sdl3.cpp)
 # end imguiWithHooks1919Wip
 
 # begin imguiSkiaImpl
-add_library(imguiSkiaImpl OBJECT "${CMAKE_CURRENT_LIST_DIR}/./imgui_skia_impl/imgui_skia_extensions.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./imgui_skia_impl/imgui_skia_hooks_impl.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./imgui_skia_impl/imgui_skia_imzero_cmd_render.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./imgui_skia_impl/imgui_skia_paragraph.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./imgui_skia_impl/imgui_skia_setup_ui.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./imgui_skia_impl/imgui_skia_tracy_support.cpp")
+add_library(imguiSkiaImpl OBJECT /home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./imgui_skia_impl/imgui_skia_extensions.cpp
+/home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./imgui_skia_impl/imgui_skia_hooks_impl.cpp
+/home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./imgui_skia_impl/imgui_skia_imzero_cmd_render.cpp
+/home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./imgui_skia_impl/imgui_skia_paragraph.cpp
+/home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./imgui_skia_impl/imgui_skia_setup_ui.cpp
+/home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./imgui_skia_impl/imgui_skia_tracy_support.cpp)
 # end imguiSkiaImpl
 
 # empty target sdl3Shared
@@ -124,17 +124,17 @@ add_library(imguiSkiaImpl OBJECT "${CMAKE_CURRENT_LIST_DIR}/./imgui_skia_impl/im
 # empty target skiaShared
 
 # begin imguiSkiaDriverImpl
-add_library(imguiSkiaDriverImpl OBJECT "${CMAKE_CURRENT_LIST_DIR}/./imgui_skia_driver_impl/imgui_skia_app_sdl3.cpp"
-"${CMAKE_CURRENT_LIST_DIR}/./imgui_skia_driver_impl/imgui_skia_cli_options.cpp")
+add_library(imguiSkiaDriverImpl OBJECT /home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./imgui_skia_driver_impl/imgui_skia_app_sdl3.cpp
+/home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./imgui_skia_driver_impl/imgui_skia_cli_options.cpp)
 # end imguiSkiaDriverImpl
 
 # begin mainSkiaSdl3Minimal
-add_library(mainSkiaSdl3Minimal OBJECT "${CMAKE_CURRENT_LIST_DIR}/./example_sdl3/main.cpp")
+add_library(mainSkiaSdl3Minimal OBJECT /home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./example_sdl3/main.cpp)
 target_compile_options(mainSkiaSdl3Minimal PUBLIC -Wno-unused-parameter)
 # end mainSkiaSdl3Minimal
 
 # begin tracyDisabled
-add_library(tracyDisabled OBJECT "${CMAKE_CURRENT_LIST_DIR}/./contrib/tracy/public/TracyClient.cpp")
+add_library(tracyDisabled OBJECT /home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./contrib/tracy/public/TracyClient.cpp)
 # end tracyDisabled
 add_executable(imgui_skia_exe $<TARGET_OBJECTS:imguiWithHooks1919Wip>
 $<TARGET_OBJECTS:imguiSkiaImpl>

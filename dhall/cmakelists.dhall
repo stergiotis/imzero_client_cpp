@@ -10,6 +10,7 @@ let cmakelists = let T = {
 	, cxxflags : List Text
 	, ldflags : List Text
 	, sourceTreeParts : List lib.sourceTreePart.Type
+	, librarySourceTreeParts : List lib.sourceTreePart.Type
 	, generateDepFiles : Bool
 	, projectName : Text
 	, cxxStandard : Natural
@@ -17,21 +18,27 @@ let cmakelists = let T = {
 	, cxxflags = [] : List Text
 	, ldflags = [] : List Text
 	, sourceTreeParts = [] : List lib.sourceTreePart.Type
+	, librarySourceTreeParts = [] : List lib.sourceTreePart.Type
 	, generateDepFiles = False
 	, cxxStandard = 20
 }}
 let decorateWithName = \(t : List Text) -> \(name : Text) -> if prelude.List.null Text t then ([] : List Text) else (["# ${name}"] # t)
 let definesToCxxflags = \(defines : List Text) -> (prelude.List.map Text Text (\(d : Text) -> "-D${d}") defines)
 let includesToCxxflags = \(dirs : List Text) -> (prelude.List.map Text Text (\(d : Text) -> "-I${d}") dirs)
+let composeDefines = \(s : List lib.sourceTreePart.Type) -> prelude.List.concatMap lib.sourceTreePart.Type Text (\(p : lib.sourceTreePart.Type) -> p.defines.global) s
+let composeIncludeDirs = \(s : List lib.sourceTreePart.Type) -> prelude.List.concatMap lib.sourceTreePart.Type Text (\(p : lib.sourceTreePart.Type) -> p.includeDirs.global) s
+let composeCompileOptions = \(s : List lib.sourceTreePart.Type) -> prelude.List.concatMap lib.sourceTreePart.Type Text (\(p : lib.sourceTreePart.Type) -> decorateWithName p.cxxflags.global p.name) s
+let composeLinkOptions = \(s : List lib.sourceTreePart.Type) -> prelude.List.concatMap lib.sourceTreePart.Type Text (\(p : lib.sourceTreePart.Type) -> decorateWithName p.ldflags.global p.name) s
 let cmakelistsToText = \(m : cmakelists.Type) -> 
-	let gDefines = prelude.List.concatMap lib.sourceTreePart.Type Text (\(p : lib.sourceTreePart.Type) -> p.defines.global) m.sourceTreeParts
-	let gIncludeDirs = prelude.List.concatMap lib.sourceTreePart.Type Text (\(p : lib.sourceTreePart.Type) -> p.includeDirs.global) m.sourceTreeParts
-	let gCompileOptions = m.cxxflags # prelude.List.concatMap lib.sourceTreePart.Type Text (\(p : lib.sourceTreePart.Type) -> decorateWithName p.cxxflags.global p.name) m.sourceTreeParts
-	let gLinkOptions = m.ldflags # prelude.List.concatMap lib.sourceTreePart.Type Text (\(p : lib.sourceTreePart.Type) -> decorateWithName p.ldflags.global p.name) m.sourceTreeParts
+	let gDefines = composeDefines (m.sourceTreeParts # m.librarySourceTreeParts)
+	let gIncludeDirs = composeIncludeDirs (m.sourceTreeParts # m.librarySourceTreeParts)
+	let gCompileOptions = m.cxxflags # (composeCompileOptions (m.sourceTreeParts # m.librarySourceTreeParts))
+	let gLinkOptions = m.ldflags # (composeLinkOptions (m.sourceTreeParts # m.librarySourceTreeParts))
 
 	let sources = prelude.List.concatMap lib.sourceTreePart.Type Text (\(p : lib.sourceTreePart.Type) -> p.sources) m.sourceTreeParts
 	let nonSourceObjs = prelude.List.concatMap lib.sourceTreePart.Type Text (\(p : lib.sourceTreePart.Type) -> p.nonSourceObjs) m.sourceTreeParts
-	let composePathList = \(l : List Text) -> prelude.Text.concatMapSep "\n" Text (\(p : Text) -> "\"\${CMAKE_CURRENT_LIST_DIR}/${p}\"") l
+	--let composePathList = \(l : List Text) -> prelude.Text.concatMapSep "\n" Text (\(p : Text) -> "\"\${CMAKE_CURRENT_LIST_DIR}/${p}\"") l
+	let composePathList = \(l : List Text) -> prelude.Text.concatSep "\n" l
 
 	let composeTarget = \(p : lib.sourceTreePart.Type) ->
 	 	let out = (if (prelude.List.null Text p.sources) then [] : List Text else ["add_library(${p.name} OBJECT ${composePathList p.sources})"])
