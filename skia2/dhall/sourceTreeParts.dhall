@@ -1,7 +1,8 @@
 let lib = ../../dhall/lib.dhall
 let prelude = ../../dhall/prelude.dhall
 let sourceTreePart = lib.sourceTreePart
-let imguiImplot = let dir = "./src/widgets/imgui_implot" in sourceTreePart::{
+let path = \(loc : prelude.Location.Type) -> "${env:IMGUI_SKIA_CPP_ROOT as Text}/skia2/${lib.locationToString loc}"
+let imguiImplot = let dir = path (../src/widgets/imgui_implot as Location) in sourceTreePart::{
 	, name = "imguiImplot"
 	, dir = dir
 	, includeDirs = {
@@ -23,7 +24,7 @@ let imguiImplot = let dir = "./src/widgets/imgui_implot" in sourceTreePart::{
 		] : List Text
 	}
 }
-let marshalling = let dir = "./src/marshalling" in sourceTreePart::{
+let marshalling = let dir = path (../src/marshalling as Location) in sourceTreePart::{
 	, name = "marshalling"
 	, dir = dir
 	, includeDirs = {
@@ -45,7 +46,7 @@ let marshalling = let dir = "./src/marshalling" in sourceTreePart::{
 		] : List Text
 	}
 }
-let arena = let dir = "./src/arena/simple" in sourceTreePart::{
+let arena = let dir = path (../src/arena/simple as Location) in sourceTreePart::{
 	, name = "arena"
 	, dir = dir
 	, includeDirs = {
@@ -65,7 +66,7 @@ let arena = let dir = "./src/arena/simple" in sourceTreePart::{
 		] : List Text
 	}
 }
-let widgets = let dir = "./src/widgets" in sourceTreePart::{
+let widgets = let dir = path (../src/widgets as Location) in sourceTreePart::{
 	, name = "widgets"
 	, dir = dir
 	, includeDirs = {
@@ -90,7 +91,7 @@ let widgets = let dir = "./src/widgets" in sourceTreePart::{
 		] : List Text
 	}
 }
-let imguiToggle = let dir = "./src/widgets/imgui_toggle" in sourceTreePart::{
+let imguiToggle = let dir = path (../src/widgets/imgui_toggle as Location) in sourceTreePart::{
 	, name = "imguiToggle"
 	, includeDirs = {
 		, local = [] : List Text
@@ -116,7 +117,7 @@ let imguiToggle = let dir = "./src/widgets/imgui_toggle" in sourceTreePart::{
 		] : List Text
 	}
 }
-let imguiKnobs = let dir = "./src/widgets/imgui_knobs" in sourceTreePart::{
+let imguiKnobs = let dir = path (../src/widgets/imgui_knobs as Location) in sourceTreePart::{
 	, name = "imguiKnobs"
 	, dir = dir
 	, includeDirs = {
@@ -136,7 +137,7 @@ let imguiKnobs = let dir = "./src/widgets/imgui_knobs" in sourceTreePart::{
 		] : List Text
 	}
 }
-let imguiCoolbar = let dir = "./src/widgets/imgui_coolbar" in sourceTreePart::{
+let imguiCoolbar = let dir = path (../src/widgets/imgui_coolbar as Location) in sourceTreePart::{
 	, name = "imguiCoolbar"
 	, dir = dir
 	, includeDirs = {
@@ -156,7 +157,7 @@ let imguiCoolbar = let dir = "./src/widgets/imgui_coolbar" in sourceTreePart::{
 		] : List Text
 	}
 }
-let imguiFlamegraph = let dir = "./src/widgets/imgui_flamegraph" in sourceTreePart::{
+let imguiFlamegraph = let dir = path (../src/widgets/imgui_flamegraph as Location) in sourceTreePart::{
 	, name = "imguiFlamegraph"
 	, dir = dir
 	, includeDirs = {
@@ -176,7 +177,7 @@ let imguiFlamegraph = let dir = "./src/widgets/imgui_flamegraph" in sourceTreePa
 		] : List Text
 	}
 }
-let imguiTextedit = let dir = "./imcolortextedit" in sourceTreePart::{
+let imguiTextedit = let dir = path (../imcolortextedit as Location) in sourceTreePart::{
 	, name = "imguiTextedit"
 	, dir = dir
 	, includeDirs = {
@@ -199,7 +200,7 @@ let imguiTextedit = let dir = "./imcolortextedit" in sourceTreePart::{
 		] : List Text
 	}
 }
-let render = let dir = "./src" in sourceTreePart::{
+let render = let dir = path (../src as Location) in sourceTreePart::{
 	, name = "render"
 	, dir = dir
 	, includeDirs = {
@@ -219,7 +220,7 @@ let render = let dir = "./src" in sourceTreePart::{
 		] : List Text
 	}
 }
-let binding = let dir = "./src/binding" in sourceTreePart::{
+let binding = let dir = path (../src/binding as Location) in sourceTreePart::{
 	, name = "binding"
 	, dir = dir
 	, includeDirs = {
@@ -243,7 +244,7 @@ let binding = let dir = "./src/binding" in sourceTreePart::{
 	}
 }
 let imzeroClientSkiaSdl3Impl =
-    let dir = "./imzero_client_skia_sdl3_impl"
+    let dir = path (../imzero_client_skia_sdl3_impl as Location)
     in sourceTreePart::{
 	, name = "imzeroClientSkiaSdl3Impl"
 	, dir = dir
