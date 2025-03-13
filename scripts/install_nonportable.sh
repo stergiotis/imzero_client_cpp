@@ -6,5 +6,5 @@ cd "$here"
 
 # linux
 source /etc/os-release
-version_id=$(echo "$VERSION_ID" | grep -o -E "[0-9]+[.][0-9]+")
+version_id=$(echo "$VERSION_ID" | grep -o -E "[0-9]+[.]?[0-9]*" | head -n 1)
 ."/nonportable/${ID}_${version_id}.sh"
