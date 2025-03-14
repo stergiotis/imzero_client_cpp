@@ -5,12 +5,14 @@ let common =
 	let ubsan = False
 	let sourceTreePartsRepo = ./dhall/sourceTreeParts.dhall
 	let sourceTreePartsImGuiSkia = ../skia_minimal/dhall/sourceTreeParts.dhall
+	let target = {os = sourceTreePartsImGuiSkia.TargetOs.linux}
 	let librarySourceTreeParts = [
+		, sourceTreePartsImGuiSkia.systemFlags target
         , sourceTreePartsImGuiSkia.flatbuffers
         , sourceTreePartsImGuiSkia.imguiWithHooks1919Wip sourceTreePartsImGuiSkia.ImGuiAppHelper.SDL3
         , sourceTreePartsImGuiSkia.imguiSkiaImpl
         , sourceTreePartsImGuiSkia.sdl3Shared
-        , sourceTreePartsImGuiSkia.skiaShared
+        , sourceTreePartsImGuiSkia.skiaShared target
         , sourceTreePartsImGuiSkia.imguiSkiaDriverImpl
 	]
 	# (if debug then [ , sourceTreePartsImGuiSkia.tracyEnabled ] else [ , sourceTreePartsImGuiSkia.tracyDisabled ] : List lib.sourceTreePart.Type )

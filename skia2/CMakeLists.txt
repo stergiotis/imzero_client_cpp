@@ -59,12 +59,13 @@ add_compile_options(-std=c++20
 -Wno-unused-parameter
 -fno-omit-frame-pointer
 -O3
+# systemFlags
+-fPIC
 # sdl3Shared
 -I/home/deck/repo/imzero_client_cpp/skia_minimal/./../skia_minimal/contrib/sdl/include
 # skiaShared
 -ffp-contract=off
 -fstrict-aliasing
--fPIC
 -fvisibility=hidden
 -fdata-sections
 -ffunction-sections
@@ -74,6 +75,8 @@ add_compile_options(-std=c++20
 )
 link_libraries(-Wl,-rpath,'$ORIGIN/../lib' -Wl,-z,origin
 -DNDEBUG
+# systemFlags
+-Wl,-rpath,'$ORIGIN/../lib' -Wl,-z,origin
 # sdl3Shared
 -L/home/deck/repo/imzero_client_cpp/skia_minimal/./../skia_minimal/contrib/sdl/build
 -Wl,--enable-new-dtags
@@ -83,7 +86,6 @@ link_libraries(-Wl,-rpath,'$ORIGIN/../lib' -Wl,-z,origin
 -lpthread
 -lfreetype
 -lz
--lglfw
 -lfontconfig
 -lwebpmux
 -lwebpdemux

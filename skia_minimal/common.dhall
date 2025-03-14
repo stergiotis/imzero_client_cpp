@@ -4,12 +4,14 @@ let common =
     let asan = False
     let ubsan = False
     let sourceTreePartsRepo = ./dhall/sourceTreeParts.dhall
+    let target = {os = sourceTreePartsRepo.TargetOs.linux}
     let sourceTreeParts = [
+        , sourceTreePartsRepo.systemFlags target
         , sourceTreePartsRepo.flatbuffers
         , sourceTreePartsRepo.imguiWithHooks1919Wip sourceTreePartsRepo.ImGuiAppHelper.SDL3
         , sourceTreePartsRepo.imguiSkiaImpl
         , sourceTreePartsRepo.sdl3Shared
-        , sourceTreePartsRepo.skiaShared
+        , sourceTreePartsRepo.skiaShared target
         , sourceTreePartsRepo.imguiSkiaDriverImpl
         --, sourceTreePartsRepo.mainSkiaSdl3Minimal
     ] 
@@ -53,7 +55,7 @@ let common =
     --    , linker
         ] : List Text
     --let stdlibFlags = ["-stdlib=libc++"] : List Text
-    let ldflags = ["-Wl,-rpath,'$ORIGIN/../lib' -Wl,-z,origin"] # (if debug then ldflagsDebug else ldflagsRelease)
+    let ldflags = (if debug then ldflagsDebug else ldflagsRelease)
     let stdlibFlags = [] : List Text
     let linker = cxx
     in {

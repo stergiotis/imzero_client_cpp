@@ -92,17 +92,6 @@ let cmakelistsToText = \(m : cmakelists.Type) ->
 	++ recursiveLinking
 	++ "\n"
 	++ targets
-	--++ merge {
-	--	, Some = \(e : Text) -> "add_executable(${e} ${allTargetNames})\n"
-	--	, None = ""
-	--	} m.output.exe
-	--++ (let executables = (prelude.List.filter lib.sourceTreePart.Type (\(p : lib.sourceTreePart.Type) -> p.executable == True) m.sourceTreeParts)
-	--   in prelude.Text.concatMapSep "\n" lib.sourceTreePart.Type (\(p : lib.sourceTreePart.Type) -> 
-	--  	"add_executable(${p.name}Exe)\n" 
-	--	++ (prelude.Text.concatMapSep "\n" lib.sourceTreePart.Type (\(t : lib.sourceTreePart.Type) -> "target_link_libraries(${p.name}Exe ${t.name})")
-	--	 (prelude.List.filter lib.sourceTreePart.Type mustLinkTarget m.sourceTreeParts)
-	--	 )
-	--   ) executables)
 	++ merge {
 		, Some = \(a : Text) -> "add_library(${a} STATIC ${libTargetNames})\n"
 		, None = ""
