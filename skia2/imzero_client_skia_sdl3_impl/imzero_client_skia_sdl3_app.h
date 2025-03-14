@@ -33,7 +33,16 @@ namespace ImZeroClient
     public:
         App();
         ~App();
-        int Run(ImZeroCliOptions &opts);
+
+        void postRender(ImGuiSkia::FrameExportFormatE frameExportFormat, SkSurface* surface, int width, int height);
+        void prePaint(const SkSurface* surface, int width, int height);
+        SkSurface* preRender(bool& done, int& width, int& height);
+        ImGuiSkia::FrameExportFormatE render(SkSurface* surface, int width, int height);
+        void postPaint(SkSurface* surface, ImGuiSkia::FrameExportFormatE frameExportFormat, int width, int height);
+
+        void setup(ImZeroCliOptions &opts);
+        int mainLoop();
+        void cleanup();
     private:
         sk_sp<SkSurface> getSurfaceRaster(int w, int h);
         bool fFffiInterpreter = false;
@@ -70,5 +79,7 @@ namespace ImZeroClient
 
         ImGuiSkia::Driver::App fApp{};
         sk_sp<SkSurface> fSurface{nullptr};
+        FILE *fFffiInFile = nullptr;
+        FILE *fFffiOutFile = nullptr;
     };
 }

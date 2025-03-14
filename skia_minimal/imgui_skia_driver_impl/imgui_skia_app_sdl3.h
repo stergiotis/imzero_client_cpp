@@ -12,8 +12,8 @@ namespace ImGuiSkia::Driver {
     class App {
     public:
         App();
-        void postRender(FrameExportFormatE frameExportFormat, SkSurface* surface, int width, int height);
         ~App();
+        void postRender(FrameExportFormatE frameExportFormat, SkSurface* surface, int width, int height);
         void prePaint(const SkSurface* surface, int width, int height);
         SkSurface* preRender(bool& done, int& width, int& height);
         FrameExportFormatE render(SkSurface* surface, int width, int height);

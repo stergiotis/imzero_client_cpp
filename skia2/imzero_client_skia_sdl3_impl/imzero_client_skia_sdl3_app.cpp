@@ -58,7 +58,7 @@
 #define QOI_NO_STDIO
 #define QOI_FREE static_assert(false && "free should never be called")
 #define QOI_MALLOC(sz) qoiMalloc(sz)
-static void *qoiMalloc(size_t sz) {
+static void *qoiMalloc(const size_t sz) {
     static void *qoiBuffer = nullptr;
     static size_t lastSz = 0;
     if(qoiBuffer == nullptr) {
@@ -75,7 +75,7 @@ static void applyFlag(int &flag,T val,bool v) {
     if(v) {
         flag |= val;
     } else {
-        flag &= ~(val);
+        flag &= ~val;
     }
 }
 constexpr int msaaSampleCount = 0; //4;
@@ -621,40 +621,80 @@ static void printColorMode(FILE *fd) {
 #endif
 }
 
-int ImZeroClient::App::Run(ImZeroCliOptions &opts) {
+void ImZeroClient::App::setup(ImZeroCliOptions &opts) {
     printColorMode(stderr);
     // prevent SIGPIPE when writing frames or reading user interaction events
     //signal(SIGPIPE, SIG_IGN);
 
     sk_sp<SkTypeface> typeface = nullptr;
     sk_sp<SkData> ttfData = nullptr;
-    FILE *fffiInFile = stdin;
-    FILE *fffiOutFile = stdout;
     {
         // setup skia/imgui shared objects
         if (opts.fFffiInterpreter) {
             if (opts.fFffiInFile != nullptr) {
-                fffiInFile = fopen(opts.fFffiInFile, "rw");
-                if (fffiInFile == nullptr) {
+                fFffiInFile = fopen(opts.fFffiInFile, "rw");
+                if (fFffiInFile == nullptr) {
                     fprintf(stderr, "unable to open fffInFile %s: %s", opts.fFffiInFile, strerror(errno));
                     exit(1);
                 }
-                setvbuf(fffiInFile, nullptr, _IONBF, 0);
+                setvbuf(fFffiInFile, nullptr, _IONBF, 0);
             }
             if (opts.fFffiOutFile != nullptr) {
-                fffiOutFile = fopen(opts.fFffiOutFile, "w");
-                if (fffiOutFile == nullptr) {
+                fFffiOutFile = fopen(opts.fFffiOutFile, "w");
+                if (fFffiOutFile == nullptr) {
                     fprintf(stderr, "unable to open fffOutFile %s: %s", opts.fFffiOutFile, strerror(errno));
                     exit(1);
                 }
-                setvbuf(fffiOutFile, nullptr, _IONBF, 0);
+                setvbuf(fFffiOutFile, nullptr, _IONBF, 0);
             }
         }
     }
-
-    if (opts.fFffiInterpreter) {
-        render_init(fffiInFile, fffiOutFile);
+    fFffiInterpreter = opts.fFffiInterpreter;
+    if (fFffiInterpreter) {
+        //render_init(fffiInFile, fffiOutFile);
     }
+    fApp.setup(opts.fBaseOptions);
+}
+SkSurface* ImZeroClient::App::preRender(bool& done, int& width, int& height) {
+   return fApp.preRender(done, width, height);
+}
+void ImZeroClient::App::postRender(ImGuiSkia::FrameExportFormatE frameExportFormat, SkSurface* surface, int width, int height) {
+    return fApp.postRender(frameExportFormat, surface, width, height);
+}
+ImGuiSkia::FrameExportFormatE ImZeroClient::App::render(SkSurface* surface, int width, int height) {
+    static bool first = true;
+    auto const r = fApp.render(surface, width, height);
+    if (fFffiInterpreter) {
+        if (first) {
+            first = false;
+            render_init(fFffiInFile, fFffiOutFile);
+        }
+        render_render();
+    }
+    return r;
+}
+void ImZeroClient::App::postPaint(SkSurface* surface, ImGuiSkia::FrameExportFormatE frameExportFormat, int width, int height) {
+   return fApp.postPaint(surface, frameExportFormat, width, height);
+}
+void ImZeroClient::App::cleanup() {
+    if (fFffiInterpreter) {
+       render_cleanup();
+    }
+    fApp.cleanup();
+}
+
+int ImZeroClient::App::mainLoop() {
+    bool done = false;
+    int width;
+    int height;
+    while(!done) {
+        auto const surface = preRender(done,width,height);
+        if (surface != nullptr) {
+            const auto frameExportFormat = render(surface,width,height);
+            postRender(frameExportFormat, surface, width,height);
+        }
+    }
+
     return 0;
 }
 int ImZeroClient::App::mainLoopHeadless(const ImZeroCliOptions &opts, ImVec4 const &clearColor) {

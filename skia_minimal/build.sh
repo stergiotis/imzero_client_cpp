@@ -5,6 +5,6 @@ cd "$here"
 export IMGUI_SKIA_CPP_ROOT="$(realpath "$here")/.."
 ./copy_libs.sh
 ./build_cpp.sh
-rm -rf bin
-mkdir -p bin
-mv imgui_skia_exe bin
+#rm -rf bin
+#mkdir -p bin
+#mv imgui_skia_exe bin

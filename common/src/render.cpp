@@ -127,14 +127,11 @@ void render_init(FILE *fdInput,FILE *fdOutput) {
     sendInit();
     receiveInit();
 
-    interpretCommands();
-    fprintf(stderr,"end of render_init\n");
+    //interpretCommands();
 }
-
 
 void render_render() {
     interpretCommands();
-    //EmitDrawList(stdout);
 }
 
 void render_cleanup() {

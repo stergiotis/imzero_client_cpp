@@ -7,7 +7,7 @@ let common =
 	let sourceTreePartsImGuiSkia = ../skia_minimal/dhall/sourceTreeParts.dhall
 	let target = {os = sourceTreePartsImGuiSkia.TargetOs.linux}
 	let librarySourceTreeParts = [
-		, sourceTreePartsImGuiSkia.systemFlags target
+        , sourceTreePartsImGuiSkia.systemFlags target
         , sourceTreePartsImGuiSkia.flatbuffers
         , sourceTreePartsImGuiSkia.imguiWithHooks1919Wip sourceTreePartsImGuiSkia.ImGuiAppHelper.SDL3
         , sourceTreePartsImGuiSkia.imguiSkiaImpl
