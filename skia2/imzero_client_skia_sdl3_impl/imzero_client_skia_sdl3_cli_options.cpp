@@ -29,7 +29,7 @@ void ImZeroCliOptions::usage(const char *name, FILE *file) const {
     fprintf(file,"    -videoResolutionHeight [int:%u]\n", fVideoResolutionHeight);
     fprintf(file,"    -videoExitAfterNFrames [int:%u]\n", fVideoExitAfterNFrames);
 }
-void ImZeroCliOptions::parse(int argc, const char **argv,FILE *logChannel, uint64_t &usedFlags) {
+void ImZeroCliOptions::parse(const int argc, const char **argv,FILE *logChannel, uint64_t &usedFlags) {
     fFffiInFile = ImGuiSkia::Driver::findFlagValueDefault(logChannel,usedFlags, argc, argv, "-fffiInFile", fFffiInFile);
     fFffiOutFile = ImGuiSkia::Driver::findFlagValueDefault(logChannel,usedFlags, argc, argv, "-fffiOutFile", fFffiOutFile);
     fFffiInterpreter = ImGuiSkia::Driver::getBoolFlagValue(logChannel,usedFlags,argc,argv,"-fffiInterpreter",fFffiInterpreter);

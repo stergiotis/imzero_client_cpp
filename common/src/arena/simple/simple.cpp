@@ -9,7 +9,7 @@
 uint8_t *arena = nullptr;
 int64_t arenaPos = 0;
 int64_t arenaAllocSize = 8ULL*1024ULL*1024ULL*1024ULL;
-constexpr const int64_t alignment = static_cast<int64_t>(alignof(std::max_align_t));
+constexpr int64_t alignment = alignof(std::max_align_t);
 
 static void adjustAlignment() {
     // ensure the _next_ allocation will be properly aligned
@@ -17,7 +17,7 @@ static void adjustAlignment() {
 }
 void arenaInit() {
     if(arena == nullptr) {
-        arena = (uint8_t*)malloc(arenaAllocSize);
+        arena = static_cast<uint8_t*>(malloc(arenaAllocSize));
         assert(arena != nullptr);
         adjustAlignment();
     }
@@ -35,23 +35,23 @@ void arenaFree() {
     arenaPos = 0;
 }
 void *arenaMalloc(size_t sz) {
-    assert((int64_t)sz <= (arenaAllocSize-arenaPos));
-    if((int64_t)sz > (arenaAllocSize-arenaPos)) {
-	    fprintf(stderr,"sz=%ld,pos=%ld\n",(long)sz,(long)arenaPos);
+    assert(static_cast<int64_t>(sz) <= (arenaAllocSize-arenaPos));
+    if(static_cast<int64_t>(sz) > (arenaAllocSize-arenaPos)) {
+	    fprintf(stderr,"sz=%ld,pos=%ld\n",static_cast<long>(sz),arenaPos);
     	return nullptr;
     }
-    auto r = arena+arenaPos;
+    const auto r = arena+arenaPos;
     arenaPos+=static_cast<int64_t>(sz);
     adjustAlignment();
     return r;
 }
 void *arenaCalloc(size_t nmemb,size_t sz) {
-    auto s = nmemb*sz;
-    auto r = arenaMalloc(s);
+    const auto s = nmemb*sz;
+    const auto r = arenaMalloc(s);
     assert(r != nullptr);
     memset(r,0x00,s);
     return r;
 }
 bool arenaBelongsForSureToArena(const void *ptr) {
-    return ((uintptr_t)ptr >= (uintptr_t)arena && (uintptr_t)ptr < (uintptr_t)arena + (uintptr_t)arenaAllocSize);
+    return (reinterpret_cast<uintptr_t>(ptr) >= reinterpret_cast<uintptr_t>(arena) && reinterpret_cast<uintptr_t>(ptr) < reinterpret_cast<uintptr_t>(arena) + static_cast<uintptr_t>(arenaAllocSize));
 }

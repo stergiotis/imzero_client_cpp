@@ -714,7 +714,7 @@ int ImZeroClient::App::mainLoopHeadless(const ImZeroCliOptions &opts, ImVec4 con
 void ImZeroClient::App::loopEmpty(const ImZeroCliOptions &opts) {
     const int w = static_cast<int>(opts.fVideoResolutionWidth);
     const int h = static_cast<int>(opts.fVideoResolutionHeight);
-    uint64_t maxFrame = opts.fVideoExitAfterNFrames;
+    const uint64_t maxFrame = opts.fVideoExitAfterNFrames;
 
     while(maxFrame == 0 || fFrame < maxFrame) {
         videoPaint(nullptr,w,h);
@@ -728,7 +728,7 @@ void ImZeroClient::App::loopWebp(const ImZeroCliOptions &opts) {
     SkWebpEncoder::Options webPOptions;
 
     auto const rasterSurface = getSurfaceRaster(w,h);
-    auto canvas = rasterSurface->getCanvas();
+    const auto canvas = rasterSurface->getCanvas();
 
     if(fOutputFormat == kRawFrameOutputFormat_WebP_Lossy) {
         webPOptions.fCompression = SkWebpEncoder::Compression::kLossy;
@@ -737,7 +737,7 @@ void ImZeroClient::App::loopWebp(const ImZeroCliOptions &opts) {
         webPOptions.fCompression = SkWebpEncoder::Compression::kLossless;
         webPOptions.fQuality = 0.0f;
     }
-    uint64_t maxFrame = opts.fVideoExitAfterNFrames;
+    const uint64_t maxFrame = opts.fVideoExitAfterNFrames;
 
     videoPaint(canvas,w,h);
     videoPostPaint();
@@ -766,10 +766,10 @@ void ImZeroClient::App::loopJpeg(const ImZeroCliOptions &opts) {
     SkJpegEncoder::Options jpegOptions;
 
     auto const rasterSurface = getSurfaceRaster(w,h);
-    auto canvas = rasterSurface->getCanvas();
+    const auto canvas = rasterSurface->getCanvas();
 
     jpegOptions.fQuality = 80;
-    uint64_t maxFrame = opts.fVideoExitAfterNFrames;
+    const uint64_t maxFrame = opts.fVideoExitAfterNFrames;
 
     videoPaint(canvas,w,h);
     videoPostPaint();
@@ -797,10 +797,10 @@ void ImZeroClient::App::loopPng(const ImZeroCliOptions &opts) {
     SkPngEncoder::Options pngOptions;
 
     auto const rasterSurface = getSurfaceRaster(w,h);
-    auto canvas = rasterSurface->getCanvas();
+    const auto canvas = rasterSurface->getCanvas();
 
     pngOptions.fZLibLevel = 6;
-    uint64_t maxFrame = opts.fVideoExitAfterNFrames;
+    const uint64_t maxFrame = opts.fVideoExitAfterNFrames;
 
     videoPaint(canvas,w,h);
     videoPostPaint();
@@ -833,9 +833,9 @@ void ImZeroClient::App::loopQoi(const ImZeroCliOptions &opts) {
     };
 
     auto const rasterSurface = getSurfaceRaster(w,h);
-    auto canvas = rasterSurface->getCanvas();
+    const auto canvas = rasterSurface->getCanvas();
     auto stream = SkFILEWStream(opts.fVideoRawFramesFile);
-    uint64_t maxFrame = opts.fVideoExitAfterNFrames;
+    const uint64_t maxFrame = opts.fVideoExitAfterNFrames;
 
     videoPaint(canvas,w,h);
     videoPostPaint();
@@ -862,9 +862,9 @@ void ImZeroClient::App::loopBmp(const ImZeroCliOptions &opts) {
     const auto bmpEncoder = BmpBGRA8888Encoder(w,h);
 
     auto const rasterSurface = getSurfaceRaster(w,h);
-    auto canvas = rasterSurface->getCanvas();
+    const auto canvas = rasterSurface->getCanvas();
 
-    uint64_t maxFrame = opts.fVideoExitAfterNFrames;
+    const uint64_t maxFrame = opts.fVideoExitAfterNFrames;
 
     videoPaint(canvas,w,h);
     videoPostPaint();
@@ -934,7 +934,7 @@ void ImZeroClient::App::loopSvg(const ImZeroCliOptions &opts) {
             canvas = SkSVGCanvas::Make(SkRect::MakeIWH(w,h), &stream, svgCanvasFlags).release();
             break;
     }
-    uint64_t maxFrame = opts.fVideoExitAfterNFrames;
+    const uint64_t maxFrame = opts.fVideoExitAfterNFrames;
 
     videoPaint(canvas,w,h);
     videoPostPaint();
@@ -960,7 +960,7 @@ void ImZeroClient::App::loopSkp(const ImZeroCliOptions &opts) {
     videoPostPaint();
     fFrame = 0;
     while(maxFrame == 0 || fFrame < maxFrame) {
-        auto canvas = skiaRecorder.beginRecording(SkIntToScalar(w), SkIntToScalar(h));
+        const auto canvas = skiaRecorder.beginRecording(SkIntToScalar(w), SkIntToScalar(h));
         videoPaint(canvas,w,h);
 
         { ZoneScoped;
@@ -991,7 +991,7 @@ void ImZeroClient::App::videoPostPaint() {
 void ImZeroClient::App::videoPaint(SkCanvas* canvas, int width, int height) { ZoneScoped;
     ImGui::useVectorCmd = fApp.fUseVectorCmd;
     resetReceiveStat();
-    resetSendStat();
+    ::resetSendStat();
     if(fFffiInterpreter) { ZoneScopedN("render fffi commands");
         render_render();
     } else { ZoneScopedN("demo window");
@@ -1427,6 +1427,16 @@ void ImZeroClient::App::ensureRawFrameFileOpened(const ImZeroCliOptions &opts) {
         }
         fRawFrameFileOpened = true;
     }
+}
+sk_sp<SkSurface> ImZeroClient::App::getSurfaceRaster(int const w, int const h) {
+    if(fSurface == nullptr) {
+        constexpr SkColorType colorType = kRGBA_8888_SkColorType;
+        constexpr SkAlphaType alphaType = kPremul_SkAlphaType;
+        const sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
+        const auto c = SkColorInfo(colorType, alphaType, colorSpace);
+        fSurface = SkSurfaces::Raster(SkImageInfo::Make(SkISize::Make(w,h), c));
+    }
+    return fSurface;
 }
 
 ImZeroClient::App::App() {

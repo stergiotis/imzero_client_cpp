@@ -69,5 +69,6 @@ namespace ImZeroClient
         uint64_t fTime = 0;
 
         ImGuiSkia::Driver::App fApp{};
+        sk_sp<SkSurface> fSurface{nullptr};
     };
 }

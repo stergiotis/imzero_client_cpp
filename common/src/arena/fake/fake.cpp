@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
-#include "../arena.h"
 
 void **ptrs = nullptr;
 int pos=0;

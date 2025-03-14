@@ -1,10 +1,8 @@
 #pragma once
 #include <cstdint>
-#include "casts.h"
 #include <imgui.h>
 #include <implot.h>
 #include <cstdio>
-#include <cstring>
 #include <type_traits>
 #include <string>
 extern FILE *fdOut;
@@ -17,7 +15,7 @@ size_t fwrite_sendStat(const void *__restrict __ptr, size_t __size,
                       size_t __n, FILE *__restrict __s) noexcept;
 inline size_t fwrite_sendStat(const void *__restrict __ptr, size_t __size,
                               size_t __n, FILE *__restrict __s) noexcept {
-    auto t = fwrite(__ptr,__size,__n,__s);
+    const auto t = fwrite(__ptr,__size,__n,__s);
     totalSentBytes += t;
     return t;
 }
@@ -39,14 +37,14 @@ void sendArray(const T *v) {
 }
 template <typename T>
 void sendSlice(const T *v, size_t len) {
-    sendValue<uint32_t>((uint32_t)len);
+    sendValue<uint32_t>(static_cast<uint32_t>(len));
     if(len > 0){
         fwrite_sendStat(v,sizeof(T),len,fdOut);
     }
 }
 template <typename T>
 void sendSlice(const T *begin, const T *endIncl) {
-    auto len = (size_t)((uintptr_t)endIncl-(uintptr_t)begin+1);
+    const auto len = reinterpret_cast<uintptr_t>(endIncl)-reinterpret_cast<uintptr_t>(begin)+1;
     sendSlice<T>(begin,len);
 }
 void sendEmptyString();

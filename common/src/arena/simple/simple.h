@@ -1,6 +1,4 @@
 #pragma once
-#include <cstdint>
-#include <cstdlib>
 
 void arenaInit();
 size_t arenaSize();

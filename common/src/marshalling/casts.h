@@ -1,3 +1,4 @@
+#pragma once
 #define IM_VEC2_CLASS_EXTRA                                                     \
         constexpr ImVec2(const float *f) : x(f[0]), y(f[1]) {}
 

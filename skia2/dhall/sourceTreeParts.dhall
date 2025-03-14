@@ -247,6 +247,7 @@ let imzeroClientSkiaSdl3Impl =
     let dir = path (../imzero_client_skia_sdl3_impl as Location)
     in sourceTreePart::{
 	, name = "imzeroClientSkiaSdl3Impl"
+	, executable = True
 	, dir = dir
 	, sources = [
 		, "${dir}/main.cpp"

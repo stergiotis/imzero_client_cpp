@@ -1,4 +1,4 @@
-#include <string.h>
+#include <cstring>
 #include <cassert>
 #include "receive.h"
 #include "helper.h"
@@ -12,7 +12,7 @@ const char ** convertNullSeparatedStringArrayToArray(const char *nullsepstra, si
     if(len == 0){
         return nullptr;
     }
-    auto retr = (const char **)arenaMalloc(len*sizeof(void *));
+    auto retr = static_cast<const char**>(arenaMalloc(len * sizeof(void*)));
     assert(retr != nullptr);
 
     retr[0] = nullsepstra;
@@ -30,7 +30,7 @@ const char ** convertNullSeparatedStringArrayToArray(const char *nullsepstra, si
 }
 
 size_t findNullSeparatedStringArrayLength(const char *nullsepstra) {
-    size_t l = getStringLength(nullsepstra);
+    const size_t l = getStringLength(nullsepstra);
     const char *end = nullsepstra+l+1;
     size_t n = 0;
     auto t=findNull(nullsepstra);
