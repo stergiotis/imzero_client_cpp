@@ -75,7 +75,7 @@ const uint32_t FuncProcIdFlush = 0xffffffff;
 #endif
 
 uint32_t lap = 0;
-static void interpretCommands() {
+void interpretCommands() {
     lap++;
     arenaReset((lap & 0xff) == 0);
     bool flushed = false;
@@ -106,10 +106,10 @@ static void interpretCommands() {
     }
 }
 
-static void setup_imgui() {
+/*static void setup_imgui() {
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags &= ~ImGuiConfigFlags_ViewportsEnable;
-}
+}*/
 
 #include "implot_style.h"
 #include "adobe_spectrum_style.h"
@@ -119,7 +119,7 @@ void render_init(FILE *fdInput,FILE *fdOutput) {
     //StyleImPlot();
     //StyleAdobeSpectrum();
     ImGui::StyleColorsDark();
-    setup_imgui();
+    //setup_imgui();
 
     ImPlot::CreateContext();
 

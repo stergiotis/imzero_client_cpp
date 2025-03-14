@@ -85,23 +85,12 @@ link_libraries(-Wl,-rpath,'$ORIGIN/../lib' -Wl,-z,origin
 -lskunicode
 -lbentleyottmann
 -lskshaper
-# mainSkiaSdl3Minimal
--ldl
--lpthread
--lfreetype
--lz
--lfontconfig
--lwebpmux
--lwebpdemux
--lX11
--lGLU
--lGL
 )
 
 # empty target flatbuffers
 
 # begin imguiWithHooks1919Wip
-add_library(imguiWithHooks1919Wip OBJECT /home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./imgui_w_hooks_1.91.9_wip/imgui.cpp
+add_library(imguiWithHooks1919Wip STATIC /home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./imgui_w_hooks_1.91.9_wip/imgui.cpp
 /home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./imgui_w_hooks_1.91.9_wip/imgui_demo.cpp
 /home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./imgui_w_hooks_1.91.9_wip/imgui_draw.cpp
 /home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./imgui_w_hooks_1.91.9_wip/imgui_tables.cpp
@@ -111,7 +100,7 @@ add_library(imguiWithHooks1919Wip OBJECT /home/deck/repo/imzero_client_cpp/skia_
 # end imguiWithHooks1919Wip
 
 # begin imguiSkiaImpl
-add_library(imguiSkiaImpl OBJECT /home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./imgui_skia_impl/imgui_skia_extensions.cpp
+add_library(imguiSkiaImpl STATIC /home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./imgui_skia_impl/imgui_skia_extensions.cpp
 /home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./imgui_skia_impl/imgui_skia_hooks_impl.cpp
 /home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./imgui_skia_impl/imgui_skia_imzero_cmd_render.cpp
 /home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./imgui_skia_impl/imgui_skia_paragraph.cpp
@@ -124,29 +113,14 @@ add_library(imguiSkiaImpl OBJECT /home/deck/repo/imzero_client_cpp/skia_minimal/
 # empty target skiaShared
 
 # begin imguiSkiaDriverImpl
-add_library(imguiSkiaDriverImpl OBJECT /home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./imgui_skia_driver_impl/imgui_skia_app_sdl3.cpp
+add_library(imguiSkiaDriverImpl STATIC /home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./imgui_skia_driver_impl/imgui_skia_app_sdl3.cpp
 /home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./imgui_skia_driver_impl/imgui_skia_cli_options.cpp)
 # end imguiSkiaDriverImpl
 
-# begin mainSkiaSdl3Minimal
-add_library(mainSkiaSdl3Minimal OBJECT /home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./example_sdl3/main.cpp)
-target_compile_options(mainSkiaSdl3Minimal PUBLIC -Wno-unused-parameter)
-# end mainSkiaSdl3Minimal
-
 # begin tracyDisabled
-add_library(tracyDisabled OBJECT /home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./contrib/tracy/public/TracyClient.cpp)
+add_library(tracyDisabled STATIC /home/deck/repo/imzero_client_cpp/skia_minimal/../skia_minimal/./contrib/tracy/public/TracyClient.cpp)
 # end tracyDisabled
-add_executable(imgui_skia_exe $<TARGET_OBJECTS:imguiWithHooks1919Wip>
-$<TARGET_OBJECTS:imguiSkiaImpl>
-$<TARGET_OBJECTS:imguiSkiaDriverImpl>
-$<TARGET_OBJECTS:mainSkiaSdl3Minimal>
-$<TARGET_OBJECTS:tracyDisabled>)
 add_library(imgui_skia STATIC $<TARGET_OBJECTS:imguiWithHooks1919Wip>
 $<TARGET_OBJECTS:imguiSkiaImpl>
 $<TARGET_OBJECTS:imguiSkiaDriverImpl>
 $<TARGET_OBJECTS:tracyDisabled>)
-add_executable(imgui_skia_exe2 $<TARGET_OBJECTS:mainSkiaSdl3Minimal>)
-add_dependencies(imgui_skia_exe2 imgui_skia)
-add_library(libimgui_skia2 STATIC IMPORTED)
-set_target_properties(libimgui_skia2 PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_LIST_DIR}/build/libimgui_skia.a")
-target_link_libraries(imgui_skia_exe2 libimgui_skia2)

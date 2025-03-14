@@ -11,7 +11,7 @@ let common =
         , sourceTreePartsRepo.sdl3Shared
         , sourceTreePartsRepo.skiaShared
         , sourceTreePartsRepo.imguiSkiaDriverImpl
-        , sourceTreePartsRepo.mainSkiaSdl3Minimal
+        --, sourceTreePartsRepo.mainSkiaSdl3Minimal
     ] 
     # (if debug then [ , sourceTreePartsRepo.tracyEnabled ] else [ ,sourceTreePartsRepo.tracyDisabled ] : List lib.sourceTreePart.Type )
     let cxx = "clang++"

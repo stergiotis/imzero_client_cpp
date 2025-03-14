@@ -18,13 +18,10 @@ cmake.cmakelistsToText cmake.cmakelists::{
 	, sourceTreeParts = common.sourceTreeParts
 	, cxxStandard = common.cppstd
 }
---++ "\n"
---++ "add_executable(imgui_skia_exe $<TARGET_OBJECTS:mainSkiaSdl3Minimal>)\n"
---++ "target_link_libraries(imgui_skia_exe imgui_skia)\n"
 
 -- simulate using the static library libimgui_skia.a in a project
-++ "add_executable(imgui_skia_exe2 $<TARGET_OBJECTS:mainSkiaSdl3Minimal>)\n"
-++ "add_dependencies(imgui_skia_exe2 imgui_skia)\n"
-++ "add_library(libimgui_skia2 STATIC IMPORTED)\n"
-++ "set_target_properties(libimgui_skia2 PROPERTIES IMPORTED_LOCATION \"\${CMAKE_CURRENT_LIST_DIR}/build/libimgui_skia.a\")\n"
-++ "target_link_libraries(imgui_skia_exe2 libimgui_skia2)\n"
+--++ "add_executable(imgui_skia_exe2 $<TARGET_OBJECTS:mainSkiaSdl3Minimal>)\n"
+--++ "add_dependencies(imgui_skia_exe2 imgui_skia)\n"
+--++ "add_library(libimgui_skia2 STATIC IMPORTED)\n"
+--++ "set_target_properties(libimgui_skia2 PROPERTIES IMPORTED_LOCATION \"\${CMAKE_CURRENT_LIST_DIR}/build/libimgui_skia.a\")\n"
+--++ "target_link_libraries(imgui_skia_exe2 libimgui_skia2)\n"

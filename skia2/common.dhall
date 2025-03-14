@@ -15,18 +15,18 @@ let common =
 	]
 	# (if debug then [ , sourceTreePartsImGuiSkia.tracyEnabled ] else [ , sourceTreePartsImGuiSkia.tracyDisabled ] : List lib.sourceTreePart.Type )
 	let sourceTreeParts = [
+		, sourceTreePartsRepo.marshalling
+		, sourceTreePartsRepo.arena
+		, sourceTreePartsRepo.binding
+		, sourceTreePartsRepo.render
+
 		, sourceTreePartsRepo.imguiImplot
 		, sourceTreePartsRepo.imguiToggle
 		, sourceTreePartsRepo.imguiKnobs
 		, sourceTreePartsRepo.imguiCoolbar
 		, sourceTreePartsRepo.imguiFlamegraph
 		, sourceTreePartsRepo.imguiTextedit
-
-		, sourceTreePartsRepo.marshalling
-		, sourceTreePartsRepo.arena
 		, sourceTreePartsRepo.widgets
-		, sourceTreePartsRepo.render
-		, sourceTreePartsRepo.binding
 
 		, sourceTreePartsRepo.imzeroClientSkiaSdl3Impl
 	] 
