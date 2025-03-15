@@ -25,4 +25,4 @@ mkdir -p build
 cd build
 cmake ../CMakeLists.txt
 cmake --build . -j
-mv *_exe ..
+mv mainSkiaSdl3 ../imgui_skia_exe

@@ -539,6 +539,7 @@ let mainSkiaSdl3Minimal =
 let mainSkiaSdl3 = 
     let dir = "./main/sdl3"
     in sourceTreePart::{
+        , executable = True
 	, name = "mainSkiaSdl3"
 	, dir = dir
 	, sources = [

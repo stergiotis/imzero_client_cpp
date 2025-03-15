@@ -1,6 +1,7 @@
 #include "imgui.h"
 #include "tracy/Tracy.hpp"
 #include "imgui_internal.h"
+#include "include/core/SkFont.h"
 
 #define IMZERO_DRAWLIST_BEGIN if(ImGui::useVectorCmd) {
 #define IMZERO_DRAWLIST_END return false; }
@@ -200,7 +201,7 @@ namespace ImGui {
     bool Hooks::Global::Pre::RenderDimmedBackdgroundBehindWindow(::ImGuiWindow *window, ImU32 col) {
         return false;
     }
-    bool Hooks::Global::Pre::InputTextCalcTextSize(::ImVec2 &out, ::ImGuiContext* ctx, const char* text_begin, const char* text_end, const char** remaining, ImVec2* out_offset, bool stop_on_new_line) {
+    bool Hooks::Global::Pre::InputTextCalcTextSize(::ImVec2 &out, const ::ImGuiContext* ctx, const char* text_begin, const char* text_end, const char** remaining, ImVec2* out_offset, bool stop_on_new_line) {
         if (!ImGui::useVectorCmd) {
            return true;
         }
@@ -324,7 +325,7 @@ namespace ImGui {
     int Hooks::ImDrawListSplitter::MergeUpdate(::ImDrawListSplitter &splitter,int i,int prev) {
         return prev + static_cast<int>(splitter._ChannelsFbCmds[i]->size());
     }
-    void Hooks::ImDrawListSplitter::MergeReserve(::ImDrawList *drawList,int n) {
+    void Hooks::ImDrawListSplitter::MergeReserve(const ::ImDrawList *drawList,int n) {
         drawList->_FbCmds->reserve(drawList->_FbCmds->size() + n);
     }
     void Hooks::ImDrawListSplitter::MergeOp(::ImDrawListSplitter &splitter,::ImDrawList *drawList,int i) { ZoneScopedN("serialize and add split draw list");
