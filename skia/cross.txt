@@ -1,0 +1,5 @@
+https://gist.github.com/jwinarske/a3f40d5d6e38f2c513c65955c0916339
+https://github.com/rust-skia/rust-skia/blob/master/.github/workflows/windows-release.yaml
+https://github.com/rust-skia/rust-skia/blob/master/.github/workflows/windows-release.yaml
+https://github.com/mpsuzuki/skia-binaries/blob/master/build-skia-shared.sh
+https://github.com/aseprite/skia/blob/aseprite-m102/.github/workflows/build.yml

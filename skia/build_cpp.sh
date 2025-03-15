@@ -2,9 +2,6 @@
 set -ev
 here=$(dirname "$(readlink -f "$BASH_SOURCE")")
 cd "$here"
-flatc="../../contrib/flatbuffers/flatc"
-"$flatc" -o main --cpp ../spec/ImZeroFB.fbs --reflect-types --reflect-names --filename-suffix .out
-xxd -i ../spec/ImZeroFB.fbs main/ImZeroFB.fbs.gen.h
 
 ./cmakelists.dhall
 
@@ -19,10 +16,9 @@ generate_buildinfo() {
    fi
    echo -en ";\n}\n"
 }
-generate_buildinfo > src/buildinfo.gen.h
+generate_buildinfo > "$here/imzero_client_skia_sdl3_impl/buildinfo.gen.h"
 
 mkdir -p build
 cd build
 cmake ../CMakeLists.txt
 cmake --build . -j
-mv mainSkiaSdl3 ../imgui_skia_exe
