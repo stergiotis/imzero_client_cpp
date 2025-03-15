@@ -218,20 +218,6 @@ void ImGuiSkia::Driver::App::postPaint(SkSurface *surface, FrameExportFormatE fr
 
     FrameMark;
 }
-static void build_ImFontAtlas(ImFontAtlas& atlas, SkPaint& fontPaint) {
-    int w, h;
-    unsigned char* pixels;
-    atlas.GetTexDataAsAlpha8(&pixels, &w, &h);
-    SkImageInfo info = SkImageInfo::MakeA8(w, h);
-    const SkPixmap pmap(info, pixels, info.minRowBytes());
-    const SkMatrix localMatrix = SkMatrix::Scale(1.0f / static_cast<float>(w), 1.0f / static_cast<float>(h));
-    const auto fontImage = SkImages::RasterFromPixmap(pmap, nullptr, nullptr);
-    const auto fontShader = fontImage->makeShader(SkSamplingOptions(SkFilterMode::kLinear), localMatrix);
-    fontPaint.setShader(fontShader);
-    fontPaint.setColor(SK_ColorWHITE);
-    const ImTextureID texId = reinterpret_cast<intptr_t>(&fontPaint);
-    atlas.TexID = texId;
-}
 
 void ImGuiSkia::Driver::App::setup(CliOptions &opts) {
     // prevent SIGPIPE when writing frames or reading user interaction events
@@ -443,10 +429,24 @@ void ImGuiSkia::Driver::App::setup(CliOptions &opts) {
         }
     }
 
-
     createContext(initialWindowWidth, initialWindowHeight);
-    build_ImFontAtlas(*((ImGui::GetIO()).Fonts), fFontPaint);
 }
+void ImGuiSkia::Driver::App::completeFontSetup() {
+    ImFontAtlas &atlas = *((ImGui::GetIO()).Fonts);
+    int w, h;
+    unsigned char* pixels;
+    atlas.GetTexDataAsAlpha8(&pixels, &w, &h);
+    const SkImageInfo info = SkImageInfo::MakeA8(w, h);
+    const SkPixmap pmap(info, pixels, info.minRowBytes());
+    const SkMatrix localMatrix = SkMatrix::Scale(1.0f / static_cast<float>(w), 1.0f / static_cast<float>(h));
+    const auto fontImage = SkImages::RasterFromPixmap(pmap, nullptr, nullptr);
+    const auto fontShader = fontImage->makeShader(SkSamplingOptions(SkFilterMode::kLinear), localMatrix);
+    fFontPaint.setShader(fontShader);
+    fFontPaint.setColor(SK_ColorWHITE);
+    const ImTextureID texId = reinterpret_cast<intptr_t>(&fFontPaint);
+    atlas.TexID = texId;
+}
+
 SkSurface * ImGuiSkia::Driver::App::preRender(bool &done, int &width, int &height) {
     const ImGuiIO &io = ImGui::GetIO();
     width = static_cast<int>(io.DisplaySize.x);

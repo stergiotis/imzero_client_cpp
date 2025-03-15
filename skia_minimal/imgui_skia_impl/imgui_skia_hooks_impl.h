@@ -1,7 +1,6 @@
 #pragma once
 
 #include "imgui_skia_config.h"
-#include "include/core/SkFont.h"
 #include "imgui_skia_paragraph.h"
 
 // NOTE: part of ImDrawChannel as std::vector and FlatBufferBuilder are not trivially default constructible

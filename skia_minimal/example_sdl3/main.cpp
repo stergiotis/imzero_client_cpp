@@ -12,6 +12,7 @@ int main(int argc, const char** argv) {
 
     ImGuiSkia::Driver::App app{};
     app.setup(opts);
+    app.completeFontSetup();
     const int r = app.mainLoop();
     app.cleanup();
     return r;

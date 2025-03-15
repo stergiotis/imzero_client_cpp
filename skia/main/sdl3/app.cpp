@@ -999,7 +999,7 @@ int App::Run(CliOptions &opts) {
         createContext(clearColor, dm->w, dm->h);
     }
 
-    build_ImFontAtlas(*io.Fonts, fFontPaint);
+    //build_ImFontAtlas(*io.Fonts, fFontPaint);
 
     if(headless) {
         return mainLoopHeadless(opts, clearColor);

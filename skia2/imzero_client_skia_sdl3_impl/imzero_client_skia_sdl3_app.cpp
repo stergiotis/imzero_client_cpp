@@ -622,6 +622,8 @@ static void printColorMode(FILE *fd) {
 }
 
 void ImZeroClient::App::setup(ImZeroCliOptions &opts) {
+    fApp.setup(opts.fBaseOptions); // will set up imgui, needed in render_init
+
     printColorMode(stderr);
     // prevent SIGPIPE when writing frames or reading user interaction events
     //signal(SIGPIPE, SIG_IGN);
@@ -629,6 +631,8 @@ void ImZeroClient::App::setup(ImZeroCliOptions &opts) {
     sk_sp<SkTypeface> typeface = nullptr;
     sk_sp<SkData> ttfData = nullptr;
     {
+        fFffiInFile = stdin;
+        fFffiOutFile = stdout;
         // setup skia/imgui shared objects
         if (opts.fFffiInterpreter) {
             if (opts.fFffiInFile != nullptr) {
@@ -650,11 +654,16 @@ void ImZeroClient::App::setup(ImZeroCliOptions &opts) {
         }
     }
     fFffiInterpreter = opts.fFffiInterpreter;
-    if (fFffiInterpreter) {
-        //render_init(fffiInFile, fffiOutFile);
-    }
-    fApp.setup(opts.fBaseOptions);
 }
+void ImZeroClient::App::completeFontSetup() {
+    if (fFffiInterpreter) {
+        render_init(fFffiInFile, fFffiOutFile);
+        // this assumes that the font setup commands will be sent in the first batch before (not evaluated in a frame context)
+        interpretCommands();
+    }
+    fApp.completeFontSetup();
+}
+
 SkSurface* ImZeroClient::App::preRender(bool& done, int& width, int& height) {
    return fApp.preRender(done, width, height);
 }
@@ -662,13 +671,8 @@ void ImZeroClient::App::postRender(ImGuiSkia::FrameExportFormatE frameExportForm
     return fApp.postRender(frameExportFormat, surface, width, height);
 }
 ImGuiSkia::FrameExportFormatE ImZeroClient::App::render(SkSurface* surface, int width, int height) {
-    static bool first = true;
     auto const r = fApp.render(surface, width, height);
     if (fFffiInterpreter) {
-        if (first) {
-            first = false;
-            render_init(fFffiInFile, fFffiOutFile);
-        }
         render_render();
     }
     return r;

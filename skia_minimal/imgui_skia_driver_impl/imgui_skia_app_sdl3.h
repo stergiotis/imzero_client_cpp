@@ -20,6 +20,7 @@ namespace ImGuiSkia::Driver {
         void postPaint(SkSurface* surface, FrameExportFormatE frameExportFormat, int width, int height);
 
         void setup(CliOptions &opts);
+        void completeFontSetup();
         int mainLoop();
         void cleanup();
 

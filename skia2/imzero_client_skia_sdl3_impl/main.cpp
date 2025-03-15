@@ -60,6 +60,7 @@ int main(const int argc, const char** argv) {
 
     ImZeroClient::App app{};
     app.setup(opts);
+    app.completeFontSetup();
 
     const int r = app.mainLoop();
     app.cleanup();

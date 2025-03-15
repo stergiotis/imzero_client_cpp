@@ -41,6 +41,7 @@ namespace ImZeroClient
         void postPaint(SkSurface* surface, ImGuiSkia::FrameExportFormatE frameExportFormat, int width, int height);
 
         void setup(ImZeroCliOptions &opts);
+        void completeFontSetup();
         int mainLoop();
         void cleanup();
     private:
