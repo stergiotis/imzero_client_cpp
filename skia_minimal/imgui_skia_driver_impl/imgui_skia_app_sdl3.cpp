@@ -7,7 +7,6 @@
 #include "imgui_impl_sdl3.h"
 #include "imgui_internal.h"
 
-#include <SDL3/SDL_main.h>
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <SDL3/SDL_opengles2.h>
 #else

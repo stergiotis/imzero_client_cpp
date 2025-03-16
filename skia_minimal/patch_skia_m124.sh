@@ -1,4 +1,5 @@
 #!/bin/bash
+set -ev
 here=$(dirname "$(readlink -f "$BASH_SOURCE")")
 cd "$here/../../contrib/skia/"
 echo "applying patches to skia m124"

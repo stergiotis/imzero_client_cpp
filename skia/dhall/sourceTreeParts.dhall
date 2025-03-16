@@ -258,6 +258,7 @@ let imzeroClientSkiaSdl3Impl =
 	, includeDirs = {
 		, local = [
             , "${dir}"
+            , "${dir}/../../../contrib/qoi"
 			]
 		, global = [] : List Text
 	}

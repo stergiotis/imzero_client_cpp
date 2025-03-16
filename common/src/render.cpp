@@ -5,7 +5,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <cstdio>
+#if defined(linux) || defined(__linux) || defined(__linux__)
 #include <unistd.h>
+#endif
 #include <fcntl.h>
 
 #include <cstdint>

@@ -68,7 +68,7 @@ static void *qoiMalloc(const size_t sz) {
     assert(lastSz == sz && "assuming constant width, height and depth of qoi images");
     return qoiBuffer;
 }
-#include "../contrib/qoi/qoi.h"
+#include "qoi.h"
 
 template <typename T>
 static void applyFlag(int &flag,T val,bool v) {
@@ -635,6 +635,7 @@ void ImZeroClient::App::setup(ImZeroCliOptions &opts) {
         fFffiOutFile = stdout;
         // setup skia/imgui shared objects
         if (opts.fFffiInterpreter) {
+	    #if defined(linux) || defined(__linux) || defined(__linux__)
             if (opts.fFffiInFile != nullptr) {
                 fFffiInFile = fopen(opts.fFffiInFile, "rw");
                 if (fFffiInFile == nullptr) {
@@ -651,6 +652,9 @@ void ImZeroClient::App::setup(ImZeroCliOptions &opts) {
                 }
                 setvbuf(fFffiOutFile, nullptr, _IONBF, 0);
             }
+#else
+// FIXME TODO
+#endif
         }
     }
     fFffiInterpreter = opts.fFffiInterpreter;
@@ -711,7 +715,11 @@ int ImZeroClient::App::mainLoopHeadless(const ImZeroCliOptions &opts, ImVec4 con
 
     if(opts.fVideoUserInteractionEventsFile != nullptr && opts.fVideoUserInteractionEventsFile[0] != '\0') {
         // RDWR: having at least one writer will prevent SIG_PIPE
+#if defined(linux) || defined(__linux) || defined(__linux__)
         fUserInteractionFd = open(opts.fVideoUserInteractionEventsFile, O_RDWR | O_NONBLOCK);
+#else
+	// FIXME TODO
+#endif
         if(fUserInteractionFd == -1) {
             fprintf(stderr, "unable to open user interaction events in file %s: %s\n", opts.fVideoUserInteractionEventsFile, strerror(errno));
             return 1;
@@ -1062,7 +1070,11 @@ void ImZeroClient::App::videoPaint(SkCanvas* canvas, int width, int height) { Zo
 }
 ImZeroClient::App::~App() {
     if(fDispatchInteractionEvents) {
+#if defined(linux) || defined(__linux) || defined(__linux__)
         close(fUserInteractionFd);
+#else
+// FIXME TODO
+#endif
         fDispatchInteractionEvents = false;
     }
 }
@@ -1113,10 +1125,15 @@ void ImZeroClient::App::dispatchUserInteractionEventsBinary() {
                 break;
             case 1: // read message length
             {
+#if defined(linux) || defined(__linux) || defined(__linux__)
                 auto r = read(fUserInteractionFd,p,bytesToRead);
                 if(r <= 0) {
                     return;
                 }
+#else
+		// FIXME TODO
+		int r = 0;
+#endif
                 bytesToRead -= r;
                 p += r;
                 if(bytesToRead == 0) {
@@ -1133,7 +1150,12 @@ void ImZeroClient::App::dispatchUserInteractionEventsBinary() {
                 break;
             case 2: // read message
             {
+#if defined(linux) || defined(__linux) || defined(__linux__)
                 auto r = read(fUserInteractionFd,p,bytesToRead);
+#else
+		// FIXME TODO
+		int r = 0;
+#endif
                 bytesToRead -= r;
                 p += r;
                 if(bytesToRead == 0) {
@@ -1325,7 +1347,12 @@ void ImZeroClient::App::dispatchUserInteractionEventsFB() {
                 break;
             case 1: // read flatbuffers message length
             {
+#if defined(linux) || defined(__linux) || defined(__linux__)
                 auto r = read(fUserInteractionFd,p,bytesToRead);
+#else
+		// FIXME TODO
+		int r = 0;
+#endif
                 if(r <= 0) {
                     return;
                 }
@@ -1346,7 +1373,12 @@ void ImZeroClient::App::dispatchUserInteractionEventsFB() {
             case 2: // read flatbuffers message
             {
                 //fprintf(stderr, "reading message of size %d\n", (int)bytesToRead);
+#if defined(linux) || defined(__linux) || defined(__linux__)
                 auto r = read(fUserInteractionFd,p,bytesToRead);
+#else
+		// FIXME TODO
+		int r = 0;
+#endif
                 bytesToRead -= r;
                 p += r;
                 if(bytesToRead == 0) {

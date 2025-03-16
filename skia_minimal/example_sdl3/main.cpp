@@ -1,6 +1,7 @@
+#include <SDL3/SDL_main.h>
 #include "imgui_skia_app_sdl3.h"
 
-int main(int argc, const char** argv) {
+int SDL_main(int argc, const char** argv) {
     ImGuiSkia::Driver::CliOptions opts{};
     uint64_t usedFlags = 0;
     if(opts.hasHelpFlag(argc, argv)) {

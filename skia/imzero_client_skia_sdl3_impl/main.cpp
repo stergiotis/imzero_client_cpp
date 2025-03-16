@@ -1,7 +1,10 @@
+#include <SDL3/SDL_main.h>
 #include "imzero_client_skia_sdl3_app.h"
 #include "imzero_client_skia_sdl3_cli_options.h"
 
+#if defined(linux) || defined(__linux) || defined(__linux__)
 #include <sys/prctl.h>
+#endif
 #ifdef TRACY_ENABLE
 #include <cstdlib>
 #include "tracy/Tracy.hpp"
@@ -39,7 +42,7 @@ void operator delete(void* ptr) noexcept {
 #endif
 #endif
 
-int main(const int argc, const char** argv) {
+int SDL_main(const int argc, const char** argv) {
 #ifdef TRACY_ENABLE
     ImGui::SetAllocatorFunctions(imZeroMemAlloc,imZeroMemFree,nullptr);
 #endif
@@ -53,10 +56,12 @@ int main(const int argc, const char** argv) {
     opts.parse(argc, argv, stderr, usedFlags);
     opts.checkConsistency(argc, argv, stderr, usedFlags);
 
+#if defined(linux) || defined(__linux) || defined(__linux__)
     if (0 > prctl(PR_SET_DUMPABLE, opts.fCoreDump ? 1 : 0)) {
         perror("unable to set prctl(PR_SET_DUMPABLE)");
         return 1;
     }
+#endif
 
     ImZeroClient::App app{};
     app.setup(opts);
