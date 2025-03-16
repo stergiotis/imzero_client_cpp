@@ -14,14 +14,6 @@ cmake.cmakelistsToText cmake.cmakelists::{
            }
 	, projectName = "imgui_skia_exe"
 	, cxxflags = ["-std=c++${Natural/show common.cppstd}" ] # common.cxxflags # common.stdlibFlags
-	--#  [ , "-I\${CMAKE_CURRENT_LIST_DIR}/../skia_minimal/imgui_w_hooks_1.91.9_wip"
-	--    , "-I\${CMAKE_CURRENT_LIST_DIR}/../skia_minimal/imgui_skia_impl"
-	--    , "-I\${CMAKE_CURRENT_LIST_DIR}/../skia_minimal/imgui_skia_driver_impl"
-	--    , "-I\${CMAKE_CURRENT_LIST_DIR}/../../contrib/skia"
-	--    , "-I\${CMAKE_CURRENT_LIST_DIR}/../../contrib/flatbuffers/include"
-	--    , "-I\${CMAKE_CURRENT_LIST_DIR}/../../contrib/sdl/include"
-	--    , "-I\${CMAKE_CURRENT_LIST_DIR}/../../contrib/tracy/public"
-	--    ]
 	, ldflags = common.ldflags # common.stdlibFlags
 	, sourceTreeParts = common.sourceTreeParts
 	, librarySourceTreeParts = common.librarySourceTreeParts

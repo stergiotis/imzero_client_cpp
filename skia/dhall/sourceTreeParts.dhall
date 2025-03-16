@@ -1,7 +1,7 @@
 let lib = ../../dhall/lib.dhall
 let prelude = ../../dhall/prelude.dhall
 let sourceTreePart = lib.sourceTreePart
-let path = \(loc : prelude.Location.Type) -> "${env:IMGUI_SKIA_CPP_ROOT as Text}/skia2/${lib.locationToString loc}"
+let path = \(loc : prelude.Location.Type) -> "${env:IMGUI_SKIA_CPP_ROOT as Text}/skia/${lib.locationToString loc}"
 let imguiImplot = let dir = path (../src/widgets/imgui_implot as Location) in sourceTreePart::{
 	, name = "imguiImplot"
 	, dir = dir
