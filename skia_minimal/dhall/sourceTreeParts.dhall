@@ -3,7 +3,7 @@ let prelude = ../../dhall/prelude.dhall
 let sourceTreePart = lib.sourceTreePart
 let path = \(loc : prelude.Location.Type) -> "${env:IMGUI_SKIA_CPP_ROOT as Text}/skia_minimal/${lib.locationToString loc}"
 
-let TargetOs = <windows | linux>
+let TargetOs = <windows | linux | windows_cross >
 let Target = {
 	os : TargetOs
 }
@@ -19,6 +19,20 @@ let flatbuffers = let dir = path (../contrib/flatbuffers as Location) in
 	, sources = [] : List Text
 }
 let systemFlags = \(tgt : Target) -> merge {
+	 , windows = sourceTreePart::{
+		        , dir = "."
+				, sources = [] : List Text
+				, name = "systemFlags"
+				, cxxflags = {
+					, local = [] : List Text
+					, global = [
+					] : List Text
+				}
+				, ldflags = {
+					, global = [
+					] : List Text
+				}
+	 }
 	 , linux = sourceTreePart::{
 		        , dir = "."
 				, sources = [] : List Text
@@ -35,7 +49,7 @@ let systemFlags = \(tgt : Target) -> merge {
 					]
 				}
 	 }
-	, windows = let dir = path (./.xwin-cache/splat as Location) in sourceTreePart::{
+	, windows_cross = let dir = path (./.xwin-cache/splat as Location) in sourceTreePart::{
 		        , dir = "."
 				, name = "systemFlags"
 				, sources = [] : List Text
@@ -296,7 +310,7 @@ let skiaShared = \(tgt : Target) ->
 				}
 				, nonSourceObjs = [] : List Text
 			}
-		, windows = sourceTreePart::{
+		, windows_cross = sourceTreePart::{
 				, name = "skiaShared"
 				, dir = dir
 				, sources = [] : List Text
@@ -360,6 +374,87 @@ let skiaShared = \(tgt : Target) ->
 						, "-lskshaper"
 						-- , "-lsvg"
 						--, "-Wl,--verbose"
+					] : List Text
+				}
+				, nonSourceObjs = [] : List Text
+			}
+		, windows = sourceTreePart::{
+				, name = "skiaShared"
+				, dir = dir
+				, sources = [] : List Text
+				, includeDirs = {
+					, local = [] : List Text
+					, global = [
+						, "${dir}"
+					] : List Text
+				}
+				, defines = {, local = [] : List Text
+							, global = [
+								, "MESA_EGL_NO_X11_HEADERS"
+							-- FIXME extract from skia.ninja
+							, "NOMINMAX"
+							, "NDEBUG"
+							, "SK_CODEC_DECODES_BMP"
+							, "SK_CODEC_DECODES_WBMP"
+							, "SKIA_DLL"
+							, "SK_ENABLE_PRECOMPILE"
+							, "SK_GANESH"
+							, "SK_DISABLE_TRACING"
+							, "SK_GAMMA_APPLY_TO_A8"
+							, "SK_ENABLE_AVX512_OPTS"
+							, "SKIA_IMPLEMENTATION=1"
+							, "SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE"
+							, "SK_TYPEFACE_FACTORY_FREETYPE"
+							, "SK_FONTMGR_FREETYPE_EMBEDDED_AVAILABLE"
+							, "SK_FONTMGR_FREETYPE_EMPTY_AVAILABLE"
+							, "SK_TYPEFACE_FACTORY_DIRECTWRITE"
+							, "SK_FONTMGR_DIRECTWRITE_AVAILABLE"
+							, "SK_FONTMGR_GDI_AVAILABLE"
+							, "SK_GL"
+							, "SK_CODEC_ENCODES_JPEG"
+							, "SK_SUPPORT_PDF"
+							, "SK_CODEC_DECODES_JPEG"
+							, "SK_CODEC_ENCODES_PNG"
+							, "SK_CODEC_ENCODES_PNG_WITH_LIBPNG"
+							, "SK_CODEC_ENCODES_WEBP"
+							, "SK_SUPPORT_XPS"
+							, "SK_CODEC_DECODES_ICO"
+							, "SK_CODEC_DECODES_PNG"
+							, "SK_CODEC_DECODES_PNG_WITH_LIBPNG"
+							, "SK_CODEC_DECODES_RAW"
+							, "SK_CODEC_DECODES_WEBP"
+							, "SK_HAS_WUFFS_LIBRARY"
+							, "SK_CODEC_DECODES_GIF"
+							, "SK_XML"
+							, "_HAS_AUTO_PTR_ETC" -- FIXME workaround
+							] : List Text}
+				, cxxflags = {
+					, global = [
+					, "-funwind-tables"
+					, "-ffp-contract=off" -- standard compliant fp processing
+					, "-fstrict-aliasing" -- is on for optimization levels larger than O1
+					, "-fvisibility=hidden"
+					, "-fdata-sections"
+					, "-ffunction-sections"
+					, "-fvisibility-inlines-hidden"
+					, "-fno-exceptions"
+					, "-fno-rtti"
+					] : List Text
+					, local = [
+					] : List Text
+				}
+				, ldflags = {
+					, global = [
+					--	, "-lz"
+					--	, "-lwebpmux"
+					--	, "-lwebpdemux"
+						, "-L${skiaSharedBaseDir}/out/Shared"
+						, "-lskparagraph"
+						, "-lskia"
+						, "-lskunicode_core"
+						, "-lskunicode_icu"
+						, "-lbentleyottmann"
+						, "-lskshaper"
 					] : List Text
 				}
 				, nonSourceObjs = [] : List Text

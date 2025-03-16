@@ -263,14 +263,14 @@ void ImGuiSkia::Driver::App::setup(CliOptions &opts) {
 #if defined(SK_FONTMGR_FONTCONFIG_AVAILABLE)
                 fFontMgr = SkFontMgr_New_FontConfig(nullptr);
 #else
-                fprintf(stderr,"SK_FONTMGR_FONTCONFIG_AVAILABLE is not defined, font manager %s not supported\n",opts.fontManager);
+                fprintf(stderr,"SK_FONTMGR_FONTCONFIG_AVAILABLE is not defined, font manager %s not supported\n",opts.fFontManager);
 #endif
             }
             if (opts.fFontManager != nullptr && strcmp(opts.fFontManager, "directory") == 0) {
 #if defined(SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE)
                 fFontMgr = SkFontMgr_New_Custom_Directory(opts.fFontManagerArg);
 #else
-                fprintf(stderr,"SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE is not defined, font manager %s not supported\n",opts.fontManager);
+                fprintf(stderr,"SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE is not defined, font manager %s not supported\n",opts.fFontManager);
 #endif
             }
             if (fFontMgr == nullptr) {
@@ -557,6 +557,7 @@ ImGuiSkia::Driver::App::App() {
     fFontPaint = SkPaint();
 }
 
+#if defined(linux) || defined(_linux) || defined(__linux__)
 void ImGuiSkia::Driver::App::createContext(const int width, const int height) {
     glViewport(0, 0, width, height);
     glClearColor(fClearColor.x * fClearColor.w, fClearColor.y * fClearColor.w, fClearColor.z * fClearColor.w, fClearColor.w);
@@ -577,6 +578,10 @@ void ImGuiSkia::Driver::App::createContext(const int width, const int height) {
         exit(1);
     }
 }
+#else
+void ImGuiSkia::Driver::App::createContext(const int width, const int height) {
+}
+#endif
 sk_sp<SkSurface> ImGuiSkia::Driver::App::getSurfaceRaster(const int w, const int h) {
     if(fSurface == nullptr) {
         constexpr SkColorType colorType = kRGBA_8888_SkColorType;
