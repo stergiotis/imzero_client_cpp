@@ -5,8 +5,8 @@
 #include "imgui_skia_cli_options.h"
 #include "imgui_skia_imzero_cmd_render.h"
 #include "imgui_skia_setup_ui.h"
-#include "include/gpu/gl/GrGLInterface.h"
-#include "include/gpu/GrDirectContext.h"
+#include "include/gpu/ganesh/gl/GrGLInterface.h"
+#include "include/gpu/ganesh/GrDirectContext.h"
 
 namespace ImGuiSkia::Driver {
     class App {

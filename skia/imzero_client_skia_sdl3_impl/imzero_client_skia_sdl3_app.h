@@ -6,7 +6,7 @@
 #include <SDL3/SDL_video.h>
 #include "include/core/SkSurface.h"
 #include "imzero_client_skia_sdl3_cli_options.h"
-#include "include/gpu/GrDirectContext.h"
+#include "include/gpu/ganesh/GrDirectContext.h"
 #include "imgui.h"
 #include "imgui_skia_app_sdl3.h"
 

@@ -645,6 +645,9 @@ sk_sp<SkSurface> ImGuiSkia::Driver::App::getSurfaceGL() {
 }
 
 void ImGuiSkia::Driver::App::destroyContext() {
+#ifdef _DLL
+    static_assert(_DLL == 0 && "_DLL");
+#endif
     fSurface.reset(nullptr);
 
     if (fContext != nullptr) {

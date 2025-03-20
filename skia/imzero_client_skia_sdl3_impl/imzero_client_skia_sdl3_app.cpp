@@ -6,7 +6,6 @@
 #include <cstring>
 
 
-#include <SDL3/SDL_main.h>
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <SDL3/SDL_opengles2.h>
 #else
@@ -31,7 +30,7 @@
 #include "include/encode/SkWebpEncoder.h"
 #include "bmp_encoder.h"
 #if defined(__linux__)
-#include "include/gpu/gl/glx/GrGLMakeGLXInterface.h"
+#include "include/gpu/ganesh/gl/glx/GrGLMakeGLXInterface.h"
 #endif
 
 #include "include/gpu/ganesh/SkSurfaceGanesh.h"

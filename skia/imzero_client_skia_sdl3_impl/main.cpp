@@ -41,33 +41,45 @@ void operator delete(void* ptr) noexcept {
 }
 #endif
 #endif
-
-int SDL_main(const int argc, const char** argv) {
+extern "C" {
+  int SDL_main(int argc, char* argv[]) {
+#ifdef _DEBUG
+static_assert(_DEBUG == 0 && "_DEBUG is not 0");
+#endif
+#ifdef MD_DynamicRelease
+static_assert(MD_DynamicRelease == 0 && "MD_DynamicRelease is not 0");
+#endif
+#ifdef _DLL
+static_assert(_DLL == 0 && "_DLL is not 0");
+#endif
+static_assert(_HAS_ITERATOR_DEBUGGING == 0 && "_HAS_ITERATOR_DEBUGGING is not 0");
+static_assert(_ITERATOR_DEBUG_LEVEL == 0 && "_ITERATOR_DEBUG_LEVEL is not 0");
 #ifdef TRACY_ENABLE
-    ImGui::SetAllocatorFunctions(imZeroMemAlloc,imZeroMemFree,nullptr);
+      ImGui::SetAllocatorFunctions(imZeroMemAlloc,imZeroMemFree,nullptr);
 #endif
 
-    ImZeroCliOptions opts{};
-    uint64_t usedFlags = 0;
-    if (opts.hasHelpFlag(argc, argv)) {
-       opts.usage(argv[0],stderr);
-       return 0;
-    }
-    opts.parse(argc, argv, stderr, usedFlags);
-    opts.checkConsistency(argc, argv, stderr, usedFlags);
+      ImZeroCliOptions opts{};
+      uint64_t usedFlags = 0;
+      if (opts.hasHelpFlag(argc, const_cast<const char **>(argv))) {
+         opts.usage(argv[0],stderr);
+         return 0;
+      }
+      opts.parse(argc, const_cast<const char**>(argv), stderr, usedFlags);
+      opts.checkConsistency(argc, const_cast<const char**>(argv), stderr, usedFlags);
 
 #if defined(linux) || defined(__linux) || defined(__linux__)
-    if (0 > prctl(PR_SET_DUMPABLE, opts.fCoreDump ? 1 : 0)) {
-        perror("unable to set prctl(PR_SET_DUMPABLE)");
-        return 1;
-    }
+      if (0 > prctl(PR_SET_DUMPABLE, opts.fCoreDump ? 1 : 0)) {
+    perror("unable to set prctl(PR_SET_DUMPABLE)");
+    return 1;
+      }
 #endif
 
-    ImZeroClient::App app{};
-    app.setup(opts);
-    app.completeFontSetup();
+      ImZeroClient::App app{};
+      app.setup(opts);
+      app.completeFontSetup();
 
-    const int r = app.mainLoop();
-    app.cleanup();
-    return r;
+      const int r = app.mainLoop();
+      app.cleanup();
+      return r;
+  }
 }
