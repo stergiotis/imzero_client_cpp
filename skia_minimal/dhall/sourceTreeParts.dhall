@@ -81,21 +81,23 @@ let systemFlags = \(tgt : Target) -> merge {
 				}
 	}
 } tgt.os
-let sdl3Shared = let sdlDir = path (../contrib/sdl as Location)
+let sdl3Shared = let dir = path (../../../contrib/sdl as Location)
 in
 sourceTreePart::{
-	, dir = ""
+	, dir = dir
 	, name = "sdl3Shared"
 	, sources = [] : List Text
+	, includeDirs = {
+		, local = [] : List Text
+		, global = ["${dir}/include"] : List Text
+	}
 	, cxxflags = {
 	   , local = [] : List Text
-	   , global = [
-		, "-I${sdlDir}/include"
-		 ] : List Text
+	   , global = [] : List Text
 	}
 	, ldflags = { global = [
-		, "-L${sdlDir}/build"
-		, "-Wl,--enable-new-dtags"
+		, "-L${dir}/build"
+		--, "-Wl,--enable-new-dtags"
 		, "-lSDL3"
 	 ] : List Text }
 }

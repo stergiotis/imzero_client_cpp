@@ -57,7 +57,7 @@ getContribRepo "https://github.com/stergiotis/imgui_knobs.git" "imgui_knobs" "ma
 getContribRepo "https://github.com/stergiotis/imgui_toggle.git" "imgui_toggle" "main" "2b95aac1732058521d505d6e506f12aa1a331f90"
 getContribRepo "https://github.com/dhall-lang/dhall-lang" "dhall-lang" "master" "v22.0.0"
 getContribRepo "https://github.com/google/flatbuffers.git" "flatbuffers" "master" "129ef422e8a4e89d87a7216a865602673a6d0bf3"
-getContribRepo "https://github.com/google/skia" "skia" "chrome/m124" ""
+getContribRepo "https://github.com/google/skia" "skia" "chrome/m134" ""
 getContribRepo "https://github.com/wolfpld/tracy" "tracy" "master" "v0.11.1"
 getContribRepo "https://github.com/libsdl-org/SDL.git" "sdl" "main" "7c12c63f63be522af2ad8e8216ea7b2786aa42a0"
 getContribRepo "https://github.com/phoboslab/qoi.git" "qoi" "master" "bf7b41c2ff3f24a2031193b62aa76d35e8842b5a"

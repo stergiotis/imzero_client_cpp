@@ -10,6 +10,8 @@ export PATH="$PATH:$HOME/bin"
 
 mkdir -p build
 cd build
-cmake -G "Unix Makefiles" ../CMakeLists.txt
-make -j
+cmake -DCMAKE_BUILD_TYPE=Release -G "Ninja" ../CMakeLists.txt
+#cmake --build . -j
+#cmake -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" ../CMakeLists.txt
+#make -j
 mv *_exe ..

@@ -3,7 +3,7 @@ set -ev
 here=$(dirname "$(readlink -f "$BASH_SOURCE")")
 cd "$here"
 
-./cmakelists.dhall
+#./cmakelists.dhall
 
 generate_buildinfo() {
    echo -en "#pragma once\nnamespace buildinfo {\n static const char *gitCommit=\""
@@ -22,6 +22,11 @@ mkdir -p build
 cd build
 cmake -DCMAKE_C_COMPILER="clang" \
       -DCMAKE_CXX_COMPILER="clang++" \
-      -G "Unix Makefiles" \
+      -G "Ninja" \
       ../CMakeLists.txt
-make -j
+cmake --build . -j
+#cmake -DCMAKE_C_COMPILER="clang" \
+#      -DCMAKE_CXX_COMPILER="clang++" \
+#      -G "Unix Makefiles" \
+#      ../CMakeLists.txt
+#make -j

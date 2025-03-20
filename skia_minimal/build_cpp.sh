@@ -9,6 +9,6 @@ flatc="$here/contrib/flatbuffers/flatc"
 
 mkdir -p build
 cd build
-cmake ../CMakeLists.txt
+cmake ../CMakeLists.txt -G Ninja
 cmake --build . -j
 mv *_exe ..

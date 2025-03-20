@@ -7,6 +7,7 @@ let cmakelists = let T = {
 	}
     , cxx : Text
     , linker : Text
+        , debugBuild : Bool
 	, cxxflags : List Text
 	, ldflags : List Text
 	, sourceTreeParts : List lib.sourceTreePart.Type
@@ -16,6 +17,7 @@ let cmakelists = let T = {
 	, cxxStandard : Natural
 	, recursiveLinking : Bool
 } in {Type = T, default = {
+	, debugBuild = False
 	, cxxflags = [] : List Text
 	, ldflags = [] : List Text
 	, sourceTreeParts = [] : List lib.sourceTreePart.Type
@@ -84,6 +86,7 @@ let cmakelistsToText = \(m : cmakelists.Type) ->
 	-- ++ "set(CMAKE_CXX_STANDARD ${Natural/show m.cxxStandard})\n" -- FIXME why does cmake translate CMAKE_CXX_STANDARD=20 to -std=gnu++20
 	++ "set(CMAKE_LINKER ${m.linker})\n"
 	++ "set(CMAKE_CXX_COMPILER ${m.cxx})\n"
+	++ "set(CMAKE_BUILD_TYPE " ++ (if m.debugBuild then "Debug" else "Release") ++ ")\n"
 	++ "\n"
 	++ "add_compile_definitions(${prelude.Text.concatSep "\n" gDefines}\n)\n"
 	++ "include_directories(${composePathList gIncludeDirs}\n)\n"
