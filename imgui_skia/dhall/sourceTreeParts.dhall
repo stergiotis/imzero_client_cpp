@@ -443,6 +443,8 @@ let skia = \(tgt : Target) ->
                      , "SK_XML"
 		     , "SK_DISABLE_LEGACY_GL_MAKE_NATIVE_INTERFACE"
                      , "_HAS_AUTO_PTR_ETC" -- FIXME workaround
+		     , "GR_GL_FUNCTION_TYPE=__stdcall"
+
                      ] : List Text}
             , cxxflags = {
                , global = [
