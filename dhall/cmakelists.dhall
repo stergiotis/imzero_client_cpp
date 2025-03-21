@@ -75,7 +75,7 @@ let cmakelistsToText = \(m : cmakelists.Type) ->
 			++ prelude.Text.concatSep "\n" out
 			++ "\n# end ${p.name}\n")
 	let recursiveLinking = prelude.Text.concatSep "\n" (if m.recursiveLinking then
-	[, "if(CMAKE_C_COMPILER_ID STREQUAL \"GNU\" AND CMAKE_SYSTEM_NAME STREQUAL \"Linux\")"
+	[, "if(CMAKE_CXX_COMPILER_ID STREQUAL \"Clang\" AND CMAKE_SYSTEM_NAME STREQUAL \"Linux\")"
 	, "add_link_options(-Wl,--start-group)"
 	, "endif()"] else [] : List Text)
 	let targets = prelude.Text.concatMapSep "\n" lib.sourceTreePart.Type composeTarget m.sourceTreeParts

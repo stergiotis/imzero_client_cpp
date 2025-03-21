@@ -7,6 +7,9 @@
 static const char *findNull(const char *s) {
     return s+strlen(s);
 }
+const char ** convertNullSeparatedStringArrayToArray(char *nullsepstra, size_t &len) {
+    return convertNullSeparatedStringArrayToArray(const_cast<const char *>(nullsepstra),len);
+}
 const char ** convertNullSeparatedStringArrayToArray(const char *nullsepstra, size_t &len) {
     len = findNullSeparatedStringArrayLength(nullsepstra);
     if(len == 0){
