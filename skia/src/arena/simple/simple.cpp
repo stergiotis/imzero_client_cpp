@@ -2,7 +2,6 @@
 #include <cstdlib>
 #include <cassert>
 #include <cstring>
-#include <cstdio>
 #include <cstddef>
 #include <memory>
 
@@ -37,7 +36,6 @@ void arenaFree() {
 void *arenaMalloc(size_t sz) {
     assert(static_cast<int64_t>(sz) <= (arenaAllocSize-arenaPos));
     if(static_cast<int64_t>(sz) > (arenaAllocSize-arenaPos)) {
-	    fprintf(stderr,"sz=%ld,pos=%ld\n",static_cast<long>(sz),arenaPos);
     	return nullptr;
     }
     const auto r = arena+arenaPos;
