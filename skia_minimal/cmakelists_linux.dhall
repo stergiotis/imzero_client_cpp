@@ -3,16 +3,17 @@ let prelude = ../dhall/prelude.dhall
 let lib = ../dhall/lib.dhall
 let cmake = ../dhall/cmakelists.dhall
 let sourceTreePartsRepo = ./dhall/sourceTreeParts.dhall
-let common = ./common.dhall
+let c = ./common.dhall
+let common = c.common {os = c.TargetOs.windows}
 in 
 cmake.cmakelistsToText cmake.cmakelists::{
 	, cxx = common.cxx
 	, linker = common.linker
 	, output = {
-	            , exe = Some "imgui_skia_exe"
+	            , exe = None Text
 	            , staticLib = Some "imgui_skia"
 	            }
-	, projectName = "imgui_skia_exe"
+	, projectName = "imgui_skia"
 	, cxxflags = ["-std=c++${Natural/show common.cppstd}" ] # common.cxxflags # common.stdlibFlags
 	, ldflags = common.ldflags # common.stdlibFlags
 	, sourceTreeParts = common.sourceTreeParts

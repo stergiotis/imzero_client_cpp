@@ -1,18 +1,19 @@
-let common = 
+let sourceTreePartsImGuiSkia = ../skia_minimal/dhall/sourceTreeParts.dhall
+let TargetOs = sourceTreePartsImGuiSkia.TargetOs
+let Target = sourceTreePartsImGuiSkia.Target
+let common = \(target : Target) ->
 	let lib = ../dhall/lib.dhall
 	let debug = False
 	let asan = False
 	let ubsan = False
 	let sourceTreePartsRepo = ./dhall/sourceTreeParts.dhall
-	let sourceTreePartsImGuiSkia = ../skia_minimal/dhall/sourceTreeParts.dhall
-	let target = {os = sourceTreePartsImGuiSkia.TargetOs.linux}
 	let librarySourceTreeParts = [
         , sourceTreePartsImGuiSkia.systemFlags target
         , sourceTreePartsImGuiSkia.flatbuffers
         , sourceTreePartsImGuiSkia.imguiWithHooks1919Wip sourceTreePartsImGuiSkia.ImGuiAppHelper.SDL3
         , sourceTreePartsImGuiSkia.imguiSkiaImpl
-        , sourceTreePartsImGuiSkia.sdl3Shared
-        , sourceTreePartsImGuiSkia.skiaShared target
+	, sourceTreePartsImGuiSkia.sdl3 target
+        , sourceTreePartsImGuiSkia.skia target
         , sourceTreePartsImGuiSkia.imguiSkiaDriverImpl
 	]
 	# (if debug then [ , sourceTreePartsImGuiSkia.tracyEnabled ] else [ , sourceTreePartsImGuiSkia.tracyDisabled ] : List lib.sourceTreePart.Type )
@@ -71,7 +72,7 @@ let common =
 	--	, linker
 		] : List Text
 	--let stdlibFlags = ["-stdlib=libc++"] : List Text
-	let ldflags = ["-Wl,-rpath,'$ORIGIN/../lib' -Wl,-z,origin"] # (if debug then ldflagsDebug else ldflagsRelease)
+	let ldflags = (if debug then ldflagsDebug else ldflagsRelease)
 	let stdlibFlags = [] : List Text
 	let linker = cxx
 	in {
@@ -85,4 +86,8 @@ let common =
 		, stdlibFlags
 		, debug
 	}
-in common
+in {
+  , common
+  , Target
+  , TargetOs
+  }

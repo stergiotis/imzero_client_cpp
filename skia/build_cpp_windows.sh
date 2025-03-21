@@ -3,7 +3,7 @@ set -ev
 here=$(dirname "$(readlink -f "$BASH_SOURCE")")
 cd "$here"
 
-#./cmakelists.dhall
+./cmakelists_windows.dhall
 
 generate_buildinfo() {
    echo -en "#pragma once\nnamespace buildinfo {\n static const char *gitCommit=\""
@@ -20,13 +20,11 @@ generate_buildinfo > "$here/imzero_client_skia_sdl3_impl/buildinfo.gen.h"
 
 mkdir -p build
 cd build
-cmake -DCMAKE_C_COMPILER="clang" \
-      -DCMAKE_CXX_COMPILER="clang++" \
-      -G "Ninja" \
-      ../CMakeLists.txt
+cmake  -G "Ninja" ..
+
+# Patch ninja file: Use static linked msvc runtime
+find . -name "*.ninja" | xargs -n 1 sed -i "s/-D_DLL / /g"
+find . -name "*.ninja" | xargs -n 1 sed -i "s/-MD / /g"
+
+# build
 cmake --build . -j
-#cmake -DCMAKE_C_COMPILER="clang" \
-#      -DCMAKE_CXX_COMPILER="clang++" \
-#      -G "Unix Makefiles" \
-#      ../CMakeLists.txt
-#make -j

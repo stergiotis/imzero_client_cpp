@@ -2,24 +2,13 @@
 set -ev
 here=$(dirname "$(readlink -f "$BASH_SOURCE")")
 
-# relevant issues (on ubuntu 22.10):
-# * -Wpsabi with no avx512f in march
-#   - https://groups.google.com/a/skia.org/g/bugs/c/4GuY7jjfCzY
-#   - https://bugs.chromium.org/p/chromium/issues/detail?id=1112929&no_tracker_redirect=1
-# * harfbuzz 2.x not having hb-subset.h for pdf support:
-#   - https://groups.google.com/a/skia.org/g/bugs/c/4GuY7jjfCzY
-# * missing SK_API declarations for defitions in SkParagraph:
-#   - https://skia-review.googlesource.com/c/skia/+/878977
-# * missing include https://skia-review.googlesource.com/c/skia/+/878977
-#"$here/patch_skia_m124.sh"
-
 cd "$here/../../contrib/skia"
 pwd
 export GIT_SYNC_DEPS_SKIP_EMSDK="true"
 python tools/git-sync-deps
 
-mkdir -p out/Shared
-cat > out/Shared/args.gn <<- EOF
+mkdir -p out/Static
+cat > out/Static/args.gn <<- EOF
     cc = "clang"
     cxx = "clang++"
     clang_win="C:/Program Files/LLVM"
@@ -149,12 +138,6 @@ cat > out/Shared/args.gn <<- EOF
     skunicode_tests_enabled=false
     werror=false
 EOF
-#extra_ldflags = [ "-fuse-ld=lld", "-Wl,-rpath,${clangdir}/lib/x86_64-unknown-linux-gnu" ]
 
-./bin/gn.exe gen out/Shared
-#./bin/gn.exe args out/Shared --list
-#./bin/gn args out/Shared --list --short
-
-./third_party/ninja/ninja -v -d keeprsp -C out/Shared
-#"$here/patch_skia_m124.sh"
-#./third_party/ninja/ninja -v -d keeprsp -C out/Shared
+./bin/gn.exe gen out/Static
+./third_party/ninja/ninja -v -d keeprsp -C out/Static

@@ -641,7 +641,7 @@ sourceTreePart::{
 	}
 	, ldflags = { global = [
 		, "-L${sdlDir}/build"
-		, "-Wl,--enable-new-dtags"
+		--, "-Wl,--enable-new-dtags"
 		, "-lSDL3"
 	 ] : List Text }
 }

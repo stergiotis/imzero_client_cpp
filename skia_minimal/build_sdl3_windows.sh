@@ -2,12 +2,13 @@
 set -ev
 here=$(dirname "$(readlink -f "$BASH_SOURCE")")
 cd "$here/../../contrib/sdl"
-cmake -S . -B build -DSDL_STATIC=off \
-	            -DSDL_SHARED=on \
-		    -DCMAKE_BUILD_TYPE=Release \
-		    -DCMAKE_C_COMPILER=clang \
-		    -DCMAKE_CXX_COMPILER=clang++ \
-		    -DSDL_HIDAPI=off \
-		    -DCMAKE_CXX_COMPILER=clang++ \
-		    -DCMAKE_C_COMPILER=clang
-cmake --build build --config Release -j
+mkdir -p build
+cd build
+cmake -DSDL_STATIC=on \
+      -DSDL_SHARED=off \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_C_COMPILER=clang \
+      -DCMAKE_CXX_COMPILER=clang++ \
+      -DSDL_HIDAPI=off \
+      -G "Ninja" ..
+cmake --build . -j

@@ -1,17 +1,18 @@
-let common = 
+let sourceTreePartsRepo = ./dhall/sourceTreeParts.dhall
+let Target = sourceTreePartsRepo.Target
+let TargetOs = sourceTreePartsRepo.TargetOs
+let common = \(target : Target) -> 
     let lib = ../dhall/lib.dhall
     let debug = False
     let asan = False
     let ubsan = False
-    let sourceTreePartsRepo = ./dhall/sourceTreeParts.dhall
-    let target = {os = sourceTreePartsRepo.TargetOs.linux}
     let sourceTreeParts = [
         , sourceTreePartsRepo.systemFlags target
         , sourceTreePartsRepo.flatbuffers
         , sourceTreePartsRepo.imguiWithHooks1919Wip sourceTreePartsRepo.ImGuiAppHelper.SDL3
         , sourceTreePartsRepo.imguiSkiaImpl
-        , sourceTreePartsRepo.sdl3Shared
-        , sourceTreePartsRepo.skiaShared target
+        , sourceTreePartsRepo.sdl3 target
+        , sourceTreePartsRepo.skia target
         , sourceTreePartsRepo.imguiSkiaDriverImpl
         --, sourceTreePartsRepo.mainSkiaSdl3Minimal
     ] 
@@ -19,7 +20,7 @@ let common =
     let cxx = "clang++"
     let cppstd = 20
     let cxxflagsRelease = [
-            , "-Wall"
+        , "-Wall"
         , "-Wformat"
         , "-Wextra"
         , "-Wno-unused-parameter"
@@ -68,4 +69,8 @@ let common =
         , stdlibFlags
         , debug
     }
-in common
+in {
+ , common
+ , Target
+ , TargetOs
+ }

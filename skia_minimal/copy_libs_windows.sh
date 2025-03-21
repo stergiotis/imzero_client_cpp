@@ -7,7 +7,7 @@ mkdir -p lib
 copy() {
    cp "$(realpath "$1")" "lib/$(basename "$1")"
 }
-copy "$here/../../contrib/sdl/build/Release/SDL3.dll"
+#copy "$here/../../contrib/sdl/build/Release/SDL3.dll"
 #copy "$here/../../contrib/skia/out/Shared/skparagraph.dll"
 #copy "$here/../../contrib/skia/out/Shared/skparagraph.dll.lib"
 #copy "$here/../../contrib/skia/out/Shared/skia.dll"
