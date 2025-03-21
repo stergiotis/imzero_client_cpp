@@ -140,4 +140,4 @@ cat > out/Static/args.gn <<- EOF
 EOF
 
 ./bin/gn.exe gen out/Static
-./third_party/ninja/ninja -v -d keeprsp -C out/Static
+ninja -v -d keeprsp -C out/Static

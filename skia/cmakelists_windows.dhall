@@ -22,5 +22,5 @@ cmake.cmakelistsToText cmake.cmakelists::{
 	, recursiveLinking = False
 }
 ++ "add_library(libimgui_skia STATIC IMPORTED)\n"
-++ "set_target_properties(libimgui_skia PROPERTIES IMPORTED_LOCATION \"\${CMAKE_CURRENT_LIST_DIR}/../skia_minimal/build/imgui_skia.lib\")\n"
+++ "set_target_properties(libimgui_skia PROPERTIES IMPORTED_LOCATION \"\${CMAKE_CURRENT_LIST_DIR}/../imgui_skia/build/imgui_skia.lib\")\n"
 ++ "target_link_libraries(imzeroClientSkiaSdl3Impl libimgui_skia)\n"

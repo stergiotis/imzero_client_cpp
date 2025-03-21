@@ -1,7 +1,7 @@
 let lib = ../../dhall/lib.dhall
 let prelude = ../../dhall/prelude.dhall
 let sourceTreePart = lib.sourceTreePart
-let path = \(loc : prelude.Location.Type) -> "${env:IMGUI_SKIA_CPP_ROOT as Text}/skia_minimal/${lib.locationToString loc}"
+let path = \(loc : prelude.Location.Type) -> "${env:IMGUI_SKIA_CPP_ROOT as Text}/imgui_skia/${lib.locationToString loc}"
 
 let TargetOs = <windows | linux | windows_cross >
 let Target = {
@@ -441,6 +441,7 @@ let skia = \(tgt : Target) ->
                      , "SK_HAS_WUFFS_LIBRARY"
                      , "SK_CODEC_DECODES_GIF"
                      , "SK_XML"
+		     , "SK_DISABLE_LEGACY_GL_MAKE_NATIVE_INTERFACE"
                      , "_HAS_AUTO_PTR_ETC" -- FIXME workaround
                      ] : List Text}
             , cxxflags = {
@@ -467,6 +468,7 @@ let skia = \(tgt : Target) ->
                   , "-lskunicode_icu"
                   , "-lbentleyottmann"
                   , "-lskshaper"
+		  , "-lOpenGL32"
                ] : List Text
             }
             , nonSourceObjs = [] : List Text

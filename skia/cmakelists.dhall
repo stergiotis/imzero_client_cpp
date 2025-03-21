@@ -22,5 +22,5 @@ cmake.cmakelistsToText cmake.cmakelists::{
 	, recursiveLinking = True -- FIXME why is this necessary?
 }
 ++ "add_library(libimgui_skia STATIC IMPORTED)\n"
-++ "set_target_properties(libimgui_skia PROPERTIES IMPORTED_LOCATION \"\${CMAKE_CURRENT_LIST_DIR}/../skia_minimal/build/libimgui_skia.a\")\n"
+++ "set_target_properties(libimgui_skia PROPERTIES IMPORTED_LOCATION \"\${CMAKE_CURRENT_LIST_DIR}/../imgui_skia/build/libimgui_skia.a\")\n"
 ++ "target_link_libraries(imzeroClientSkiaSdl3Impl libimgui_skia)\n"

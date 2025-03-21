@@ -1,4 +1,4 @@
-let sourceTreePartsImGuiSkia = ../skia_minimal/dhall/sourceTreeParts.dhall
+let sourceTreePartsImGuiSkia = ../imgui_skia/dhall/sourceTreeParts.dhall
 let TargetOs = sourceTreePartsImGuiSkia.TargetOs
 let Target = sourceTreePartsImGuiSkia.Target
 let common = \(target : Target) ->

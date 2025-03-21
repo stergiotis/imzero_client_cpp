@@ -1,18 +1,17 @@
-#include <fcntl.h>
 #include "imgui_skia_app_sdl3.h"
+#include "imgui_impl_sdl3.h"
 
+#include "imgui_internal.h"
+
+#include <fcntl.h>
 #include <cstdio>
 #include <cstring>
 
-#include "imgui_impl_sdl3.h"
-#include "imgui_internal.h"
-
 #if defined(IMGUI_IMPL_OPENGL_ES2)
-#include <SDL3/SDL_opengles2.h>
+#include "SDL3/SDL_opengles2.h"
 #else
-#include <SDL3/SDL_opengl.h>
-#include <SDL3/SDL.h>
-
+#include "SDL3/SDL_opengl.h"
+#include "SDL3/SDL.h"
 #endif
 
 #include "include/core/SkGraphics.h"
@@ -23,23 +22,44 @@
 #if defined(SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE)
 #include "include/ports/SkFontMgr_directory.h"
 #endif
-#include "include/core/SkSpan.h"
-#include "include/svg/SkSVGCanvas.h"
-#include "include/core/SkColorSpace.h"
+#if defined(SK_FONTMGR_DIRECTWRITE_AVAILABLE)
+#include "include/ports/SkTypeface_win.h"
+#endif
+
 #include "include/encode/SkPngEncoder.h"
 #include "include/encode/SkJpegEncoder.h"
 #include "include/encode/SkWebpEncoder.h"
-#if defined(linux) || defined(linux) || defined(__linux__)
-#include "include/gpu/gl/glx/GrGLMakeGLXInterface.h"
-#endif
 
-#include <include/core/SkStream.h>
-#include <include/core/SkPictureRecorder.h>
-#include <include/core/SkPicture.h>
+#include "include/core/SkSpan.h"
+#include "include/core/SkColorSpace.h"
+#include "include/core/SkStream.h"
+#include "include/core/SkPictureRecorder.h"
+#include "include/core/SkPicture.h"
 
+#include "include/svg/SkSVGCanvas.h"
+
+#include "include/gpu/ganesh/GrBackendSurface.h"
+#include "include/gpu/ganesh/GrDirectContext.h"
 #include "include/gpu/ganesh/gl/GrGLDirectContext.h"
+#include "include/gpu/ganesh/gl/GrGLInterface.h"
+#include "include/gpu/ganesh/gl/GrGLAssembleInterface.h"
 #include "include/gpu/ganesh/SkSurfaceGanesh.h"
 #include "include/gpu/ganesh/gl/GrGLBackendSurface.h"
+#include "include/gpu/ganesh/GrContextOptions.h"
+#include "include/gpu/ganesh/GrDirectContext.h"
+#include "include/gpu/ganesh/gl/GrGLInterface.h"
+
+#if defined(linux) || defined(linux) || defined(__linux__)
+#include "include/gpu/ganesh/gl/glx/GrGLMakeGLXInterface.h"
+#include <X11/Xlib.h>
+#include <GL/glx.h>
+#include <GL/gl.h>
+#else
+#include "include/gpu/ganesh/gl/win/GrGLMakeWinInterface.h"
+#include "include/gpu/ganesh/gl/egl/GrGLMakeEGLInterface.h"
+#include <windows.h>
+#endif
+
 #include "src/gpu/ganesh/gl/GrGLDefines.h"
 #include "src/gpu/ganesh/gl/GrGLUtil.h"
 
@@ -565,7 +585,11 @@ void ImGuiSkia::Driver::App::createContext(const int width, const int height) {
 
     fNativeInterface = GrGLInterfaces::MakeGLX();
     //nativeInterface->checkAndResetOOMed();
-    if(fNativeInterface == nullptr || !fNativeInterface->validate()) {
+    if(fNativeInterface.get() == nullptr) {
+        fprintf(stderr, "unable to create skia GrGLInterface (GLX): nativeInterface\n");
+        exit(1);
+    }
+    if(!fNativeInterface->validate()) {
         fprintf(stderr, "unable to create skia GrGLInterface (GLX): nativeInterface=%p (%s)\n",
                 fNativeInterface.get(),
                 fNativeInterface->validate() ? "valid" : "invalid");
@@ -579,6 +603,29 @@ void ImGuiSkia::Driver::App::createContext(const int width, const int height) {
 }
 #else
 void ImGuiSkia::Driver::App::createContext(const int width, const int height) {
+    glViewport(0, 0, width, height);
+    glClearColor(fClearColor.x * fClearColor.w, fClearColor.y * fClearColor.w, fClearColor.z * fClearColor.w, fClearColor.w);
+    glClearStencil(0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+    fNativeInterface = GrGLInterfaces::MakeWin();
+    //fNativeInterface = GrGLInterfacesGrGLInterface::MakeEGL();
+    fprintf(stderr,"fNativeInterface=%p\n", fNativeInterface.get());
+    if(fNativeInterface.get() == nullptr) {
+        fprintf(stderr, "unable to create skia GrGLInterface (Win): nativeInterface\n");
+        exit(1);
+    }
+    if(!fNativeInterface->validate()) {
+        fprintf(stderr, "unable to create skia GrGLInterface (Win): nativeInterface=%p (%s)\n",
+                fNativeInterface.get(),
+                fNativeInterface->validate() ? "valid" : "invalid");
+        exit(1);
+    }
+    fContext = GrDirectContexts::MakeGL(fNativeInterface);
+    if(fContext == nullptr) {
+        fprintf(stderr,"unable to create skia GrDirectContext (GL)\n");
+        exit(1);
+    }
 }
 #endif
 sk_sp<SkSurface> ImGuiSkia::Driver::App::getSurfaceRaster(const int w, const int h) {
