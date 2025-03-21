@@ -35,3 +35,5 @@ sudo apt install -y clang libjpeg-dev libicu-dev libwebp-dev libfontconfig-dev l
 
 #clang (non-OS version) deps
 sudo apt install libtinfo6
+
+sudo apt install patchelf

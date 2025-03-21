@@ -1,1 +1,1 @@
-../../common/contrib/imgui_ImGuiColorTextEdit/TextEditor.h
+../../../contrib/imgui_ImGuiColorTextEdit/TextEditor.h

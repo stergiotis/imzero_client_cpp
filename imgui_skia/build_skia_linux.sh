@@ -11,9 +11,10 @@ here=$(dirname "$(readlink -f "$BASH_SOURCE")")
 # * missing SK_API declarations for defitions in SkParagraph:
 #   - https://skia-review.googlesource.com/c/skia/+/878977
 # * missing include https://skia-review.googlesource.com/c/skia/+/878977
-"$here/patch_skia_m124.sh"
+#"$here/patch_skia_m124.sh"
+"$here/patch_skia_m134.sh"
 
-cd "$here/contrib/skia"
+cd "$here/../../contrib/skia"
 export GIT_SYNC_DEPS_SKIP_EMSDK="true"
 python3 tools/git-sync-deps
 
@@ -66,7 +67,7 @@ cat > out/Shared/args.gn <<- EOF
     skia_enable_skunicode=true
     skia_enable_spirv_validation=false
     skia_enable_svg=true
-    skia_enable_tools=true
+    skia_enable_tools=false
     skia_enable_vello_shaders=false
     skia_enable_vulkan_debug_layers=false
     skia_enable_winuwp=false
@@ -98,7 +99,7 @@ cat > out/Shared/args.gn <<- EOF
     skia_use_gl=true
     skia_use_harfbuzz=true
     skia_use_icu=true
-    skia_use_icu4x=false
+    skia_use_icu4x=true
     skia_use_jpeg_gainmaps=false
     skia_use_libavif=false
     skia_use_libfuzzer_defaults=true
@@ -117,7 +118,7 @@ cat > out/Shared/args.gn <<- EOF
     skia_use_no_jpeg_encode=false
     skia_use_no_png_encode=false
     skia_use_no_webp_encode=false
-    skia_use_perfetto=true
+    skia_use_perfetto=false
     skia_use_piex=true
     skia_use_runtime_icu=false
     skia_use_safe_libcxx=false
@@ -149,5 +150,5 @@ EOF
 ./bin/gn gen out/Shared
 
 ./third_party/ninja/ninja -v -d keeprsp -C out/Shared
-"$here/patch_skia_m124.sh"
-./third_party/ninja/ninja -v -d keeprsp -C out/Shared
+#"$here/patch_skia_m124.sh"
+#./third_party/ninja/ninja -v -d keeprsp -C out/Shared

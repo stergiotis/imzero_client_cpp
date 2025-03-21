@@ -9,5 +9,6 @@ flatc="$here/../../contrib/flatbuffers/flatc"
 
 mkdir -p build
 cd build
-cmake -G Ninja ..
+cmake -G Ninja .. -DCMAKE_CXX_COMPILER=clang++ \
+	          -DCMAKE_C_COMPILER=clang
 cmake --build . -j

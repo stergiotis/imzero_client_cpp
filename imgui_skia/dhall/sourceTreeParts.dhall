@@ -316,9 +316,10 @@ let skia = \(tgt : Target) ->
                   , "-L${dir}/out/Shared"
                   , "-lskparagraph"
                   , "-lskia"
-                  , "-lskunicode"
                   , "-lbentleyottmann"
                   , "-lskshaper"
+		  , "-lskunicode_core"
+		  , "-lskunicode_icu"
                   -- , "-lsvg"
                   --, "-Wl,--verbose"
                ] : List Text
@@ -387,6 +388,8 @@ let skia = \(tgt : Target) ->
                   , "-lskunicode"
                   , "-lbentleyottmann"
                   , "-lskshaper"
+		  , "-lskunicode_core"
+		  , "-lskunicode_icu"
                   -- , "-lsvg"
                   --, "-Wl,--verbose"
                ] : List Text

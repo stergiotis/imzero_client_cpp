@@ -42,6 +42,9 @@ void operator delete(void* ptr) noexcept {
 #endif
 #endif
 extern "C" {
+#if defined(linux) || defined(__linux) || defined(__linux__)
+  int main(int argc, char* argv[]) {
+#else
   int SDL_main(int argc, char* argv[]) {
 #ifdef _DEBUG
 static_assert(_DEBUG == 0 && "_DEBUG is not 0");
@@ -54,6 +57,8 @@ static_assert(_DLL == 0 && "_DLL is not 0");
 #endif
 static_assert(_HAS_ITERATOR_DEBUGGING == 0 && "_HAS_ITERATOR_DEBUGGING is not 0");
 static_assert(_ITERATOR_DEBUG_LEVEL == 0 && "_ITERATOR_DEBUG_LEVEL is not 0");
+#endif
+
 #ifdef TRACY_ENABLE
       ImGui::SetAllocatorFunctions(imZeroMemAlloc,imZeroMemFree,nullptr);
 #endif

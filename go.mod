@@ -13,6 +13,7 @@ require (
 )
 
 require (
+	github.com/AfterShip/clickhouse-sql-parser v0.4.2 // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
 	github.com/brianvoe/gofakeit/v7 v7.1.2 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.6 // indirect
@@ -21,6 +22,7 @@ require (
 	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
 	github.com/google/flatbuffers v24.12.23+incompatible // indirect
 	github.com/klauspost/cpuid/v2 v2.2.9 // indirect
+	github.com/matoous/go-nanoid/v2 v2.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/philip-peterson/go-mutablestring v1.0.7 // indirect
@@ -37,4 +39,5 @@ require (
 	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/tools v0.28.0 // indirect
+	lukechampine.com/blake3 v1.4.0 // indirect
 )

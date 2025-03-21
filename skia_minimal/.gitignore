@@ -1,7 +1,0 @@
-*.ttf
-cmake-build-*
-build
-.idea
-.vscode
-lib
-bin
