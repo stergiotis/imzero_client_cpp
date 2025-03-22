@@ -18,15 +18,15 @@ cd "$here/../../contrib/skia"
 export GIT_SYNC_DEPS_SKIP_EMSDK="true"
 python3 tools/git-sync-deps
 
-mkdir -p out/Shared
-cat > out/Shared/args.gn <<- EOF
+mkdir -p out/Static
+cat > out/Static/args.gn <<- EOF
     cc = "clang"
     cxx = "clang++"
     extra_cflags = ["-Wno-psabi"]
     is_official_build=true
     is_debug=false
     is_trivial_abi=false
-    is_component_build=true
+    is_component_build=false
     skia_use_gl=true
     sanitize=""
     skia_build_for_debugger=false
@@ -123,14 +123,14 @@ cat > out/Shared/args.gn <<- EOF
     skia_use_runtime_icu=false
     skia_use_safe_libcxx=false
     skia_use_sfml=false
-    skia_use_system_expat=true
+    skia_use_system_expat=false
     skia_use_system_freetype2=true
     skia_use_system_harfbuzz=false
-    skia_use_system_icu=true
-    skia_use_system_libjpeg_turbo=true
-    skia_use_system_libpng=true
-    skia_use_system_libwebp=true
-    skia_use_system_zlib=true
+    skia_use_system_icu=false
+    skia_use_system_libjpeg_turbo=false
+    skia_use_system_libpng=false
+    skia_use_system_libwebp=false
+    skia_use_system_zlib=false
     skia_use_vma=false
     skia_use_vulkan=false
     skia_use_webgl=false
@@ -147,8 +147,8 @@ EOF
 ./bin/fetch-ninja
 #bin/gn args out/Shared --list
 #./bin/gn args out/Shared --list --short
-./bin/gn gen out/Shared
+./bin/gn gen out/Static
 
-./third_party/ninja/ninja -v -d keeprsp -C out/Shared
+./third_party/ninja/ninja -v -d keeprsp -C out/Static
 #"$here/patch_skia_m124.sh"
 #./third_party/ninja/ninja -v -d keeprsp -C out/Shared

@@ -4,7 +4,7 @@ let lib = ../dhall/lib.dhall
 let cmake = ../dhall/cmakelists.dhall
 let sourceTreePartsRepo = ./dhall/sourceTreeParts.dhall
 let c = ./common.dhall
-let common = c.common {os = c.TargetOs.windows}
+let common = c.common {os = c.TargetOs.linux}
 in 
 cmake.cmakelistsToText cmake.cmakelists::{
 	, cxx = common.cxx

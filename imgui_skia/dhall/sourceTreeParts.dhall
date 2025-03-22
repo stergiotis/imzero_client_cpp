@@ -284,7 +284,7 @@ let skia = \(tgt : Target) ->
                      ]
     in merge {
       linux = sourceTreePart::{
-            , name = "skiaShared"
+            , name = "skia"
             , dir = dir
             , sources = [] : List Text
             , includeDirs = {
@@ -294,79 +294,97 @@ let skia = \(tgt : Target) ->
                ] : List Text
             }
             , defines = {, local = [] : List Text
-                     , global = [ --, "IMGUI_USE_BGRA_PACKED_COLOR" 
-                     -- FIXME extract from rsp
-               , "SK_RELEASE"
-               , "SK_GAMMA_APPLY_TO_A8"
-               , "SK_ALLOW_STATIC_GLOBAL_INITIALIZERS=1"
-               , "SK_TYPEFACE_FACTORY_FREETYPE"
-               , "SK_FONTMGR_FREETYPE_EMBEDDED_AVAILABLE"
-               , "SK_FONTMGR_FONTCONFIG_AVAILABLE"
-               , "SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE"
-               , "SK_FONTMGR_FREETYPE_EMPTY_AVAILABLE"
-               , "SK_GL"
-               , "SK_SUPPORT_PDF"
-               , "SK_CODEC_DECODES_JPEG"
-               , "SK_CODEC_DECODES_JPEG_GAINMAPS"
-               , "SK_XML"
-               , "SK_CODEC_DECODES_PNG"
-               , "SK_CODEC_DECODES_RAW"
-               , "SK_CODEC_DECODES_WEBP"
-               , "SK_DEFAULT_TYPEFACE_IS_EMPTY"
-               , "SK_DISABLE_LEGACY_DEFAULT_TYPEFACE"
-               , "SK_R32_SHIFT=16"
-               , "SK_ENABLE_PRECOMPILE"
-               , "SK_GANESH"
-               , "SK_ENABLE_PARAGRAPH"
-               , "SK_UNICODE_AVAILABLE"
-               , "SK_UNICODE_ICU_IMPLEMENTATION"
-               , "SK_SHAPER_PRIMITIVE_AVAILABLE"
-               , "SK_SHAPER_HARFBUZZ_AVAILABLE"
-               , "SK_SHAPER_UNICODE_AVAILABLE"
-               , "SK_ENABLE_SVG"
-               , "SK_BUILD_FOR_UNIX"
+                     , global = [
+                     -- FIXME extract from skia.ninja
+                        , "NDEBUG"
+                        , "SK_CODEC_DECODES_BMP"
+                        , "SK_CODEC_DECODES_WBMP"
+                        , "SK_R32_SHIFT=16"
+                        , "SK_ENABLE_PRECOMPILE"
+                        , "SK_GANESH"
+                        , "SK_DISABLE_TRACING"
+                        , "SK_GAMMA_APPLY_TO_A8"
+                        , "SK_ENABLE_AVX512_OPTS"
+                        , "SKIA_IMPLEMENTATION=1"
+                        , "SK_FONTMGR_FCI_AVAILABLE"
+                        , "SK_TYPEFACE_FACTORY_FREETYPE"
+                        , "SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE"
+                        , "SK_FONTMGR_FREETYPE_EMBEDDED_AVAILABLE"
+                        , "SK_FONTMGR_FREETYPE_EMPTY_AVAILABLE"
+                        , "SK_FONTMGR_FONTCONFIG_AVAILABLE"
+                        , "SK_GL"
+                        , "SK_CODEC_ENCODES_JPEG"
+                        , "SK_SUPPORT_PDF"
+                        , "SK_CODEC_DECODES_JPEG"
+                        , "SK_CODEC_ENCODES_PNG"
+                        , "SK_CODEC_ENCODES_PNG_WITH_LIBPNG"
+                        , "SK_CODEC_ENCODES_WEBP"
+                        , "SK_CODEC_DECODES_RAW"
+                        , "SK_CODEC_DECODES_WEBP"
+                        , "SK_HAS_WUFFS_LIBRARY"
+                        , "SK_CODEC_DECODES_GIF"
+                        , "SK_XML"
                      ] : List Text}
             , cxxflags = {
                , global = [
-               , "-ffp-contract=off" -- standard compliant fp processing
-               , "-fstrict-aliasing" -- is on for optimization levels larger than O1
-               , "-fvisibility=hidden"
-               , "-fdata-sections"
-               , "-ffunction-sections"
-               , "-fvisibility-inlines-hidden"
-               , "-fno-exceptions"
-               , "-fno-rtti"
+                  , "-Wno-attributes"
+                  , "-ffp-contract=off"
+                  , "-fPIC"
+                  , "-fvisibility=hidden"
+                  , "-fstrict-aliasing"
+                  , "-O3"
+                  , "-fdata-sections"
+                  , "-ffunction-sections"
+                  , "-Wno-psabi"
+                  , "-fvisibility-inlines-hidden"
+                  , "-fno-exceptions"
+                  , "-fno-rtti"
                ] : List Text
                , local = [
                ] : List Text
             }
             , ldflags = {
                , global = [
-                  , "-ldl"
-                  , "-lpthread"
-                  , "-lfreetype"
-                  , "-lz"
-                  , "-lfontconfig"
-                  , "-lwebpmux"
-                  , "-lwebpdemux"
-                  , "-lX11"
-                  , "-lGLU"
-                  , "-lGL"
-                  , "-L${dir}/out/Shared"
-                  , "-lskparagraph"
-                  , "-lskia"
+                  , "-L${dir}/out/Static"
                   , "-lbentleyottmann"
+                  , "-lcompression_utils_portable"
+                  , "-ldng_sdk"
+                  , "-lexpat"
+                  , "-lharfbuzz"
+                  , "-licu"
+                  , "-licu4x_rust"
+                  , "-ljpeg"
+                  , "-lpathkit"
+                  , "-lpiex"
+                  , "-lpng"
+                  , "-lskcms"
+                  , "-lskia"
+                  , "-lskparagraph"
+                  , "-lskresources"
                   , "-lskshaper"
                   , "-lskunicode_core"
                   , "-lskunicode_icu"
-                  -- , "-lsvg"
+                  , "-lskunicode_icu4x"
+                  , "-lsvg"
+                  , "-lwebp"
+                  , "-lwebp_sse41"
+                  , "-lwuffs"
+                  , "-lzlib"
+
+                  , "-ldl"
+                  , "-lpthread"
+                  , "-lfreetype"
+                  , "-lfontconfig"
+                  , "-lX11"
+                  , "-lGLU"
+                  , "-lGL"
                   --, "-Wl,--verbose"
                ] : List Text
             }
             , nonSourceObjs = [] : List Text
          }
       , windows_cross = sourceTreePart::{
-            , name = "skiaShared"
+            , name = "skia"
             , dir = dir
             , sources = [] : List Text
             , includeDirs = {
@@ -414,7 +432,7 @@ let skia = \(tgt : Target) ->
             , nonSourceObjs = [] : List Text
          }
       , windows = sourceTreePart::{
-            , name = "skiaShared"
+            , name = "skia"
             , dir = dir
             , sources = [] : List Text
             , includeDirs = {
@@ -447,6 +465,7 @@ let skia = \(tgt : Target) ->
                   , "-lskia"
                   , "-lskunicode_core"
                   , "-lskunicode_icu"
+                  , "-lskunicode_icu4x"
                   , "-lbentleyottmann"
                   , "-lskshaper"
                   , "-lOpenGL32"

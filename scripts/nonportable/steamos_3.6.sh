@@ -16,6 +16,7 @@ $pacman holo-3.6/gcc
 $pacman libxslt
 $pacman bzip2
 $pacman dhall dhall-json dhall
+$pacman patchelf
 
 # freetype
 $pacman freetype2
