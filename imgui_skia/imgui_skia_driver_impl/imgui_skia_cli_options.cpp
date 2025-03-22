@@ -82,7 +82,7 @@ void ImGuiSkia::Driver::CliOptions::usage(const char *name, FILE *file) const {
     fprintf(file,"font flags:\n");
     fprintf(file,"    -ttfFilePath [path:%s]\n", fTtfFilePath);
     fprintf(file,"    -fontDyFudge [float:%f]\n", fFontDyFudge);
-    fprintf(file,"    -fontManager [name:%s]\n", fFontManager);
+    fprintf(file,"    -fontManager [name:%s] valid names (platform depenent) \"fontconfig\", \"directory\", \"directwrite\"\n", fFontManager);
     fprintf(file,"    -fontManagerArg [arg:%s]\n", fFontManagerArg);
 }
 bool ImGuiSkia::Driver::CliOptions::hasHelpFlag(const int argc, const char **argv) {

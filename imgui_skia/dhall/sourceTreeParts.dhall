@@ -243,6 +243,45 @@ let imguiSkiaImpl = let dir = path (../imgui_skia_impl as Location) in sourceTre
 }
 let skia = \(tgt : Target) ->
     let dir = path (../../../contrib/skia as Location)
+    let windows_defines = [
+                        -- from skia.ninja
+                        , "_CRT_SECURE_NO_WARNINGS"
+                        , "_HAS_EXCEPTIONS=0"
+                        , "WIN32_LEAN_AND_MEAN"
+                        , "NOMINMAX"
+                        , "NDEBUG"
+                        , "SK_CODEC_DECODES_BMP"
+                        , "SK_CODEC_DECODES_WBMP"
+                        , "SK_ENABLE_PRECOMPILE"
+                        , "SK_GANESH"
+                        , "SK_DISABLE_TRACING"
+                        , "SK_GAMMA_APPLY_TO_A8"
+                        , "SK_ENABLE_AVX512_OPTS"
+                        , "SKIA_IMPLEMENTATION=1"
+                        , "SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE"
+                        , "SK_TYPEFACE_FACTORY_FREETYPE"
+                        , "SK_FONTMGR_FREETYPE_EMBEDDED_AVAILABLE"
+                        , "SK_FONTMGR_FREETYPE_EMPTY_AVAILABLE"
+                        , "SK_TYPEFACE_FACTORY_DIRECTWRITE"
+                        , "SK_FONTMGR_DIRECTWRITE_AVAILABLE"
+                        , "SK_FONTMGR_GDI_AVAILABLE"
+                        , "SK_GL"
+                        , "SK_CODEC_ENCODES_JPEG"
+                        , "SK_SUPPORT_PDF"
+                        , "SK_CODEC_DECODES_JPEG"
+                        , "SK_CODEC_ENCODES_PNG"
+                        , "SK_CODEC_ENCODES_PNG_WITH_LIBPNG"
+                        , "SK_CODEC_ENCODES_WEBP"
+                        , "SK_SUPPORT_XPS"
+                        , "SK_CODEC_DECODES_ICO"
+                        , "SK_CODEC_DECODES_PNG"
+                        , "SK_CODEC_DECODES_PNG_WITH_LIBPNG"
+                        , "SK_CODEC_DECODES_RAW"
+                        , "SK_CODEC_DECODES_WEBP"
+                        , "SK_HAS_WUFFS_LIBRARY"
+                        , "SK_CODEC_DECODES_GIF"
+                        , "SK_XML"
+                     ]
     in merge {
       linux = sourceTreePart::{
             , name = "skiaShared"
@@ -318,8 +357,8 @@ let skia = \(tgt : Target) ->
                   , "-lskia"
                   , "-lbentleyottmann"
                   , "-lskshaper"
-		  , "-lskunicode_core"
-		  , "-lskunicode_icu"
+                  , "-lskunicode_core"
+                  , "-lskunicode_icu"
                   -- , "-lsvg"
                   --, "-Wl,--verbose"
                ] : List Text
@@ -338,30 +377,8 @@ let skia = \(tgt : Target) ->
             }
             , defines = {, local = [] : List Text
                      , global = [
-                        , "MESA_EGL_NO_X11_HEADERS"
-                     -- FIXME extract from rsp
-               , "SK_RELEASE"
-               , "SK_GAMMA_APPLY_TO_A8"
-               , "SK_FONTMGR_DIRECTWRITE_AVAILABLE"
-               , "SK_ALLOW_STATIC_GLOBAL_INITIALIZERS=1"
-               , "SK_TYPEFACE_FACTORY_FREETYPE"
-               , "SK_FONTMGR_FREETYPE_EMBEDDED_AVAILABLE"
-               , "SK_SUPPORT_PDF"
-               , "SK_XML"
-               , "SK_CODEC_DECODES_RAW"
-               , "SK_DEFAULT_TYPEFACE_IS_EMPTY"
-               , "SK_DISABLE_LEGACY_DEFAULT_TYPEFACE"
-               , "SK_ENABLE_PRECOMPILE"
-               , "SK_GANESH"
-               , "SK_ENABLE_PARAGRAPH"
-               , "SK_UNICODE_AVAILABLE"
-               , "SK_UNICODE_ICU_IMPLEMENTATION"
-               , "SK_SHAPER_PRIMITIVE_AVAILABLE"
-               , "SK_SHAPER_HARFBUZZ_AVAILABLE"
-               , "SK_SHAPER_UNICODE_AVAILABLE"
-               , "SK_ENABLE_SVG"
-               , "SK_BUILD_FOR_UNIX"
-                     ] : List Text}
+                        , "MESA_EGL_NO_X11"
+                     ] # windows_defines : List Text}
             , cxxflags = {
                , global = [
                , "-funwind-tables"
@@ -388,8 +405,8 @@ let skia = \(tgt : Target) ->
                   , "-lskunicode"
                   , "-lbentleyottmann"
                   , "-lskshaper"
-		  , "-lskunicode_core"
-		  , "-lskunicode_icu"
+                  , "-lskunicode_core"
+                  , "-lskunicode_icu"
                   -- , "-lsvg"
                   --, "-Wl,--verbose"
                ] : List Text
@@ -407,48 +424,7 @@ let skia = \(tgt : Target) ->
                ] : List Text
             }
             , defines = {, local = [] : List Text
-                     , global = [
-                        , "MESA_EGL_NO_X11_HEADERS"
-                     -- FIXME extract from skia.ninja
-                     , "NOMINMAX"
-                     , "NDEBUG"
-                     , "SK_CODEC_DECODES_BMP"
-                     , "SK_CODEC_DECODES_WBMP"
-                     , "SKIA_DLL"
-                     , "SK_ENABLE_PRECOMPILE"
-                     , "SK_GANESH"
-                     , "SK_DISABLE_TRACING"
-                     , "SK_GAMMA_APPLY_TO_A8"
-                     , "SK_ENABLE_AVX512_OPTS"
-                     , "SKIA_IMPLEMENTATION=1"
-                     , "SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE"
-                     , "SK_TYPEFACE_FACTORY_FREETYPE"
-                     , "SK_FONTMGR_FREETYPE_EMBEDDED_AVAILABLE"
-                     , "SK_FONTMGR_FREETYPE_EMPTY_AVAILABLE"
-                     , "SK_TYPEFACE_FACTORY_DIRECTWRITE"
-                     , "SK_FONTMGR_DIRECTWRITE_AVAILABLE"
-                     , "SK_FONTMGR_GDI_AVAILABLE"
-                     , "SK_GL"
-                     , "SK_CODEC_ENCODES_JPEG"
-                     , "SK_SUPPORT_PDF"
-                     , "SK_CODEC_DECODES_JPEG"
-                     , "SK_CODEC_ENCODES_PNG"
-                     , "SK_CODEC_ENCODES_PNG_WITH_LIBPNG"
-                     , "SK_CODEC_ENCODES_WEBP"
-                     , "SK_SUPPORT_XPS"
-                     , "SK_CODEC_DECODES_ICO"
-                     , "SK_CODEC_DECODES_PNG"
-                     , "SK_CODEC_DECODES_PNG_WITH_LIBPNG"
-                     , "SK_CODEC_DECODES_RAW"
-                     , "SK_CODEC_DECODES_WEBP"
-                     , "SK_HAS_WUFFS_LIBRARY"
-                     , "SK_CODEC_DECODES_GIF"
-                     , "SK_XML"
-		     , "SK_DISABLE_LEGACY_GL_MAKE_NATIVE_INTERFACE"
-                     , "_HAS_AUTO_PTR_ETC" -- FIXME workaround
-		     , "GR_GL_FUNCTION_TYPE=__stdcall"
-
-                     ] : List Text}
+                     , global = windows_defines : List Text}
             , cxxflags = {
                , global = [
                , "-funwind-tables"
@@ -473,7 +449,7 @@ let skia = \(tgt : Target) ->
                   , "-lskunicode_icu"
                   , "-lbentleyottmann"
                   , "-lskshaper"
-		  , "-lOpenGL32"
+                  , "-lOpenGL32"
                ] : List Text
             }
             , nonSourceObjs = [] : List Text

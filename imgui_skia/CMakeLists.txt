@@ -5,12 +5,13 @@ set(CMAKE_LINKER clang++)
 set(CMAKE_CXX_COMPILER clang++)
 set(CMAKE_BUILD_TYPE Release)
 
-add_compile_definitions(MESA_EGL_NO_X11_HEADERS
+add_compile_definitions(_CRT_SECURE_NO_WARNINGS
+_HAS_EXCEPTIONS=0
+WIN32_LEAN_AND_MEAN
 NOMINMAX
 NDEBUG
 SK_CODEC_DECODES_BMP
 SK_CODEC_DECODES_WBMP
-SKIA_DLL
 SK_ENABLE_PRECOMPILE
 SK_GANESH
 SK_DISABLE_TRACING
@@ -40,16 +41,14 @@ SK_CODEC_DECODES_WEBP
 SK_HAS_WUFFS_LIBRARY
 SK_CODEC_DECODES_GIF
 SK_XML
-SK_DISABLE_LEGACY_GL_MAKE_NATIVE_INTERFACE
-_HAS_AUTO_PTR_ETC
 )
-include_directories(/data/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./../../contrib/flatbuffers/include
-/data/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_w_hooks_1.91.9_wip
-/data/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_skia_impl
-/data/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./../../contrib/sdl/include
-/data/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./../../contrib/skia
-/data/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_skia_driver_impl
-/data/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./../../contrib/tracy/public
+include_directories(C:/Users/User/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./../../contrib/flatbuffers/include
+C:/Users/User/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_w_hooks_1.91.9_wip
+C:/Users/User/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_skia_impl
+C:/Users/User/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./../../contrib/sdl/include
+C:/Users/User/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./../../contrib/skia
+C:/Users/User/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_skia_driver_impl
+C:/Users/User/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./../../contrib/tracy/public
 )
 add_compile_options(-std=c++20
 -Wall
@@ -71,7 +70,7 @@ add_compile_options(-std=c++20
 )
 link_libraries(-DNDEBUG
 # sdl3Shared
--L/data/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./../../contrib/sdl/build
+-LC:/Users/User/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./../../contrib/sdl/build
 -lSDL3-static
 -lwinmm
 -limm32
@@ -84,7 +83,7 @@ link_libraries(-DNDEBUG
 -lshell32
 -ldinput8
 # skiaShared
--L/data/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./../../contrib/skia/out/Static
+-LC:/Users/User/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./../../contrib/skia/out/Static
 -lskparagraph
 -lskia
 -lskunicode_core
@@ -99,22 +98,22 @@ link_libraries(-DNDEBUG
 # empty target flatbuffers
 
 # begin imguiWithHooks1919Wip
-add_library(imguiWithHooks1919Wip STATIC /data/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_w_hooks_1.91.9_wip/imgui.cpp
-/data/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_w_hooks_1.91.9_wip/imgui_demo.cpp
-/data/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_w_hooks_1.91.9_wip/imgui_draw.cpp
-/data/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_w_hooks_1.91.9_wip/imgui_tables.cpp
-/data/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_w_hooks_1.91.9_wip/imgui_widgets.cpp
-/data/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_w_hooks_1.91.9_wip/imgui_impl_sdl3.cpp
-/data/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_w_hooks_1.91.9_wip/imgui_impl_sdl3.cpp)
+add_library(imguiWithHooks1919Wip STATIC C:/Users/User/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_w_hooks_1.91.9_wip/imgui.cpp
+C:/Users/User/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_w_hooks_1.91.9_wip/imgui_demo.cpp
+C:/Users/User/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_w_hooks_1.91.9_wip/imgui_draw.cpp
+C:/Users/User/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_w_hooks_1.91.9_wip/imgui_tables.cpp
+C:/Users/User/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_w_hooks_1.91.9_wip/imgui_widgets.cpp
+C:/Users/User/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_w_hooks_1.91.9_wip/imgui_impl_sdl3.cpp
+C:/Users/User/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_w_hooks_1.91.9_wip/imgui_impl_sdl3.cpp)
 # end imguiWithHooks1919Wip
 
 # begin imguiSkiaImpl
-add_library(imguiSkiaImpl STATIC /data/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_skia_impl/imgui_skia_extensions.cpp
-/data/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_skia_impl/imgui_skia_hooks_impl.cpp
-/data/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_skia_impl/imgui_skia_imzero_cmd_render.cpp
-/data/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_skia_impl/imgui_skia_paragraph.cpp
-/data/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_skia_impl/imgui_skia_setup_ui.cpp
-/data/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_skia_impl/imgui_skia_tracy_support.cpp)
+add_library(imguiSkiaImpl STATIC C:/Users/User/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_skia_impl/imgui_skia_extensions.cpp
+C:/Users/User/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_skia_impl/imgui_skia_hooks_impl.cpp
+C:/Users/User/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_skia_impl/imgui_skia_imzero_cmd_render.cpp
+C:/Users/User/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_skia_impl/imgui_skia_paragraph.cpp
+C:/Users/User/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_skia_impl/imgui_skia_setup_ui.cpp
+C:/Users/User/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_skia_impl/imgui_skia_tracy_support.cpp)
 # end imguiSkiaImpl
 
 # empty target sdl3Shared
@@ -122,12 +121,12 @@ add_library(imguiSkiaImpl STATIC /data/repo/imzero_client_cpp/imgui_skia/../imgu
 # empty target skiaShared
 
 # begin imguiSkiaDriverImpl
-add_library(imguiSkiaDriverImpl STATIC /data/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_skia_driver_impl/imgui_skia_app_sdl3.cpp
-/data/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_skia_driver_impl/imgui_skia_cli_options.cpp)
+add_library(imguiSkiaDriverImpl STATIC C:/Users/User/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_skia_driver_impl/imgui_skia_app_sdl3.cpp
+C:/Users/User/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./imgui_skia_driver_impl/imgui_skia_cli_options.cpp)
 # end imguiSkiaDriverImpl
 
 # begin tracyDisabled
-add_library(tracyDisabled STATIC /data/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./../../contrib/tracy/public/TracyClient.cpp)
+add_library(tracyDisabled STATIC C:/Users/User/repo/imzero_client_cpp/imgui_skia/../imgui_skia/./../../contrib/tracy/public/TracyClient.cpp)
 # end tracyDisabled
 add_library(imgui_skia STATIC $<TARGET_OBJECTS:imguiWithHooks1919Wip>
 $<TARGET_OBJECTS:imguiSkiaImpl>

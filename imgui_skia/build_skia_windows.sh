@@ -1,9 +1,9 @@
 #!/bin/bash
 set -ev
 here=$(dirname "$(readlink -f "$BASH_SOURCE")")
+"$here/patch_skia_m134.sh"
 
 cd "$here/../../contrib/skia"
-pwd
 export GIT_SYNC_DEPS_SKIP_EMSDK="true"
 python tools/git-sync-deps
 
@@ -63,7 +63,7 @@ cat > out/Static/args.gn <<- EOF
     skia_enable_sksl_tracing=false
     skia_enable_skunicode=true
     skia_enable_spirv_validation=false
-    skia_enable_svg=false
+    skia_enable_svg=true
     skia_enable_tools=false
     skia_enable_vello_shaders=false
     skia_enable_vulkan_debug_layers=false

@@ -56,7 +56,7 @@
 #include <GL/gl.h>
 #else
 #include "include/gpu/ganesh/gl/win/GrGLMakeWinInterface.h"
-#include "include/gpu/ganesh/gl/egl/GrGLMakeEGLInterface.h"
+//#include "include/gpu/ganesh/gl/egl/GrGLMakeEGLInterface.h"
 #include <windows.h>
 #endif
 
@@ -290,6 +290,13 @@ void ImGuiSkia::Driver::App::setup(CliOptions &opts) {
                 fFontMgr = SkFontMgr_New_Custom_Directory(opts.fFontManagerArg);
 #else
                 fprintf(stderr,"SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE is not defined, font manager %s not supported\n",opts.fFontManager);
+#endif
+            }
+            if (opts.fFontManager != nullptr && strcmp(opts.fFontManager, "directwrite") == 0) {
+#if defined(SK_FONTMGR_DIRECTWRITE_AVAILABLE)
+                fFontMgr = SkFontMgr_New_DirectWrite();
+#else
+                fprintf(stderr,"SK_FONTMGR_DIRECTWRITE_AVAILABLE is not defined, font manager %s not supported\n",opts.fFontManager);
 #endif
             }
             if (fFontMgr == nullptr) {
@@ -576,23 +583,31 @@ ImGuiSkia::Driver::App::App() {
     fFontPaint = SkPaint();
 }
 
-#if defined(linux) || defined(_linux) || defined(__linux__)
 void ImGuiSkia::Driver::App::createContext(const int width, const int height) {
     glViewport(0, 0, width, height);
     glClearColor(fClearColor.x * fClearColor.w, fClearColor.y * fClearColor.w, fClearColor.z * fClearColor.w, fClearColor.w);
     glClearStencil(0);
     glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    const auto openGlVersion = glGetString(GL_VERSION);
 
+    char *glConstructorName = nullptr;
+#if defined(linux) || defined(_linux) || defined(__linux__)
     fNativeInterface = GrGLInterfaces::MakeGLX();
+    glConstructorName = "glx";
+#else
+    fNativeInterface = GrGLInterfaces::MakeWin();
+    glConstructorName = "win";
+    //fNativeInterface = GrGLInterfaces::MakeEGL();
+    //glConstructorName = "egl";
+#endif
+
     //nativeInterface->checkAndResetOOMed();
     if(fNativeInterface.get() == nullptr) {
-        fprintf(stderr, "unable to create skia GrGLInterface (GLX): nativeInterface\n");
+        fprintf(stderr, "unable to create skia GrGLInterface (%s) for OpenGl version %s\n", glConstructorName, openGlVersion);
         exit(1);
     }
     if(!fNativeInterface->validate()) {
-        fprintf(stderr, "unable to create skia GrGLInterface (GLX): nativeInterface=%p (%s)\n",
-                fNativeInterface.get(),
-                fNativeInterface->validate() ? "valid" : "invalid");
+        fprintf(stderr, "unable to create valid skia GrGLInterface (%s) for OpenGl version %s\n", glConstructorName, openGlVersion);
         exit(1);
     }
     fContext = GrDirectContexts::MakeGL(fNativeInterface);
@@ -601,33 +616,6 @@ void ImGuiSkia::Driver::App::createContext(const int width, const int height) {
         exit(1);
     }
 }
-#else
-void ImGuiSkia::Driver::App::createContext(const int width, const int height) {
-    glViewport(0, 0, width, height);
-    glClearColor(fClearColor.x * fClearColor.w, fClearColor.y * fClearColor.w, fClearColor.z * fClearColor.w, fClearColor.w);
-    glClearStencil(0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-    fNativeInterface = GrGLInterfaces::MakeWin();
-    //fNativeInterface = GrGLInterfacesGrGLInterface::MakeEGL();
-    fprintf(stderr,"fNativeInterface=%p\n", fNativeInterface.get());
-    if(fNativeInterface.get() == nullptr) {
-        fprintf(stderr, "unable to create skia GrGLInterface (Win): nativeInterface\n");
-        exit(1);
-    }
-    if(!fNativeInterface->validate()) {
-        fprintf(stderr, "unable to create skia GrGLInterface (Win): nativeInterface=%p (%s)\n",
-                fNativeInterface.get(),
-                fNativeInterface->validate() ? "valid" : "invalid");
-        exit(1);
-    }
-    fContext = GrDirectContexts::MakeGL(fNativeInterface);
-    if(fContext == nullptr) {
-        fprintf(stderr,"unable to create skia GrDirectContext (GL)\n");
-        exit(1);
-    }
-}
-#endif
 sk_sp<SkSurface> ImGuiSkia::Driver::App::getSurfaceRaster(const int w, const int h) {
     if(fSurface == nullptr) {
         constexpr SkColorType colorType = kRGBA_8888_SkColorType;
