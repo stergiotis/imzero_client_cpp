@@ -8,9 +8,6 @@ export IMGUI_SKIA_CPP_ROOT="$(realpath "$here/..")"
 #./copy_libs_windows.sh
 ./build_cpp_windows.sh
 #./build_go.sh
-rm -rf bin
+rm -f bin/*.exe
 mkdir -p bin
-#mv build/imzeroClientSkiaSdl3Impl* bin/imgui_skia_exe
-
-#mkdir -p .vscode
-#./vscode.dhall
+mv build/imzeroClientSkiaSdl3Impl.exe bin/imgui_skia.exe

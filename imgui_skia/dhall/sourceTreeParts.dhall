@@ -465,7 +465,6 @@ let skia = \(tgt : Target) ->
                   , "-lskia"
                   , "-lskunicode_core"
                   , "-lskunicode_icu"
-                  , "-lskunicode_icu4x"
                   , "-lbentleyottmann"
                   , "-lskshaper"
                   , "-lOpenGL32"
