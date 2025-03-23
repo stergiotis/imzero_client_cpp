@@ -4,6 +4,10 @@
 
 #if defined(linux) || defined(__linux) || defined(__linux__)
 #include <sys/prctl.h>
+#else
+#include <cstdio>
+#include <fcntl.h>
+#include <io.h>
 #endif
 #ifdef TRACY_ENABLE
 #include <cstdlib>
@@ -59,6 +63,24 @@ static_assert(_HAS_ITERATOR_DEBUGGING == 0 && "_HAS_ITERATOR_DEBUGGING is not 0"
 static_assert(_ITERATOR_DEBUG_LEVEL == 0 && "_ITERATOR_DEBUG_LEVEL is not 0");
 #endif
 
+#if defined(linux) || defined(__linux) || defined(__linux__)
+#else
+    {
+        auto result = _setmode(_fileno(stdin), _O_BINARY);
+        if(result == -1) {
+            perror("Cannot set mode binary mode");
+        }
+        result = _setmode(_fileno(stdout), _O_BINARY);
+        if(result == -1) {
+            perror("Cannot set mode binary mode");
+        }
+        result = _setmode(_fileno(stderr), _O_BINARY);
+        if(result == -1) {
+            perror("Cannot set mode binary mode");
+        }
+    }
+#endif
+
 #ifdef TRACY_ENABLE
       ImGui::SetAllocatorFunctions(imZeroMemAlloc,imZeroMemFree,nullptr);
 #endif
@@ -74,8 +96,8 @@ static_assert(_ITERATOR_DEBUG_LEVEL == 0 && "_ITERATOR_DEBUG_LEVEL is not 0");
 
 #if defined(linux) || defined(__linux) || defined(__linux__)
       if (0 > prctl(PR_SET_DUMPABLE, opts.fCoreDump ? 1 : 0)) {
-    perror("unable to set prctl(PR_SET_DUMPABLE)");
-    return 1;
+         perror("unable to set prctl(PR_SET_DUMPABLE)");
+         return 1;
       }
 #endif
 
