@@ -1,0 +1,3 @@
+@echo off
+main_go.exe --logFormat console --httpServerAddress localhost:8888 demo --imGuiBinary bin/imgui_skia.exe --mainFontTTF SauceCodeProNerdFontPropo-Regular.ttf --mainFontSizeInPixels 13 -clientFontManager "directwrite" -clientSkiaBackendType gl -clientVsync on -clientTtfFilePath SauceCodeProNerdFontPropo-Regular.ttf -clientBackdropFilter off -clientVectorCmd on -clientImguiNavKeyboard on
+pause
