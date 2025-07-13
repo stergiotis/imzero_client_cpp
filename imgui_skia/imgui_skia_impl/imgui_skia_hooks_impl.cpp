@@ -928,9 +928,6 @@ namespace ImGui {
                 retr.y = size;
             }
         }
-        if (freeAllocatedText) {
-            IM_FREE(const_cast<char*>(text_begin));
-        }
         return false;
     }
 
@@ -970,7 +967,6 @@ namespace ImGui {
 
             auto const arg = ImZeroFB::CreateCmdRenderText(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(font),size,&posFb,col,&clipRectFb,textFb);
             draw_list->addVectorCmdFB(ImZeroFB::VectorCmdArg_CmdRenderText,arg.Union());
-            IM_FREE(const_cast<char*>(text_begin));
         } else {
             textFb = draw_list->fbBuilder->CreateString(text_begin,len);
             auto isParagraph = wrap_width > 0.0f || isParagraphText(text_begin,text_end);
