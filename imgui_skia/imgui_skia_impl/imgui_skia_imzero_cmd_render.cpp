@@ -937,6 +937,10 @@ void ImGuiSkia::VectorCmdSkiaRenderer::drawCmdRenderTextFB(const ImZeroFB::CmdRe
     auto size = cmd.size();
     auto font = fFont.makeWithSize(SkScalarToFloat(size));
     const auto text = cmd.text();
+    if(text == nullptr) {
+        canvas.restore();
+	return;
+    }
 
     float dy;
     { ZoneScoped;
