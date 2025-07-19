@@ -890,7 +890,7 @@ namespace ImGui {
 
         if(isPasswordFont(*font)) {
             // assumes passwords are rendered on a single line
-            //freeAllocatedText = populatePasswordText(*font, &text_begin, &text_end, static_cast<size_t>(text_end-text_begin));
+            freeAllocatedText = populatePasswordText(*font, &text_begin, &text_end, static_cast<size_t>(text_end-text_begin));
         } else if(wrap_width > 0.0f || isParagraphText(text_begin,text_end)) { ZoneScoped;
             if(wrap_width <= 0.0f) {
                 wrap_width = ImGui::GetContentRegionAvail().x;
