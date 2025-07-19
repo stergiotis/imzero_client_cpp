@@ -108,28 +108,24 @@ void interpretCommands() {
     }
 }
 
-/*static void setup_imgui() {
-    ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags &= ~ImGuiConfigFlags_ViewportsEnable;
-}*/
-
 #include "implot_style.h"
 #include "adobe_spectrum_style.h"
+#include "imthemes_style.h"
 void render_init(FILE *fdInput,FILE *fdOutput) {
     fdIn = fdInput;
     fdOut = fdOutput;
     //StyleImPlot();
     //StyleAdobeSpectrum();
-    ImGui::StyleColorsDark();
-    //setup_imgui();
+    //ImGui::StyleColorsDark();
+    SetupImGuiStyle_Everforest();
+    //SetupImGuiStyle_Enemymouse();
+    //SetupImGuiStyle_Darcula();
 
     ImPlot::CreateContext();
 
     arenaInit();
     sendInit();
     receiveInit();
-
-    //interpretCommands();
 }
 
 void render_render() {
@@ -137,5 +133,5 @@ void render_render() {
 }
 
 void render_cleanup() {
-	ImPlot::DestroyContext();
+    ImPlot::DestroyContext();
 }
