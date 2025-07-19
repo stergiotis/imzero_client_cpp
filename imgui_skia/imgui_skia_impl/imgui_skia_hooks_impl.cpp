@@ -36,6 +36,7 @@ namespace ImGui {
     SkFont skiaFont;
     bool useVectorCmd = false;
     float skiaFontDyFudge = 0.0f;
+    float skiaFontScaleOverride = 1.0f;
     std::shared_ptr<ImGuiSkia::Paragraph> paragraph = nullptr;
 }
 
@@ -90,12 +91,21 @@ inline void initHiddenPwBuffer(const ImFont &font) {
 static bool populatePasswordText(const ::ImFont &font, const char **text_begin, const char **text_end, size_t len) {
     auto freeAllocatedText = false;
     initHiddenPwBuffer(font);
-    if(len > hiddenPwBufferNChars) { ZoneScopedN("slow path password text allocation");
-        *text_begin = static_cast<char *>(IM_ALLOC(len*hiddenPwBufferNBytesPerChar));
+    if(true) { ZoneScopedN("slow path password text allocation");
+        auto u = static_cast<char *>(IM_ALLOC(len+1));
+	for(size_t i=0;i<len;i++) {
+              u[i] = '*';
+	}
+	u[len]='\0';
+        *text_begin = u;
+        freeAllocatedText = true;
+    } else if(len > hiddenPwBufferNChars) { ZoneScopedN("slow path password text allocation");
+        *text_begin = static_cast<char *>(IM_ALLOC(len*hiddenPwBufferNBytesPerChar+1));
         // slow path, very long or high codepoints password
         for(size_t i=0;i<len;i++) {
             memcpy(const_cast<char*>(&(*text_begin)[i*hiddenPwBufferNBytesPerChar]), hiddenPwBuffer, hiddenPwBufferNBytesPerChar);
         }
+	//(const_cast<char*>(*text_begin))[len*hiddenPwBufferNChars+1-1]=0; // zero termination
         freeAllocatedText = true;
     } else {
         // fast path, password fits in buffer
@@ -854,7 +864,7 @@ namespace ImGui {
         } else {
             tmp = c;
         }
-        auto const f = ImGui::skiaFont.makeWithSize(SkFloatToScalar(font->FontSize));
+        auto const f = ImGui::skiaFont.makeWithSize(SkFloatToScalar(font->FontSize*ImGui::skiaFontScaleOverride));
         auto const glyph = f.unicharToGlyph(static_cast<SkUnichar>(tmp));
         SkScalar advanceX;
         f.getWidths(&glyph,1,&advanceX);
@@ -880,7 +890,7 @@ namespace ImGui {
 
         if(isPasswordFont(*font)) {
             // assumes passwords are rendered on a single line
-            freeAllocatedText = populatePasswordText(*font, &text_begin, &text_end, static_cast<size_t>(text_end-text_begin));
+            //freeAllocatedText = populatePasswordText(*font, &text_begin, &text_end, static_cast<size_t>(text_end-text_begin));
         } else if(wrap_width > 0.0f || isParagraphText(text_begin,text_end)) { ZoneScoped;
             if(wrap_width <= 0.0f) {
                 wrap_width = ImGui::GetContentRegionAvail().x;
@@ -899,7 +909,7 @@ namespace ImGui {
         }
 
         { ZoneScoped;
-            const auto f = ImGui::skiaFont.makeWithSize(SkFloatToScalar(size));
+            const auto f = ImGui::skiaFont.makeWithSize(SkFloatToScalar(size*ImGui::skiaFontScaleOverride));
             SkRect r;
             const SkScalar advanceWidth = f.measureText(text_begin,text_end-text_begin,SkTextEncoding::kUTF8, &r);
             if(freeAllocatedText) {
@@ -962,7 +972,6 @@ namespace ImGui {
         flatbuffers::Offset<flatbuffers::String> textFb;
         auto freeAllocatedText = false;
         if(isPasswordFont(*font)) {
-            initHiddenPwBuffer(*font);
             freeAllocatedText = populatePasswordText(*font,&text_begin,&text_end,text_end-text_begin);
 
             auto const arg = ImZeroFB::CreateCmdRenderText(*draw_list->fbBuilder,reinterpret_cast<uint64_t>(font),size,&posFb,col,&clipRectFb,textFb);

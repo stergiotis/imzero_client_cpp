@@ -82,6 +82,7 @@ void ImGuiSkia::Driver::CliOptions::usage(const char *name, FILE *file) const {
     fprintf(file,"font flags:\n");
     fprintf(file,"    -ttfFilePath [path:%s]\n", fTtfFilePath);
     fprintf(file,"    -fontDyFudge [float:%f]\n", fFontDyFudge);
+    fprintf(file,"    -fontScaleOverride [float:%f]\n", fFontScaleOverride);
     fprintf(file,"    -fontManager [name:%s] valid names (platform depenent) \"fontconfig\", \"directory\", \"directwrite\"\n", fFontManager);
     fprintf(file,"    -fontManagerArg [arg:%s]\n", fFontManagerArg);
 }
@@ -119,6 +120,11 @@ void ImGuiSkia::Driver::CliOptions::parse(const int argc,const char **argv,FILE 
     fFontDyFudge = findFlagValueDefaultFloat(logChannel,usedFlags, argc, argv, "-fontDyFudge", "0.0");
     if(std::isnan(fFontDyFudge) || fFontDyFudge < -10000.0f || fFontDyFudge > 10000.0f) {
         fprintf(logChannel,"implausible value for -fontDyFudge: %f\n", fFontDyFudge);
+        exit(1);
+    }
+    fFontScaleOverride = findFlagValueDefaultFloat(logChannel,usedFlags, argc, argv, "-fontScaleOverride", "1.0");
+    if(std::isnan(fFontDyFudge) || fFontDyFudge < -10000.0f || fFontDyFudge > 10000.0f) {
+        fprintf(logChannel,"implausible value for -fontScaleOverride: %f\n", fFontScaleOverride);
         exit(1);
     }
     fFontManager = findFlagValueDefault(logChannel,usedFlags, argc, argv, "-fontManager", fFontManager);

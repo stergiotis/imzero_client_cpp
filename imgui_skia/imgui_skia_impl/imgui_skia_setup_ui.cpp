@@ -280,6 +280,7 @@ void ImGuiSkia::SetupUI::render(FrameExportFormatE &exportFormat, VectorCmdSkiaR
             ImGui::DragFloat("dy fudge",&ImGui::skiaFontDyFudge,0.001f,-1.0f,1.0f);
             dy += fFontMetricsSize*ImGui::skiaFontDyFudge;
 
+            ImGui::DragFloat("font scale override",&ImGui::skiaFontScaleOverride,0.001f,-1.0f,1.0f);
             {
                 auto a = fabs(metrics.fAscent)-fabs(metrics.fCapHeight);
                 if(a == fabs(metrics.fDescent)) {
@@ -292,6 +293,9 @@ void ImGuiSkia::SetupUI::render(FrameExportFormatE &exportFormat, VectorCmdSkiaR
                     ImGui::TextUnformatted("|ascent|+|descent| == |size|   => easy");
                 } else {
                     ImGui::Text("%f = |ascent|+|descent| != |size| = %f   => hard", fabs(metrics.fAscent)+fabs(metrics.fDescent), fFontMetricsSize);
+		    if(ImGui::Button("auto scale")) {
+			    ImGui::skiaFontScaleOverride = fFontMetricsSize/(fabs(metrics.fAscent)+fabs(metrics.fDescent));
+		    }
                 }
             }
             if(f.isLinearMetrics()) {

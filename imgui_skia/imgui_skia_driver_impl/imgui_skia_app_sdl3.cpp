@@ -313,6 +313,7 @@ void ImGuiSkia::Driver::App::setup(CliOptions &opts) {
         }
 
         ImGui::skiaFontDyFudge = opts.fFontDyFudge;
+        ImGui::skiaFontScaleOverride = opts.fFontScaleOverride;
         ImGui::paragraph = std::make_shared<Paragraph>(fFontMgr, typeface);
         ImGui::paragraph->enableFontFallback();
         ImGui::skiaFont = SkFont(typeface);

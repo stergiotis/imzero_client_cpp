@@ -16,7 +16,6 @@ let common = \(target : Target) ->
         , sourceTreePartsImGuiSkia.skia target
         , sourceTreePartsImGuiSkia.imguiSkiaDriverImpl
 	]
-	# (if debug then [ , sourceTreePartsImGuiSkia.tracyEnabled ] else [ , sourceTreePartsImGuiSkia.tracyDisabled ] : List lib.sourceTreePart.Type )
 	let sourceTreeParts = [
 		, sourceTreePartsRepo.marshalling
 		, sourceTreePartsRepo.arena
@@ -33,6 +32,7 @@ let common = \(target : Target) ->
 
 		, sourceTreePartsRepo.imzeroClientSkiaSdl3Impl
 	] 
+	# (if debug then [ , sourceTreePartsImGuiSkia.tracyEnabled ] else [ , sourceTreePartsImGuiSkia.tracyDisabled ] : List lib.sourceTreePart.Type )
     let cxx = "clang++"
 	let cppstd = 20
 	let cxxflagsRelease = [

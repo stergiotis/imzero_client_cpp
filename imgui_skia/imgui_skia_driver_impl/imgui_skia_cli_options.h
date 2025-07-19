@@ -7,7 +7,8 @@ namespace ImGuiSkia::Driver {
     struct CliOptions {
         const char *fTtfFilePath = defaultTtfFilePath;
         float fFontDyFudge = 0.0f;
-        const char *fAppTitle = "ImGui with Skia Backend";
+        float fFontScaleOverride = 1.0f;
+        const char *fAppTitle = "ImZero";
         bool fFullscreen = false;
         int fInitialMainWindowWidth = -1;
         int fInitialMainWindowHeight = -1;

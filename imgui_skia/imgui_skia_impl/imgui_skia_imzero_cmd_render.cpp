@@ -896,7 +896,7 @@ void ImGuiSkia::VectorCmdSkiaRenderer::drawCmdRenderParagraphFB(const ImZeroFB::
     auto size = cmd.size();
     const auto text = cmd.text();
 
-    fParagraph->setFontSize(SkScalarToFloat(size));
+    fParagraph->setFontSize(SkScalarToFloat(size*ImGui::skiaFontScaleOverride));
     fParagraph->setForegroundPaint(paint);
     fParagraph->setLetterSpacing(cmd.letter_spacing());
     {
@@ -935,7 +935,7 @@ void ImGuiSkia::VectorCmdSkiaRenderer::drawCmdRenderTextFB(const ImZeroFB::CmdRe
 
     paint.setColor(convertColor(cmd.col()));
     auto size = cmd.size();
-    auto font = fFont.makeWithSize(SkScalarToFloat(size));
+    auto font = fFont.makeWithSize(SkScalarToFloat(size*ImGui::skiaFontScaleOverride));
     const auto text = cmd.text();
     if(text == nullptr) {
         canvas.restore();
@@ -962,7 +962,7 @@ void ImGuiSkia::VectorCmdSkiaRenderer::drawCmdRenderUnicodeCodepointFB(const ImZ
     SkPaint paint;
     paint.setColor(convertColor(cmd.col()));
     auto size = cmd.size();
-    auto font = fFont.makeWithSize(SkScalarToFloat(size));
+    auto font = fFont.makeWithSize(SkScalarToFloat(size*ImGui::skiaFontScaleOverride));
     auto const cp = cmd.codepoint();
 
     auto const glyph =  font.unicharToGlyph(static_cast<SkUnichar>(cp));

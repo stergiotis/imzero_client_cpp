@@ -45,13 +45,13 @@ include_directories(/home/deck/repo/imzero_client_cpp/skia/./src/marshalling
 /home/deck/repo/imzero_client_cpp/skia/./src/widgets/imgui_flamegraph
 /home/deck/repo/imzero_client_cpp/skia/./imcolortextedit
 /home/deck/repo/imzero_client_cpp/skia/./src/widgets
+/home/deck/repo/imzero_client_cpp/imgui_skia/./../../contrib/tracy/public
 /home/deck/repo/imzero_client_cpp/imgui_skia/./../../contrib/flatbuffers/include
 /home/deck/repo/imzero_client_cpp/imgui_skia/./../imgui_skia/imgui_w_hooks_1.91.9_wip
 /home/deck/repo/imzero_client_cpp/imgui_skia/./../imgui_skia/imgui_skia_impl
 /home/deck/repo/imzero_client_cpp/imgui_skia/./../../contrib/sdl/include
 /home/deck/repo/imzero_client_cpp/imgui_skia/./../../contrib/skia
 /home/deck/repo/imzero_client_cpp/imgui_skia/./../imgui_skia/imgui_skia_driver_impl
-/home/deck/repo/imzero_client_cpp/imgui_skia/./../../contrib/tracy/public
 )
 add_compile_options(-std=c++20
 -Wall
@@ -196,7 +196,12 @@ target_link_libraries(imzeroClientSkiaSdl3Impl imguiCoolbar)
 target_link_libraries(imzeroClientSkiaSdl3Impl imguiFlamegraph)
 target_link_libraries(imzeroClientSkiaSdl3Impl imguiTextedit)
 target_link_libraries(imzeroClientSkiaSdl3Impl widgets)
+target_link_libraries(imzeroClientSkiaSdl3Impl tracyDisabled)
 # end imzeroClientSkiaSdl3Impl
+
+# begin tracyDisabled
+add_library(tracyDisabled STATIC /home/deck/repo/imzero_client_cpp/imgui_skia/./../../contrib/tracy/public/TracyClient.cpp)
+# end tracyDisabled
 add_library(libimgui_skia STATIC IMPORTED)
 set_target_properties(libimgui_skia PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_LIST_DIR}/../imgui_skia/build/libimgui_skia.a")
 target_link_libraries(imzeroClientSkiaSdl3Impl libimgui_skia)
