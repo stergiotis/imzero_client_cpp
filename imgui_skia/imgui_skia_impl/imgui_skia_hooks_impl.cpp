@@ -258,7 +258,7 @@ namespace ImGui {
         out.x = SkScalarToFloat(paragraph->getMaxIntrinsicWidth());
         out.y = SkScalarToFloat(paragraph->getHeight());
 #else
-        const auto f = ImGui::skiaFont.makeWithSize(SkFloatToScalar(g.FontSize));
+        const auto f = ImGui::skiaFont.makeWithSize(SkFloatToScalar(g.FontSize*ImGui::skiaFontScaleOverride));
         const SkScalar advanceWidth = f.measureText(text_begin,text_end-text_begin,SkTextEncoding::kUTF8, nullptr);
         out.x = advanceWidth;
         out.y = g.FontSize;
@@ -900,7 +900,7 @@ namespace ImGui {
                 retr.y = size;
                 return false;
             }
-            paragraph->setFontSize(size);
+            paragraph->setFontSize(size*ImGui::skiaFontScaleOverride);
             paragraph->build(text_begin,static_cast<size_t>(text_end-text_begin));
             paragraph->layout(SkFloatToScalar(wrap_width));
             retr.x = SkScalarToFloat(paragraph->getMaxIntrinsicWidth());
@@ -1004,7 +1004,7 @@ namespace ImGui {
                     auto const clipRectSkia = SkRect::MakeLTRB(SkScalar(clip_rect.x),SkScalar(clip_rect.y),SkScalar(clip_rect.z),SkScalar(clip_rect.w));
             auto const clipRectSkiaTrans = clipRectSkia.makeOffset(-pos.x,-pos.y);
 
-            ImGui::paragraph->setFontSize(SkScalar(size));
+            ImGui::paragraph->setFontSize(SkScalar(size*ImGui::skiaFontScaleOverride));
             ImGui::paragraph->build(text_begin,static_cast<size_t>(text_end-text_begin));
             ImGui::paragraph->layout(SkScalar(wrap_width));
             for(int lineNumber=0;;lineNumber++) {
