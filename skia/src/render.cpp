@@ -111,15 +111,17 @@ void interpretCommands() {
 #include "implot_style.h"
 #include "adobe_spectrum_style.h"
 #include "imthemes_style.h"
+#include "style.h"
 void render_init(FILE *fdInput,FILE *fdOutput) {
     fdIn = fdInput;
     fdOut = fdOutput;
     //StyleImPlot();
     //StyleAdobeSpectrum();
     //ImGui::StyleColorsDark();
-    SetupImGuiStyle_Everforest();
+    //SetupImGuiStyle_Everforest();
     //SetupImGuiStyle_Enemymouse();
     //SetupImGuiStyle_Darcula();
+    SetupImGuiStyle_ImZero();
 
     ImPlot::CreateContext();
 
