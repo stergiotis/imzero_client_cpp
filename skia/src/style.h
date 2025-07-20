@@ -4,7 +4,7 @@ void SetupImGuiStyle_ImZero() {
 	
 	style.Alpha = 1.0f;
 	style.DisabledAlpha = 0.6000000238418579f;
-	style.WindowPadding = ImVec2(6.0f, 3.0f);
+	style.WindowPadding = ImVec2(9.0f, 6.0f);
 	//style.WindowRounding = 6.0f;
 	style.WindowRounding = 3.0f;
 	style.WindowBorderSize = 1.0f;
@@ -16,12 +16,12 @@ void SetupImGuiStyle_ImZero() {
 	style.ChildBorderSize = 1.0f;
 	style.PopupRounding = 0.0f;
 	style.PopupBorderSize = 1.0f;
-	style.FramePadding = ImVec2(5.0f, 1.0f);
+	style.FramePadding = ImVec2(9.0f, 3.0f);
 	style.FrameRounding = 3.0f;
 	style.FrameBorderSize = 1.0f;
-	style.ItemSpacing = ImVec2(8.0f, 4.0f);
-	style.ItemInnerSpacing = ImVec2(4.0f, 4.0f);
-	style.CellPadding = ImVec2(4.0f, 2.0f);
+	style.ItemSpacing = ImVec2(12.0f, 6.0f);
+	style.ItemInnerSpacing = ImVec2(6.0f, 4.0f);
+	style.CellPadding = ImVec2(4.0f, 3.0f);
 	style.IndentSpacing = 21.0f;
 	style.ColumnsMinSpacing = 6.0f;
 	style.ScrollbarSize = 13.0f;
@@ -45,7 +45,7 @@ void SetupImGuiStyle_ImZero() {
 	style.Colors[ImGuiCol_FrameBg] = ImVec4(0.3137255012989044f, 0.2862745225429535f, 0.2705882489681244f, 1.0f);
 	style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.4000000059604645f, 0.3607843220233917f, 0.3294117748737335f, 1.0f);
 	style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.4862745106220245f, 0.43529412150383f, 0.3921568691730499f, 1.0f);
-	//
+
 	//style.Colors[ImGuiCol_TitleBg] = ImVec4(0.2352941185235977f, 0.2196078449487686f, 0.2117647081613541f, 1.0f);
 	//style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.3137255012989044f, 0.2862745225429535f, 0.2705882489681244f, 1.0f);
 	//style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.2352941185235977f, 0.2196078449487686f, 0.2117647081613541f, 1.0f);
