@@ -28,6 +28,9 @@ void ImZeroCliOptions::usage(const char *name, FILE *file) const {
     fprintf(file,"    -videoResolutionWidth [int:%u]\n", fVideoResolutionWidth);
     fprintf(file,"    -videoResolutionHeight [int:%u]\n", fVideoResolutionHeight);
     fprintf(file,"    -videoExitAfterNFrames [int:%u]\n", fVideoExitAfterNFrames);
+
+    fprintf(file,"debug flags:\n");
+    fprintf(file,"    -coreDump [bool:%s]\n", fCoreDump ? "on": "off");
 }
 void ImZeroCliOptions::parse(const int argc, const char **argv,FILE *logChannel, uint64_t &usedFlags) {
     fFffiInFile = ImGuiSkia::Driver::findFlagValueDefault(logChannel,usedFlags, argc, argv, "-fffiInFile", fFffiInFile);
