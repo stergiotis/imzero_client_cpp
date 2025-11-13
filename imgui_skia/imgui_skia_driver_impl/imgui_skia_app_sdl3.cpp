@@ -387,10 +387,10 @@ void ImGuiSkia::Driver::App::setup(CliOptions &opts) {
             auto const dm = SDL_GetDesktopDisplayMode(SDL_GetPrimaryDisplay());
             if (dm != nullptr) {
                 if (initialWindowWidth < 0) {
-                    initialWindowWidth = dm->w;
+                    initialWindowWidth = dm->w/4*3;
                 }
                 if (initialWindowHeight < 0) {
-                    initialWindowHeight = dm->h;
+                    initialWindowHeight = dm->h/4*3;
                 }
             } else {
                 fprintf(stderr, "Error: SDL_GetDesktopDisplayMode(): %s\n", SDL_GetError());
@@ -505,9 +505,11 @@ SkSurface * ImGuiSkia::Driver::App::preRender(bool &done, int &width, int &heigh
                 break;
         }
     }
-    while (SDL_GetWindowFlags(fWindow) & SDL_WINDOW_MINIMIZED) {
-        SDL_Delay(10);
-    }
+    // known problem in wayland/xwayland: the minimzation state is not properly reported by wayland
+    // see https://wiki.libsdl.org/SDL3/README-wayland
+    //while (SDL_GetWindowFlags(fWindow) & SDL_WINDOW_MINIMIZEDO) {
+    //    SDL_Delay(10);
+    //}
 
     auto const surface = getSurfaceGL();
 
